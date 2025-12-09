@@ -46,7 +46,7 @@ import { getClientsAction } from '@/modules/clients';
  */
 export default async function ClientsPage() {
   // Récupérer les clients depuis le serveur
-  const result = await getClientsAction(1, 50);
+  const result = await getClientsAction({ page: 1, limit: 50 });
 
   // Gérer les erreurs
   if (!result.success || !result.data) {

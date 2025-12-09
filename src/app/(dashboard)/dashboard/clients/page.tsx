@@ -66,8 +66,8 @@ export default async function ClientsPage({
     );
   }
 
-  const { companies, total } = result.data;
-  const totalPages = Math.ceil(total / 20);
+  const { clients, pagination } = result.data;
+  const totalPages = pagination.totalPages;
 
   return (
     <div className="space-y-6">
@@ -97,19 +97,19 @@ export default async function ClientsPage({
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{total}</div>
+            <div className="text-2xl font-bold">{pagination.total}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Liste des clients */}
-      {companies.length === 0 ? (
+      {clients.length === 0 ? (
         <Card className="p-12">
           <div className="flex flex-col items-center justify-center text-center">
             <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucun client trouvé</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {searchParams.search
+              {params.search
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Commencez par créer votre premier client'}
             </p>
@@ -123,7 +123,7 @@ export default async function ClientsPage({
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {companies.map((company) => (
+          {clients.map((company) => (
             <Card key={company.id} className="hover:bg-accent/50 transition-colors">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -202,13 +202,13 @@ export default async function ClientsPage({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Page {page} sur {totalPages} • {total} client{total > 1 ? 's' : ''} au total
+            Page {page} sur {totalPages} • {pagination.total} client{pagination.total > 1 ? 's' : ''} au total
           </p>
           <div className="flex gap-2">
             {page > 1 && (
               <Button variant="outline" size="sm" asChild>
                 <Link
-                  href={`/dashboard/clients?page=${page - 1}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
+                  href={`/dashboard/clients?page=${page - 1}${params.search ? `&search=${params.search}` : ''}`}
                 >
                   Précédent
                 </Link>
@@ -217,7 +217,7 @@ export default async function ClientsPage({
             {page < totalPages && (
               <Button variant="outline" size="sm" asChild>
                 <Link
-                  href={`/dashboard/clients?page=${page + 1}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
+                  href={`/dashboard/clients?page=${page + 1}${params.search ? `&search=${params.search}` : ''}`}
                 >
                   Suivant
                 </Link>

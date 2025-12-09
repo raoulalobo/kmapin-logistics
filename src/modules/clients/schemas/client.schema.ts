@@ -73,8 +73,7 @@ export const clientSchema = z.object({
   country: z
     .string()
     .length(2, 'Le code pays doit être au format ISO (2 lettres)')
-    .regex(/^[A-Z]{2}$/, 'Le code pays doit être en majuscules (ex: FR, US)')
-    .default('FR'),
+    .regex(/^[A-Z]{2}$/, 'Le code pays doit être en majuscules (ex: FR, US)'),
 
   // Informations complémentaires
   website: z

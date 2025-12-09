@@ -314,3 +314,29 @@ export async function requireAuth() {
 
   return session;
 }
+
+/**
+ * Helper pour vérifier si l'utilisateur est administrateur
+ *
+ * @throws Error si pas authentifié ou pas admin
+ * @returns Session utilisateur avec rôle ADMIN
+ *
+ * @example
+ * ```ts
+ * import { requireAdmin } from '@/lib/auth/config';
+ *
+ * export async function adminOnlyAction() {
+ *   const session = await requireAdmin();
+ *   // session.user.role est garanti 'ADMIN'
+ * }
+ * ```
+ */
+export async function requireAdmin() {
+  const session = await requireAuth();
+
+  if (session.user.role !== 'ADMIN') {
+    throw new Error('Forbidden: Admin access required');
+  }
+
+  return session;
+}

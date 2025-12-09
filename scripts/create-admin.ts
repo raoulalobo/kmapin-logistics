@@ -85,7 +85,7 @@ async function createAdmin() {
         name,
         role: 'ADMIN',
         companyId: company.id,
-        emailVerified: new Date(), // Vérifier l'email automatiquement pour l'admin
+        emailVerified: true, // Vérifier l'email automatiquement pour l'admin
       },
     });
     console.log(`✅ Utilisateur créé avec l'ID: ${user.id}\n`);

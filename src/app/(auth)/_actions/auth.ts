@@ -97,10 +97,11 @@ export async function loginAction(
   } catch (error) {
     // Gestion des erreurs de validation Zod
     if (error instanceof z.ZodError) {
-      if (error.errors && error.errors.length > 0) {
+      const firstError = error.issues?.[0];
+      if (firstError) {
         return {
-          error: error.errors[0].message,
-          field: error.errors[0].path[0] as string,
+          error: firstError.message,
+          field: firstError.path[0] as string,
         };
       }
       return { error: 'Données de formulaire invalides' };
@@ -135,38 +136,40 @@ export async function registerAction(
     const validatedData = registerSchema.parse(rawData);
 
     // Appeler Better Auth pour créer le compte
-    const result = await auth.api.signUpEmail({
-      body: {
-        name: validatedData.name,
-        email: validatedData.email,
-        password: validatedData.password,
-      },
-    });
+    try {
+      const result = await auth.api.signUpEmail({
+        body: {
+          name: validatedData.name,
+          email: validatedData.email,
+          password: validatedData.password,
+        },
+      });
 
-    if (!result) {
-      return { error: 'Impossible de créer le compte' };
-    }
+      if (!result) {
+        return { error: 'Impossible de créer le compte' };
+      }
 
-    // Vérifier si l'email existe déjà
-    if (result.error) {
-      if (result.error.message?.includes('already exists')) {
+      // Rediriger vers la page de vérification email
+      return {
+        success: true,
+        redirectTo: '/verify-email?email=' + encodeURIComponent(validatedData.email),
+      };
+    } catch (authError: any) {
+      // Gérer les erreurs de Better Auth (email déjà existant, etc.)
+      if (authError.message?.includes('already exists') || authError.message?.includes('duplicate')) {
         return { error: 'Un compte avec cet email existe déjà' };
       }
-      return { error: result.error.message || 'Erreur lors de la création du compte' };
+      console.error('Better Auth signup error:', authError);
+      return { error: authError.message || 'Erreur lors de la création du compte' };
     }
-
-    // Rediriger vers la page de vérification email
-    return {
-      success: true,
-      redirectTo: '/verify-email?email=' + encodeURIComponent(validatedData.email),
-    };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // Vérifier que error.errors existe et contient au moins un élément
-      if (error.errors && error.errors.length > 0) {
+      // Vérifier que error.issues existe et contient au moins un élément
+      const firstError = error.issues?.[0];
+      if (firstError) {
         return {
-          error: error.errors[0].message,
-          field: error.errors[0].path[0] as string,
+          error: firstError.message,
+          field: firstError.path[0] as string,
         };
       }
       return { error: 'Données de formulaire invalides' };
@@ -268,10 +271,11 @@ export async function resetPasswordAction(
   } catch (error) {
     // Gestion des erreurs de validation Zod
     if (error instanceof z.ZodError) {
-      if (error.errors && error.errors.length > 0) {
+      const firstError = error.issues?.[0];
+      if (firstError) {
         return {
-          error: error.errors[0].message,
-          field: error.errors[0].path[0] as string,
+          error: firstError.message,
+          field: firstError.path[0] as string,
         };
       }
       return { error: 'Données de formulaire invalides' };

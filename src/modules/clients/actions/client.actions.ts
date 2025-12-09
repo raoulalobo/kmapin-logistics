@@ -36,7 +36,7 @@ type ActionResult<T = void> =
  * @returns Résultat avec ID du client créé ou erreur
  */
 export async function createClientAction(
-  formData: FormData
+  data: ClientFormData | FormData
 ): Promise<ActionResult<{ id: string }>> {
   try {
     /**
@@ -47,20 +47,27 @@ export async function createClientAction(
     await requirePermission('clients:create');
 
     // Extraire et valider les données
-    const rawData = {
-      name: formData.get('name'),
-      legalName: formData.get('legalName') || null,
-      taxId: formData.get('taxId') || null,
-      email: formData.get('email'),
-      phone: formData.get('phone') || null,
-      address: formData.get('address'),
-      city: formData.get('city'),
-      postalCode: formData.get('postalCode'),
-      country: formData.get('country') || 'FR',
-      website: formData.get('website') || null,
-    };
+    let validatedData: ClientFormData;
 
-    const validatedData = clientSchema.parse(rawData);
+    if (data instanceof FormData) {
+      // Si c'est un FormData (formulaire natif), extraire les valeurs
+      const rawData = {
+        name: data.get('name'),
+        legalName: data.get('legalName') || null,
+        taxId: data.get('taxId') || null,
+        email: data.get('email'),
+        phone: data.get('phone') || null,
+        address: data.get('address'),
+        city: data.get('city'),
+        postalCode: data.get('postalCode'),
+        country: data.get('country') || 'FR',
+        website: data.get('website') || null,
+      };
+      validatedData = clientSchema.parse(rawData);
+    } else {
+      // Si c'est déjà un objet ClientFormData, juste valider
+      validatedData = clientSchema.parse(data);
+    }
 
     // Vérifier si un client avec le même email existe déjà
     const existingClient = await prisma.company.findFirst({
@@ -267,6 +274,8 @@ export async function getClientAction(id: string) {
             shipments: true,
             invoices: true,
             users: true,
+            quotes: true,
+            documents: true,
           },
         },
       },

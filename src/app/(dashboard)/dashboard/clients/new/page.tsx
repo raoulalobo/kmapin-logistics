@@ -40,15 +40,15 @@ export default function NewClientPage() {
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
-      legalName: '',
-      taxId: '',
+      legalName: null,
+      taxId: null,
       email: '',
-      phone: '',
+      phone: null,
       address: '',
       city: '',
       postalCode: '',
-      country: '',
-      website: '',
+      country: 'FR',
+      website: null,
     },
   });
 
@@ -121,7 +121,7 @@ export default function NewClientPage() {
                     <FormItem>
                       <FormLabel>Raison sociale</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="ACME Transport SARL" />
+                        <Input {...field} value={field.value ?? ''} placeholder="ACME Transport SARL" />
                       </FormControl>
                       <FormDescription>
                         Nom légal complet (optionnel)
@@ -139,7 +139,7 @@ export default function NewClientPage() {
                   <FormItem>
                     <FormLabel>Numéro de TVA</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="FR12345678901" />
+                      <Input {...field} value={field.value ?? ''} placeholder="FR12345678901" />
                     </FormControl>
                     <FormDescription>
                       Numéro d'identification fiscale (optionnel)
@@ -182,7 +182,7 @@ export default function NewClientPage() {
                     <FormItem>
                       <FormLabel>Téléphone</FormLabel>
                       <FormControl>
-                        <Input {...field} type="tel" placeholder="+33 1 23 45 67 89" />
+                        <Input {...field} value={field.value ?? ''} type="tel" placeholder="+33 1 23 45 67 89" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -197,7 +197,7 @@ export default function NewClientPage() {
                   <FormItem>
                     <FormLabel>Site web</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" placeholder="https://acme.com" />
+                      <Input {...field} value={field.value ?? ''} type="url" placeholder="https://acme.com" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

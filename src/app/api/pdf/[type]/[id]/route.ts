@@ -22,7 +22,7 @@ import { generateQuotePDF } from '@/lib/pdf/quote-pdf';
  */
 interface RouteParams {
   params: Promise<{
-    type: 'invoice' | 'quote';
+    type: string;
     id: string;
   }>;
 }

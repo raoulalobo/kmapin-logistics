@@ -1,0 +1,22 @@
+# Vercel Ignore File
+# Fichiers à ne pas déployer sur Vercel
+
+.env
+.env.local
+.env.*.local
+
+# Scripts locaux
+scripts/
+
+# Plans Claude
+.claude/
+
+# Node modules (seront installés sur Vercel)
+node_modules/
+
+# Build cache local
+.next/
+.turbo/
+
+# Fichiers de config locaux
+*.local.*

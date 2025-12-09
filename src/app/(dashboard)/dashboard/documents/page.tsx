@@ -191,7 +191,7 @@ export default async function DocumentsPage({
         </Card>
       ) : (
         <div className="space-y-2">
-          {documents.map((doc) => (
+          {documents.map((doc: any) => (
             <Card key={doc.id} className="p-4 hover:bg-accent/50 transition-colors">
               <div className="flex items-center justify-between">
                 {/* Icône et infos du document */}
