@@ -1,0 +1,7 @@
+Nom: test@kmapin.com
+Pass:Test123456!
+Role:USER
+
+Nom: admin3@kmapin.com
+Pass:Admin123!
+Role:ADMIN

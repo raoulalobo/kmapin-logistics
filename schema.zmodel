@@ -1,0 +1,770 @@
+// Schéma Zenstack - KmapIn Logistics
+// Application de gestion de fret multi-modal avec Access Control
+
+/**
+ * Generator Prisma standard
+ */
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+/**
+ * Plugin Zenstack pour hooks React Query
+ */
+plugin hooks {
+  provider = '@zenstackhq/tanstack-query'
+  target = 'react'
+  version = 'v5'
+  output = "../src/lib/hooks"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTIFICATION (Better Auth)
+// ============================================
+
+/**
+ * Modèle User avec access control
+ * - ADMIN : accès complet à tous les users
+ * - OPERATIONS_MANAGER/FINANCE_MANAGER : peuvent lire les users de leur entreprise
+ * - CLIENT/VIEWER : peuvent lire uniquement leur propre profil
+ * - Tous les users peuvent modifier leur propre profil
+ */
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false) // Better Auth: Boolean au lieu de DateTime
+  name          String?
+  image         String?
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations Better Auth
+  accounts Account[]
+  sessions Session[]
+
+  // Champs business
+  role        UserRole @default(CLIENT)
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  permissions Json?
+
+  // Relations
+  createdShipments   Shipment[] @relation("CreatedBy")
+  createdInvoices    Invoice[]  @relation("CreatedBy")
+  uploadedDocuments  Document[] @relation("UploadedDocuments")
+
+  // 🔐 Access Policies Zenstack
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Chaque user peut lire et modifier son propre profil
+  @@allow('read,update', auth() == this)
+
+  // Les managers peuvent lire les users de leur entreprise
+  @@allow('read', auth().companyId == companyId &&
+    (auth().role == OPERATIONS_MANAGER || auth().role == FINANCE_MANAGER))
+
+  // Par défaut, tout est interdit (principe de moindre privilège)
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@map("user") // Better Auth: nom de table minuscule
+}
+
+enum UserRole {
+  ADMIN
+  OPERATIONS_MANAGER
+  FINANCE_MANAGER
+  CLIENT
+  VIEWER
+}
+
+/**
+ * Modèle Account (OAuth providers + Better Auth)
+ * - Compatible avec Better Auth v1.4+ (schéma officiel)
+ * - Chaque user peut gérer ses propres comptes OAuth
+ * - Les admins ont accès complet
+ */
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String    // Better Auth: identifiant du compte chez le provider
+  providerId            String    // Better Auth: identifiant du provider (google, credential, etc.)
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   // OAuth: access token
+  refreshToken          String?   // OAuth: refresh token
+  idToken               String?   // OAuth: id token
+  accessTokenExpiresAt  DateTime? // OAuth: expiration de l'access token
+  refreshTokenExpiresAt DateTime? // OAuth: expiration du refresh token
+  scope                 String?   // OAuth: scopes autorisés
+  password              String?   // Better Auth: hashed password for email/password authentication
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // 🔐 Access Policies
+  @@allow('all', auth().role == ADMIN)
+  @@allow('all', auth().id == userId)
+  @@deny('all', true)
+
+  @@unique([providerId, accountId]) // Better Auth: contrainte unique sur provider + accountId
+  @@index([userId])
+  @@map("account") // Better Auth: nom de table minuscule
+}
+
+/**
+ * Modèle Session (Better Auth)
+ * - Conforme au schéma Better Auth officiel
+ * - Stocke les sessions avec token, IP et user agent
+ * - Chaque user peut gérer ses propres sessions
+ * - Les admins ont accès complet
+ */
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime // Better Auth: expiresAt au lieu de expires
+  token     String   @unique // Better Auth: token au lieu de sessionToken
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?  // Better Auth: tracking IP
+  userAgent String?  // Better Auth: tracking user agent
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 🔐 Access Policies
+  @@allow('all', auth().role == ADMIN)
+  @@allow('all', auth().id == userId)
+  @@deny('all', true)
+
+  @@index([userId])
+  @@map("session") // Better Auth: nom de table minuscule
+}
+
+/**
+ * Modèle VerificationToken (email verification, password reset)
+ * - Accessible en lecture publique (nécessaire pour la vérification)
+ * - Création/modification réservée au système
+ */
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  // 🔐 Access Policies
+  @@allow('read', true) // Lecture publique nécessaire
+  @@allow('all', auth().role == ADMIN)
+  @@deny('all', true)
+
+  @@unique([identifier, token])
+}
+
+/**
+ * Modèle Verification (utilisé par Better Auth)
+ * - Pour la vérification d'email et la réinitialisation de mot de passe
+ * - Gère les tokens avec expiration
+ */
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String   // Email ou identifiant de l'utilisateur
+  value      String   // Token de vérification
+  expiresAt  DateTime // Date d'expiration du token
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // 🔐 Access Policies
+  @@allow('read', true) // Lecture publique nécessaire pour Better Auth
+  @@allow('all', auth().role == ADMIN)
+  @@deny('all', true)
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ============================================
+// ENTREPRISES & CLIENTS
+// ============================================
+
+/**
+ * Modèle Company (Entreprises/Clients)
+ * - ADMIN : accès complet
+ * - OPERATIONS_MANAGER/FINANCE_MANAGER : peuvent voir toutes les companies
+ * - CLIENT/VIEWER : peuvent voir uniquement leur propre company
+ * - Les users d'une company peuvent modifier certains champs de leur company
+ */
+model Company {
+  id         String   @id @default(cuid())
+  name       String
+  legalName  String?
+  taxId      String?  @unique
+  email      String
+  phone      String?
+  address    String
+  city       String
+  postalCode String
+  country    String
+  website    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  users        User[]
+  shipments    Shipment[]
+  invoices     Invoice[]
+  quotes       Quote[]
+  documents    Document[]
+  transporters Transporter[]
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations et finance managers peuvent lire toutes les companies
+  @@allow('read', auth().role == OPERATIONS_MANAGER || auth().role == FINANCE_MANAGER)
+
+  // Les users d'une company peuvent lire et modifier leur company
+  @@allow('read,update', auth().companyId == id)
+
+  @@deny('all', true)
+
+  @@index([taxId])
+}
+
+// ============================================
+// EXPÉDITIONS
+// ============================================
+
+/**
+ * Modèle Shipment (Expéditions)
+ * - ADMIN : accès complet
+ * - OPERATIONS_MANAGER : peut créer, lire, modifier toutes les expéditions
+ * - FINANCE_MANAGER : peut lire toutes les expéditions
+ * - CLIENT : peut lire uniquement les expéditions de sa company
+ * - Le créateur peut modifier tant que status != DELIVERED
+ */
+model Shipment {
+  id             String   @id @default(cuid())
+  trackingNumber String   @unique
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id])
+
+  // Origine & Destination
+  originAddress      String
+  originCity         String
+  originPostalCode   String
+  originCountry      String
+  originContact      String?
+  originPhone        String?
+
+  destinationAddress    String
+  destinationCity       String
+  destinationPostalCode String
+  destinationCountry    String
+  destinationContact    String?
+  destinationPhone      String?
+
+  // Détails marchandise
+  cargoType           CargoType
+  weight              Float
+  volume              Float?
+  packageCount        Int
+  value               Float?
+  currency            String          @default("EUR")
+  description         String
+  specialInstructions String?
+
+  // Transport
+  transportMode TransportMode[]
+  priority      Priority        @default(STANDARD)
+  isDangerous   Boolean         @default(false)
+  isFragile     Boolean         @default(false)
+
+  // Dates
+  requestedPickupDate   DateTime?
+  actualPickupDate      DateTime?
+  estimatedDeliveryDate DateTime?
+  actualDeliveryDate    DateTime?
+
+  // Statut
+  status ShipmentStatus @default(DRAFT)
+
+  // Financier
+  estimatedCost Float?
+  actualCost    Float?
+  invoiceId     String?  @unique
+  invoice       Invoice? @relation(fields: [invoiceId], references: [id])
+
+  // Métadonnées
+  createdById String
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  trackingEvents TrackingEvent[]
+  documents      Document[]
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer, lire et modifier
+  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire toutes les expéditions
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent lire les expéditions de leur company
+  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+
+  // Le créateur peut modifier tant que status != DELIVERED
+  @@allow('read,update', auth().id == createdById && status != DELIVERED)
+
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@index([trackingNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum CargoType {
+  GENERAL
+  DANGEROUS
+  PERISHABLE
+  FRAGILE
+  BULK
+  CONTAINER
+  PALLETIZED
+  OTHER
+}
+
+enum TransportMode {
+  ROAD
+  SEA
+  AIR
+  RAIL
+}
+
+enum Priority {
+  STANDARD
+  EXPRESS
+  URGENT
+}
+
+enum ShipmentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PICKED_UP
+  IN_TRANSIT
+  AT_CUSTOMS
+  CUSTOMS_CLEARED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  ON_HOLD
+  EXCEPTION
+}
+
+// ============================================
+// TRACKING
+// ============================================
+
+/**
+ * Modèle TrackingEvent (Événements de suivi)
+ * - ADMIN/OPERATIONS_MANAGER : peuvent créer et lire
+ * - FINANCE_MANAGER/CLIENT : peuvent lire les events des shipments accessibles
+ * - Les tracking events héritent des permissions du Shipment parent
+ */
+model TrackingEvent {
+  id          String         @id @default(cuid())
+  shipmentId  String
+  shipment    Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status      ShipmentStatus
+  location    String
+  latitude    Float?
+  longitude   Float?
+  description String?
+  timestamp   DateTime       @default(now())
+  metadata    Json?
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer et lire
+  @@allow('create,read', auth().role == OPERATIONS_MANAGER)
+
+  // Lecture publique pour les tracking events (nécessaire pour tracking public)
+  // Les clients peuvent lire les events des shipments de leur company
+  @@allow('read', auth().companyId == shipment.companyId)
+
+  @@deny('all', true)
+
+  @@index([shipmentId])
+  @@index([timestamp])
+}
+
+// ============================================
+// FACTURATION
+// ============================================
+
+/**
+ * Modèle Invoice (Factures)
+ * - ADMIN/FINANCE_MANAGER : accès complet
+ * - OPERATIONS_MANAGER : peut lire toutes les factures
+ * - CLIENT : peut lire les factures de sa company
+ * - Les factures PAID ne peuvent plus être modifiées
+ */
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id])
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime
+  paidDate      DateTime?
+  subtotal      Float
+  taxRate       Float         @default(0)
+  taxAmount     Float
+  discount      Float         @default(0)
+  total         Float
+  currency      String        @default("EUR")
+  status        InvoiceStatus @default(DRAFT)
+  paymentMethod String?
+  shipment      Shipment?
+  quoteId       String?
+  quote         Quote?        @relation(fields: [quoteId], references: [id])
+  notes         String?
+  createdById   String
+  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  items         InvoiceItem[]
+  documents     Document[]
+
+  // 🔐 Access Policies
+
+  // Les admins et finance managers peuvent tout faire
+  @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
+
+  // Les operations managers peuvent lire
+  @@allow('read', auth().role == OPERATIONS_MANAGER)
+
+  // Les clients peuvent lire les factures de leur company
+  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+
+  // Les factures payées ne peuvent plus être modifiées (règle de sécurité)
+  @@deny('update,delete', status == PAID)
+
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+/**
+ * Modèle InvoiceItem (Lignes de facture)
+ * - Hérite des permissions de l'Invoice parent
+ */
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Float
+  unitPrice   Float
+  amount      Float
+
+  // 🔐 Access Policies (hérite de Invoice)
+
+  @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
+  @@allow('read', auth().role == OPERATIONS_MANAGER)
+  @@allow('read', auth().companyId == invoice.companyId)
+  @@deny('all', invoice.status == PAID) // Ne peut pas modifier si facture payée
+  @@deny('all', true)
+
+  @@index([invoiceId])
+}
+
+// ============================================
+// DEVIS
+// ============================================
+
+/**
+ * Modèle Quote (Devis)
+ * - ADMIN/OPERATIONS_MANAGER : peuvent créer et gérer tous les devis
+ * - FINANCE_MANAGER : peut lire tous les devis
+ * - CLIENT : peut lire et demander des devis pour sa company
+ */
+model Quote {
+  id                 String          @id @default(cuid())
+  quoteNumber        String          @unique
+  companyId          String
+  company            Company         @relation(fields: [companyId], references: [id])
+  originCountry      String
+  destinationCountry String
+  transportMode      TransportMode[]
+  cargoType          CargoType
+  weight             Float
+  volume             Float?
+  estimatedCost      Float
+  validUntil         DateTime
+  currency           String          @default("EUR")
+  status             QuoteStatus     @default(DRAFT)
+  acceptedAt         DateTime?
+  rejectedAt         DateTime?
+  invoices           Invoice[]
+  documents          Document[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer, lire et modifier
+  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent lire et créer des quotes pour leur company
+  @@allow('read,create', auth().companyId == companyId && auth().role == CLIENT)
+
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@index([status])
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+/**
+ * Modèle Notification (Notifications utilisateur)
+ * - ADMIN : peut lire et créer toutes les notifications
+ * - Chaque user peut lire et modifier ses propres notifications
+ */
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Chaque user peut lire et modifier (marquer comme lu) ses propres notifications
+  @@allow('read,update', auth().id == userId)
+
+  // Les operations managers peuvent créer des notifications
+  @@allow('create', auth().role == OPERATIONS_MANAGER)
+
+  @@deny('all', true)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+enum NotificationType {
+  SHIPMENT_CREATED
+  SHIPMENT_PICKED_UP
+  SHIPMENT_IN_TRANSIT
+  SHIPMENT_DELIVERED
+  SHIPMENT_DELAYED
+  INVOICE_GENERATED
+  INVOICE_PAID
+  QUOTE_REQUEST
+  CUSTOMS_CLEARED
+  DOCUMENT_UPLOADED
+}
+
+// ============================================
+// GESTION DOCUMENTAIRE
+// ============================================
+
+/**
+ * Type de document
+ */
+enum DocumentType {
+  INVOICE_SCAN           // Scan de facture
+  PROOF_OF_DELIVERY      // Preuve de livraison
+  CUSTOMS_DOCUMENT       // Document douanier
+  PACKING_LIST           // Liste de colisage
+  BILL_OF_LADING         // Connaissement
+  CMR                    // Lettre de voiture CMR
+  AIRWAY_BILL            // Lettre de transport aérien
+  CERTIFICATE            // Certificat (origine, conformité, etc.)
+  PHOTO                  // Photo de la marchandise
+  OTHER                  // Autre document
+}
+
+/**
+ * Modèle Document (Gestion documentaire)
+ * - ADMIN : accès complet à tous les documents
+ * - OPERATIONS_MANAGER : peut créer, lire et supprimer tous les documents
+ * - FINANCE_MANAGER : peut lire tous les documents
+ * - CLIENT : peut créer et lire les documents de sa company
+ * - L'uploader peut supprimer son propre document
+ */
+model Document {
+  id          String       @id @default(cuid())
+  name        String       // Nom du fichier original
+  fileUrl     String       // URL du fichier stocké (UploadThing, S3, etc.)
+  fileKey     String       // Clé unique du fichier pour suppression
+  fileSize    Int          // Taille en octets
+  mimeType    String       // Type MIME (application/pdf, image/jpeg, etc.)
+  type        DocumentType // Type de document
+  description String?      // Description optionnelle
+
+  // Relations (au moins une doit être présente)
+  shipmentId String?
+  shipment   Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  invoiceId String?
+  invoice   Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  quoteId String?
+  quote   Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  // Métadonnées
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  uploadedBy  String
+  uploader    User     @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
+  uploadedAt  DateTime @default(now())
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer, lire et supprimer
+  @@allow('create,read,delete', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire tous les documents
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent créer et lire les documents de leur company
+  @@allow('create,read', auth().companyId == companyId && auth().role == CLIENT)
+
+  // L'uploader peut supprimer son propre document
+  @@allow('delete', auth().id == uploadedBy)
+
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@index([shipmentId])
+  @@index([invoiceId])
+  @@index([quoteId])
+  @@index([uploadedBy])
+}
+
+// ============================================
+// TRANSPORTEURS
+// ============================================
+
+/**
+ * Type de transporteur
+ */
+enum TransporterType {
+  ROAD        // Routier
+  SEA         // Maritime
+  AIR         // Aérien
+  RAIL        // Ferroviaire
+  MULTIMODAL  // Multimodal
+}
+
+/**
+ * Modèle Transporter (Transporteurs/Partenaires de transport)
+ * - ADMIN : accès complet
+ * - OPERATIONS_MANAGER : peut créer, lire et modifier tous les transporteurs
+ * - FINANCE_MANAGER : peut lire tous les transporteurs
+ * - CLIENT/VIEWER : peuvent voir les transporteurs actifs
+ */
+model Transporter {
+  id            String          @id @default(cuid())
+  name          String          // Nom du transporteur
+  type          TransporterType // Type de transport
+  email         String          @unique
+  phone         String
+  address       String?
+  city          String?
+  postalCode    String?
+  country       String?
+  website       String?
+
+  // Informations commerciales
+  contactPerson String? // Nom du contact principal
+  taxId         String? // Numéro de TVA
+  iban          String? // IBAN pour les paiements
+
+  // Métadonnées
+  notes    String?  // Notes internes
+  isActive Boolean  @default(true) // Transporteur actif ou non
+  rating   Float?   @default(0) // Note de 0 à 5
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer, lire et modifier
+  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent voir les transporteurs actifs
+  @@allow('read', isActive == true && (auth().role == CLIENT || auth().role == VIEWER))
+
+  @@deny('all', true)
+
+  @@index([companyId])
+  @@index([type])
+  @@map("transporter")
+}
