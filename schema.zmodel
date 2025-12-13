@@ -3,10 +3,12 @@
 
 /**
  * Generator Prisma standard
+ * Génère les binaires pour Linux (Vercel) et le système local
  */
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 /**
