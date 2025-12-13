@@ -1,39 +1,25 @@
 /**
  * Composant : Action de Gestion des Permissions Personnalisées
  *
- * Dialog large permettant aux administrateurs de gérer les permissions
+ * Dialog permettant aux administrateurs de gérer les permissions
  * personnalisées d'un utilisateur au-delà de celles de son rôle.
  *
- * Affiche :
- * - Permissions héritées du rôle (read-only, badges gris)
- * - Permissions personnalisées (éditable, checkboxes par catégorie)
+ * Utilise StandardModal pour une interface uniforme avec recherche,
+ * filtres par catégorie et tri.
  *
  * @module components/users
  */
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Key, Loader2, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+  StandardModal,
+  type StandardModalItem,
+} from '@/components/modals';
 
 import {
   updateUserPermissionsAction,
@@ -59,11 +45,11 @@ interface UserPermissionsActionProps {
 }
 
 /**
- * Dialog de gestion des permissions personnalisées
+ * Dialog de gestion des permissions personnalisées avec StandardModal
  *
- * Organisation :
- * 1. Section "Permissions du rôle" (affichage uniquement)
- * 2. Section "Permissions personnalisées" (éditable par catégorie)
+ * Affiche :
+ * 1. Informations sur les permissions héritées du rôle (dans la description)
+ * 2. StandardModal pour sélectionner les permissions personnalisées
  */
 export function UserPermissionsAction({
   userId,
@@ -76,7 +62,7 @@ export function UserPermissionsAction({
   const [isPending, startTransition] = useTransition();
 
   // États du dialog
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPermissions, setSelectedPermissions] =
     useState<string[]>(currentPermissions);
 
@@ -95,37 +81,62 @@ export function UserPermissionsAction({
   }
 
   /**
-   * Gérer le changement d'une checkbox de permission
+   * Transformer les PERMISSION_CATEGORIES en StandardModalItem[]
+   *
+   * Chaque permission devient un item avec :
+   * - id, label, description (depuis PermissionItem)
+   * - status: 'active' si sélectionnée, 'default' sinon
+   * - disabled: true si héritée du rôle
+   * - disabledReason: explication si héritée
+   * - badge: "Hérité" si héritée du rôle
+   * - category: nom de la catégorie
    */
-  function handlePermissionToggle(permissionId: string, checked: boolean) {
-    if (checked) {
-      // Ajouter la permission
-      setSelectedPermissions((prev) => [...prev, permissionId]);
-    } else {
-      // Retirer la permission
-      setSelectedPermissions((prev) =>
-        prev.filter((p) => p !== permissionId)
-      );
-    }
-  }
+  const permissionItems: StandardModalItem[] = useMemo(() => {
+    return Object.entries(PERMISSION_CATEGORIES).flatMap(
+      ([categoryName, permissions]) =>
+        permissions.map((permission) => {
+          const isInherited = isInheritedPermission(permission.id);
+          const isSelected = selectedPermissions.includes(permission.id);
+
+          return {
+            id: permission.id,
+            label: permission.label,
+            description: permission.description,
+            status: isSelected ? ('active' as const) : ('default' as const),
+            category: categoryName,
+            disabled: isInherited,
+            disabledReason: isInherited
+              ? `Cette permission est déjà héritée du rôle ${userRole}`
+              : undefined,
+            badge: isInherited
+              ? {
+                  text: 'Hérité',
+                  variant: 'outline' as const,
+                }
+              : undefined,
+          };
+        })
+    );
+  }, [selectedPermissions, userRole, isAdminRole, rolePermissions]);
 
   /**
    * Soumettre les nouvelles permissions
    */
-  function handleSubmit() {
+  function handleSubmit(selectedIds: string[]) {
     // Vérifier si les permissions ont changé
     const permissionsChanged =
       JSON.stringify([...currentPermissions].sort()) !==
-      JSON.stringify([...selectedPermissions].sort());
+      JSON.stringify([...selectedIds].sort());
 
     if (!permissionsChanged) {
-      toast.info('Les permissions n\'ont pas changé');
+      toast.info("Les permissions n'ont pas changé");
+      setIsModalOpen(false);
       return;
     }
 
     startTransition(async () => {
       const result = await updateUserPermissionsAction(userId, {
-        permissions: selectedPermissions,
+        permissions: selectedIds,
       });
 
       if (!result.success) {
@@ -135,8 +146,8 @@ export function UserPermissionsAction({
       } else {
         toast.success(`Permissions de ${userName} mises à jour avec succès`);
 
-        // Fermer le dialog
-        setIsDialogOpen(false);
+        // Fermer le modal
+        setIsModalOpen(false);
 
         // Rafraîchir la page
         router.refresh();
@@ -151,170 +162,84 @@ export function UserPermissionsAction({
     if (!open) {
       setSelectedPermissions(currentPermissions);
     }
-    setIsDialogOpen(open);
+    setIsModalOpen(open);
   }
 
+  /**
+   * Construire la description avec les infos sur les permissions héritées
+   */
+  const descriptionText = useMemo(() => {
+    if (isAdminRole) {
+      return `⚠️ Le rôle ADMIN a accès complet à toutes les fonctionnalités. Les permissions personnalisées s'ajouteront aux permissions du rôle.`;
+    }
+
+    if (rolePermissions.length > 0) {
+      return `Les permissions personnalisées s'ajoutent aux ${rolePermissions.length} permission(s) héritée(s) du rôle ${userRole}. Les permissions héritées sont marquées "Hérité" et ne peuvent pas être modifiées.`;
+    }
+
+    return 'Sélectionnez les permissions personnalisées à accorder à cet utilisateur.';
+  }, [isAdminRole, rolePermissions, userRole]);
+
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <div onClick={(e) => {
+      // Si le trigger est cliqué, ouvrir le modal
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-trigger]')) {
+        setIsModalOpen(true);
+      }
+    }}>
+      {/* Trigger Button */}
+      <div data-trigger>{children}</div>
 
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Gérer les permissions de {userName}</DialogTitle>
-          <DialogDescription>
-            Les permissions personnalisées s'ajoutent aux permissions héritées
-            du rôle. L'utilisateur aura accès à toutes les permissions combinées.
-          </DialogDescription>
-        </DialogHeader>
-
-        <ScrollArea className="max-h-[60vh] pr-4">
-          <div className="space-y-6 py-4">
-            {/* Section 1: Permissions du rôle (read-only) */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">
-                  Permissions héritées du rôle ({userRole})
-                </h3>
-              </div>
-
-              <Card className="bg-muted/50">
-                <CardContent className="pt-4">
-                  {isAdminRole ? (
-                    <div className="text-sm text-muted-foreground">
-                      <Badge variant="destructive" className="mb-2">
-                        ADMIN - Accès complet
-                      </Badge>
-                      <p>
-                        Le rôle ADMIN a accès à toutes les fonctionnalités du
-                        système sans restriction.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {rolePermissions.length > 0 ? (
-                        rolePermissions.map((permission) => (
-                          <Badge key={permission} variant="secondary">
-                            {permission}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          Aucune permission héritée du rôle
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            <Separator />
-
-            {/* Section 2: Permissions personnalisées (éditable) */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Key className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">
-                  Permissions personnalisées
-                </h3>
-              </div>
-
-              {/* Affichage par catégories */}
-              <div className="space-y-4">
-                {Object.entries(PERMISSION_CATEGORIES).map(
-                  ([categoryName, permissions]) => (
-                    <Card key={categoryName}>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">
-                          {categoryName}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {permissions.map((permission) => {
-                            const isInherited = isInheritedPermission(
-                              permission.id
-                            );
-                            const isSelected = selectedPermissions.includes(
-                              permission.id
-                            );
-
-                            return (
-                              <div
-                                key={permission.id}
-                                className="flex items-start space-x-3"
-                              >
-                                <Checkbox
-                                  id={permission.id}
-                                  checked={isSelected}
-                                  onCheckedChange={(checked) =>
-                                    handlePermissionToggle(
-                                      permission.id,
-                                      checked as boolean
-                                    )
-                                  }
-                                  disabled={isInherited || isPending}
-                                />
-                                <div className="grid gap-1.5 leading-none flex-1">
-                                  <label
-                                    htmlFor={permission.id}
-                                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                                      isInherited
-                                        ? 'text-muted-foreground'
-                                        : 'cursor-pointer'
-                                    }`}
-                                  >
-                                    {permission.label}
-                                    {isInherited && (
-                                      <Badge
-                                        variant="outline"
-                                        className="ml-2 text-xs"
-                                      >
-                                        Hérité
-                                      </Badge>
-                                    )}
-                                  </label>
-                                  <p className="text-xs text-muted-foreground">
-                                    {permission.description}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        </ScrollArea>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setIsDialogOpen(false)}
-            disabled={isPending}
-          >
-            Annuler
-          </Button>
-          <Button onClick={handleSubmit} disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enregistrement...
-              </>
-            ) : (
-              <>
-                <Key className="mr-2 h-4 w-4" />
-                Enregistrer les permissions
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* StandardModal - Dialog principal (pas de Dialog imbriqué) */}
+      <StandardModal
+        open={isModalOpen}
+        onOpenChange={handleOpenChange}
+        title={`Gérer les permissions de ${userName}`}
+        description={descriptionText}
+        items={permissionItems}
+        selectionMode="multiple"
+        selectedIds={selectedPermissions}
+        onSelectionChange={setSelectedPermissions}
+        filters={{
+          searchEnabled: true,
+          searchPlaceholder: 'Rechercher une permission...',
+          filterOptions: Object.keys(PERMISSION_CATEGORIES).map(
+            (categoryName) => ({
+              label: categoryName,
+              value: categoryName,
+            })
+          ),
+          filterLabel: 'Catégorie',
+          sortOptions: [
+            {
+              label: 'Nom (A-Z)',
+              value: 'name-asc',
+              sortFn: (a, b) => a.label.localeCompare(b.label),
+            },
+            {
+              label: 'Nom (Z-A)',
+              value: 'name-desc',
+              sortFn: (a, b) => b.label.localeCompare(a.label),
+            },
+            {
+              label: 'Catégorie',
+              value: 'category',
+              sortFn: (a, b) =>
+                (a.category || '').localeCompare(b.category || ''),
+            },
+          ],
+          sortLabel: 'Trier par',
+        }}
+        groupByCategory={true}
+        onSubmit={handleSubmit}
+        labels={{
+          submit: 'Enregistrer les permissions',
+          cancel: 'Annuler',
+        }}
+        isLoading={isPending}
+        maxWidth="4xl"
+      />
+    </div>
   );
 }
