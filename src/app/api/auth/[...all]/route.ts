@@ -16,6 +16,12 @@ import { auth } from '@/lib/auth/config';
 import { toNextJsHandler } from 'better-auth/next-js';
 
 /**
+ * Forcer l'utilisation du Node.js runtime au lieu de l'Edge runtime
+ * Prisma nécessite le Node.js runtime complet pour fonctionner
+ */
+export const runtime = 'nodejs';
+
+/**
  * Exporter les handlers HTTP pour Next.js App Router
  * Better Auth gère automatiquement tous les endpoints
  */
