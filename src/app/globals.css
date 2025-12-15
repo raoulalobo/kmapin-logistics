@@ -1,3 +1,8 @@
+/**
+ * Styles globaux de l'application
+ * Inclut les animations personnalisées, les transitions et les effets visuels modernes
+ */
+
 @import "tailwindcss";
 
 @layer base {
@@ -29,27 +34,484 @@
     --chart-5: 27 87% 67%;
   }
 
-  /* Dark mode supprimé - application utilise uniquement le mode clair */
-
   * {
     border-color: hsl(var(--border));
   }
 
   html {
-    height: 100%;
-    overflow: hidden;
+    scroll-behavior: smooth;
+    overflow-y: auto !important;
   }
 
   body {
-    height: 100%;
-    overflow: hidden;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-y: auto !important;
   }
+}
 
-  /* Force le conteneur racine de Next.js à prendre toute la hauteur */
-  body > div {
-    height: 100%;
+/* ===== ANIMATIONS PERSONNALISÉES ===== */
+
+/* Animation de fade-in depuis le bas avec elastic easing */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation de fade-in depuis la gauche */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation de fade-in depuis la droite */
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation de scale avec bounce */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation de float (flottement doux) */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+}
+
+/* Animation de rotation lente */
+@keyframes slowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation de pulse personnalisée avec glow */
+@keyframes customPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+/* Animation de gradient animé fluide */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Animation de shimmer (brillance élégante) */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Animation de blob morphing organique */
+@keyframes blobMorph {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    border-radius: 40% 60% 50% 50% / 70% 40% 60% 30%;
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+/* Animation de wave (vague) */
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(10px) translateY(-10px);
+  }
+  50% {
+    transform: translateX(0) translateY(-20px);
+  }
+  75% {
+    transform: translateX(-10px) translateY(-10px);
+  }
+}
+
+/* Animation de glow pulsating */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4),
+                0 0 40px rgba(59, 130, 246, 0.2),
+                0 0 60px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6),
+                0 0 60px rgba(59, 130, 246, 0.4),
+                0 0 90px rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Animation de text reveal */
+@keyframes textReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* ===== CLASSES UTILITAIRES D'ANIMATIONS ===== */
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fadeInLeft {
+  animation: fadeInLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fadeInRight {
+  animation: fadeInRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-slowSpin {
+  animation: slowSpin 25s linear infinite;
+}
+
+.animate-customPulse {
+  animation: customPulse 3s ease-in-out infinite;
+}
+
+.animate-gradientShift {
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+}
+
+.animate-blobMorph {
+  animation: blobMorph 12s ease-in-out infinite;
+}
+
+.animate-wave {
+  animation: wave 6s ease-in-out infinite;
+}
+
+.animate-glowPulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.animate-textReveal {
+  animation: textReveal 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Délais d'animation échelonnés */
+.animation-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-800 {
+  animation-delay: 0.8s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+/* États initiaux pour les animations */
+.opacity-0-init {
+  opacity: 0;
+}
+
+/* ===== EFFETS VISUELS MODERNES ===== */
+
+/* Effet glassmorphism élégant */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Effet de brillance sur hover (shimmer) */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shimmer-effect:hover::before {
+  left: 150%;
+}
+
+/* Gradient text animé multicolore */
+.gradient-text-animated {
+  background: linear-gradient(
+    90deg,
+    #3b82f6,
+    #8b5cf6,
+    #ec4899,
+    #f59e0b,
+    #3b82f6
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 5s linear infinite;
+}
+
+/* Effet de hover avec lift et shadow prononcée */
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+/* Effet de hover avec scale doux */
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Effet de glow (lueur bleue) */
+.glow-effect {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6),
+              0 0 50px rgba(59, 130, 246, 0.4),
+              0 0 75px rgba(59, 130, 246, 0.2);
+}
+
+/* Effet de glow purple */
+.glow-effect-purple {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.6),
+              0 0 50px rgba(139, 92, 246, 0.4),
+              0 0 75px rgba(139, 92, 246, 0.2);
+}
+
+/* Effet de glow pink */
+.glow-effect-pink {
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.6),
+              0 0 50px rgba(236, 72, 153, 0.4),
+              0 0 75px rgba(236, 72, 153, 0.2);
+}
+
+/* Dégradés mesh complexes et organiques */
+.gradient-mesh-1 {
+  background:
+    radial-gradient(at 40% 20%, hsla(217, 100%, 70%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(262, 100%, 70%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(189, 100%, 70%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(340, 100%, 70%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(22, 100%, 70%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, hsla(242, 100%, 70%, 0.35) 0px, transparent 50%),
+    linear-gradient(to bottom, #ffffff, #f0f4ff);
+}
+
+.gradient-mesh-2 {
+  background:
+    radial-gradient(at 0% 0%, hsla(253, 100%, 70%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 100%, 70%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339, 100%, 70%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(200, 100%, 70%, 0.25) 0px, transparent 50%),
+    linear-gradient(to bottom, #fafbff, #f0f4ff);
+}
+
+/* Blob décoratif animé */
+.blob {
+  border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%;
+  filter: blur(40px);
+  animation: blobMorph 12s ease-in-out infinite;
+}
+
+/* Card moderne avec border gradient animé */
+.gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 1.25rem;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1.25rem;
+  padding: 2px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gradient-border:hover::before {
+  opacity: 1;
+}
+
+/* Transitions fluides pour tous les éléments interactifs */
+button, a, .interactive {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar personnalisée élégante */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2563eb, #7c3aed);
+}
+
+/* Effet de card avec ombre douce */
+.card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.card-shadow:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Effet de texte avec ombre portée douce */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-shadow-strong {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Background pattern subtil */
+.pattern-dots {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.pattern-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
