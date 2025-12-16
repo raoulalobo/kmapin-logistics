@@ -876,3 +876,274 @@ export async function rejectQuoteAction(
     };
   }
 }
+
+/**
+ * Table de distances approximatives entre pays (en km)
+ * Utilisée pour calculer les coûts de transport
+ * Format: { "FROM_TO": distance_en_km }
+ */
+const COUNTRY_DISTANCES: Record<string, number> = {
+  // Distances intra-européennes
+  'France_Allemagne': 600,
+  'France_Espagne': 800,
+  'France_Italie': 900,
+  'France_Belgique': 300,
+  'France_Pays-Bas': 500,
+  'France_Royaume-Uni': 450,
+  'Allemagne_Espagne': 1500,
+  'Allemagne_Italie': 1000,
+  'Allemagne_Pologne': 600,
+
+  // Distances intercontinentales (approximatives)
+  'France_États-Unis': 6500,
+  'France_Chine': 8200,
+  'France_Japon': 9700,
+  'France_Australie': 17000,
+  'France_Brésil': 8500,
+  'France_Canada': 5500,
+  'France_Inde': 6800,
+  'France_Afrique du Sud': 8500,
+  'France_Maroc': 2000,
+  'France_Algérie': 1500,
+  'France_Tunisie': 1600,
+  'France_Côte d\'Ivoire': 4800,
+  'France_Sénégal': 4200,
+
+  // Distances par défaut pour les régions
+  'Europe_Europe': 1500,
+  'Europe_Afrique': 4000,
+  'Europe_Asie': 8000,
+  'Europe_Amérique': 7000,
+  'Europe_Océanie': 16000,
+  'Asie_Asie': 4000,
+  'Asie_Amérique': 10000,
+  'Amérique_Amérique': 5000,
+};
+
+/**
+ * Fonction helper pour obtenir la distance entre deux pays
+ *
+ * Stratégie :
+ * 1. Chercher la distance exacte (Pays1_Pays2)
+ * 2. Chercher la distance inverse (Pays2_Pays1)
+ * 3. Utiliser une distance régionale par défaut
+ * 4. Distance mondiale par défaut : 10000 km
+ *
+ * @param origin - Pays d'origine
+ * @param destination - Pays de destination
+ * @returns Distance approximative en kilomètres
+ */
+function getDistance(origin: string, destination: string): number {
+  // Nettoyer les noms de pays
+  const cleanOrigin = origin.trim();
+  const cleanDestination = destination.trim();
+
+  // Chercher la distance exacte
+  const key1 = `${cleanOrigin}_${cleanDestination}`;
+  const key2 = `${cleanDestination}_${cleanOrigin}`;
+
+  if (COUNTRY_DISTANCES[key1]) return COUNTRY_DISTANCES[key1];
+  if (COUNTRY_DISTANCES[key2]) return COUNTRY_DISTANCES[key2];
+
+  // Distance régionale par défaut
+  const regions: Record<string, string[]> = {
+    Europe: ['France', 'Allemagne', 'Espagne', 'Italie', 'Belgique', 'Pays-Bas', 'Royaume-Uni', 'Pologne'],
+    Afrique: ['Maroc', 'Algérie', 'Tunisie', 'Côte d\'Ivoire', 'Sénégal', 'Afrique du Sud'],
+    Asie: ['Chine', 'Japon', 'Inde', 'Corée du Sud', 'Thaïlande', 'Vietnam'],
+    Amérique: ['États-Unis', 'Canada', 'Brésil', 'Mexique', 'Argentine'],
+    Océanie: ['Australie', 'Nouvelle-Zélande'],
+  };
+
+  // Déterminer les régions
+  let originRegion = 'Monde';
+  let destinationRegion = 'Monde';
+
+  for (const [region, countries] of Object.entries(regions)) {
+    if (countries.some(c => cleanOrigin.includes(c) || c.includes(cleanOrigin))) {
+      originRegion = region;
+    }
+    if (countries.some(c => cleanDestination.includes(c) || c.includes(cleanDestination))) {
+      destinationRegion = region;
+    }
+  }
+
+  // Chercher la distance régionale
+  const regionalKey = `${originRegion}_${destinationRegion}`;
+  if (COUNTRY_DISTANCES[regionalKey]) return COUNTRY_DISTANCES[regionalKey];
+
+  // Distance mondiale par défaut
+  return 10000;
+}
+
+/**
+ * Action : Calculer une estimation de devis (publique)
+ *
+ * Calcule un prix estimatif pour un transport sans authentification requise
+ * Utilisée par le calculateur sur la page d'accueil
+ *
+ * Logique de calcul :
+ * 1. Coût de base par kg : 0.50 EUR/kg
+ * 2. Facteur de distance : distance / 1000 * coût de base
+ * 3. Multiplicateur par mode de transport :
+ *    - ROAD (Routier) : x1.0
+ *    - SEA (Maritime) : x0.6 (moins cher)
+ *    - AIR (Aérien) : x3.0 (plus cher)
+ *    - RAIL (Ferroviaire) : x0.8 (économique)
+ * 4. Supplément type de marchandise :
+ *    - GENERAL : +0%
+ *    - DANGEROUS (Dangereux) : +50%
+ *    - PERISHABLE (Périssable) : +40%
+ *    - FRAGILE : +30%
+ *    - BULK (Vrac) : -10%
+ *    - CONTAINER : +20%
+ *    - PALLETIZED (Palettisé) : +15%
+ *    - OTHER : +10%
+ * 5. Supplément priorité :
+ *    - STANDARD : +0%
+ *    - EXPRESS : +50%
+ *    - URGENT : +100%
+ * 6. Poids volumétrique : Si volume fourni, calculer poids volumétrique
+ *    (volume_m3 * 200) et prendre le max entre poids réel et poids volumétrique
+ *
+ * @param data - Données du formulaire d'estimation
+ * @returns Résultat du calcul avec coût estimé et détails
+ *
+ * @permissions Aucune - Action publique
+ */
+export async function calculateQuoteEstimateAction(
+  data: unknown
+): Promise<ActionResult<import('../schemas/quote.schema').QuoteEstimateResult>> {
+  try {
+    // Importer le schéma et les types
+    const { quoteEstimateSchema } = await import('../schemas/quote.schema');
+    const { TransportMode, CargoType } = await import('@/generated/prisma');
+
+    // Valider les données
+    const validatedData = quoteEstimateSchema.parse(data);
+
+    // === 1. Calculer le poids effectif (réel vs volumétrique) ===
+    let effectiveWeight = validatedData.weight;
+
+    // Si un volume est fourni, calculer le poids volumétrique
+    // Formule standard : volume_m3 * 200 kg/m3
+    if (validatedData.volume && validatedData.volume > 0) {
+      const volumetricWeight = validatedData.volume * 200;
+      // Prendre le maximum entre poids réel et poids volumétrique
+      effectiveWeight = Math.max(effectiveWeight, volumetricWeight);
+    }
+
+    // === 2. Calculer la distance ===
+    const distance = getDistance(
+      validatedData.originCountry,
+      validatedData.destinationCountry
+    );
+
+    // === 3. Coût de base (0.50 EUR/kg) ===
+    const BASE_RATE_PER_KG = 0.5;
+    const baseCost = effectiveWeight * BASE_RATE_PER_KG;
+
+    // === 4. Facteur de distance (distance / 1000 * baseCost) ===
+    const distanceFactor = (distance / 1000) * baseCost;
+
+    // === 5. Multiplicateur par mode de transport ===
+    // Prendre le mode de transport principal (premier de la liste)
+    const primaryTransportMode = validatedData.transportMode[0];
+
+    const transportMultipliers: Record<string, number> = {
+      ROAD: 1.0,
+      SEA: 0.6,
+      AIR: 3.0,
+      RAIL: 0.8,
+    };
+
+    const transportMultiplier = transportMultipliers[primaryTransportMode] || 1.0;
+    const transportModeCost = (baseCost + distanceFactor) * transportMultiplier;
+
+    // === 6. Supplément type de marchandise ===
+    const cargoTypeSurcharges: Record<string, number> = {
+      GENERAL: 0,
+      DANGEROUS: 0.5,     // +50%
+      PERISHABLE: 0.4,    // +40%
+      FRAGILE: 0.3,       // +30%
+      BULK: -0.1,         // -10%
+      CONTAINER: 0.2,     // +20%
+      PALLETIZED: 0.15,   // +15%
+      OTHER: 0.1,         // +10%
+    };
+
+    const cargoSurchargeRate = cargoTypeSurcharges[validatedData.cargoType] || 0;
+    const cargoTypeSurcharge = transportModeCost * cargoSurchargeRate;
+
+    // === 7. Supplément priorité ===
+    const priority = validatedData.priority || 'STANDARD';
+    const prioritySurcharges: Record<string, number> = {
+      STANDARD: 0,
+      EXPRESS: 0.5,  // +50%
+      URGENT: 1.0,   // +100%
+    };
+
+    const prioritySurchargeRate = prioritySurcharges[priority] || 0;
+    const prioritySurcharge = transportModeCost * prioritySurchargeRate;
+
+    // === 8. Coût total estimé ===
+    const estimatedCost = Math.round(
+      transportModeCost + cargoTypeSurcharge + prioritySurcharge
+    );
+
+    // === 9. Estimation du délai de livraison (en jours) ===
+    // Basé sur le mode de transport et la distance
+    const deliveryDaysPerMode: Record<string, number> = {
+      ROAD: distance / 500,      // ~500 km/jour
+      SEA: distance / 400,       // ~400 km/jour
+      AIR: distance / 5000,      // ~5000 km/jour
+      RAIL: distance / 600,      // ~600 km/jour
+    };
+
+    let estimatedDeliveryDays = deliveryDaysPerMode[primaryTransportMode] || 7;
+
+    // Ajuster selon la priorité
+    if (priority === 'EXPRESS') {
+      estimatedDeliveryDays *= 0.7; // -30%
+    } else if (priority === 'URGENT') {
+      estimatedDeliveryDays *= 0.5; // -50%
+    }
+
+    // Arrondir à l'entier supérieur
+    estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays);
+
+    // Minimum 1 jour
+    if (estimatedDeliveryDays < 1) estimatedDeliveryDays = 1;
+
+    // === 10. Retourner le résultat ===
+    return {
+      success: true,
+      data: {
+        estimatedCost,
+        currency: 'EUR',
+        breakdown: {
+          baseCost: Math.round(baseCost),
+          transportModeCost: Math.round(transportModeCost),
+          cargoTypeSurcharge: Math.round(cargoTypeSurcharge),
+          prioritySurcharge: Math.round(prioritySurcharge),
+          distanceFactor: Math.round(distanceFactor),
+        },
+        estimatedDeliveryDays,
+      },
+    };
+  } catch (error) {
+    console.error('Error calculating quote estimate:', error);
+
+    // Gestion des erreurs de validation Zod
+    if (error instanceof Error && error.name === 'ZodError') {
+      return {
+        success: false,
+        error: 'Données invalides. Veuillez vérifier tous les champs.',
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors du calcul de l\'estimation',
+    };
+  }
+}

@@ -221,3 +221,85 @@ export function daysUntilExpiration(validUntil: Date): number {
   const diff = validUntil.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
+
+/**
+ * Schéma de validation pour l'estimation de devis publique
+ *
+ * Version simplifiée du schéma de devis pour le calculateur public
+ * sur la page d'accueil. Ne nécessite pas d'authentification.
+ *
+ * Champs requis :
+ * - Route (pays origine et destination)
+ * - Type de marchandise
+ * - Poids et volume (optionnel)
+ * - Mode(s) de transport
+ * - Priorité (optionnelle)
+ */
+export const quoteEstimateSchema = z.object({
+  // === Route ===
+  originCountry: z
+    .string()
+    .min(2, "Le pays d'origine est requis")
+    .max(100, "Le pays d'origine est trop long"),
+
+  destinationCountry: z
+    .string()
+    .min(2, 'Le pays de destination est requis')
+    .max(100, 'Le pays de destination est trop long'),
+
+  // === Informations de la marchandise ===
+  cargoType: z.nativeEnum(CargoType, {
+    errorMap: () => ({ message: 'Type de marchandise invalide' }),
+  }),
+
+  weight: z
+    .number({
+      required_error: 'Le poids est requis',
+      invalid_type_error: 'Le poids doit être un nombre',
+    })
+    .positive('Le poids doit être positif')
+    .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
+
+  volume: z
+    .number({
+      invalid_type_error: 'Le volume doit être un nombre',
+    })
+    .positive('Le volume doit être positif')
+    .max(10000, 'Le volume ne peut pas dépasser 10000 m³')
+    .optional()
+    .nullable(),
+
+  // === Transport ===
+  transportMode: z
+    .array(z.nativeEnum(TransportMode))
+    .min(1, 'Au moins un mode de transport est requis')
+    .max(4, 'Maximum 4 modes de transport'),
+
+  // === Priorité (optionnelle) ===
+  priority: z
+    .enum(['STANDARD', 'EXPRESS', 'URGENT'])
+    .default('STANDARD')
+    .optional(),
+});
+
+/**
+ * Type TypeScript inféré du schéma d'estimation
+ * Utilisé pour le calculateur de devis public
+ */
+export type QuoteEstimateData = z.infer<typeof quoteEstimateSchema>;
+
+/**
+ * Type pour le résultat du calcul d'estimation
+ */
+export type QuoteEstimateResult = {
+  estimatedCost: number;
+  currency: string;
+  breakdown: {
+    baseCost: number;
+    transportModeCost: number;
+    cargoTypeSurcharge: number;
+    prioritySurcharge: number;
+    distanceFactor: number;
+  };
+  estimatedDeliveryDays: number;
+};

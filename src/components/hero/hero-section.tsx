@@ -76,10 +76,10 @@ export function HeroSection() {
                 transition={{ type: "spring", stiffness: 400 }}
               >
                 <Link
-                  href="#industries"
+                  href="#faq"
                   className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
                 >
-                  Industries
+                  FAQ
                 </Link>
               </motion.div>
               <span className="text-white/40">|</span>

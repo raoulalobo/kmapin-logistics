@@ -33,6 +33,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HeroSection } from '@/components/hero/hero-section';
 import { StatsSection } from '@/components/stats';
+import { QuoteCalculator } from '@/components/quote-calculator';
+import { FaqSection } from '@/components/faq';
 
 export default function Home() {
   return (
@@ -51,10 +53,16 @@ export default function Home() {
           {/* Navigation principale */}
           <nav className="hidden lg:flex items-center space-x-8 text-base">
             <Link
-              href="#industries"
+              href="#quote-calculator"
               className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
             >
-              Industries
+              Devis gratuit
+            </Link>
+            <Link
+              href="#faq"
+              className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
+            >
+              FAQ
             </Link>
             <Link
               href="#services"
@@ -95,6 +103,21 @@ export default function Home() {
         {/* Hero Section - Animé avec Parallax, Typing Effect et Gradient */}
         <HeroSection />
 
+        {/* Section Calculateur de devis */}
+        <section id="quote-calculator" className="py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                Estimez le coût de votre transport
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Obtenez une estimation rapide et gratuite pour votre expédition en quelques clics
+              </p>
+            </div>
+            <QuoteCalculator />
+          </div>
+        </section>
+
         {/* Section Solutions - Description */}
         <section id="solutions" className="py-20 bg-white">
           <div className="container mx-auto px-6">
@@ -117,157 +140,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Section Industries */}
-        <section id="industries" className="py-20 bg-gray-50">
-          <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4 text-center">
-              Nos solutions pour vos besoins logistiques
-            </h2>
-            <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
-              Des solutions adaptées à chaque industrie pour optimiser votre chaîne d'approvisionnement
-            </p>
-
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {/* Industrie 1 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Automobile</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Nous vous accompagnons avec des solutions personnalisées pour optimiser vos processus tout au long de la chaîne d'approvisionnement automobile.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Industrie 2 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Sciences de la vie & Santé</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Solutions logistiques précises pour les produits pharmaceutiques et médicaux nécessitant un contrôle de température exact.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Industrie 3 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Mode & Lifestyle</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Services logistiques complets adaptés aux exigences de l'industrie de la mode et du commerce électronique.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Industrie 4 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1587293852726-70cdb56c2866?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Produits chimiques</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Transport et stockage sécurisés de produits chimiques et matières dangereuses avec équipements spécialisés.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Industrie 5 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">High-tech</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Logistique spécialisée pour équipements techniques sophistiqués avec installation et maintenance professionnelles.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Industrie 6 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 group">
-                <div className="relative h-64 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?q=80&w=2940')",
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-                </div>
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Biens de consommation & FMCG</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Logistique optimisée pour biens de consommation avec planification de routes efficace et réseau de transport global.
-                  </p>
-                  <Link href="#" className="inline-flex items-center text-[#0033FF] font-semibold hover:underline">
-                    Découvrir la solution
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
+        {/* Section FAQ */}
+        <FaqSection />
 
         {/* Section Pourquoi KmapIn */}
         <section id="why-kmapin" className="py-20 bg-white">
