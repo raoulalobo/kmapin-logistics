@@ -88,10 +88,12 @@ function translateStatus(status: string): string {
 export default async function InvoiceDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   // Récupérer la facture
-  const result = await getInvoiceAction(params.id);
+  const result = await getInvoiceAction(id);
 
   // Gérer les erreurs
   if (!result.success || !result.data) {
@@ -372,7 +374,7 @@ export default async function InvoiceDetailsPage({
       )}
 
       {/* Gestion documentaire */}
-      <DocumentsSection entityId={params.id} entityType="invoice" />
+      <DocumentsSection entityId={id} entityType="invoice" />
     </div>
   );
 }

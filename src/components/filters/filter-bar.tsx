@@ -113,15 +113,15 @@ export function FilterBar({
         {filters.map((filter) => (
           <Select
             key={filter.key}
-            value={values[filter.key] || ''}
-            onValueChange={(value) => onChange(filter.key, value || null)}
+            value={values[filter.key] || '__all__'}
+            onValueChange={(value) => onChange(filter.key, value === '__all__' ? null : value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={filter.placeholder || 'Tous'} />
             </SelectTrigger>
             <SelectContent>
-              {/* Option "Tous" pour désélectionner */}
-              <SelectItem value="">
+              {/* Option "Tous" pour désélectionner - utilise '__all__' au lieu de '' */}
+              <SelectItem value="__all__">
                 {filter.placeholder || 'Tous'}
               </SelectItem>
 

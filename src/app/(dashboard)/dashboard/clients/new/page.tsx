@@ -105,9 +105,9 @@ export default function NewClientPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom commercial *</FormLabel>
+                      <FormLabel>Nom et Prénom *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="ACME Transport" />
+                        <Input {...field} placeholder="Jean Dupont" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -124,7 +124,7 @@ export default function NewClientPage() {
                         <Input {...field} value={field.value ?? ''} placeholder="ACME Transport SARL" />
                       </FormControl>
                       <FormDescription>
-                        Nom légal complet (optionnel)
+                        (si entreprise)
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -249,9 +249,9 @@ export default function NewClientPage() {
                   name="postalCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Code postal *</FormLabel>
+                      <FormLabel>Code postal/Boîte postale</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="75001" />
+                        <Input {...field} value={field.value ?? ''} placeholder="75001" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

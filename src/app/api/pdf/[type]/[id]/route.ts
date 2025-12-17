@@ -18,6 +18,12 @@ import { generateInvoicePDF } from '@/lib/pdf/invoice-pdf';
 import { generateQuotePDF } from '@/lib/pdf/quote-pdf';
 
 /**
+ * Forcer l'utilisation du runtime Node.js (requis pour Better Auth avec async_hooks)
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#runtime
+ */
+export const runtime = 'nodejs';
+
+/**
  * Paramètres de la route dynamique
  */
 interface RouteParams {

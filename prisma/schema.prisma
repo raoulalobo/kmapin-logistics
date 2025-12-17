@@ -55,6 +55,7 @@ enum ShipmentStatus {
   AT_CUSTOMS
   CUSTOMS_CLEARED
   OUT_FOR_DELIVERY
+  READY_FOR_PICKUP
   DELIVERED
   CANCELLED
   ON_HOLD
@@ -200,7 +201,7 @@ model Company {
   phone        String?
   address      String
   city         String
-  postalCode   String
+  postalCode   String?
   country      String
   website      String?
   createdAt    DateTime      @default(now())

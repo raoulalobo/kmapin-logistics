@@ -117,9 +117,10 @@ function getStatusIcon(status: QuoteStatus) {
 export default async function QuoteDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const result = await getQuoteAction(params.id);
+  const { id } = await params;
+  const result = await getQuoteAction(id);
 
   if (!result.success || !result.data) {
     notFound();

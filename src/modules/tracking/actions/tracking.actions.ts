@@ -68,6 +68,7 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
     ShipmentStatus.AT_CUSTOMS,
     ShipmentStatus.CUSTOMS_CLEARED,
     ShipmentStatus.OUT_FOR_DELIVERY,
+    ShipmentStatus.READY_FOR_PICKUP,
   ];
 
   // Construire le filtre selon le rôle
@@ -215,12 +216,20 @@ export async function getTrackingStats() {
 
   // Compter les expéditions par statut
   const [
+    pickedUp,
+    readyForPickup,
     inTransit,
     atCustoms,
     outForDelivery,
     deliveredToday,
     totalActive,
   ] = await Promise.all([
+    prisma.shipment.count({
+      where: { ...where, status: ShipmentStatus.PICKED_UP },
+    }),
+    prisma.shipment.count({
+      where: { ...where, status: ShipmentStatus.READY_FOR_PICKUP },
+    }),
     prisma.shipment.count({
       where: { ...where, status: ShipmentStatus.IN_TRANSIT },
     }),
@@ -251,6 +260,7 @@ export async function getTrackingStats() {
             ShipmentStatus.AT_CUSTOMS,
             ShipmentStatus.CUSTOMS_CLEARED,
             ShipmentStatus.OUT_FOR_DELIVERY,
+            ShipmentStatus.READY_FOR_PICKUP,
           ],
         },
       },
@@ -258,6 +268,8 @@ export async function getTrackingStats() {
   ]);
 
   return {
+    pickedUp,
+    readyForPickup,
     inTransit,
     atCustoms,
     outForDelivery,

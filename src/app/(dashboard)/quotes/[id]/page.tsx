@@ -109,10 +109,12 @@ function translateTransportMode(mode: TransportMode): string {
 export default async function QuoteDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   // Récupérer le devis
-  const result = await getQuoteAction(params.id);
+  const result = await getQuoteAction(id);
 
   // Gérer les erreurs
   if (!result.success || !result.data) {
@@ -421,7 +423,7 @@ export default async function QuoteDetailsPage({
       )}
 
       {/* Gestion documentaire */}
-      <DocumentsSection entityId={params.id} entityType="quote" />
+      <DocumentsSection entityId={id} entityType="quote" />
     </div>
   );
 }

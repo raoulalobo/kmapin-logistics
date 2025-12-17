@@ -17,7 +17,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -39,15 +38,13 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { ClientSelect } from '@/components/forms/client-select';
 
 import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/quotes';
-import { getClientsAction } from '@/modules/clients';
 import { CargoType, TransportMode } from '@/generated/prisma';
 
 export default function NewQuotePage() {
   const router = useRouter();
-  const [clients, setClients] = useState<Array<{ id: string; name: string }>>([]);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -65,26 +62,6 @@ export default function NewQuotePage() {
       status: 'DRAFT',
     },
   });
-
-  /**
-   * Charger la liste des clients au montage du composant
-   */
-  useEffect(() => {
-    async function loadClients() {
-      try {
-        const result = await getClientsAction({ page: 1, limit: 100 });
-        if (result.success && result.data) {
-          setClients(result.data.companies.map(c => ({ id: c.id, name: c.name })));
-        }
-      } catch (error) {
-        console.error('Erreur chargement clients:', error);
-        toast.error('Erreur lors du chargement des clients');
-      } finally {
-        setIsLoadingClients(false);
-      }
-    }
-    loadClients();
-  }, []);
 
   /**
    * Soumission du formulaire
@@ -162,20 +139,16 @@ export default function NewQuotePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingClients}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={isLoadingClients ? "Chargement..." : "Sélectionner un client"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <ClientSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Rechercher un client..."
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Recherchez par nom, raison sociale ou email
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

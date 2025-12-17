@@ -177,7 +177,7 @@ export default async function ShipmentsPage({
             <Package className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucune expédition trouvée</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {searchParams.search
+              {params.search
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Commencez par créer votre première expédition'}
             </p>

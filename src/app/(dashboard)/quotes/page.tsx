@@ -80,13 +80,16 @@ function translateStatus(status: string): string {
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: { page?: string; status?: string; search?: string };
+  searchParams: Promise<{ page?: string; status?: string; search?: string }>;
 }) {
+  // Attendre les searchParams (Next.js 16)
+  const params = await searchParams;
+
   // Extraire les paramètres depuis les searchParams
-  const currentPage = Number(searchParams.page) || 1;
+  const currentPage = Number(params.page) || 1;
   const limit = 10; // Nombre d'items par page
-  const status = searchParams.status;
-  const search = searchParams.search;
+  const status = params.status;
+  const search = params.search;
 
   // Récupérer les devis depuis le serveur avec filtres
   const result = await getQuotesAction(

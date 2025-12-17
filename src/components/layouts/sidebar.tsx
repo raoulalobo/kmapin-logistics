@@ -14,6 +14,7 @@ import {
   Package,
   MapPin,
   Users,
+  UserCog,
   Truck,
   FileText,
   CreditCard,
@@ -24,7 +25,7 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { hasPermission } from '@/lib/auth/permissions';
+import { hasPermission } from '@/lib/auth/permissions-client';
 import type { UserRole } from '@/generated/prisma';
 
 /**
@@ -111,6 +112,12 @@ const navigation: NavSection[] = [
   {
     title: 'Gestion',
     links: [
+      {
+        label: 'Utilisateurs',
+        href: '/dashboard/users',
+        icon: UserCog,
+        // Pas de permission - réservé aux ADMIN via wildcard '*'
+      },
       {
         label: 'Documents',
         href: '/dashboard/documents',

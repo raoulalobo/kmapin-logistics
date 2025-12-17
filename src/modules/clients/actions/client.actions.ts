@@ -172,12 +172,13 @@ export async function getClientsAction(params: GetClientsParams = {}) {
     // Calculer le skip pour la pagination
     const skip = (page - 1) * limit;
 
-    // Construire le filtre de recherche
+    // Construire le filtre de recherche (nom, email, raison sociale, taxId)
     const whereClause = search
       ? {
           OR: [
             { name: { contains: search, mode: 'insensitive' as const } },
             { email: { contains: search, mode: 'insensitive' as const } },
+            { legalName: { contains: search, mode: 'insensitive' as const } },
             { taxId: { contains: search, mode: 'insensitive' as const } },
           ],
         }

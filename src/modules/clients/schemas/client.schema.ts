@@ -68,7 +68,9 @@ export const clientSchema = z.object({
     .string()
     .regex(/^[\d\w\s\-]+$/, 'Code postal invalide')
     .min(2, 'Le code postal doit contenir au moins 2 caractères')
-    .max(20, 'Le code postal ne peut pas dépasser 20 caractères'),
+    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
+    .optional()
+    .nullable(),
 
   country: z
     .string()

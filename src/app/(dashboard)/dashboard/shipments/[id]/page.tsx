@@ -118,9 +118,10 @@ function formatPriority(priority: string): string {
 export default async function ShipmentDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const result = await getShipmentAction(params.id);
+  const { id } = await params;
+  const result = await getShipmentAction(id);
 
   if (!result.success || !result.data) {
     notFound();

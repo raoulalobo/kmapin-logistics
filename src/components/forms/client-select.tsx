@@ -28,6 +28,7 @@ type Client = {
   id: string;
   name: string;
   email: string;
+  legalName?: string | null;
 };
 
 /**
@@ -68,7 +69,7 @@ export function ClientSelect({
         const { getClientsAction } = await import('@/modules/clients/actions/client.actions');
 
         // Récupérer tous les clients (limite à 100 pour l'instant)
-        const result = await getClientsAction(1, 100);
+        const result = await getClientsAction({ page: 1, limit: 100 });
 
         if (result.success && result.data) {
           setClients(result.data.clients);
@@ -98,6 +99,7 @@ export function ClientSelect({
 
   /**
    * Filtrer les clients selon la recherche
+   * Recherche par nom, email et raison sociale
    */
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -107,7 +109,8 @@ export function ClientSelect({
       const filtered = clients.filter(
         (client) =>
           client.name.toLowerCase().includes(query) ||
-          client.email.toLowerCase().includes(query)
+          client.email.toLowerCase().includes(query) ||
+          (client.legalName && client.legalName.toLowerCase().includes(query))
       );
       setFilteredClients(filtered);
     }
@@ -176,7 +179,9 @@ export function ClientSelect({
             </Avatar>
             <div className="flex flex-col items-start">
               <span className="font-medium">{selectedClient.name}</span>
-              <span className="text-xs text-muted-foreground">{selectedClient.email}</span>
+              <span className="text-xs text-muted-foreground">
+                {selectedClient.legalName || selectedClient.email}
+              </span>
             </div>
           </div>
         ) : (
@@ -187,13 +192,13 @@ export function ClientSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="absolute z-50 mt-2 w-full p-0 shadow-lg">
+        <Card className="absolute z-50 mt-2 w-full p-0 shadow-lg backdrop-blur-md bg-background/95 border-border/50">
           {/* Champ de recherche */}
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher un client..."
+                placeholder="Rechercher par nom, raison sociale ou email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -228,7 +233,9 @@ export function ClientSelect({
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{client.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{client.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {client.legalName || client.email}
+                      </p>
                     </div>
                     {value === client.id && (
                       <Check className="h-4 w-4 text-primary shrink-0" />

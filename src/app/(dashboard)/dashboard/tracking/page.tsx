@@ -11,7 +11,7 @@
  */
 
 import Link from 'next/link';
-import { MapPin, Package, Plane, Ship, Truck, Clock, ArrowRight } from 'lucide-react';
+import { MapPin, Package, Plane, Ship, Truck, Clock, ArrowRight, PackageCheck, Home } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,7 +76,33 @@ export default async function TrackingPage() {
       <Separator />
 
       {/* Statistiques rapides */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Prise en charge</CardTitle>
+            <PackageCheck className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.pickedUp}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Réceptionnées
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Disponible</CardTitle>
+            <Home className="h-4 w-4 text-cyan-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.readyForPickup}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Au point de retrait
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En transit</CardTitle>

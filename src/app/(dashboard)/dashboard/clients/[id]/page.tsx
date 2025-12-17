@@ -35,9 +35,10 @@ import { getClientAction } from '@/modules/clients';
 export default async function ClientDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const result = await getClientAction(params.id);
+  const { id } = await params;
+  const result = await getClientAction(id);
 
   if (!result.success || !result.data) {
     notFound();
@@ -74,7 +75,7 @@ export default async function ClientDetailPage({
 
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/clients/${client.id}/edit`}>
+              <Link href={`/dashboard/clients/${id}/edit`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Modifier
               </Link>
@@ -277,7 +278,7 @@ export default async function ClientDetailPage({
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/shipments?clientId=${client.id}`}>
+              <Link href={`/dashboard/shipments?clientId=${id}`}>
                 Voir toutes
               </Link>
             </Button>
@@ -324,7 +325,7 @@ export default async function ClientDetailPage({
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/invoices?clientId=${client.id}`}>
+              <Link href={`/dashboard/invoices?clientId=${id}`}>
                 Voir toutes
               </Link>
             </Button>
