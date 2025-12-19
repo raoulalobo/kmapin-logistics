@@ -4,7 +4,7 @@
  * @module modules/pricing/data
  */
 
-import { TransportMode, CargoType } from '@prisma/client';
+import { TransportMode, CargoType } from '@/generated/prisma';
 
 /**
  * Interface pour un tarif standard

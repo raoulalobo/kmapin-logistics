@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { CargoType, TransportMode } from '@prisma/client';
+import { CargoType, TransportMode } from '@/generated/prisma';
 
 /**
  * Schéma pour les données de devis dans la création de prospect

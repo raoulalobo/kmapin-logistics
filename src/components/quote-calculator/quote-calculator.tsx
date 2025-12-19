@@ -25,7 +25,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { calculateQuoteEstimateAction } from '@/modules/quotes/actions/quote.actions';
 import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult } from '@/modules/quotes/schemas/quote.schema';
 import { CargoType, TransportMode } from '@/generated/prisma';
-import { authClient } from '@/lib/auth/client';
 import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
 import type { QuoteDataFormData } from '@/modules/prospects';
 
@@ -76,14 +75,15 @@ export function QuoteCalculator() {
   const [showEmailModal, setShowEmailModal] = useState(false);
 
   /**
-   * Session Better Auth pour déterminer si l'utilisateur est connecté
-   */
-  const { data: session } = authClient.useSession();
-
-  /**
    * Données du formulaire pour le modal (conservées après calcul)
    */
   const [lastFormData, setLastFormData] = useState<QuoteEstimateData | null>(null);
+
+  /**
+   * TODO: Implémenter vérification session Better Auth
+   * Pour l'instant, on considère l'utilisateur comme non-connecté
+   */
+  const session = null;
 
   /**
    * Configuration de React Hook Form avec validation Zod
