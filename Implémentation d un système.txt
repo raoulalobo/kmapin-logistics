@@ -1,0 +1,624 @@
+Implémentation d'un système de devis en deux modes (calculateur interactif + tableau de tarifs standards) avec
+ gestion complète des prospects (utilisateurs non-connectés) et workflow de conversion vers utilisateurs
+ authentifiés.
+
+ Fonctionnalités clés :
+ - ✅ Deux modes d'accès : "Faire un devis" (calculateur) et "Consulter les prix standard" (tableau interactif)
+ - ✅ Utilisateurs connectés : téléchargement PDF + sauvegarde dans l'espace client
+ - ✅ Utilisateurs non-connectés : réception par email OU création de compte
+ - ✅ Système de prospects avec token d'invitation (validité 7 jours)
+ - ✅ Workflow de conversion : prospect → utilisateur avec rattachement automatique des devis
+ - ✅ Envoi d'emails via Resend (devis PDF, invitation, bienvenue)
+ - ✅ Jobs Inngest pour expiration et rappels automatiques
+
+ Choix de conception validés :
+ - Format tarifs : Tableau interactif avec filtres et bouton "Utiliser ce mode"
+ - Infos prospects : Email + Téléphone (obligatoires)
+ - Validité lien : 7 jours
+ - Emails : Resend (implémentation immédiate)
+
+ ---
+ 🗄️ 1. Modifications du Schéma de Base de Donnée
+
+ Fichier : schema.zmodel
+
+ 1.1 Nouvel Enum ProspectStatus
+
+ enum ProspectStatus {
+   PENDING      // En attente de finalisation
+   CONVERTED    // Converti en User
+   EXPIRED      // Token expiré
+ }
+
+ 1.2 Nouveau Modèle Prospect
+
+ model Prospect {
+   id                    String         @id @default(cuid())
+   email                 String         @unique
+   phone                 String?
+   name                  String?
+   company               String?        // Texte libre, pas lié à Company
+
+   // Token d'invitation
+   invitationToken       String         @unique @default(cuid())
+   invitationExpiresAt   DateTime       // 7 jours après création
+
+   status                ProspectStatus @default(PENDING)
+
+   // Conversion
+   userId                String?        @unique
+   user                  User?          @relation(fields: [userId], references: [id])
+
+   // Relations
+   guestQuotes           GuestQuote[]
+
+   createdAt             DateTime       @default(now())
+   updatedAt             DateTime       @updatedAt
+
+   // Access Policies
+   @@allow('read', true)                           // Lecture publique (token verification)
+   @@allow('create', true)                         // Création publique (calculateur)
+   @@allow('update,delete', auth().role == ADMIN)
+   @@deny('all', true)
+
+   @@index([email])
+   @@index([invitationToken])
+   @@index([status])
+ }
+
+ 1.3 Nouveau Modèle GuestQuote
+
+ model GuestQuote {
+   id                 String          @id @default(cuid())
+   quoteNumber        String          @unique // Format: GQTE-YYYYMMDD-XXXXX
+
+   // Lié au Prospect
+   prospectId         String
+   prospect           Prospect        @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+   // Champs du devis
+   originCountry      String
+   destinationCountry String
+   transportMode      TransportMode[]
+   cargoType          CargoType
+   weight             Float
+   volume             Float?
+   estimatedCost      Float
+   validUntil         DateTime
+   currency           String          @default("EUR")
+
+   // Conversion tracking
+   convertedToQuoteId String?         @unique
+   convertedToQuote   Quote?          @relation("ConvertedFromGuest", fields: [convertedToQuoteId], references:
+ [id])
+
+   createdAt          DateTime        @default(now())
+   updatedAt          DateTime        @updatedAt
+
+   // Access Policies
+   @@allow('read', true)
+   @@allow('create', true)
+   @@allow('all', auth().role == ADMIN)
+   @@deny('all', true)
+
+   @@index([prospectId])
+   @@index([quoteNumber])
+ }
+
+ 1.4 Modifications des Modèles Existants
+
+ User : Ajouter prospect Prospect? (relation 1:1)
+
+ Quote : Ajouter convertedFromGuest GuestQuote? @relation("ConvertedFromGuest") (relation inverse)
+
+ 1.5 Commandes après modification
+
+ npm run db:generate
+ npm run db:push
+
+ ---
+ 📦 2. Nouveaux Modules Backend
+
+ 2.1 Module prospects
+
+ Structure :
+ src/modules/prospects/
+ ├── actions/
+ │   └── prospect.actions.ts
+ ├── schemas/
+ │   └── prospect.schema.ts
+ └── index.ts
+
+ Actions principales :
+
+ 1. createProspectAndSendQuoteAction(data)
+   - Créer/réutiliser Prospect (si email existe et EXPIRED → nouveau token)
+   - Générer GuestQuote avec numéro GQTE-YYYYMMDD-XXXXX
+   - Générer PDF du devis
+   - Envoyer email avec PDF + lien invitation
+   - Important : Utiliser prisma standard (pas enhanced, action publique)
+ 2. getProspectByTokenAction(token)
+   - Récupérer prospect avec vérification d'expiration
+   - Inclure guestQuotes
+   - Action publique
+ 3. getProspectByEmailAction(email)
+   - Vérifier si User existe avec cet email
+   - Retourner { userExists: boolean }
+ 4. completeRegistrationAction(token, formData)
+   - Valider token non expiré
+   - Créer Company par défaut pour le prospect
+   - Retourner données pour création User (côté client Better Auth)
+ 5. finalizeProspectConversionAction(prospectId, userId)
+   - Convertir tous les GuestQuotes en Quotes
+   - Lier à la Company du User
+   - Mettre à jour Prospect : status = CONVERTED, userId
+   - Déclencher événement Inngest prospect/converted
+ 6. attachProspectToExistingUserAction(token, password)
+   - Valider token
+   - Retourner infos pour authentification
+   - (Auth + conversion se font côté client/autre action)
+
+ Schémas Zod :
+ - prospectSchema : email, phone, name?, company?, quoteData
+ - completeRegistrationSchema : password, name, phone, country
+ - attachToAccountSchema : password
+
+ 2.2 Module guest-quotes
+
+ Structure :
+ src/modules/guest-quotes/
+ ├── actions/
+ │   └── guest-quote.actions.ts
+ ├── schemas/
+ │   └── guest-quote.schema.ts
+ └── index.ts
+
+ Actions :
+ - createGuestQuoteAction(prospectId, quoteData) : Créer GuestQuote
+ - getGuestQuoteAction(id) : Récupérer un GuestQuote (public)
+ - convertGuestQuoteToQuoteAction(guestQuoteId, companyId) : Conversion vers Quote
+
+ 2.3 Module pricing
+
+ Structure :
+ src/modules/pricing/
+ ├── actions/
+ │   └── pricing.actions.ts
+ ├── schemas/
+ │   └── pricing.schema.ts
+ ├── data/
+ │   └── standard-rates.ts
+ └── index.ts
+
+ Données (standard-rates.ts) :
+ export const STANDARD_RATES: StandardRate[] = [
+   {
+     id: 'eu-de-road',
+     destination: 'Allemagne',
+     destinationCode: 'DE',
+     transportMode: 'ROAD',
+     cargoType: 'GENERAL',
+     pricePerKg: 0.45,
+     minPrice: 200,
+     maxPrice: 2000,
+     estimatedDaysMin: 2,
+     estimatedDaysMax: 4,
+     currency: 'EUR',
+   },
+   // ... autres destinations (France, Belgique, Espagne, Italie, UK, etc.)
+ ];
+
+ Actions :
+ - getStandardRatesAction(filters?) : Récupérer tarifs avec filtres (destination, mode transport, search)
+
+ ---
+ 📧 3. Configuration Resend et Templates Email
+
+ 3.1 Installation
+
+ npm install resend
+
+ 3.2 Configuration
+
+ Fichier : src/lib/email/resend.ts
+
+ import { Resend } from 'resend';
+
+ export const resend = new Resend(process.env.RESEND_API_KEY);
+
+ export const EMAIL_CONFIG = {
+   from: 'KmapIn Logistics <noreply@kmapin.com>',
+   replyTo: 'support@kmapin.com',
+ };
+
+ export async function sendEmail(params: {
+   to: string;
+   subject: string;
+   html: string;
+   attachments?: Array<{ filename: string; content: Buffer }>;
+ }) {
+   // Logique d'envoi avec gestion dev/prod
+   const emailProvider = process.env.EMAIL_PROVIDER || 'console';
+
+   if (emailProvider === 'console') {
+     console.log('📧 Email simulé:', params.to, params.subject);
+     return { success: true };
+   }
+
+   const result = await resend.emails.send({
+     from: EMAIL_CONFIG.from,
+     replyTo: EMAIL_CONFIG.replyTo,
+     ...params,
+   });
+
+   return { success: true, data: result };
+ }
+
+ Variables d'environnement (.env) :
+ RESEND_API_KEY="re_xxxxxxxxxxxxx"
+ EMAIL_PROVIDER="console"  # En dev, "resend" en prod
+
+ 3.3 Templates
+
+ Fichiers à créer :
+ - src/lib/email/templates/quote-pdf.ts : Email avec devis PDF + lien invitation
+ - src/lib/email/templates/invitation.ts : Rappel invitation (J-3)
+ - src/lib/email/templates/welcome.ts : Bienvenue après création compte
+
+ Structure template :
+ - HTML responsive avec gradient bleu (#0033FF)
+ - Logo KmapIn Logistics
+ - Résumé du devis
+ - CTA "Créer mon compte gratuitement" (lien avec token)
+ - Footer avec mentions
+
+ ---
+ 📄 4. Génération PDF pour GuestQuote
+
+ Fichier : src/lib/pdf/guest-quote-pdf.ts
+
+ export function generateGuestQuotePDF(data: GuestQuotePDFData): Buffer {
+   // Similaire à quote-pdf.ts mais avec :
+   // - Format GQTE-YYYYMMDD-XXXXX
+   // - Infos prospect (email, phone, name?, company?)
+   // - Note "Estimation indicative" en encadré jaune
+   // - Message "Créez un compte pour devis officiel"
+ }
+
+ ---
+ ⚙️ 5. Jobs Inngest
+
+ Fichier : src/lib/inngest/functions/prospects.ts
+
+ 5.1 Job : markExpiredProspects
+
+ - Cron : 0 2 * * * (2h00 quotidien)
+ - Action : Marquer prospects avec invitationExpiresAt < now en EXPIRED
+
+ 5.2 Job : sendProspectReminders
+
+ - Cron : 0 10 * * * (10h00 quotidien)
+ - Action : Envoyer rappels aux prospects expirant dans 3 jours
+
+ 5.3 Event : onProspectConverted
+
+ - Event : prospect/converted
+ - Action : Envoyer email de bienvenue avec nombre de devis rattachés
+
+ Mise à jour client Inngest :
+ - Ajouter événement prospect/converted dans src/lib/inngest/client.ts
+ - Exporter jobs dans src/lib/inngest/index.ts
+
+ ---
+ 🎨 6. Composants React
+
+ 6.1 QuoteRequestModal
+
+ Fichier : src/components/quote-request/quote-request-modal.tsx
+
+ - Dialog pour demander email + téléphone + nom? + entreprise?
+ - Validation avec React Hook Form + Zod
+ - Appel à createProspectAndSendQuoteAction
+ - Message de succès : "Devis envoyé ! Consultez votre email"
+
+ 6.2 Modification de QuoteCalculator
+
+ Fichier : src/components/quote-calculator/quote-calculator.tsx
+
+ Ajouts après affichage du résultat :
+
+ // Boutons selon état connexion
+ {session?.user ? (
+   <>
+     <Button onClick={handleDownloadPDF}>Télécharger PDF</Button>
+     <Button onClick={handleSaveQuote}>Sauvegarder dans mon espace</Button>
+   </>
+ ) : (
+   <>
+     <Button onClick={handleDownloadPDF}>Télécharger PDF</Button>
+     <Button onClick={() => setShowEmailModal(true)}>Recevoir par email</Button>
+     <Button variant="outline" asChild>
+       <Link href="/register">Créer un compte</Link>
+     </Button>
+   </>
+ )}
+
+ <QuoteRequestModal open={showEmailModal} onClose={...} quoteData={...} />
+
+ 6.3 PricingTable
+
+ Fichier : src/components/pricing-table/pricing-table.tsx
+
+ - Tableau avec colonnes : Destination, Mode transport, Prix estimé, Délai
+ - Filtres : Search destination + Select mode transport
+ - Bouton "Utiliser ce mode" → Redirige vers /#calculateur?destination=XX&mode=XX
+ - useQuery avec TanStack Query pour charger getStandardRatesAction
+
+ 6.4 CompleteRegistrationForm
+
+ Fichier : src/components/registration/complete-registration-form.tsx
+
+ Workflow :
+ 1. useEffect : Charger prospect par token
+ 2. Vérifier si email existe déjà → getProspectByEmailAction
+ 3. Cas A (email nouveau) :
+   - Formulaire : password, name (pré-rempli), phone (pré-rempli), country
+   - Submit → completeRegistrationAction + signUp.email (Better Auth) + finalizeProspectConversionAction
+ 4. Cas B (email existe) :
+   - Afficher AttachToAccountForm
+
+ 6.5 AttachToAccountForm
+
+ Fichier : src/components/registration/attach-to-account-form.tsx
+
+ - Message : "Vous avez déjà un compte !"
+ - Formulaire : email (disabled), password, lien "Mot de passe oublié ?"
+ - Submit → attachProspectToExistingUserAction + signIn.email (Better Auth) + finalizeProspectConversionAction
+
+ ---
+ 🌐 7. Pages et Routes
+
+ 7.1 Page Tarifs
+
+ Fichier : src/app/(public)/tarifs/page.tsx
+
+ - Titre : "Tarifs Standards - Transport International"
+ - Description : "Consultez nos tarifs indicatifs..."
+ - Composant : <PricingTable />
+
+ 7.2 Page Finalisation d'Inscription
+
+ Fichier : src/app/(public)/complete-registration/page.tsx
+
+ - Récupérer token depuis searchParams
+ - Client Component avec Suspense
+ - Composant : <CompleteRegistrationForm token={token} />
+
+ 7.3 Modification Homepage
+
+ Fichier : src/app/page.tsx
+
+ Ajouts :
+ - Hero section avec deux CTA :
+   - "Faire un devis" → #calculateur
+   - "Consulter les prix standard" → /tarifs
+ - Section calculateur avec id="calculateur" (ancre)
+
+ ---
+ 📋 8. Ordre d'Implémentation Recommandé
+
+ Phase 1 : Fondations (1-2h)
+
+ 1. ✅ Modifier schema.zmodel (ProspectStatus, Prospect, GuestQuote, relations)
+ 2. ✅ npm run db:generate && npm run db:push
+ 3. ✅ npm install resend
+ 4. ✅ Créer src/lib/email/resend.ts
+ 5. ✅ Ajouter RESEND_API_KEY et EMAIL_PROVIDER dans .env
+
+ Phase 2 : Modules Core (3-4h)
+
+ 6. ✅ Créer module prospects (schemas + actions)
+ 7. ✅ Créer module guest-quotes (schemas + actions)
+ 8. ✅ Créer module pricing (data + actions)
+ 9. ✅ Créer src/lib/pdf/guest-quote-pdf.ts
+ 10. ✅ Créer templates email (quote-pdf, invitation, welcome)
+
+ Phase 3 : Jobs Inngest (2h)
+
+ 11. ✅ Créer src/lib/inngest/functions/prospects.ts
+ 12. ✅ Mettre à jour src/lib/inngest/client.ts (event)
+ 13. ✅ Tester avec npx inngest-cli@latest dev
+
+ Phase 4 : Composants UI (4-5h)
+
+ 14. ✅ Créer QuoteRequestModal
+ 15. ✅ Modifier QuoteCalculator (boutons conditionnels)
+ 16. ✅ Créer PricingTable
+ 17. ✅ Créer CompleteRegistrationForm
+ 18. ✅ Créer AttachToAccountForm
+
+ Phase 5 : Pages (2h)
+
+ 19. ✅ Créer page /tarifs
+ 20. ✅ Créer page /complete-registration
+ 21. ✅ Modifier homepage (hero + CTA)
+
+ Phase 6 : Tests et Validation (3h)
+
+ 22. ✅ Tester workflow complet : calculateur → email → conversion
+ 23. ✅ Tester jobs Inngest
+ 24. ✅ Vérifier access policies Zenstack
+
+ ---
+ 🎯 Fichiers Critiques à Modifier/Créer
+
+ À Modifier
+
+ 1. schema.zmodel : Ajout Prospect, GuestQuote, ProspectStatus
+ 2. src/components/quote-calculator/quote-calculator.tsx : Boutons conditionnels + modal
+ 3. src/app/page.tsx : Hero avec deux CTA
+ 4. src/lib/inngest/client.ts : Événement prospect/converted
+ 5. src/lib/inngest/index.ts : Export nouveaux jobs
+
+ À Créer (Nouveaux Fichiers)
+
+ Configuration :
+ - src/lib/email/resend.ts
+ - src/lib/email/templates/quote-pdf.ts
+ - src/lib/email/templates/invitation.ts
+ - src/lib/email/templates/welcome.ts
+ - src/lib/pdf/guest-quote-pdf.ts
+
+ Modules :
+ - src/modules/prospects/schemas/prospect.schema.ts
+ - src/modules/prospects/actions/prospect.actions.ts
+ - src/modules/prospects/index.ts
+ - src/modules/guest-quotes/schemas/guest-quote.schema.ts
+ - src/modules/guest-quotes/actions/guest-quote.actions.ts
+ - src/modules/guest-quotes/index.ts
+ - src/modules/pricing/data/standard-rates.ts
+ - src/modules/pricing/actions/pricing.actions.ts
+ - src/modules/pricing/schemas/pricing.schema.ts
+ - src/modules/pricing/index.ts
+
+ Jobs :
+ - src/lib/inngest/functions/prospects.ts
+
+ Composants :
+ - src/components/quote-request/quote-request-modal.tsx
+ - src/components/pricing-table/pricing-table.tsx
+ - src/components/registration/complete-registration-form.tsx
+ - src/components/registration/attach-to-account-form.tsx
+
+ Pages :
+ - src/app/(public)/tarifs/page.tsx
+ - src/app/(public)/complete-registration/page.tsx
+
+ ---
+ ⚠️ Points d'Attention Critiques
+
+ 1. Actions Publiques vs Authentifiées
+
+ - Actions publiques (prospects, guest-quotes) → Utiliser prisma standard (pas enhanced)
+ - Actions authentifiées (quotes, users) → Utiliser getEnhancedPrismaFromSession(session)
+
+ 2. Création de Company
+
+ - Lors de la conversion, créer automatiquement une Company par défaut
+ - Utiliser les infos du prospect (name, email, country)
+ - L'utilisateur pourra compléter plus tard
+
+ 3. Workflow Better Auth
+
+ - Création User se fait côté client avec signUp.email()
+ - Server Actions préparent (Company) et finalisent (conversion GuestQuotes)
+ - Ordre : completeRegistrationAction → signUp.email() → finalizeProspectConversionAction
+
+ 4. Gestion des Doublons
+
+ - Si email existe et status = EXPIRED → Réutiliser avec nouveau token
+ - Si email existe et status = PENDING → Ajouter GuestQuote au prospect existant
+ - Si email existe et status = CONVERTED → Erreur (utilisateur existe déjà)
+
+ 5. Sécurité des Tokens
+
+ - Générer avec crypto.randomUUID() (secure, unique)
+ - Vérifier expiration avant toute action
+ - Invalider après utilisation (status = CONVERTED)
+ - Ne jamais exposer dans logs
+
+ 6. Format Numéros GuestQuote
+
+ - Format : GQTE-YYYYMMDD-XXXXX (préfixe G pour Guest)
+ - Vérifier unicité lors de la génération
+ - Fallback avec timestamp si collision
+
+ ---
+ 📊 Schéma de Flux Complet
+
+ UTILISATEUR NON-CONNECTÉ
+ │
+ ├─→ Calculateur (homepage)
+ │   │
+ │   ├─→ Recevoir par email
+ │   │   │
+ │   │   └─→ QuoteRequestModal
+ │   │       └─→ createProspectAndSendQuoteAction
+ │   │           ├─→ Créer Prospect + GuestQuote
+ │   │           ├─→ Générer PDF
+ │   │           └─→ Envoyer email + lien invitation
+ │   │
+ │   └─→ Créer un compte
+ │       └─→ /register (normal)
+ │
+ └─→ Consulter tarifs (/tarifs)
+     └─→ Cliquer "Utiliser ce mode"
+         └─→ Redirection vers calculateur pré-rempli
+
+ PROSPECT REÇOIT EMAIL
+ │
+ └─→ Cliquer lien invitation
+     └─→ /complete-registration?token=XXX
+         │
+         ├─→ Email NOUVEAU
+         │   └─→ CompleteRegistrationForm
+         │       ├─→ completeRegistrationAction (créer Company)
+         │       ├─→ signUp.email (Better Auth)
+         │       └─→ finalizeProspectConversionAction
+         │           ├─→ GuestQuote → Quote
+         │           ├─→ Prospect status = CONVERTED
+         │           └─→ Event Inngest → Email bienvenue
+         │
+         └─→ Email EXISTE
+             └─→ AttachToAccountForm
+                 ├─→ signIn.email (Better Auth)
+                 └─→ finalizeProspectConversionAction
+                     └─→ Rattachement GuestQuotes
+
+ ---
+ ✅ Critères de Succès
+
+ 1. ✅ Un utilisateur non-connecté peut demander un devis et le recevoir par email
+ 2. ✅ Le devis PDF contient toutes les informations calculées
+ 3. ✅ Le lien d'invitation fonctionne et expire après 7 jours
+ 4. ✅ Un nouveau compte est créé avec Company automatique
+ 5. ✅ Les GuestQuotes sont convertis en Quotes liés à la Company
+ 6. ✅ Un utilisateur existant peut rattacher ses devis à son compte
+ 7. ✅ Les jobs Inngest expirent et rappellent les prospects automatiquement
+ 8. ✅ Le tableau de tarifs affiche les prix standards et redirige vers le calculateur
+ 9. ✅ Les access policies Zenstack protègent correctement les données
+ 10. ✅ Tous les emails sont envoyés via Resend en production
+
+ ---
+ 🚀 Pour Commencer l'Implémentation
+
+ # 1. Modifier le schéma
+ vim schema.zmodel
+
+ # 2. Générer et pousser
+ npm run db:generate
+ npm run db:push
+
+ # 3. Installer Resend
+ npm install resend
+
+ # 4. Configurer les variables d'environnement
+ echo 'RESEND_API_KEY="re_xxxxx"' >> .env
+ echo 'EMAIL_PROVIDER="console"' >> .env
+
+ # 5. Démarrer le développement
+ npm run dev
+
+ # 6. Démarrer Inngest Dev Server (terminal séparé)
+ npx inngest-cli@latest dev
+
+ ---
+ Durée estimée totale : 15-20 heures de développement
+
+ Ordre de priorité :
+ 1. Schéma + Configuration (critique)
+ 2. Modules prospects + guest-quotes (core)
+ 3. Composants UI (interface)
+ 4. Jobs Inngest (automatisation)
+ 5. Tests et validation (qualité)
+
