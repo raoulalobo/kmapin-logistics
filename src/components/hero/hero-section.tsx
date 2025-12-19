@@ -8,7 +8,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone } from 'lucide-react';
+import { Phone, Calculator, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
@@ -43,6 +43,49 @@ export function HeroSection() {
               >
                 Solutions logistiques sur mesure pour vos expéditions multi-modales
               </motion.p>
+
+              {/* Boutons CTA avec stagger animation */}
+              <motion.div
+                className="flex flex-wrap gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 2 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-[#0033FF] hover:bg-[#0029CC] text-white h-14 px-8 text-lg font-semibold shadow-xl"
+                  >
+                    <Link href="#calculateur" className="flex items-center gap-2">
+                      <Calculator className="h-5 w-5" />
+                      Faire un devis
+                    </Link>
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
+                  >
+                    <Link href="/tarifs" className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Consulter les prix standard
+                    </Link>
+                  </Button>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>

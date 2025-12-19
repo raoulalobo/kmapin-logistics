@@ -104,7 +104,7 @@ export default function Home() {
         <HeroSection />
 
         {/* Section Calculateur de devis */}
-        <section id="quote-calculator" className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <section id="calculateur" className="py-20 bg-gradient-to-b from-gray-50 to-white scroll-mt-20">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">

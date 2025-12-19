@@ -14,7 +14,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Calculator, Package, MapPin, Truck, Ship, Plane, Train, ArrowRight, TrendingUp } from 'lucide-react';
+import { Loader2, Calculator, Package, MapPin, Truck, Ship, Plane, Train, ArrowRight, TrendingUp, Download, Mail, Save, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +25,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { calculateQuoteEstimateAction } from '@/modules/quotes/actions/quote.actions';
 import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult } from '@/modules/quotes/schemas/quote.schema';
 import { CargoType, TransportMode } from '@/generated/prisma';
+import { authClient } from '@/lib/auth/client';
+import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
+import type { QuoteDataFormData } from '@/modules/prospects';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -64,6 +69,21 @@ export function QuoteCalculator() {
   const [result, setResult] = useState<QuoteEstimateResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * État du modal de demande de devis par email
+   */
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  /**
+   * Session Better Auth pour déterminer si l'utilisateur est connecté
+   */
+  const { data: session } = authClient.useSession();
+
+  /**
+   * Données du formulaire pour le modal (conservées après calcul)
+   */
+  const [lastFormData, setLastFormData] = useState<QuoteEstimateData | null>(null);
 
   /**
    * Configuration de React Hook Form avec validation Zod
@@ -112,6 +132,9 @@ export function QuoteCalculator() {
       setError(null);
       setResult(null);
 
+      // Sauvegarder les données du formulaire pour le modal email
+      setLastFormData(data);
+
       // Appeler la Server Action
       const response = await calculateQuoteEstimateAction(data);
 
@@ -126,6 +149,42 @@ export function QuoteCalculator() {
     } finally {
       setIsCalculating(false);
     }
+  };
+
+  /**
+   * Télécharger le devis en PDF
+   */
+  const handleDownloadPDF = () => {
+    // TODO: Implémenter la génération et téléchargement du PDF
+    // Pour l'instant, juste un toast
+    toast.info('Téléchargement PDF - Fonctionnalité à venir');
+  };
+
+  /**
+   * Sauvegarder le devis dans l'espace client (utilisateur connecté)
+   */
+  const handleSaveQuote = () => {
+    // TODO: Implémenter la sauvegarde du devis
+    toast.info('Sauvegarde du devis - Fonctionnalité à venir');
+  };
+
+  /**
+   * Préparer les données pour le QuoteRequestModal
+   * Convertit QuoteEstimateData en QuoteDataFormData
+   */
+  const prepareQuoteDataForModal = (): QuoteDataFormData | null => {
+    if (!lastFormData || !result) return null;
+
+    return {
+      originCountry: lastFormData.originCountry,
+      destinationCountry: lastFormData.destinationCountry,
+      cargoType: lastFormData.cargoType,
+      weight: lastFormData.weight,
+      volume: lastFormData.volume || null,
+      transportMode: lastFormData.transportMode,
+      estimatedCost: result.estimatedCost,
+      currency: 'EUR',
+    };
   };
 
   return (
@@ -414,17 +473,74 @@ export function QuoteCalculator() {
                   </div>
                 </div>
 
-                {/* Call to action */}
-                <Button className="w-full bg-[#0033FF] hover:bg-[#0029CC] h-14 text-base shadow-lg hover:shadow-xl transition-all" asChild>
-                  <a href="/register">
-                    Demander un devis détaillé
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </a>
-                </Button>
+                {/* Actions conditionnelles selon l'état de connexion */}
+                <div className="space-y-4">
+                  {session?.user ? (
+                    // Utilisateur connecté : Télécharger + Sauvegarder
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Button
+                          onClick={handleDownloadPDF}
+                          variant="outline"
+                          className="h-12 text-base border-[#0033FF] text-[#0033FF] hover:bg-blue-50"
+                        >
+                          <Download className="mr-2 h-5 w-5" />
+                          Télécharger PDF
+                        </Button>
+                        <Button
+                          onClick={handleSaveQuote}
+                          className="h-12 text-base bg-[#0033FF] hover:bg-[#0029CC]"
+                        >
+                          <Save className="mr-2 h-5 w-5" />
+                          Sauvegarder dans mon espace
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    // Utilisateur non-connecté : Télécharger + Email + Créer compte
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Button
+                          onClick={handleDownloadPDF}
+                          variant="outline"
+                          className="h-12 text-base border-[#0033FF] text-[#0033FF] hover:bg-blue-50"
+                        >
+                          <Download className="mr-2 h-5 w-5" />
+                          Télécharger PDF
+                        </Button>
+                        <Button
+                          onClick={() => setShowEmailModal(true)}
+                          className="h-12 text-base bg-[#0033FF] hover:bg-[#0029CC]"
+                        >
+                          <Mail className="mr-2 h-5 w-5" />
+                          Recevoir par email
+                        </Button>
+                      </div>
+                      <Button
+                        className="w-full h-12 text-base bg-gradient-to-r from-[#0033FF] to-[#0029CC] hover:opacity-90 shadow-lg"
+                        asChild
+                      >
+                        <Link href="/register">
+                          <UserPlus className="mr-2 h-5 w-5" />
+                          Créer un compte pour suivre mes expéditions
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Modal de demande de devis par email (utilisateurs non-connectés) */}
+      {prepareQuoteDataForModal() && (
+        <QuoteRequestModal
+          open={showEmailModal}
+          onClose={() => setShowEmailModal(false)}
+          quoteData={prepareQuoteDataForModal()!}
+        />
       )}
     </div>
   );
