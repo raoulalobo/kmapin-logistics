@@ -81,6 +81,7 @@ export function PricingTable() {
 
   /**
    * Générer l'URL pour le calculateur pré-rempli
+   * Les query params doivent être AVANT le hash pour être accessibles via useSearchParams()
    */
   const getCalculatorUrl = (rate: StandardRate) => {
     const params = new URLSearchParams({
@@ -89,7 +90,7 @@ export function PricingTable() {
       mode: rate.transportMode,
     });
 
-    return `/#calculateur?${params.toString()}`;
+    return `/?${params.toString()}#calculateur`;
   };
 
   return (
