@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { TransportMode } from '@prisma/client';
+import { TransportMode } from '@/generated/prisma';
 
 /**
  * Schéma pour les filtres de tarifs standards
