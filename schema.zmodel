@@ -61,6 +61,7 @@ model User {
   createdShipments   Shipment[] @relation("CreatedBy")
   createdInvoices    Invoice[]  @relation("CreatedBy")
   uploadedDocuments  Document[] @relation("UploadedDocuments")
+  prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
 
   // 🔐 Access Policies Zenstack
 
@@ -538,6 +539,7 @@ model Quote {
   rejectedAt         DateTime?
   invoices           Invoice[]
   documents          Document[]
+  convertedFromGuest GuestQuote?     @relation("ConvertedFromGuest") // Relation inverse pour conversion
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -567,6 +569,131 @@ enum QuoteStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+}
+
+enum ProspectStatus {
+  PENDING      // En attente de finalisation d'inscription
+  CONVERTED    // Converti en User
+  EXPIRED      // Token d'invitation expiré
+}
+
+// ============================================
+// PROSPECTS ET GUEST QUOTES
+// ============================================
+
+/**
+ * Modèle Prospect
+ * Représente une personne qui a demandé un devis sans créer de compte complet
+ *
+ * Workflow :
+ * 1. Utilisateur non-connecté demande un devis → Création Prospect + GuestQuote
+ * 2. Email envoyé avec PDF + lien invitation (token valide 7 jours)
+ * 3. Prospect clique sur le lien → Finalise inscription → Conversion en User
+ * 4. GuestQuotes convertis en Quotes liés à la Company du User
+ *
+ * Access policies :
+ * - Lecture publique (pour vérification du token)
+ * - Création publique (calculateur accessible à tous)
+ * - Modification/suppression réservée aux ADMIN
+ */
+model Prospect {
+  id                    String         @id @default(cuid())
+  email                 String         @unique
+  phone                 String?
+  name                  String?
+  company               String?        // Nom entreprise (texte libre, pas lié à Company)
+
+  // Token d'invitation sécurisé
+  invitationToken       String         @unique @default(cuid())
+  invitationExpiresAt   DateTime       // 7 jours après création
+
+  status                ProspectStatus @default(PENDING)
+
+  // Lien vers User si converti
+  userId                String?        @unique
+  user                  User?          @relation(fields: [userId], references: [id])
+
+  // Relations
+  guestQuotes           GuestQuote[]
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  // 🔐 Access Policies
+
+  // Lecture publique nécessaire pour vérifier les tokens
+  @@allow('read', true)
+
+  // Création publique pour le calculateur de devis
+  @@allow('create', true)
+
+  // Seuls les admins peuvent modifier ou supprimer
+  @@allow('update,delete', auth().role == ADMIN)
+
+  // Par défaut, tout est interdit
+  @@deny('all', true)
+
+  @@index([email])
+  @@index([invitationToken])
+  @@index([status])
+}
+
+/**
+ * Modèle GuestQuote (Devis Prospect)
+ * Représente un devis pour un prospect (utilisateur non-connecté)
+ *
+ * Différences avec Quote :
+ * - Pas de companyId (lié à prospectId)
+ * - Numéro format GQTE-YYYYMMDD-XXXXX (au lieu de QTE-)
+ * - Peut être converti en Quote lors de la création du compte
+ *
+ * Access policies :
+ * - Lecture publique (pour afficher dans les emails)
+ * - Création publique (calculateur)
+ * - ADMIN ont accès complet
+ */
+model GuestQuote {
+  id                 String          @id @default(cuid())
+  quoteNumber        String          @unique // Format: GQTE-YYYYMMDD-XXXXX
+
+  // Lié au Prospect (au lieu de Company)
+  prospectId         String
+  prospect           Prospect        @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  // Champs du devis (identiques à Quote)
+  originCountry      String
+  destinationCountry String
+  transportMode      TransportMode[]
+  cargoType          CargoType
+  weight             Float
+  volume             Float?
+  estimatedCost      Float
+  validUntil         DateTime
+  currency           String          @default("EUR")
+
+  // Conversion tracking
+  convertedToQuoteId String?         @unique
+  convertedToQuote   Quote?          @relation("ConvertedFromGuest", fields: [convertedToQuoteId], references: [id])
+
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  // 🔐 Access Policies
+
+  // Lecture publique (affichage dans emails)
+  @@allow('read', true)
+
+  // Création publique (calculateur)
+  @@allow('create', true)
+
+  // Les admins ont accès complet
+  @@allow('all', auth().role == ADMIN)
+
+  // Par défaut, tout est interdit
+  @@deny('all', true)
+
+  @@index([prospectId])
+  @@index([quoteNumber])
 }
 
 // ============================================
