@@ -11,9 +11,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import { Loader2, Calculator, Package, MapPin, Truck, Ship, Plane, Train, ArrowRight, TrendingUp, Download, Mail, Save, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -86,6 +87,11 @@ export function QuoteCalculator() {
   const session = null;
 
   /**
+   * Lire les query params pour pré-remplissage depuis /tarifs
+   */
+  const searchParams = useSearchParams();
+
+  /**
    * Configuration de React Hook Form avec validation Zod
    */
   const {
@@ -106,6 +112,35 @@ export function QuoteCalculator() {
       priority: 'STANDARD',
     },
   });
+
+  /**
+   * Pré-remplir le formulaire si des query params sont présents
+   * Exemple: /#calculateur?destination=Allemagne&mode=ROAD
+   */
+  useEffect(() => {
+    const destination = searchParams.get('destination');
+    const mode = searchParams.get('mode');
+
+    if (destination) {
+      setValue('destinationCountry', destination);
+      toast.info(`Destination pré-remplie : ${destination}`);
+    }
+
+    if (mode && Object.values(TransportMode).includes(mode as TransportMode)) {
+      setValue('transportMode', [mode as TransportMode]);
+      toast.info(`Mode de transport sélectionné : ${transportModeLabels[mode as TransportMode].label}`);
+    }
+
+    // Scroll smooth vers le calculateur si params présents
+    if (destination || mode) {
+      setTimeout(() => {
+        const element = document.getElementById('calculateur');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [searchParams, setValue]);
 
   /**
    * Observer les modes de transport sélectionnés

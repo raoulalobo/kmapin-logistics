@@ -6,6 +6,7 @@
  */
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import {
   ArrowRight,
   Package,
@@ -27,6 +28,7 @@ import {
   Building2,
   Clock,
   Award,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -114,7 +116,16 @@ export default function Home() {
                 Obtenez une estimation rapide et gratuite pour votre expédition en quelques clics
               </p>
             </div>
-            <QuoteCalculator />
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-12 w-12 animate-spin text-[#0033FF]" />
+                  <span className="ml-3 text-lg text-gray-600">Chargement du calculateur...</span>
+                </div>
+              }
+            >
+              <QuoteCalculator />
+            </Suspense>
           </div>
         </section>
 
