@@ -141,6 +141,16 @@ type Events = {
       timestamp: string;
     };
   };
+
+  /**
+   * Événement : Prospect converti en User
+   */
+  'prospect/converted': {
+    data: {
+      prospectId: string;
+      userId: string;
+    };
+  };
 };
 
 /**

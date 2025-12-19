@@ -21,6 +21,13 @@ export {
   generateWeeklyReport,
 } from './functions/scheduled';
 
+// Fonctions prospects
+export {
+  markExpiredProspects,
+  sendProspectReminders,
+  onProspectConverted,
+} from './functions/prospects';
+
 /**
  * Guide d'utilisation :
  *
