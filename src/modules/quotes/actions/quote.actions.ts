@@ -1147,3 +1147,104 @@ export async function calculateQuoteEstimateAction(
     };
   }
 }
+
+/**
+ * Action : Sauvegarder un devis depuis le calculateur
+ *
+ * Crée un nouveau devis dans l'espace client de l'utilisateur connecté
+ * à partir des données du calculateur de devis
+ *
+ * @param data - Données du devis calculé
+ * @returns Résultat avec ID et numéro de devis créé ou erreur
+ *
+ * @permissions Utilisateur authentifié avec une company
+ */
+export async function saveQuoteFromCalculatorAction(
+  data: unknown
+): Promise<ActionResult<{ id: string; quoteNumber: string }>> {
+  try {
+    // Importer le schéma
+    const { quoteEstimateSchema } = await import('../schemas/quote.schema');
+
+    // Vérifier l'authentification
+    const session = await requireAuth();
+
+    // Vérifier que l'utilisateur a une company
+    if (!session.user.companyId) {
+      return {
+        success: false,
+        error: 'Votre compte n\'est pas associé à une compagnie',
+      };
+    }
+
+    // Valider les données
+    const validatedData = quoteEstimateSchema.parse(data);
+
+    // Calculer l'estimation pour obtenir le coût
+    const estimation = await calculateQuoteEstimateAction(data);
+
+    if (!estimation.success || !estimation.data) {
+      return {
+        success: false,
+        error: 'Erreur lors du calcul de l\'estimation',
+      };
+    }
+
+    // Générer un numéro de devis unique
+    const quoteNumber = await generateQuoteNumber();
+
+    // Date de validité : 30 jours par défaut
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    // Créer le devis en DRAFT
+    const quote = await prisma.quote.create({
+      data: {
+        quoteNumber,
+        companyId: session.user.companyId,
+        originCountry: validatedData.originCountry,
+        destinationCountry: validatedData.destinationCountry,
+        cargoType: validatedData.cargoType,
+        weight: validatedData.weight,
+        volume: validatedData.volume,
+        transportMode: validatedData.transportMode,
+        estimatedCost: estimation.data.estimatedCost,
+        currency: 'EUR',
+        validUntil,
+        status: 'DRAFT',
+      },
+    });
+
+    // Revalider la liste des devis
+    revalidatePath('/dashboard/quotes');
+
+    return {
+      success: true,
+      data: { id: quote.id, quoteNumber: quote.quoteNumber },
+    };
+  } catch (error) {
+    console.error('Error saving quote from calculator:', error);
+
+    // Gestion des erreurs
+    if (error instanceof Error) {
+      if (error.message.includes('Unauthorized')) {
+        return {
+          success: false,
+          error: 'Vous devez être connecté pour sauvegarder un devis',
+        };
+      }
+
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Données invalides',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la sauvegarde du devis',
+    };
+  }
+}

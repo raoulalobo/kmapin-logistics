@@ -192,19 +192,154 @@ export function QuoteCalculator() {
 
   /**
    * Télécharger le devis en PDF
+   * Génère un PDF côté client en utilisant jsPDF
    */
   const handleDownloadPDF = () => {
-    // TODO: Implémenter la génération et téléchargement du PDF
-    // Pour l'instant, juste un toast
-    toast.info('Téléchargement PDF - Fonctionnalité à venir');
+    if (!result || !lastFormData) {
+      toast.error('Aucun devis à télécharger');
+      return;
+    }
+
+    try {
+      // Import dynamique de jsPDF pour éviter les problèmes SSR
+      import('jspdf').then(({ default: jsPDF }) => {
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const primaryColor: [number, number, number] = [0, 51, 255];
+        const textColor: [number, number, number] = [51, 51, 51];
+        const lightGray: [number, number, number] = [240, 240, 240];
+        let yPos = 20;
+
+        // EN-TÊTE
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, pageWidth, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(28);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ESTIMATION DE DEVIS', 20, 25);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('KmapIn Logistics', 20, 33);
+        yPos = 50;
+
+        // NUMÉRO ET DATE
+        const quoteNumber = `EST-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-5)}`;
+        const rightCol = pageWidth - 80;
+        doc.setTextColor(...textColor);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('N° ESTIMATION :', rightCol, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(quoteNumber, rightCol + 35, yPos);
+        yPos += 7;
+        doc.setFont('helvetica', 'bold');
+        doc.text('DATE :', rightCol, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(new Date().toLocaleDateString('fr-FR'), rightCol + 35, yPos);
+        yPos = 80;
+
+        // DÉTAILS DU TRANSPORT
+        doc.setFillColor(...lightGray);
+        doc.rect(20, yPos, pageWidth - 40, 8, 'F');
+        doc.setTextColor(...textColor);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('DÉTAILS DU TRANSPORT', 25, yPos + 5);
+        yPos += 14;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+
+        // Route
+        doc.setFont('helvetica', 'bold');
+        doc.text('Route :', 25, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${lastFormData.originCountry} → ${lastFormData.destinationCountry}`, 50, yPos);
+        yPos += 6;
+
+        // Modes de transport
+        doc.setFont('helvetica', 'bold');
+        doc.text('Modes :', 25, yPos);
+        doc.setFont('helvetica', 'normal');
+        const modes = lastFormData.transportMode.map(m => transportModeLabels[m].label).join(', ');
+        doc.text(modes, 50, yPos);
+        yPos += 6;
+
+        // Type de marchandise
+        doc.setFont('helvetica', 'bold');
+        doc.text('Marchandise :', 25, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(cargoTypeLabels[lastFormData.cargoType], 50, yPos);
+        yPos += 6;
+
+        // Poids
+        doc.setFont('helvetica', 'bold');
+        doc.text('Poids :', 25, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, 50, yPos);
+        yPos += 6;
+
+        // Volume (si présent)
+        if (lastFormData.volume) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Volume :', 25, yPos);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`${lastFormData.volume.toLocaleString('fr-FR')} m³`, 50, yPos);
+          yPos += 6;
+        }
+
+        yPos += 10;
+
+        // TARIFICATION
+        doc.setFillColor(230, 247, 237);
+        doc.rect(20, yPos, pageWidth - 40, 25, 'F');
+        doc.setTextColor(46, 125, 50);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TARIFICATION ESTIMÉE', 25, yPos + 6);
+        doc.setFontSize(20);
+        doc.text(`${result.estimatedCost.toLocaleString('fr-FR')} EUR`, 25, yPos + 18);
+
+        // Télécharger le PDF
+        doc.save(`devis-kmapin-${quoteNumber}.pdf`);
+        toast.success('PDF téléchargé avec succès !');
+      });
+    } catch (error) {
+      console.error('Erreur génération PDF:', error);
+      toast.error('Erreur lors de la génération du PDF');
+    }
   };
 
   /**
    * Sauvegarder le devis dans l'espace client (utilisateur connecté)
+   * Appelle la Server Action pour créer un Quote en DRAFT
    */
-  const handleSaveQuote = () => {
-    // TODO: Implémenter la sauvegarde du devis
-    toast.info('Sauvegarde du devis - Fonctionnalité à venir');
+  const handleSaveQuote = async () => {
+    if (!result || !lastFormData) {
+      toast.error('Aucun devis à sauvegarder');
+      return;
+    }
+
+    try {
+      const { saveQuoteFromCalculatorAction } = await import('@/modules/quotes/actions/quote.actions');
+
+      toast.loading('Sauvegarde en cours...');
+
+      const response = await saveQuoteFromCalculatorAction(lastFormData);
+
+      if (response.success && response.data) {
+        toast.success(`Devis ${response.data.quoteNumber} sauvegardé dans votre espace !`);
+      } else {
+        toast.error(response.error || 'Erreur lors de la sauvegarde');
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde devis:', error);
+      toast.error('Erreur lors de la sauvegarde du devis');
+    }
   };
 
   /**
