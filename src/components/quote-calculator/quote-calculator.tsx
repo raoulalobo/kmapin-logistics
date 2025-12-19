@@ -99,6 +99,7 @@ export function QuoteCalculator() {
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<QuoteEstimateData>({
     resolver: zodResolver(quoteEstimateSchema),
@@ -149,9 +150,10 @@ export function QuoteCalculator() {
 
   /**
    * Gérer la sélection/désélection des modes de transport
+   * Utilise getValues() pour obtenir la valeur actuelle de manière synchrone
    */
   const toggleTransportMode = (mode: TransportMode) => {
-    const current = selectedTransportModes;
+    const current = getValues('transportMode') || [];
     const updated = current.includes(mode)
       ? current.filter((m) => m !== mode)
       : [...current, mode];
