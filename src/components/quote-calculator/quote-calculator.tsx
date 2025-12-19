@@ -28,6 +28,7 @@ import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult }
 import { CargoType, TransportMode } from '@/generated/prisma';
 import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
 import type { QuoteDataFormData } from '@/modules/prospects';
+import { authClient } from '@/lib/auth/client';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -81,10 +82,11 @@ export function QuoteCalculator() {
   const [lastFormData, setLastFormData] = useState<QuoteEstimateData | null>(null);
 
   /**
-   * TODO: Implémenter vérification session Better Auth
-   * Pour l'instant, on considère l'utilisateur comme non-connecté
+   * Récupération de la session utilisateur via Better Auth
+   * Si l'utilisateur est connecté, `session.user` contiendra les infos utilisateur
+   * Sinon, `session` sera null
    */
-  const session = null;
+  const { data: session } = authClient.useSession();
 
   /**
    * Lire les query params pour pré-remplissage depuis /tarifs
