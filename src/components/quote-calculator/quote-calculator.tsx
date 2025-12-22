@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,7 +29,7 @@ import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult }
 import { CargoType, TransportMode } from '@/generated/prisma';
 import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
 import type { QuoteDataFormData } from '@/modules/prospects';
-import { authClient } from '@/lib/auth/client';
+import { useSafeSession } from '@/lib/auth/hooks';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -77,16 +78,22 @@ export function QuoteCalculator() {
   const [showEmailModal, setShowEmailModal] = useState(false);
 
   /**
+   * État du modal d'affichage des résultats
+   */
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+
+  /**
    * Données du formulaire pour le modal (conservées après calcul)
    */
   const [lastFormData, setLastFormData] = useState<QuoteEstimateData | null>(null);
 
   /**
    * Récupération de la session utilisateur via Better Auth
+   * Utilise un hook sécurisé compatible React 19
    * Si l'utilisateur est connecté, `session.user` contiendra les infos utilisateur
    * Sinon, `session` sera null
    */
-  const { data: session } = authClient.useSession();
+  const { data: session } = useSafeSession();
 
   /**
    * Lire les query params pour pré-remplissage depuis /tarifs
@@ -110,7 +117,7 @@ export function QuoteCalculator() {
       destinationCountry: '',
       cargoType: 'GENERAL',
       weight: 0,
-      volume: undefined,
+      volume: 0,
       transportMode: [],
       priority: 'STANDARD',
     },
@@ -179,6 +186,7 @@ export function QuoteCalculator() {
 
       if (response.success && response.data) {
         setResult(response.data);
+        setIsResultModalOpen(true); // Ouvrir le modal automatiquement
       } else {
         setError(response.error || 'Une erreur est survenue');
       }
@@ -365,7 +373,7 @@ export function QuoteCalculator() {
     <div className="w-full max-w-7xl mx-auto space-y-8">
       {/* Formulaire en pleine largeur */}
       <Card className="border-0 shadow-xl w-full">
-        <CardHeader className="bg-gradient-to-r from-[#0033FF] to-[#0029CC] text-white">
+        <CardHeader className="bg-gradient-to-r from-[#003D82] to-[#002952] text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
@@ -387,7 +395,7 @@ export function QuoteCalculator() {
               {/* Pays d'origine */}
               <div className="space-y-2">
                 <Label htmlFor="originCountry" className="text-base font-semibold flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#0033FF]" />
+                  <MapPin className="h-4 w-4 text-[#003D82]" />
                   Pays d'origine
                 </Label>
                 <Input
@@ -404,7 +412,7 @@ export function QuoteCalculator() {
               {/* Pays de destination */}
               <div className="space-y-2">
                 <Label htmlFor="destinationCountry" className="text-base font-semibold flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#0033FF]" />
+                  <MapPin className="h-4 w-4 text-[#003D82]" />
                   Pays de destination
                 </Label>
                 <Input
@@ -421,7 +429,7 @@ export function QuoteCalculator() {
               {/* Poids */}
               <div className="space-y-2">
                 <Label htmlFor="weight" className="text-base font-semibold flex items-center gap-2">
-                  <Package className="h-4 w-4 text-[#0033FF]" />
+                  <Package className="h-4 w-4 text-[#003D82]" />
                   Poids (kg)
                 </Label>
                 <Input
@@ -439,14 +447,14 @@ export function QuoteCalculator() {
               {/* Volume */}
               <div className="space-y-2">
                 <Label htmlFor="volume" className="text-base font-semibold flex items-center gap-2">
-                  <Package className="h-4 w-4 text-[#0033FF]" />
+                  <Package className="h-4 w-4 text-[#003D82]" />
                   Volume (m³)
                 </Label>
                 <Input
                   id="volume"
                   type="number"
                   step="0.01"
-                  placeholder="10.5 (optionnel)"
+                  placeholder="0 (entrez 0 si inconnu)"
                   {...register('volume', { valueAsNumber: true })}
                   className={`h-11 ${errors.volume ? 'border-red-500' : ''}`}
                 />
@@ -505,7 +513,7 @@ export function QuoteCalculator() {
             {/* Modes de transport */}
             <div className="space-y-4">
               <Label className="text-base font-semibold flex items-center gap-2">
-                <Truck className="h-4 w-4 text-[#0033FF]" />
+                <Truck className="h-4 w-4 text-[#003D82]" />
                 Mode(s) de transport
               </Label>
 
@@ -519,12 +527,12 @@ export function QuoteCalculator() {
                       onClick={() => toggleTransportMode(value as TransportMode)}
                       className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-4 transition-all hover:scale-105 ${
                         isSelected
-                          ? 'border-[#0033FF] bg-blue-50 shadow-md'
+                          ? 'border-[#003D82] bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
-                      <Icon className={`h-8 w-8 ${isSelected ? 'text-[#0033FF]' : 'text-gray-500'}`} />
-                      <span className={`text-sm font-medium ${isSelected ? 'text-[#0033FF]' : 'text-gray-700'}`}>
+                      <Icon className={`h-8 w-8 ${isSelected ? 'text-[#003D82]' : 'text-gray-500'}`} />
+                      <span className={`text-sm font-medium ${isSelected ? 'text-[#003D82]' : 'text-gray-700'}`}>
                         {label}
                       </span>
                     </button>
@@ -541,7 +549,7 @@ export function QuoteCalculator() {
               <Button
                 type="submit"
                 disabled={isCalculating}
-                className="bg-[#0033FF] hover:bg-[#0029CC] h-14 px-12 text-lg shadow-lg hover:shadow-xl transition-all"
+                className="bg-[#003D82] hover:bg-[#002952] h-14 px-12 text-lg shadow-lg hover:shadow-xl transition-all text-white"
               >
                 {isCalculating ? (
                   <>
@@ -567,38 +575,37 @@ export function QuoteCalculator() {
         </CardContent>
       </Card>
 
-      {/* Résultat - En dessous du formulaire */}
-      {result && (
-        <Card className="border-0 shadow-2xl bg-gradient-to-br from-blue-50 via-white to-blue-50 w-full">
-          <CardHeader className="border-b bg-white/50 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0033FF]">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl text-[#0033FF]">Votre estimation personnalisée</CardTitle>
-                  <CardDescription className="text-base">
-                    Cette estimation est indicative et peut varier selon les conditions réelles
-                  </CardDescription>
-                </div>
+      {/* Modal de résultat */}
+      <Dialog open={isResultModalOpen} onOpenChange={setIsResultModalOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-blue-50">
+          <DialogHeader>
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#003D82]">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl text-[#003D82]">Votre estimation personnalisée</DialogTitle>
+                <p className="text-base text-gray-600">
+                  Cette estimation est indicative et peut varier selon les conditions réelles
+                </p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="grid gap-8 lg:grid-cols-2">
-              {/* Prix total - Grande carte à gauche */}
-              <div className="rounded-2xl bg-gradient-to-br from-[#0033FF] to-[#0029CC] p-8 text-white shadow-xl">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
-                      <Package className="h-5 w-5" />
+          </DialogHeader>
+          {result && (
+            <CardContent className="p-8">
+              <div className="grid gap-8 lg:grid-cols-2">
+                {/* Prix total - Grande carte à gauche */}
+                <div className="rounded-2xl bg-gradient-to-br from-[#003D82] to-[#002952] p-8 text-white shadow-xl">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div className="text-lg font-medium text-blue-100">Prix estimé</div>
                     </div>
-                    <div className="text-lg font-medium text-blue-100">Prix estimé</div>
-                  </div>
-                  <div className="text-6xl font-bold">
-                    {result.estimatedCost.toLocaleString('fr-FR')} €
-                  </div>
+                    <div className="text-6xl font-bold">
+                      {result.estimatedCost.toLocaleString('fr-FR')} €
+                    </div>
                   <div className="flex items-center gap-2 text-blue-100">
                     <div className="h-px flex-1 bg-white/20"></div>
                     <span className="text-sm">Délai estimé</span>
@@ -613,7 +620,7 @@ export function QuoteCalculator() {
               {/* Détail des coûts - Droite */}
               <div className="space-y-6">
                 <h4 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <div className="h-8 w-1 bg-[#0033FF] rounded-full"></div>
+                  <div className="h-8 w-1 bg-[#003D82]"></div>
                   Détail du calcul
                 </h4>
                 <div className="space-y-3">
@@ -641,9 +648,9 @@ export function QuoteCalculator() {
                       <span className="font-bold text-purple-900">+{result.breakdown.prioritySurcharge} €</span>
                     </div>
                   )}
-                  <div className="border-t-2 border-[#0033FF] pt-3 mt-4 flex justify-between items-center p-4 rounded-lg bg-blue-50">
+                  <div className="border-t-2 border-[#003D82] pt-3 mt-4 flex justify-between items-center p-4 rounded-lg bg-blue-50">
                     <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-[#0033FF]">{result.estimatedCost} €</span>
+                    <span className="text-2xl font-bold text-[#003D82]">{result.estimatedCost} €</span>
                   </div>
                 </div>
 
@@ -656,14 +663,14 @@ export function QuoteCalculator() {
                         <Button
                           onClick={handleDownloadPDF}
                           variant="outline"
-                          className="h-12 text-base border-[#0033FF] text-[#0033FF] hover:bg-blue-50"
+                          className="h-12 text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                         >
                           <Download className="mr-2 h-5 w-5" />
                           Télécharger PDF
                         </Button>
                         <Button
                           onClick={handleSaveQuote}
-                          className="h-12 text-base bg-[#0033FF] hover:bg-[#0029CC]"
+                          className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
                           <Save className="mr-2 h-5 w-5" />
                           Sauvegarder dans mon espace
@@ -677,21 +684,21 @@ export function QuoteCalculator() {
                         <Button
                           onClick={handleDownloadPDF}
                           variant="outline"
-                          className="h-12 text-base border-[#0033FF] text-[#0033FF] hover:bg-blue-50"
+                          className="h-12 text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                         >
                           <Download className="mr-2 h-5 w-5" />
                           Télécharger PDF
                         </Button>
                         <Button
                           onClick={() => setShowEmailModal(true)}
-                          className="h-12 text-base bg-[#0033FF] hover:bg-[#0029CC]"
+                          className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
                           <Mail className="mr-2 h-5 w-5" />
                           Recevoir par email
                         </Button>
                       </div>
                       <Button
-                        className="w-full h-12 text-base bg-gradient-to-r from-[#0033FF] to-[#0029CC] hover:opacity-90 shadow-lg"
+                        className="w-full h-12 text-base bg-gradient-to-r from-[#003D82] to-[#002952] hover:opacity-90 shadow-lg"
                         asChild
                       >
                         <Link href="/register">
@@ -705,8 +712,9 @@ export function QuoteCalculator() {
               </div>
             </div>
           </CardContent>
-        </Card>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de demande de devis par email (utilisateurs non-connectés) */}
       {prepareQuoteDataForModal() && (

@@ -45,7 +45,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           background-color: #ffffff;
         }
         .header {
-          background: linear-gradient(135deg, #0033FF 0%, #0029CC 100%);
+          background: linear-gradient(135deg, #003D82 0%, #002952 100%);
           padding: 40px 20px;
           text-align: center;
         }
@@ -82,7 +82,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           border-radius: 5px;
         }
         .features h3 {
-          color: #0033FF;
+          color: #003D82;
           margin-top: 0;
         }
         .features ul {
@@ -99,7 +99,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           content: "✓";
           position: absolute;
           left: 0;
-          color: #0033FF;
+          color: #003D82;
           font-weight: bold;
         }
         .cta-container {
@@ -108,7 +108,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
         }
         .cta-button {
           display: inline-block;
-          background: #0033FF;
+          background: #003D82;
           color: white;
           padding: 15px 40px;
           text-decoration: none;

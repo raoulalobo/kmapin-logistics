@@ -12,7 +12,7 @@
  * - Responsive : 2 colonnes sur mobile, 4 sur desktop
  *
  * Layout : Grid 2 cols (mobile) → 4 cols (lg+)
- * Style : Fond bleu corporate (#0033FF), texte blanc
+ * Style : Fond bleu corporate (#003D82), texte blanc
  */
 
 'use client';
@@ -39,7 +39,7 @@ export function StatsSection() {
   });
 
   return (
-    <section ref={sectionRef} className="py-20 bg-[#0033FF]">
+    <section ref={sectionRef} className="py-20 bg-[#003D82] text-white">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
           {statsData.map((stat, index) => (

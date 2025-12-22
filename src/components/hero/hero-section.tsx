@@ -59,7 +59,7 @@ export function HeroSection() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-[#0033FF] hover:bg-[#0029CC] text-white h-14 px-8 text-lg font-semibold shadow-xl"
+                    className="bg-[#003D82] hover:bg-[#002952] text-white h-14 px-8 text-lg font-semibold shadow-xl text-white"
                   >
                     <Link href="#calculateur" className="flex items-center gap-2">
                       <Calculator className="h-5 w-5" />
@@ -92,7 +92,7 @@ export function HeroSection() {
 
         {/* Navigation ancrée - Bande bleue style Rhenus avec fade-in */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-[#0033FF] py-4"
+          className="absolute bottom-0 left-0 right-0 bg-[#003D82] py-4 text-white"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 2 }}
@@ -205,7 +205,7 @@ export function HeroSection() {
         >
           <Button
             asChild
-            className="bg-[#0033FF] hover:bg-[#0029CC] rounded-l-lg rounded-r-none px-6 py-8 shadow-xl"
+            className="bg-[#003D82] hover:bg-[#002952] rounded-l-lg rounded-r-none px-6 py-8 shadow-xl text-white"
           >
             <Link href="#contact" className="flex flex-col items-center gap-2">
               <Phone className="h-6 w-6" />

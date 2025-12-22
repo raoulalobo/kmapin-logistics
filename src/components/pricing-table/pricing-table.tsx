@@ -97,7 +97,7 @@ export function PricingTable() {
     <div className="w-full max-w-7xl mx-auto space-y-6">
       {/* En-tête */}
       <Card className="border-0 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-[#0033FF] to-[#0029CC] text-white">
+        <CardHeader className="bg-gradient-to-r from-[#003D82] to-[#002952] text-white">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
               <TrendingUp className="h-7 w-7 text-white" />
@@ -117,7 +117,7 @@ export function PricingTable() {
             {/* Recherche par destination */}
             <div className="space-y-2">
               <Label htmlFor="search" className="text-base font-semibold flex items-center gap-2">
-                <Search className="h-4 w-4 text-[#0033FF]" />
+                <Search className="h-4 w-4 text-[#003D82]" />
                 Rechercher une destination
               </Label>
               <Input
@@ -132,7 +132,7 @@ export function PricingTable() {
             {/* Filtre par mode de transport */}
             <div className="space-y-2">
               <Label htmlFor="transport-mode" className="text-base font-semibold flex items-center gap-2">
-                <Truck className="h-4 w-4 text-[#0033FF]" />
+                <Truck className="h-4 w-4 text-[#003D82]" />
                 Mode de transport
               </Label>
               <Select
@@ -161,7 +161,7 @@ export function PricingTable() {
           <div className="rounded-lg border">
             {isLoading ? (
               <div className="flex items-center justify-center p-12">
-                <Loader2 className="h-8 w-8 animate-spin text-[#0033FF]" />
+                <Loader2 className="h-8 w-8 animate-spin text-[#003D82]" />
                 <span className="ml-3 text-lg text-gray-600">Chargement des tarifs...</span>
               </div>
             ) : isError ? (
@@ -207,7 +207,7 @@ export function PricingTable() {
                         {/* Prix estimé */}
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-bold text-[#0033FF]">
+                            <span className="font-bold text-[#003D82]">
                               {rate.pricePerKg.toFixed(2)} € /kg
                             </span>
                             <span className="text-xs text-gray-500">
@@ -230,7 +230,7 @@ export function PricingTable() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-[#0033FF] text-[#0033FF] hover:bg-blue-50"
+                            className="border-[#003D82] text-[#003D82] hover:bg-blue-50"
                             asChild
                           >
                             <Link href={getCalculatorUrl(rate)}>

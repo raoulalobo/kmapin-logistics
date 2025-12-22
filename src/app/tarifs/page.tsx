@@ -74,7 +74,7 @@ export default function TarifsPage() {
         <PricingTable />
 
         {/* Section CTA */}
-        <div className="mt-12 text-center bg-gradient-to-r from-[#0033FF] to-[#0029CC] rounded-2xl p-12 text-white">
+        <div className="mt-12 text-center bg-gradient-to-r from-[#003D82] to-[#002952] rounded-2xl p-12 text-white">
           <h2 className="text-3xl font-bold mb-4">
             Besoin d'un devis personnalisé ?
           </h2>
@@ -84,7 +84,7 @@ export default function TarifsPage() {
           </p>
           <a
             href="/#calculateur"
-            className="inline-flex items-center justify-center rounded-lg bg-white text-[#0033FF] px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            className="inline-flex items-center justify-center rounded-lg bg-white text-[#003D82] px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
           >
             Calculer mon devis gratuitement
           </a>

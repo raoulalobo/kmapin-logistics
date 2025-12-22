@@ -45,7 +45,7 @@ function LoadingFallback() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-[#0033FF]" />
+        <Loader2 className="h-12 w-12 animate-spin text-[#003D82]" />
         <p className="text-lg text-gray-600">Chargement...</p>
       </div>
     </div>
@@ -70,7 +70,7 @@ async function CompleteRegistrationContent({ searchParams }: CompleteRegistratio
         {/* Breadcrumb */}
         <div className="mb-8 text-center">
           <nav className="text-sm text-gray-500">
-            <a href="/" className="hover:text-[#0033FF] transition-colors">
+            <a href="/" className="hover:text-[#003D82] transition-colors">
               Accueil
             </a>
             <span className="mx-2">›</span>
@@ -85,11 +85,11 @@ async function CompleteRegistrationContent({ searchParams }: CompleteRegistratio
         <div className="mt-8 text-center text-sm text-gray-500 max-w-2xl mx-auto">
           <p>
             En créant un compte, vous acceptez nos{' '}
-            <a href="/terms" className="text-[#0033FF] hover:underline">
+            <a href="/terms" className="text-[#003D82] hover:underline">
               conditions d'utilisation
             </a>{' '}
             et notre{' '}
-            <a href="/privacy" className="text-[#0033FF] hover:underline">
+            <a href="/privacy" className="text-[#003D82] hover:underline">
               politique de confidentialité
             </a>
             .

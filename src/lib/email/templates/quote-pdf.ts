@@ -58,7 +58,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
           background-color: #ffffff;
         }
         .header {
-          background: linear-gradient(135deg, #0033FF 0%, #0029CC 100%);
+          background: linear-gradient(135deg, #003D82 0%, #002952 100%);
           padding: 30px 20px;
           text-align: center;
         }
@@ -83,7 +83,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
         .quote-summary {
           background: white;
           padding: 20px;
-          border-left: 4px solid #0033FF;
+          border-left: 4px solid #003D82;
           margin: 20px 0;
         }
         .quote-summary .label {
@@ -93,7 +93,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
           text-transform: uppercase;
         }
         .quote-summary .value {
-          color: #0033FF;
+          color: #003D82;
           font-size: 32px;
           font-weight: bold;
           margin: 5px 0 0 0;
@@ -105,7 +105,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
           border-radius: 5px;
         }
         .benefits h3 {
-          color: #0033FF;
+          color: #003D82;
           margin-top: 0;
         }
         .benefits ul {
@@ -122,7 +122,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
           content: "✓";
           position: absolute;
           left: 0;
-          color: #0033FF;
+          color: #003D82;
           font-weight: bold;
         }
         .cta-container {
@@ -131,7 +131,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
         }
         .cta-button {
           display: inline-block;
-          background: #0033FF;
+          background: #003D82;
           color: white;
           padding: 15px 40px;
           text-decoration: none;
@@ -140,7 +140,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
           font-size: 16px;
         }
         .cta-button:hover {
-          background: #0029CC;
+          background: #002952;
         }
         .expiry-notice {
           text-align: center;

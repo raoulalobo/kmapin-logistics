@@ -95,7 +95,7 @@ const faqItems: FaqItem[] = [
  * Caractéristiques :
  * - Accordéon Radix UI (une seule question ouverte à la fois)
  * - 8 questions/réponses avec icônes
- * - Design cohérent avec le style Rhenus (couleur #0033FF)
+ * - Design cohérent avec le style Rhenus (couleur #003D82)
  * - Responsive et accessible au clavier
  * - Effets hover et transitions fluides
  */
@@ -126,11 +126,11 @@ export function FaqSection() {
                     <div className="flex items-center gap-4 w-full">
                       {/* Icône dans un cercle bleu */}
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                        <Icon className="h-5 w-5 text-[#0033FF]" />
+                        <Icon className="h-5 w-5 text-[#003D82]" />
                       </div>
 
                       {/* Question */}
-                      <span className="text-lg font-semibold text-gray-900 group-hover:text-[#0033FF] transition-colors text-left">
+                      <span className="text-lg font-semibold text-gray-900 group-hover:text-[#003D82] transition-colors text-left">
                         {item.question}
                       </span>
                     </div>

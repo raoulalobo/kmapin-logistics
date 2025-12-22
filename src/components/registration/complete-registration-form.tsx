@@ -238,7 +238,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="flex items-center justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0033FF]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#003D82]" />
           <span className="ml-3 text-lg text-gray-600">Vérification de votre invitation...</span>
         </CardContent>
       </Card>
@@ -262,7 +262,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
           <p className="text-center text-gray-600">
             Pour obtenir un nouveau devis et une nouvelle invitation, rendez-vous sur notre page d'accueil.
           </p>
-          <Button asChild className="bg-[#0033FF] hover:bg-[#0029CC]">
+          <Button asChild className="bg-[#003D82] hover:bg-[#002952] text-white">
             <a href="/">Retour à l'accueil</a>
           </Button>
         </CardContent>
@@ -310,7 +310,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
     // Cas A: Nouveau utilisateur → Formulaire de création
     return (
       <Card className="max-w-2xl mx-auto">
-        <CardHeader className="bg-gradient-to-r from-[#0033FF] to-[#0029CC] text-white">
+        <CardHeader className="bg-gradient-to-r from-[#003D82] to-[#002952] text-white">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
               <UserPlus className="h-6 w-6 text-white" />
@@ -446,7 +446,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
               <Button
                 type="submit"
                 disabled={isPending}
-                className="w-full h-12 text-base bg-[#0033FF] hover:bg-[#0029CC]"
+                className="w-full h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
               >
                 {isPending ? (
                   <>

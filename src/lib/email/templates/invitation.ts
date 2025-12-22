@@ -92,7 +92,7 @@ export function generateInvitationReminderTemplate(
           content: "✓";
           position: absolute;
           left: 0;
-          color: #0033FF;
+          color: #003D82;
           font-weight: bold;
         }
         .cta-container {

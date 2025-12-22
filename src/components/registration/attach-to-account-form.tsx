@@ -212,7 +212,7 @@ export function AttachToAccountForm({
             <div className="flex justify-end">
               <Link
                 href="/reset-password"
-                className="text-sm text-[#0033FF] hover:underline"
+                className="text-sm text-[#003D82] hover:underline"
               >
                 Mot de passe oublié ?
               </Link>
