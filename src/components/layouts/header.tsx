@@ -8,7 +8,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Bell, LogOut, User, Settings } from 'lucide-react';
+import { List, Bell, SignOut, User, Gear } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,8 +41,8 @@ interface HeaderProps {
  * Composant Header
  *
  * En-tête responsive avec :
- * - Menu hamburger pour mobile (ouvre la sidebar en sheet)
- * - Menu utilisateur avec dropdown (profil, paramètres, déconnexion)
+ * - List hamburger pour mobile (ouvre la sidebar en sheet)
+ * - List utilisateur avec dropdown (profil, paramètres, déconnexion)
  * - Notifications (badge indicatif)
  */
 export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
@@ -51,13 +51,13 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
 
   /**
    * Handler pour la déconnexion
-   * Appelle l'action serveur et redirige vers login
+   * Appelle l'action serveur et redirige vers la page d'accueil
    */
   async function handleLogout() {
     setIsLoading(true);
     try {
       await logoutAction();
-      router.push('/login');
+      router.push('/'); // Redirection vers la page d'accueil
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       setIsLoading(false);
@@ -79,11 +79,11 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-6">
-      {/* Menu hamburger mobile - Affiche la sidebar en Sheet */}
+      {/* List hamburger mobile - Affiche la sidebar en Sheet */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
+            <List className="h-5 w-5" />
             <span className="sr-only">Ouvrir le menu</span>
           </Button>
         </SheetTrigger>
@@ -105,7 +105,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
           <span className="sr-only">Notifications</span>
         </Button>
 
-        {/* Menu utilisateur */}
+        {/* List utilisateur */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -143,7 +143,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
 
             <DropdownMenuItem asChild>
               <a href="/dashboard/settings" className="cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
+                <Gear className="mr-2 h-4 w-4" />
                 <span>Paramètres</span>
               </a>
             </DropdownMenuItem>
@@ -156,7 +156,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
               onClick={handleLogout}
               disabled={isLoading}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <SignOut className="mr-2 h-4 w-4" />
               <span>{isLoading ? 'Déconnexion...' : 'Se déconnecter'}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

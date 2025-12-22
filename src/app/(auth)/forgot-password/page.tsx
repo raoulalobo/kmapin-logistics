@@ -10,7 +10,7 @@
 import { useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { Envelope, CircleNotch, ArrowLeft } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
-              <Mail className="w-6 h-6 text-primary" />
+              <Envelope className="w-6 h-6 text-primary" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Envelope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   name="email"
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Envoi en cours...
                 </>
               ) : (

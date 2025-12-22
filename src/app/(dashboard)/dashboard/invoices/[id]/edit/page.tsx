@@ -18,7 +18,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, FileText, Loader2, Plus, Trash2, Euro } from 'lucide-react';
+import { ArrowLeft, FileText, CircleNotch, Plus, Trash, CurrencyEur } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -228,7 +228,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-muted-foreground" />
+          <CircleNotch className="h-12 w-12 animate-spin mx-auto text-muted-foreground" />
           <p className="text-muted-foreground">Chargement de la facture...</p>
         </div>
       </div>
@@ -398,7 +398,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
                             size="icon"
                             onClick={() => removeItem(index)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash className="h-4 w-4 text-destructive" />
                           </Button>
                         )}
                       </TableCell>
@@ -466,7 +466,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
             <Button type="submit" disabled={isPending || items.length === 0}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Mise à jour en cours...
                 </>
               ) : (

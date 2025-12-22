@@ -11,7 +11,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, Building2, Mail, Phone, MapPin, Package, Euro } from 'lucide-react';
+import { Plus, Buildings, Envelope, Phone, MapPin, Package, CurrencyEur } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -94,7 +94,7 @@ export default async function ClientsPage({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total clients</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Buildings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pagination.total}</div>
@@ -106,7 +106,7 @@ export default async function ClientsPage({
       {clients.length === 0 ? (
         <Card className="p-12">
           <div className="flex flex-col items-center justify-center text-center">
-            <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
+            <Buildings className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucun client trouvé</h3>
             <p className="text-sm text-muted-foreground mb-4">
               {params.search
@@ -128,7 +128,7 @@ export default async function ClientsPage({
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <Building2 className="h-8 w-8 text-primary" />
+                    <Buildings className="h-8 w-8 text-primary" />
                     <div>
                       <CardTitle className="text-lg">{company.name}</CardTitle>
                       {company.taxId && (
@@ -144,7 +144,7 @@ export default async function ClientsPage({
                 {/* Coordonnées */}
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Envelope className="h-4 w-4 text-muted-foreground" />
                     <span className="truncate">{company.email}</span>
                   </div>
                   {company.phone && (
@@ -175,7 +175,7 @@ export default async function ClientsPage({
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Euro className="h-4 w-4 text-muted-foreground" />
+                    <CurrencyEur className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">
                       {company._count?.invoices || 0} facture(s)
                     </span>

@@ -48,11 +48,13 @@ export const quoteSchema = z.object({
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
   volume: z
-    .number()
-    .positive('Le volume doit être positif')
+    .number({
+      required_error: 'Le volume est requis',
+      invalid_type_error: 'Le volume doit être un nombre',
+    })
+    .min(0, 'Le volume doit être positif ou zéro')
     .max(10000, 'Le volume ne peut pas dépasser 10000 m³')
-    .optional()
-    .nullable(),
+    .default(0),
 
   // === Transport ===
   transportMode: z
@@ -262,12 +264,12 @@ export const quoteEstimateSchema = z.object({
 
   volume: z
     .number({
+      required_error: 'Le volume est requis',
       invalid_type_error: 'Le volume doit être un nombre',
     })
-    .positive('Le volume doit être positif')
+    .min(0, 'Le volume doit être positif ou zéro')
     .max(10000, 'Le volume ne peut pas dépasser 10000 m³')
-    .optional()
-    .nullable(),
+    .default(0),
 
   // === Transport ===
   transportMode: z

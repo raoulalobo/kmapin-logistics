@@ -10,7 +10,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, Eye, FileText, Euro, Clock, CheckCircle, Download } from 'lucide-react';
+import { Plus, Eye, FileText, CurrencyEur, Clock, CheckCircle, Download } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import {

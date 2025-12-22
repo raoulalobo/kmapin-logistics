@@ -12,7 +12,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Building2, Loader2, Save } from 'lucide-react';
+import { ArrowLeft, Buildings, CircleNotch, FloppyDisk } from '@phosphor-icons/react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,7 +91,7 @@ export default function NewClientPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+              <Buildings className="h-5 w-5" />
               Informations du client
             </CardTitle>
             <CardDescription>
@@ -281,12 +281,12 @@ export default function NewClientPage() {
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                     Création en cours...
                   </>
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4" />
+                    <FloppyDisk className="mr-2 h-4 w-4" />
                     Créer le client
                   </>
                 )}

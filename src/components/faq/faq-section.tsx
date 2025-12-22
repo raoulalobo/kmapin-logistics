@@ -18,15 +18,15 @@ import {
 } from '@/components/ui/accordion';
 import {
   Clock,
-  DollarSign,
+  CurrencyDollar,
   MapPin,
   Package,
   Truck,
   Shield,
   FileText,
-  AlertCircle,
-  LucideIcon,
-} from 'lucide-react';
+  WarningCircle,
+  Icon,
+} from '@phosphor-icons/react';
 
 /**
  * Type pour un élément de FAQ
@@ -37,8 +37,8 @@ interface FaqItem {
   question: string;
   /** Réponse détaillée affichée dans le contenu de l'accordéon */
   answer: string;
-  /** Icône Lucide React associée à la question */
-  icon: LucideIcon;
+  /** Icône Phosphor associée à la question */
+  icon: Icon;
 }
 
 /**
@@ -54,7 +54,7 @@ const faqItems: FaqItem[] = [
   {
     question: 'Comment calculer le coût de mon transport ?',
     answer: 'Le coût dépend de plusieurs facteurs : poids et dimensions du colis, distance parcourue, mode de transport (routier, maritime, aérien, ferroviaire), type de marchandise, et services additionnels (assurance, douanes, livraison express). Utilisez notre calculateur de devis en ligne pour obtenir une estimation gratuite et instantanée.',
-    icon: DollarSign,
+    icon: CurrencyDollar,
   },
   {
     question: 'Quelles zones géographiques couvrez-vous ?',
@@ -84,7 +84,7 @@ const faqItems: FaqItem[] = [
   {
     question: 'Que faire en cas de retard ou de problème pendant le transport ?',
     answer: 'Nos équipes sont disponibles 24/7 pour répondre à vos urgences. Contactez votre chargé de clientèle dédié ou notre service client par téléphone, email ou chat. En cas de retard, nous vous informons proactivement et proposons des solutions alternatives. Une indemnisation est possible selon les conditions du contrat de transport.',
-    icon: AlertCircle,
+    icon: WarningCircle,
   },
 ];
 

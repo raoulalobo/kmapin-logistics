@@ -17,13 +17,13 @@ import {
   ArrowLeft,
   FileText,
   Calendar,
-  Euro,
+  CurrencyEur,
   User,
   Package,
   CheckCircle,
   Building,
-  Edit,
-} from 'lucide-react';
+  PencilSimple,
+} from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import {

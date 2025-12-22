@@ -15,7 +15,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { Trash, CircleNotch, Warning } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -106,7 +106,7 @@ export function InvoiceDeleteAction({
           className={className}
           disabled={!canDelete || isPending}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash className="mr-2 h-4 w-4" />
           Supprimer
         </Button>
       </AlertDialogTrigger>
@@ -114,7 +114,7 @@ export function InvoiceDeleteAction({
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
+              <Warning className="h-6 w-6 text-destructive" />
             </div>
             <div className="flex-1">
               <AlertDialogTitle>Supprimer la facture</AlertDialogTitle>
@@ -144,7 +144,7 @@ export function InvoiceDeleteAction({
 
           {/* Avertissement */}
           <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4">
-            <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+            <Warning className="h-5 w-5 text-orange-600 mt-0.5" />
             <div className="flex-1 space-y-1">
               <p className="text-sm font-medium text-orange-900">
                 Action irréversible
@@ -159,7 +159,7 @@ export function InvoiceDeleteAction({
           {/* Message si la facture ne peut pas être supprimée */}
           {!canDelete && (
             <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+              <Warning className="h-5 w-5 text-red-600 mt-0.5" />
               <div className="flex-1 space-y-1">
                 <p className="text-sm font-medium text-red-900">
                   Suppression impossible
@@ -182,12 +182,12 @@ export function InvoiceDeleteAction({
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                 Suppression...
               </>
             ) : (
               <>
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash className="mr-2 h-4 w-4" />
                 Supprimer définitivement
               </>
             )}

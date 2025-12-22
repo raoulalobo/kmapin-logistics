@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'next/navigation';
-import { Loader2, Calculator, Package, MapPin, Truck, Ship, Plane, Train, ArrowRight, TrendingUp, Download, Mail, Save, UserPlus } from 'lucide-react';
+import { CircleNotch, Calculator, Package, MapPin, Truck, Boat, Airplane, Train, ArrowRight, TrendUp, Download, Envelope, FloppyDisk, UserPlus } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -50,8 +50,8 @@ const cargoTypeLabels: Record<CargoType, string> = {
  */
 const transportModeLabels: Record<TransportMode, { label: string; icon: any }> = {
   ROAD: { label: 'Routier', icon: Truck },
-  SEA: { label: 'Maritime', icon: Ship },
-  AIR: { label: 'Aérien', icon: Plane },
+  SEA: { label: 'Maritime', icon: Boat },
+  AIR: { label: 'Aérien', icon: Airplane },
   RAIL: { label: 'Ferroviaire', icon: Train },
 };
 
@@ -158,14 +158,14 @@ export function QuoteCalculator() {
   const selectedTransportModes = watch('transportMode') || [];
 
   /**
-   * Gérer la sélection/désélection des modes de transport
-   * Utilise getValues() pour obtenir la valeur actuelle de manière synchrone
+   * Gérer la sélection d'un seul mode de transport
+   * Un seul mode peut être sélectionné à la fois
    */
   const toggleTransportMode = (mode: TransportMode) => {
     const current = getValues('transportMode') || [];
-    const updated = current.includes(mode)
-      ? current.filter((m) => m !== mode)
-      : [...current, mode];
+    // Si on clique sur le mode déjà sélectionné, on le désélectionne
+    // Sinon, on remplace la sélection par le nouveau mode
+    const updated = current.includes(mode) ? [] : [mode];
     setValue('transportMode', updated, { shouldValidate: true });
   };
 
@@ -514,7 +514,7 @@ export function QuoteCalculator() {
             <div className="space-y-4">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <Truck className="h-4 w-4 text-[#003D82]" />
-                Mode(s) de transport
+                Mode de transport
               </Label>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -553,7 +553,7 @@ export function QuoteCalculator() {
               >
                 {isCalculating ? (
                   <>
-                    <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                    <CircleNotch className="mr-3 h-6 w-6 animate-spin" />
                     Calcul en cours...
                   </>
                 ) : (
@@ -581,7 +581,7 @@ export function QuoteCalculator() {
           <DialogHeader>
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#003D82]">
-                <TrendingUp className="h-6 w-6 text-white" />
+                <TrendUp className="h-6 w-6 text-white" />
               </div>
               <div>
                 <DialogTitle className="text-2xl text-[#003D82]">Votre estimation personnalisée</DialogTitle>
@@ -672,7 +672,7 @@ export function QuoteCalculator() {
                           onClick={handleSaveQuote}
                           className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
-                          <Save className="mr-2 h-5 w-5" />
+                          <FloppyDisk className="mr-2 h-5 w-5" />
                           Sauvegarder dans mon espace
                         </Button>
                       </div>
@@ -693,7 +693,7 @@ export function QuoteCalculator() {
                           onClick={() => setShowEmailModal(true)}
                           className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
-                          <Mail className="mr-2 h-5 w-5" />
+                          <Envelope className="mr-2 h-5 w-5" />
                           Recevoir par email
                         </Button>
                       </div>

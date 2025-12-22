@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { User, Building2, Bell, Lock, Save } from 'lucide-react';
+import { User, Buildings, Bell, Lock, FloppyDisk } from '@phosphor-icons/react';
 
 export default function SettingsPage() {
   return (
@@ -73,7 +73,7 @@ export default function SettingsPage() {
               />
             </div>
             <Button className="gap-2">
-              <Save className="h-4 w-4" />
+              <FloppyDisk className="h-4 w-4" />
               Enregistrer les modifications
             </Button>
           </CardContent>
@@ -136,7 +136,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
+              <Buildings className="h-5 w-5 text-primary" />
               <CardTitle>Informations entreprise</CardTitle>
             </div>
             <CardDescription>
@@ -206,7 +206,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <Button className="gap-2">
-              <Save className="h-4 w-4" />
+              <FloppyDisk className="h-4 w-4" />
               Mettre à jour
             </Button>
           </CardContent>

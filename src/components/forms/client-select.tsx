@@ -13,7 +13,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, Building, Check, ChevronDown } from 'lucide-react';
+import { MagnifyingGlass, Building, Check, CaretDown } from '@phosphor-icons/react';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -187,7 +187,7 @@ export function ClientSelect({
         ) : (
           <span className="text-muted-foreground">{placeholder}</span>
         )}
-        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        <CaretDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
 
       {/* Dropdown */}
@@ -196,7 +196,7 @@ export function ClientSelect({
           {/* Champ de recherche */}
           <div className="p-3 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par nom, raison sociale ou email..."
                 value={searchQuery}

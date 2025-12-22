@@ -9,7 +9,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Mail, Globe2, Loader2 } from 'lucide-react';
+import { Package, Envelope, Globe, CircleNotch } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { useSafeSession } from '@/lib/auth/hooks';
 
@@ -64,16 +64,16 @@ export function HomepageHeader() {
         {/* Actions - Boutons dynamiques selon l'état de connexion */}
         <div className="flex items-center space-x-6">
           <button className="text-gray-700 hover:text-gray-900">
-            <Mail className="h-5 w-5" />
+            <Envelope className="h-5 w-5" />
           </button>
           <button className="text-gray-700 hover:text-gray-900">
-            <Globe2 className="h-5 w-5" />
+            <Globe className="h-5 w-5" />
           </button>
 
           {/* Affichage conditionnel selon l'état de session */}
           {isLoading ? (
             <Button disabled className="bg-[#003D82] text-white">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <CircleNotch className="h-4 w-4 animate-spin mr-2" />
               Chargement...
             </Button>
           ) : session?.user ? (

@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Image as ImageIcon, Download, Trash2, Eye } from 'lucide-react';
+import { FileText, Image as Image, Download, Trash, Eye } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -121,7 +121,7 @@ export function DocumentsGallery({
    */
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) {
-      return <ImageIcon className="h-8 w-8 text-blue-500" />;
+      return <Image className="h-8 w-8 text-blue-500" />;
     }
     return <FileText className="h-8 w-8 text-gray-500" />;
   };
@@ -248,7 +248,7 @@ export function DocumentsGallery({
                       setDeleteDialogOpen(true);
                     }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash className="h-4 w-4 text-red-500" />
                   </Button>
                 </div>
               </div>

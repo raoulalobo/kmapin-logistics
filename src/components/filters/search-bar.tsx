@@ -12,7 +12,7 @@
 
 'use client';
 
-import { Search, X } from 'lucide-react';
+import { MagnifyingGlass, X } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -54,7 +54,7 @@ export function SearchBar({
   return (
     <div className={`relative flex items-center ${className}`}>
       {/* Icône de recherche */}
-      <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+      <MagnifyingGlass className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
 
       {/* Input de recherche */}
       <Input

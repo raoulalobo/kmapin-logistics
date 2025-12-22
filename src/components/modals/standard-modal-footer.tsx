@@ -12,7 +12,7 @@
 
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { Plus } from '@phosphor-icons/react';
 
 /**
  * Props du composant StandardModalFooter

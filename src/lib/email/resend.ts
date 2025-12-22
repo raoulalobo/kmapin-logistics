@@ -17,10 +17,13 @@ export const resend = process.env.RESEND_API_KEY
 
 /**
  * Configuration des emails
+ *
+ * IMPORTANT : En mode test, utiliser onboarding@resend.dev (domaine de test Resend)
+ * En production, vérifier le domaine kmapin.com sur https://resend.com/domains
  */
 export const EMAIL_CONFIG = {
-  from: 'KmapIn Logistics <noreply@kmapin.com>',
-  replyTo: 'support@kmapin.com',
+  from: 'KmapIn Logistics <onboarding@resend.dev>', // Domaine de test Resend
+  replyTo: 'onboarding@resend.dev',
 };
 
 /**

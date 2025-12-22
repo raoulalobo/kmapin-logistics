@@ -9,7 +9,7 @@
 import { useTransition, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, Lock, Loader2 } from 'lucide-react';
+import { Key, Lock, CircleNotch } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -73,7 +73,7 @@ function ResetPasswordForm() {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-              <KeyRound className="h-6 w-6 text-destructive" />
+              <Key className="h-6 w-6 text-destructive" />
             </div>
             <CardTitle className="text-2xl">Lien invalide</CardTitle>
             <CardDescription>
@@ -95,7 +95,7 @@ function ResetPasswordForm() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <KeyRound className="h-6 w-6 text-primary" />
+            <Key className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
           <CardDescription>
@@ -151,12 +151,12 @@ function ResetPasswordForm() {
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Modification en cours...
                 </>
               ) : (
                 <>
-                  <KeyRound className="mr-2 h-4 w-4" />
+                  <Key className="mr-2 h-4 w-4" />
                   Modifier le mot de passe
                 </>
               )}
@@ -184,7 +184,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <CircleNotch className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <ResetPasswordForm />

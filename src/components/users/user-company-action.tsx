@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, Loader2 } from 'lucide-react';
+import { Buildings, CircleNotch } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -177,7 +177,7 @@ export function UserCompanyAction({
               <Card className="bg-muted/50">
                 <CardContent className="pt-4">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <Buildings className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">{currentCompanyName}</span>
                   </div>
                 </CardContent>
@@ -253,12 +253,12 @@ export function UserCompanyAction({
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                 Assignation...
               </>
             ) : (
               <>
-                <Building2 className="mr-2 h-4 w-4" />
+                <Buildings className="mr-2 h-4 w-4" />
                 Assigner
               </>
             )}

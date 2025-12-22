@@ -10,7 +10,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, Eye, FileText, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
+import { Plus, Eye, FileText, CheckCircle, XCircle, Clock, Download } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import {

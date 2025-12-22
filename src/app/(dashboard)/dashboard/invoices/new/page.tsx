@@ -16,7 +16,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, FileText, Loader2, Plus, Trash2, Euro } from 'lucide-react';
+import { ArrowLeft, FileText, CircleNotch, Plus, Trash, CurrencyEur } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -307,7 +307,7 @@ export default function NewInvoicePage() {
                             size="icon"
                             onClick={() => removeItem(index)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash className="h-4 w-4 text-destructive" />
                           </Button>
                         )}
                       </TableCell>
@@ -375,7 +375,7 @@ export default function NewInvoicePage() {
             <Button type="submit" disabled={isPending || items.length === 0}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Création en cours...
                 </>
               ) : (

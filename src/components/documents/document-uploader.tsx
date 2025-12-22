@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, FileText, Image as Image } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -165,7 +165,7 @@ export function DocumentUploader({
    */
   const getFileIcon = () => {
     if (!selectedFile) return <Upload className="h-12 w-12" />;
-    if (selectedFile.type.startsWith('image/')) return <ImageIcon className="h-12 w-12" />;
+    if (selectedFile.type.startsWith('image/')) return <Image className="h-12 w-12" />;
     return <FileText className="h-12 w-12" />;
   };
 

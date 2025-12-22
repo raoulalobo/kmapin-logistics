@@ -11,7 +11,7 @@
  */
 
 import Link from 'next/link';
-import { MapPin, Package, Plane, Ship, Truck, Clock, ArrowRight, PackageCheck, Home } from 'lucide-react';
+import { MapPin, Package, Airplane, Boat, Truck, Clock, ArrowRight, CheckCircle, House } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,8 +23,8 @@ import { TrackingTimeline } from '@/components/tracking/TrackingTimeline';
  * Obtenir l'icône du mode de transport
  */
 function getTransportIcon(modes: string[]) {
-  if (modes.includes('AIR')) return <Plane className="h-4 w-4" />;
-  if (modes.includes('SEA')) return <Ship className="h-4 w-4" />;
+  if (modes.includes('AIR')) return <Airplane className="h-4 w-4" />;
+  if (modes.includes('SEA')) return <Boat className="h-4 w-4" />;
   if (modes.includes('ROAD')) return <Truck className="h-4 w-4" />;
   return <Package className="h-4 w-4" />;
 }
@@ -80,7 +80,7 @@ export default async function TrackingPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Prise en charge</CardTitle>
-            <PackageCheck className="h-4 w-4 text-orange-600" />
+            <CheckCircle className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pickedUp}</div>
@@ -93,7 +93,7 @@ export default async function TrackingPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Disponible</CardTitle>
-            <Home className="h-4 w-4 text-cyan-600" />
+            <House className="h-4 w-4 text-cyan-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.readyForPickup}</div>

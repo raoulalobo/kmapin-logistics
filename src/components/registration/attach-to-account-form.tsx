@@ -20,7 +20,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, LogIn, AlertCircle, Mail, Lock } from 'lucide-react';
+import { CircleNotch, SignIn, WarningCircle, Envelope, Lock } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -145,7 +145,7 @@ export function AttachToAccountForm({
       <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-            <LogIn className="h-6 w-6 text-white" />
+            <SignIn className="h-6 w-6 text-white" />
           </div>
           <div>
             <CardTitle className="text-2xl text-white">Vous avez déjà un compte !</CardTitle>
@@ -159,7 +159,7 @@ export function AttachToAccountForm({
       <CardContent className="p-6 space-y-6">
         {/* Alerte d'information */}
         <Alert className="border-blue-200 bg-blue-50">
-          <Mail className="h-4 w-4 text-blue-600" />
+          <Envelope className="h-4 w-4 text-blue-600" />
           <AlertTitle className="text-blue-900">Compte existant détecté</AlertTitle>
           <AlertDescription className="text-blue-800">
             Un compte existe déjà avec l'email <strong>{email}</strong>.
@@ -172,7 +172,7 @@ export function AttachToAccountForm({
             {/* Email (lecture seule) */}
             <FormItem>
               <FormLabel className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-gray-500" />
+                <Envelope className="h-4 w-4 text-gray-500" />
                 Email
               </FormLabel>
               <FormControl>
@@ -226,12 +226,12 @@ export function AttachToAccountForm({
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <CircleNotch className="mr-2 h-5 w-5 animate-spin" />
                   Connexion en cours...
                 </>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-5 w-5" />
+                  <SignIn className="mr-2 h-5 w-5" />
                   Se connecter et rattacher mes devis
                 </>
               )}

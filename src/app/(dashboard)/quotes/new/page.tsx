@@ -17,7 +17,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, FileText, Loader2, MapPin, Package, Truck, Euro } from 'lucide-react';
+import { ArrowLeft, FileText, CircleNotch, MapPin, Package, Truck, CurrencyEur } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -401,7 +401,7 @@ export default function NewQuotePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Euro className="h-5 w-5" />
+                <CurrencyEur className="h-5 w-5" />
                 Tarification et validité
               </CardTitle>
             </CardHeader>
@@ -491,7 +491,7 @@ export default function NewQuotePage() {
             <Button type="submit" disabled={isPending}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Création en cours...
                 </>
               ) : (

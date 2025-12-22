@@ -13,7 +13,7 @@
  */
 
 import Link from 'next/link';
-import { FileText, Download, Eye, Search, Filter, FileIcon, Package, Receipt, FileQuestion } from 'lucide-react';
+import { FileText, Download, Eye, MagnifyingGlass, Funnel, File, Package, Receipt } from '@phosphor-icons/react/dist/ssr';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,11 +39,11 @@ function getDocumentIcon(type: string) {
     case 'AIRWAY_BILL':
       return <FileText className="h-8 w-8 text-indigo-500" />;
     case 'CERTIFICATE':
-      return <FileIcon className="h-8 w-8 text-yellow-500" />;
+      return <File className="h-8 w-8 text-yellow-500" />;
     case 'PHOTO':
-      return <FileIcon className="h-8 w-8 text-pink-500" />;
+      return <File className="h-8 w-8 text-pink-500" />;
     default:
-      return <FileQuestion className="h-8 w-8 text-muted-foreground" />;
+      return <File className="h-8 w-8 text-muted-foreground" />;
   }
 }
 
@@ -130,7 +130,7 @@ export default async function DocumentsPage({
       {/* Barre de recherche et filtres */}
       <div className="flex gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Rechercher un document..."
             className="pl-10"
@@ -138,7 +138,7 @@ export default async function DocumentsPage({
           />
         </div>
         <Button variant="outline" size="icon">
-          <Filter className="h-4 w-4" />
+          <Funnel className="h-4 w-4" />
         </Button>
       </div>
 

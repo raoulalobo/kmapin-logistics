@@ -26,7 +26,7 @@ import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, UserPlus, AlertCircle, CheckCircle2, Mail } from 'lucide-react';
+import { CircleNotch, UserPlus, WarningCircle, CheckCircle, Envelope } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -238,7 +238,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="flex items-center justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-[#003D82]" />
+          <CircleNotch className="h-8 w-8 animate-spin text-[#003D82]" />
           <span className="ml-3 text-lg text-gray-600">Vérification de votre invitation...</span>
         </CardContent>
       </Card>
@@ -250,7 +250,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
+            <WarningCircle className="h-4 w-4" />
             <AlertTitle>Lien d'invitation expiré</AlertTitle>
             <AlertDescription>
               Votre lien d'invitation a expiré (validité: 7 jours).
@@ -275,7 +275,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
+            <WarningCircle className="h-4 w-4" />
             <AlertTitle>Erreur</AlertTitle>
             <AlertDescription>
               Une erreur est survenue lors de la vérification de votre invitation.
@@ -327,7 +327,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
         <CardContent className="p-6 space-y-6">
           {/* Info prospect */}
           <Alert>
-            <Mail className="h-4 w-4" />
+            <Envelope className="h-4 w-4" />
             <AlertTitle>Bienvenue !</AlertTitle>
             <AlertDescription>
               Vous avez {prospectData.quoteCount} devis en attente. Créez votre compte pour
@@ -450,12 +450,12 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <CircleNotch className="mr-2 h-5 w-5 animate-spin" />
                     Création de votre compte...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    <CheckCircle className="mr-2 h-5 w-5" />
                     Créer mon compte
                   </>
                 )}

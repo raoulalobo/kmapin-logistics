@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, FloppyDisk } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -278,7 +278,7 @@ export default function NewClientPage() {
           {/* Actions */}
           <div className="flex gap-4">
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              <Save className="mr-2 h-4 w-4" />
+              <FloppyDisk className="mr-2 h-4 w-4" />
               {form.formState.isSubmitting ? 'Création...' : 'Créer le client'}
             </Button>
             <Button

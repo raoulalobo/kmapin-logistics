@@ -13,18 +13,18 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   ArrowLeft,
-  Building2,
-  Mail,
+  Buildings,
+  Envelope,
   Phone,
   MapPin,
   Globe,
-  Edit,
-  Trash2,
+  PencilSimple,
+  Trash,
   Package,
   FileText,
-  Euro,
+  CurrencyEur,
   Calendar,
-} from 'lucide-react';
+} from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -59,7 +59,7 @@ export default async function ClientDetailPage({
 
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Building2 className="h-12 w-12 text-primary" />
+            <Buildings className="h-12 w-12 text-primary" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
               {client.legalName && (
@@ -81,7 +81,7 @@ export default async function ClientDetailPage({
               </Link>
             </Button>
             <Button variant="destructive" size="sm">
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash className="mr-2 h-4 w-4" />
               Supprimer
             </Button>
           </div>
@@ -157,7 +157,7 @@ export default async function ClientDetailPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
+              <Envelope className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Email</p>
                 <a

@@ -12,7 +12,7 @@
 
 'use client';
 
-import { X, SlidersHorizontal } from 'lucide-react';
+import { X, Sliders } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -99,7 +99,7 @@ export function FilterBar({
     <div className="flex flex-wrap items-center gap-3">
       {/* Icône et titre */}
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <SlidersHorizontal className="h-4 w-4" />
+        <Sliders className="h-4 w-4" />
         <span>Filtres</span>
         {activeFiltersCount > 0 && (
           <Badge variant="secondary" className="h-5 min-w-5 px-1">

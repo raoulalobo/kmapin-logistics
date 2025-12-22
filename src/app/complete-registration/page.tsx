@@ -17,7 +17,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { CircleNotch } from '@phosphor-icons/react/dist/ssr';
 
 import { CompleteRegistrationForm } from '@/components/registration';
 
@@ -45,7 +45,7 @@ function LoadingFallback() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-[#003D82]" />
+        <CircleNotch className="h-12 w-12 animate-spin text-[#003D82]" />
         <p className="text-lg text-gray-600">Chargement...</p>
       </div>
     </div>

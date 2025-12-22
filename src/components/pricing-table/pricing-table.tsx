@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Truck, Ship, Plane, Train, TrendingUp, Loader2, Package } from 'lucide-react';
+import { MagnifyingGlass, Truck, Boat, Airplane, Train, TrendUp, CircleNotch, Package } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -50,8 +50,8 @@ import type { StandardRate } from '@/modules/pricing/data/standard-rates';
  */
 const transportModeLabels: Record<TransportMode, { label: string; icon: any; color: string }> = {
   ROAD: { label: 'Routier', icon: Truck, color: 'text-blue-600' },
-  SEA: { label: 'Maritime', icon: Ship, color: 'text-cyan-600' },
-  AIR: { label: 'Aérien', icon: Plane, color: 'text-purple-600' },
+  SEA: { label: 'Maritime', icon: Boat, color: 'text-cyan-600' },
+  AIR: { label: 'Aérien', icon: Airplane, color: 'text-purple-600' },
   RAIL: { label: 'Ferroviaire', icon: Train, color: 'text-green-600' },
 };
 
@@ -100,7 +100,7 @@ export function PricingTable() {
         <CardHeader className="bg-gradient-to-r from-[#003D82] to-[#002952] text-white">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-              <TrendingUp className="h-7 w-7 text-white" />
+              <TrendUp className="h-7 w-7 text-white" />
             </div>
             <div>
               <CardTitle className="text-3xl text-white">Tarifs Standards</CardTitle>
@@ -117,7 +117,7 @@ export function PricingTable() {
             {/* Recherche par destination */}
             <div className="space-y-2">
               <Label htmlFor="search" className="text-base font-semibold flex items-center gap-2">
-                <Search className="h-4 w-4 text-[#003D82]" />
+                <MagnifyingGlass className="h-4 w-4 text-[#003D82]" />
                 Rechercher une destination
               </Label>
               <Input
@@ -161,7 +161,7 @@ export function PricingTable() {
           <div className="rounded-lg border">
             {isLoading ? (
               <div className="flex items-center justify-center p-12">
-                <Loader2 className="h-8 w-8 animate-spin text-[#003D82]" />
+                <CircleNotch className="h-8 w-8 animate-spin text-[#003D82]" />
                 <span className="ml-3 text-lg text-gray-600">Chargement des tarifs...</span>
               </div>
             ) : isError ? (
@@ -245,7 +245,7 @@ export function PricingTable() {
               </Table>
             ) : (
               <div className="flex flex-col items-center justify-center p-12 text-center">
-                <Search className="h-12 w-12 text-gray-300 mb-4" />
+                <MagnifyingGlass className="h-12 w-12 text-gray-300 mb-4" />
                 <p className="text-lg font-medium text-gray-900">Aucun tarif trouvé</p>
                 <p className="text-sm text-gray-600 mt-1">
                   Essayez de modifier vos filtres de recherche

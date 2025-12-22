@@ -15,7 +15,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Ban, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Prohibit, CheckCircle, CircleNotch, Warning } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -102,7 +102,7 @@ export function UserStatusAction({
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
             {!isActivating && (
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <Warning className="h-5 w-5 text-destructive" />
             )}
             <AlertDialogTitle>
               {isActivating
@@ -161,7 +161,7 @@ export function UserStatusAction({
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                 {isActivating ? 'Activation...' : 'Désactivation...'}
               </>
             ) : (
@@ -173,7 +173,7 @@ export function UserStatusAction({
                   </>
                 ) : (
                   <>
-                    <Ban className="mr-2 h-4 w-4" />
+                    <Prohibit className="mr-2 h-4 w-4" />
                     Confirmer et désactiver
                   </>
                 )}

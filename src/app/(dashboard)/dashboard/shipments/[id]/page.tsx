@@ -17,18 +17,18 @@ import {
   Package,
   MapPin,
   Calendar,
-  Euro,
-  Edit,
-  Trash2,
-  Building2,
-  Weight,
-  Box,
+  CurrencyEur,
+  PencilSimple,
+  Trash,
+  Buildings,
+  Scales,
+  Cube,
   FileText,
-  AlertTriangle,
-  ShieldAlert,
+  Warning,
+  ShieldWarning,
   Clock,
-  CheckCircle2,
-} from 'lucide-react';
+  CheckCircle,
+} from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -168,7 +168,7 @@ export default async function ShipmentDetailPage({
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
+            <Buildings className="h-8 w-8 text-muted-foreground" />
             <div>
               <p className="font-semibold text-lg">{shipment.company.name}</p>
               <p className="text-sm text-muted-foreground">{shipment.company.email}</p>
@@ -304,7 +304,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.value && (
               <div className="flex items-center gap-3">
-                <Euro className="h-5 w-5 text-muted-foreground" />
+                <CurrencyEur className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Valeur</p>
                   <p className="text-sm text-muted-foreground">
@@ -347,13 +347,13 @@ export default async function ShipmentDetailPage({
             <div className="flex gap-4 mt-4">
               {shipment.isDangerous && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
-                  <ShieldAlert className="h-4 w-4" />
+                  <ShieldWarning className="h-4 w-4" />
                   <span>Marchandise dangereuse</span>
                 </div>
               )}
               {shipment.isFragile && (
                 <div className="flex items-center gap-2 text-sm text-orange-600">
-                  <AlertTriangle className="h-4 w-4" />
+                  <Warning className="h-4 w-4" />
                   <span>Marchandise fragile</span>
                 </div>
               )}
@@ -416,7 +416,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.actualPickupDate && (
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm font-medium">Collecte réelle</p>
                   <p className="text-sm text-muted-foreground">
@@ -432,7 +432,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.actualDeliveryDate && (
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm font-medium">Livraison réelle</p>
                   <p className="text-sm text-muted-foreground">
@@ -455,7 +455,7 @@ export default async function ShipmentDetailPage({
           <CardContent className="space-y-3">
             {shipment.estimatedCost && (
               <div className="flex items-center gap-3">
-                <Euro className="h-5 w-5 text-muted-foreground" />
+                <CurrencyEur className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Coût estimé</p>
                   <p className="text-sm text-muted-foreground">
@@ -467,7 +467,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.actualCost && (
               <div className="flex items-center gap-3">
-                <Euro className="h-5 w-5 text-green-600" />
+                <CurrencyEur className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm font-medium">Coût réel</p>
                   <p className="text-sm text-muted-foreground">
@@ -575,7 +575,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.createdBy && (
               <div className="flex items-center gap-3">
-                <Building2 className="h-5 w-5 text-muted-foreground" />
+                <Buildings className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Créé par</p>
                   <p className="text-sm text-muted-foreground">
@@ -598,7 +598,7 @@ export default async function ShipmentDetailPage({
             </Link>
           </Button>
           <Button variant="destructive" size="sm">
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash className="mr-2 h-4 w-4" />
             Supprimer
           </Button>
         </div>

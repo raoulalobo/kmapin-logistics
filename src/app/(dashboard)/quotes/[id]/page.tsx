@@ -20,13 +20,13 @@ import {
   MapPin,
   Package,
   Truck,
-  Euro,
+  CurrencyEur,
   Calendar,
   Building,
   CheckCircle,
   XCircle,
-  AlertCircle,
-} from 'lucide-react';
+  WarningCircle,
+} from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -160,7 +160,7 @@ export default async function QuoteDetailsPage({
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
+              <WarningCircle className="h-5 w-5" />
               <p className="text-sm font-medium">
                 Ce devis a expiré le {validUntil.toLocaleDateString('fr-FR')}
               </p>
@@ -174,7 +174,7 @@ export default async function QuoteDetailsPage({
         <Card className="border-orange-600">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-orange-600">
-              <AlertCircle className="h-5 w-5" />
+              <WarningCircle className="h-5 w-5" />
               <p className="text-sm font-medium">
                 Ce devis expire dans {daysLeft} jour{daysLeft > 1 ? 's' : ''}
               </p>
@@ -342,7 +342,7 @@ export default async function QuoteDetailsPage({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Euro className="h-5 w-5" />
+            <CurrencyEur className="h-5 w-5" />
             Tarification
           </CardTitle>
         </CardHeader>

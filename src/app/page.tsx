@@ -12,24 +12,24 @@ import {
   Package,
   MapPin,
   FileText,
-  TrendingUp,
+  TrendUp,
   Shield,
-  Users,
-  CheckCircle2,
+  UsersThree,
+  CheckCircle,
   Truck,
-  Ship,
-  Plane,
+  Boat,
+  Airplane,
   Train,
   Star,
-  Globe2,
+  Globe,
   Phone,
-  Mail,
-  ChevronRight,
-  Building2,
+  Envelope,
+  CaretRight,
+  Buildings,
   Clock,
   Award,
-  Loader2,
-} from 'lucide-react';
+  CircleNotch,
+} from '@phosphor-icons/react/dist/ssr';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +39,7 @@ import { QuoteCalculator } from '@/components/quote-calculator';
 import { FaqSection } from '@/components/faq';
 import { HomepageHeader } from '@/components/layouts/homepage-header';
 
-export default function Home() {
+export default function House() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header dynamique avec détection de session */}
@@ -63,7 +63,7 @@ export default function Home() {
             <Suspense
               fallback={
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="h-12 w-12 animate-spin text-[#003D82]" />
+                  <CircleNotch className="h-12 w-12 animate-spin text-[#003D82]" />
                   <span className="ml-3 text-lg text-gray-600">Chargement du calculateur...</span>
                 </div>
               }
@@ -144,7 +144,7 @@ export default function Home() {
                       <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
                         {/* Glow effect */}
                         <div className="absolute inset-0 rounded-2xl bg-[#003D82] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                        <TrendingUp className="relative h-8 w-8 text-[#003D82] transition-colors" />
+                        <TrendUp className="relative h-8 w-8 text-[#003D82] transition-colors" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#003D82] transition-colors">
@@ -182,7 +182,7 @@ export default function Home() {
                       <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
                         {/* Glow effect */}
                         <div className="absolute inset-0 rounded-2xl bg-[#003D82] opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                        <Globe2 className="relative h-8 w-8 text-[#003D82] transition-colors" />
+                        <Globe className="relative h-8 w-8 text-[#003D82] transition-colors" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#003D82] transition-colors">
@@ -222,7 +222,7 @@ export default function Home() {
                   />
                 </div>
                 <CardContent className="p-6">
-                  <Ship className="h-10 w-10 text-[#003D82] mb-4" />
+                  <Boat className="h-10 w-10 text-[#003D82] mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Transport maritime</h3>
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Solution économique et écologique pour vos marchandises non urgentes avec service LCL et FCL.
@@ -266,7 +266,7 @@ export default function Home() {
                   />
                 </div>
                 <CardContent className="p-6">
-                  <Plane className="h-10 w-10 text-[#003D82] mb-4" />
+                  <Airplane className="h-10 w-10 text-[#003D82] mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Fret aérien</h3>
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Transport rapide et fiable par avion avec services de courrier à bord et affrètement.
@@ -288,7 +288,7 @@ export default function Home() {
                   />
                 </div>
                 <CardContent className="p-6">
-                  <Building2 className="h-10 w-10 text-[#003D82] mb-4" />
+                  <Buildings className="h-10 w-10 text-[#003D82] mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Solutions d'entreposage</h3>
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Stockage sécurisé avec plus de 180 sites et système de gestion d'entrepôt moderne.
@@ -364,7 +364,7 @@ export default function Home() {
                   </h3>
                   <Link href="#" className="text-[#003D82] font-semibold hover:underline inline-flex items-center">
                     Lire l'article complet
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <CaretRight className="ml-1 h-4 w-4" />
                   </Link>
                 </CardContent>
               </Card>
@@ -389,7 +389,7 @@ export default function Home() {
                   </h3>
                   <Link href="#" className="text-[#003D82] font-semibold hover:underline inline-flex items-center">
                     Lire l'article complet
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <CaretRight className="ml-1 h-4 w-4" />
                   </Link>
                 </CardContent>
               </Card>
@@ -414,7 +414,7 @@ export default function Home() {
                   </h3>
                   <Link href="#" className="text-[#003D82] font-semibold hover:underline inline-flex items-center">
                     Lire l'article complet
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <CaretRight className="ml-1 h-4 w-4" />
                   </Link>
                 </CardContent>
               </Card>

@@ -9,7 +9,7 @@
 import { useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { SignIn, Envelope, Lock, CircleNotch, House, ArrowLeft } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -78,9 +78,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour à l'accueil</span>
+            </Link>
             <div className="p-3 bg-primary/10 rounded-full">
-              <LogIn className="w-6 h-6 text-primary" />
+              <SignIn className="w-6 h-6 text-primary" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
@@ -97,7 +104,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Envelope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   name="email"
@@ -143,12 +150,12 @@ export default function LoginPage() {
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Connexion en cours...
                 </>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-4 w-4" />
+                  <SignIn className="mr-2 h-4 w-4" />
                   Se connecter
                 </>
               )}

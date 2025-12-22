@@ -19,7 +19,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2, UserPlus } from 'lucide-react';
+import { Plus, CircleNotch, UserPlus } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -357,7 +357,7 @@ export function UserCreateDialog({ children }: UserCreateDialogProps) {
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                     Création...
                   </>
                 ) : (

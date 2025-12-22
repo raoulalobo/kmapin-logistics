@@ -12,7 +12,7 @@
  */
 
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { CaretLeft, CaretRight, DotsThree } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 
@@ -112,12 +112,12 @@ export function Pagination({ currentPage, totalPages, baseUrl, searchParams }: P
         >
           {currentPage > 1 ? (
             <Link href={buildPageUrl(baseUrl, currentPage - 1, searchParams)}>
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft className="h-4 w-4" />
               <span className="sr-only md:not-sr-only md:ml-2">Précédent</span>
             </Link>
           ) : (
             <span>
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft className="h-4 w-4" />
               <span className="sr-only md:not-sr-only md:ml-2">Précédent</span>
             </span>
           )}
@@ -133,7 +133,7 @@ export function Pagination({ currentPage, totalPages, baseUrl, searchParams }: P
                   className="flex h-9 w-9 items-center justify-center"
                   aria-hidden="true"
                 >
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  <DotsThree className="h-4 w-4 text-muted-foreground" />
                 </div>
               );
             }
@@ -174,12 +174,12 @@ export function Pagination({ currentPage, totalPages, baseUrl, searchParams }: P
           {currentPage < totalPages ? (
             <Link href={buildPageUrl(baseUrl, currentPage + 1, searchParams)}>
               <span className="sr-only md:not-sr-only md:mr-2">Suivant</span>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
             </Link>
           ) : (
             <span>
               <span className="sr-only md:not-sr-only md:mr-2">Suivant</span>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
             </span>
           )}
         </Button>

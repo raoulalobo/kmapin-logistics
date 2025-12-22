@@ -14,7 +14,7 @@
 
 'use client';
 
-import { MapPin, Clock, CheckCircle2, Package, Plane, Ship, Truck } from 'lucide-react';
+import { MapPin, Clock, CheckCircle, Package, Airplane, Boat, Truck } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { TrackingEventData } from '@/modules/tracking';
 
@@ -29,7 +29,7 @@ interface TrackingTimelineProps {
 function getStatusIcon(status: string) {
   switch (status) {
     case 'DELIVERED':
-      return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
     case 'IN_TRANSIT':
       return <Truck className="h-4 w-4 text-blue-600" />;
     case 'AT_CUSTOMS':

@@ -11,7 +11,7 @@
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Euro } from 'lucide-react';
+import { CurrencyEur } from '@phosphor-icons/react';
 
 /**
  * Props du composant RevenueChart
@@ -32,7 +32,7 @@ function CustomTooltip({ active, payload }: any) {
   return (
     <div className="rounded-lg border bg-background p-3 shadow-lg">
       <div className="flex items-center gap-2">
-        <Euro className="h-4 w-4 text-green-600" />
+        <CurrencyEur className="h-4 w-4 text-green-600" />
         <div>
           <p className="text-sm font-medium">{payload[0].payload.month}</p>
           <p className="text-lg font-bold text-green-600">

@@ -8,7 +8,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, Eye, Pencil, Trash2, Building2 } from 'lucide-react';
+import { Plus, Eye, PencilSimple, Trash, Buildings } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -91,7 +91,7 @@ export default async function ClientsPage() {
             <CardTitle className="text-sm font-medium">
               Total clients
             </CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Buildings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pagination.total}</div>
@@ -152,7 +152,7 @@ export default async function ClientsPage() {
         <CardContent>
           {clients.length === 0 ? (
             <div className="text-center py-12">
-              <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
+              <Buildings className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">Aucun client</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Commencez par créer votre premier client
@@ -225,7 +225,7 @@ export default async function ClientsPage() {
                             <Link
                               href={`/dashboard/clients/${client.id}/edit`}
                             >
-                              <Pencil className="mr-2 h-4 w-4" />
+                              <PencilSimple className="mr-2 h-4 w-4" />
                               Modifier
                             </Link>
                           </DropdownMenuItem>
@@ -237,7 +237,7 @@ export default async function ClientsPage() {
                               client._count.invoices > 0
                             }
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash className="mr-2 h-4 w-4" />
                             Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>

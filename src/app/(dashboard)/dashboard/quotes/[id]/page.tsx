@@ -16,17 +16,17 @@ import {
   FileText,
   MapPin,
   Calendar,
-  Euro,
-  Edit,
-  Trash2,
-  Building2,
-  Weight,
-  Box,
-  CheckCircle2,
+  CurrencyEur,
+  PencilSimple,
+  Trash,
+  Buildings,
+  Scales,
+  Cube,
+  CheckCircle,
   XCircle,
-  AlertCircle,
+  WarningCircle,
   Clock,
-} from 'lucide-react';
+} from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -102,11 +102,11 @@ function formatTransportMode(mode: string): string {
 function getStatusIcon(status: QuoteStatus) {
   switch (status) {
     case 'ACCEPTED':
-      return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+      return <CheckCircle className="h-5 w-5 text-green-600" />;
     case 'REJECTED':
       return <XCircle className="h-5 w-5 text-red-600" />;
     case 'EXPIRED':
-      return <AlertCircle className="h-5 w-5 text-orange-600" />;
+      return <WarningCircle className="h-5 w-5 text-orange-600" />;
     case 'SENT':
       return <Clock className="h-5 w-5 text-blue-600" />;
     default:
@@ -173,7 +173,7 @@ export default async function QuoteDetailPage({
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <WarningCircle className="h-5 w-5 text-orange-600" />
               <div>
                 <p className="font-medium text-orange-900">Devis expiré</p>
                 <p className="text-sm text-orange-700">
@@ -192,7 +192,7 @@ export default async function QuoteDetailPage({
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
+            <Buildings className="h-8 w-8 text-muted-foreground" />
             <div>
               <p className="font-semibold text-lg">{quote.company.name}</p>
               <p className="text-sm text-muted-foreground">{quote.company.email}</p>
@@ -340,7 +340,7 @@ export default async function QuoteDetailPage({
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-3">
-            <Euro className="h-8 w-8 text-muted-foreground" />
+            <CurrencyEur className="h-8 w-8 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium text-muted-foreground">Coût estimé</p>
               <p className="text-3xl font-bold">
@@ -360,7 +360,7 @@ export default async function QuoteDetailPage({
           <CardContent className="space-y-3">
             {quote.acceptedAt && (
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm font-medium">Accepté le</p>
                   <p className="text-sm text-muted-foreground">
@@ -437,7 +437,7 @@ export default async function QuoteDetailPage({
 
             {quote.createdBy && (
               <div className="flex items-center gap-3">
-                <Building2 className="h-5 w-5 text-muted-foreground" />
+                <Buildings className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Créé par</p>
                   <p className="text-sm text-muted-foreground">
@@ -463,7 +463,7 @@ export default async function QuoteDetailPage({
 
         {quote.status === 'DRAFT' && (
           <Button variant="destructive" size="sm">
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash className="mr-2 h-4 w-4" />
             Supprimer
           </Button>
         )}
@@ -471,7 +471,7 @@ export default async function QuoteDetailPage({
         {quote.status === 'SENT' && !isExpired && (
           <>
             <Button variant="default" size="sm">
-              <CheckCircle2 className="mr-2 h-4 w-4" />
+              <CheckCircle className="mr-2 h-4 w-4" />
               Accepter
             </Button>
             <Button variant="destructive" size="sm">

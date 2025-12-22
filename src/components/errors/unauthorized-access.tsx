@@ -10,7 +10,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldAlert, Home, ArrowLeft } from 'lucide-react';
+import { ShieldWarning, House, ArrowLeft } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -87,7 +87,7 @@ export function UnauthorizedAccess({
           {/* Icône de sécurité */}
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-destructive/10 p-6">
-              <ShieldAlert className="h-12 w-12 text-destructive" />
+              <ShieldWarning className="h-12 w-12 text-destructive" />
             </div>
           </div>
 
@@ -127,7 +127,7 @@ export function UnauthorizedAccess({
             {showDashboardButton && (
               <Button asChild className="flex-1">
                 <Link href="/dashboard">
-                  <Home className="mr-2 h-4 w-4" />
+                  <House className="mr-2 h-4 w-4" />
                   Aller au tableau de bord
                 </Link>
               </Button>

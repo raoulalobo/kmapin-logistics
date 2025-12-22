@@ -17,7 +17,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Mail, Loader2, Send, CheckCircle2 } from 'lucide-react';
+import { Envelope, CircleNotch, PaperPlaneRight, CheckCircle } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,8 +52,8 @@ import { z } from 'zod';
 const prospectFormSchema = z.object({
   email: z.string().email('Email invalide').max(100, 'Email trop long'),
   phone: z.string().min(10, 'Numéro de téléphone invalide (min 10 caractères)').max(20, 'Numéro trop long'),
-  name: z.string().min(2, 'Nom trop court').max(100, 'Nom trop long').optional(),
-  company: z.string().min(2, 'Nom d\'entreprise trop court').max(200, 'Nom trop long').optional(),
+  name: z.string().max(100, 'Nom trop long').optional(),
+  company: z.string().max(200, 'Nom trop long').optional(),
 });
 
 type ProspectFormInput = z.infer<typeof prospectFormSchema>;
@@ -147,12 +147,12 @@ export function QuoteRequestModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         {!isSuccess ? (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
+                <Envelope className="h-5 w-5 text-primary" />
                 Recevoir mon devis par email
               </DialogTitle>
               <DialogDescription>
@@ -278,12 +278,12 @@ export function QuoteRequestModal({
                   <Button type="submit" disabled={isPending}>
                     {isPending ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                         Envoi en cours...
                       </>
                     ) : (
                       <>
-                        <Send className="mr-2 h-4 w-4" />
+                        <PaperPlaneRight className="mr-2 h-4 w-4" />
                         Envoyer le devis
                       </>
                     )}
@@ -296,7 +296,7 @@ export function QuoteRequestModal({
           // Écran de succès
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <div className="rounded-full bg-green-100 p-3">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
+              <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
             <div className="text-center space-y-2">
               <h3 className="text-xl font-semibold text-green-900">
