@@ -9,8 +9,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Envelope, Globe, CircleNotch } from '@phosphor-icons/react';
+import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Truck, Warehouse, Anchor, Strategy, CaretDown } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useSafeSession } from '@/lib/auth/hooks';
 
 export function HomepageHeader() {
@@ -30,31 +36,87 @@ export function HomepageHeader() {
         {/* Navigation principale */}
         <nav className="hidden lg:flex items-center space-x-8 text-base">
           <Link
-            href="#quote-calculator"
+            href="/#calculateur"
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
           >
             Devis gratuit
           </Link>
           <Link
-            href="#faq"
+            href="/#faq"
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
           >
             FAQ
           </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1 text-gray-700 hover:text-gray-900 transition-colors font-medium outline-none">
+              Services
+              <CaretDown className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64">
+              <DropdownMenuItem asChild>
+                <Link href="/services/transport-aerien" className="flex items-center gap-3 cursor-pointer">
+                  <Airplane className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Transport Aérien</div>
+                    <div className="text-xs text-gray-500">Livraison express mondiale</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/services/transport-maritime" className="flex items-center gap-3 cursor-pointer">
+                  <Boat className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Transport Maritime</div>
+                    <div className="text-xs text-gray-500">Fret FCL et LCL</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/services/transport-routier" className="flex items-center gap-3 cursor-pointer">
+                  <Truck className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Transport Routier</div>
+                    <div className="text-xs text-gray-500">Livraison porte-à-porte</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/services/entreposage" className="flex items-center gap-3 cursor-pointer">
+                  <Warehouse className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Solutions d'Entreposage</div>
+                    <div className="text-xs text-gray-500">Stockage et distribution</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/services/services-portuaires" className="flex items-center gap-3 cursor-pointer">
+                  <Anchor className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Services Portuaires</div>
+                    <div className="text-xs text-gray-500">Dédouanement et manutention</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/services/logistique-4pl" className="flex items-center gap-3 cursor-pointer">
+                  <Strategy className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Logistique 4PL</div>
+                    <div className="text-xs text-gray-500">Pilotage stratégique</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link
-            href="#services"
-            className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
-          >
-            Services
-          </Link>
-          <Link
-            href="#about"
+            href="/#why-kmapin"
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
           >
             À propos
           </Link>
           <Link
-            href="#contact"
+            href="/#contact"
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
           >
             Contact

@@ -227,7 +227,7 @@ export default function House() {
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Solution économique et écologique pour vos marchandises non urgentes avec service LCL et FCL.
                   </p>
-                  <Link href="#" className="text-[#003D82] font-semibold text-sm hover:underline">
+                  <Link href="/services/transport-maritime" className="text-[#003D82] font-semibold text-sm hover:underline">
                     Découvrir →
                   </Link>
                 </CardContent>
@@ -249,7 +249,7 @@ export default function House() {
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Solutions flexibles adaptées à vos besoins avec départs quotidiens et routes optimisées.
                   </p>
-                  <Link href="#" className="text-[#003D82] font-semibold text-sm hover:underline">
+                  <Link href="/services/transport-routier" className="text-[#003D82] font-semibold text-sm hover:underline">
                     Découvrir →
                   </Link>
                 </CardContent>
@@ -271,7 +271,7 @@ export default function House() {
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Transport rapide et fiable par avion avec services de courrier à bord et affrètement.
                   </p>
-                  <Link href="#" className="text-[#003D82] font-semibold text-sm hover:underline">
+                  <Link href="/services/transport-aerien" className="text-[#003D82] font-semibold text-sm hover:underline">
                     Découvrir →
                   </Link>
                 </CardContent>
@@ -293,7 +293,7 @@ export default function House() {
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     Stockage sécurisé avec plus de 180 sites et système de gestion d'entrepôt moderne.
                   </p>
-                  <Link href="#" className="text-[#003D82] font-semibold text-sm hover:underline">
+                  <Link href="/services/entreposage" className="text-[#003D82] font-semibold text-sm hover:underline">
                     Découvrir →
                   </Link>
                 </CardContent>
@@ -427,16 +427,14 @@ export default function House() {
       <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 mb-12">
-            {/* Industries */}
+            {/* Informations légales */}
             <div>
-              <h4 className="text-white font-bold text-lg mb-6">Industries</h4>
+              <h4 className="text-white font-bold text-lg mb-6">Informations légales</h4>
               <ul className="space-y-3">
-                <li><Link href="#" className="hover:text-white transition-colors">Automobile</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Produits chimiques</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Biens de consommation & FMCG</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Mode & Lifestyle</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">High-tech</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Sciences de la vie & Santé</Link></li>
+                <li><Link href="/legal/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link></li>
+                <li><Link href="/legal/politique-de-confidentialite" className="hover:text-white transition-colors">Politique de confidentialité</Link></li>
+                <li><Link href="/legal/informations-sur-les-donnees" className="hover:text-white transition-colors">Informations sur les données</Link></li>
+                <li><Link href="/legal/systeme-de-denonciation" className="hover:text-white transition-colors">Système de dénonciation</Link></li>
               </ul>
             </div>
 
@@ -444,12 +442,12 @@ export default function House() {
             <div>
               <h4 className="text-white font-bold text-lg mb-6">Services</h4>
               <ul className="space-y-3">
-                <li><Link href="#" className="hover:text-white transition-colors">Transport aérien</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Transport maritime</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Transport routier</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Solutions d'entreposage</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Services portuaires</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Logistique 4PL</Link></li>
+                <li><Link href="/services/transport-aerien" className="hover:text-white transition-colors">Transport aérien</Link></li>
+                <li><Link href="/services/transport-maritime" className="hover:text-white transition-colors">Transport maritime</Link></li>
+                <li><Link href="/services/transport-routier" className="hover:text-white transition-colors">Transport routier</Link></li>
+                <li><Link href="/services/entreposage" className="hover:text-white transition-colors">Solutions d'entreposage</Link></li>
+                <li><Link href="/services/services-portuaires" className="hover:text-white transition-colors">Services portuaires</Link></li>
+                <li><Link href="/services/logistique-4pl" className="hover:text-white transition-colors">Logistique 4PL</Link></li>
               </ul>
             </div>
 
@@ -494,13 +492,7 @@ export default function House() {
 
           {/* Bottom bar */}
           <div className="border-t border-gray-800 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex flex-wrap gap-6 text-sm">
-                <Link href="#" className="hover:text-white transition-colors">Mentions légales</Link>
-                <Link href="#" className="hover:text-white transition-colors">Politique de confidentialité</Link>
-                <Link href="#" className="hover:text-white transition-colors">Informations sur les données</Link>
-                <Link href="#" className="hover:text-white transition-colors">Système de dénonciation</Link>
-              </div>
+            <div className="flex justify-center items-center">
               <p className="text-sm">2025 © KmapIn Logistics. Tous droits réservés.</p>
             </div>
           </div>
