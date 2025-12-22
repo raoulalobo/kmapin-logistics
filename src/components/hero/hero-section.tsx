@@ -8,7 +8,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Calculator, TrendingUp } from 'lucide-react';
+import { Phone, Calculator, TrendUp } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
@@ -80,7 +80,7 @@ export function HeroSection() {
                     className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
                   >
                     <Link href="/tarifs" className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
+                      <TrendUp className="h-5 w-5" />
                       Consulter les prix standard
                     </Link>
                   </Button>
@@ -90,7 +90,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Navigation ancrée - Bande bleue style Rhenus avec fade-in */}
+        {/* Barre bleue vide */}
         <motion.div
           className="absolute bottom-0 left-0 right-0 bg-[#003D82] py-4 text-white"
           initial={{ opacity: 0, y: 50 }}
@@ -98,90 +98,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 2 }}
         >
           <div className="container mx-auto px-6">
-            <nav className="flex items-center justify-center space-x-1 text-sm overflow-x-auto">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#solutions"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  Solutions logistiques
-                </Link>
-              </motion.div>
-              <span className="text-white/40">|</span>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#faq"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  FAQ
-                </Link>
-              </motion.div>
-              <span className="text-white/40">|</span>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#why-kmapin"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  Pourquoi KmapIn
-                </Link>
-              </motion.div>
-              <span className="text-white/40">|</span>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#services"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  Services
-                </Link>
-              </motion.div>
-              <span className="text-white/40">|</span>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#contact"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  Contact
-                </Link>
-              </motion.div>
-              <span className="text-white/40">|</span>
-
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Link
-                  href="#actualites"
-                  className="text-white/90 hover:text-white px-6 py-2 transition-colors whitespace-nowrap"
-                >
-                  Actualités
-                </Link>
-              </motion.div>
-            </nav>
+            {/* Barre vide - contenu supprimé */}
           </div>
         </motion.div>
       </ParallaxBackground>

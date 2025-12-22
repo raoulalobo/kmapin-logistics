@@ -14,17 +14,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Users,
+  ChartBar,
+  TrendUp,
+  TrendDown,
+  UsersThreeThree,
   Package,
-  Euro,
-  AlertCircle,
-  CheckCircle2,
+  CurrencyEur,
+  WarningCircle,
+  CheckCircle,
   Clock,
   FileText,
-} from 'lucide-react';
+} from '@phosphor-icons/react/dist/ssr';
 import { getDashboardStats, getRevenueChartData, getShipmentsChartData } from '@/modules/dashboard';
 
 /**
@@ -58,7 +58,7 @@ function KPICard({
           {trend && trendValue && (
             <Badge variant={trend === 'up' ? 'default' : 'destructive'} className="text-xs">
               {trend === 'up' ? (
-                <TrendingUp className="h-3 w-3 mr-1" />
+                <TrendUp className="h-3 w-3 mr-1" />
               ) : (
                 <TrendingDown className="h-3 w-3 mr-1" />
               )}
@@ -97,7 +97,7 @@ export default async function ReportsPage() {
             title="Chiffre d'affaires total"
             value={`${stats.totalRevenue.toLocaleString('fr-FR')} €`}
             subtitle="Mois en cours"
-            icon={Euro}
+            icon={CurrencyEur}
             trend={stats.revenueGrowth >= 0 ? 'up' : 'down'}
             trendValue={`${Math.abs(stats.revenueGrowth).toFixed(1)}% vs mois dernier`}
           />
@@ -113,7 +113,7 @@ export default async function ReportsPage() {
             title="Factures en retard"
             value={stats.overdueInvoices}
             subtitle="À relancer"
-            icon={AlertCircle}
+            icon={WarningCircle}
           />
         </div>
       </div>
@@ -144,7 +144,7 @@ export default async function ReportsPage() {
             title="Taux de livraison"
             value={`${stats.deliveryRate.toFixed(1)}%`}
             subtitle="Livraisons réussies"
-            icon={CheckCircle2}
+            icon={CheckCircle}
           />
 
           <KPICard
@@ -166,21 +166,21 @@ export default async function ReportsPage() {
             title="Clients totaux"
             value={stats.totalClients}
             subtitle="Base clients"
-            icon={Users}
+            icon={UsersThree}
           />
 
           <KPICard
             title="Clients actifs"
             value={stats.activeClients}
             subtitle="Avec expéditions en cours"
-            icon={Users}
+            icon={UsersThree}
           />
 
           <KPICard
             title="Nouveaux clients"
             value={stats.newClientsThisMonth}
             subtitle="Ce mois-ci"
-            icon={Users}
+            icon={UsersThree}
           />
         </div>
       </div>
@@ -209,7 +209,7 @@ export default async function ReportsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-orange-500" />
+                <WarningCircle className="h-4 w-4 text-orange-500" />
                 Factures impayées
               </CardTitle>
             </CardHeader>
@@ -224,7 +224,7 @@ export default async function ReportsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-500" />
+                <WarningCircle className="h-4 w-4 text-red-500" />
                 Factures en retard
               </CardTitle>
             </CardHeader>
@@ -248,7 +248,7 @@ export default async function ReportsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
+                <ChartBar className="h-5 w-5" />
                 Revenus mensuels
               </CardTitle>
               <CardDescription>
@@ -301,7 +301,7 @@ export default async function ReportsPage() {
       <Card className="border-dashed">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
-            <BarChart3 className="h-8 w-8 text-muted-foreground" />
+            <ChartBar className="h-8 w-8 text-muted-foreground" />
             <div>
               <h3 className="font-semibold mb-1">Graphiques à venir</h3>
               <p className="text-sm text-muted-foreground">

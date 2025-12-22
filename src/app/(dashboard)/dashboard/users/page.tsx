@@ -15,19 +15,19 @@
 
 import Link from 'next/link';
 import {
-  Users,
+  UsersThree,
   Shield,
   CheckCircle,
   XCircle,
   Plus,
-  Building2,
+  Buildings,
   Phone,
   Package,
   FileText,
-  Mail,
-  Ban,
+  Envelope,
+  Prohibit,
   Key,
-} from 'lucide-react';
+} from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +142,7 @@ export default async function UsersPage({
             <CardTitle className="text-sm font-medium">
               Total utilisateurs
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <UsersThree className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -187,7 +187,7 @@ export default async function UsersPage({
         </Card>
       </div>
 
-      {/* TODO: Barre de filtres (Search + Role + Status) */}
+      {/* TODO: Barre de filtres (MagnifyingGlass + Role + Status) */}
       {/* Pour l'instant, on affiche tous les utilisateurs */}
       {/* Cette fonctionnalité sera ajoutée dans une prochaine itération */}
 
@@ -196,7 +196,7 @@ export default async function UsersPage({
         // État vide
         <Card className="p-12">
           <div className="flex flex-col items-center justify-center text-center">
-            <Users className="h-16 w-16 text-muted-foreground mb-4" />
+            <UsersThree className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">
               Aucun utilisateur trouvé
             </h3>
@@ -252,7 +252,7 @@ export default async function UsersPage({
 
                       {/* Email */}
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Mail className="h-3 w-3" />
+                        <Envelope className="h-3 w-3" />
                         <span className="truncate">{user.email}</span>
                       </div>
                     </div>
@@ -274,7 +274,7 @@ export default async function UsersPage({
 
                   {/* Entreprise */}
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <Buildings className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Entreprise :</span>
                     <span className="truncate">
                       {user.company?.name || 'Aucune'}
@@ -345,7 +345,7 @@ export default async function UsersPage({
                     currentCompanyId={user.companyId}
                   >
                     <Button variant="outline" size="sm" className="w-full">
-                      <Building2 className="mr-2 h-3 w-3" />
+                      <Buildings className="mr-2 h-3 w-3" />
                       Entreprise
                     </Button>
                   </UserCompanyAction>
@@ -363,7 +363,7 @@ export default async function UsersPage({
                     >
                       {user.emailVerified ? (
                         <>
-                          <Ban className="mr-2 h-3 w-3" />
+                          <Prohibit className="mr-2 h-3 w-3" />
                           Désactiver
                         </>
                       ) : (

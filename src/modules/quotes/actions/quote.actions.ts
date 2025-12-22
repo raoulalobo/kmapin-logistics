@@ -878,101 +878,60 @@ export async function rejectQuoteAction(
 }
 
 /**
- * Table de distances approximatives entre pays (en km)
- * Utilisée pour calculer les coûts de transport
- * Format: { "FROM_TO": distance_en_km }
+ * Mapping des noms de pays complets vers codes ISO
+ * Utilisé pour convertir les noms de pays en codes pour la recherche de distance
  */
-const COUNTRY_DISTANCES: Record<string, number> = {
-  // Distances intra-européennes
-  'France_Allemagne': 600,
-  'France_Espagne': 800,
-  'France_Italie': 900,
-  'France_Belgique': 300,
-  'France_Pays-Bas': 500,
-  'France_Royaume-Uni': 450,
-  'Allemagne_Espagne': 1500,
-  'Allemagne_Italie': 1000,
-  'Allemagne_Pologne': 600,
-
-  // Distances intercontinentales (approximatives)
-  'France_États-Unis': 6500,
-  'France_Chine': 8200,
-  'France_Japon': 9700,
-  'France_Australie': 17000,
-  'France_Brésil': 8500,
-  'France_Canada': 5500,
-  'France_Inde': 6800,
-  'France_Afrique du Sud': 8500,
-  'France_Maroc': 2000,
-  'France_Algérie': 1500,
-  'France_Tunisie': 1600,
-  'France_Côte d\'Ivoire': 4800,
-  'France_Sénégal': 4200,
-
-  // Distances par défaut pour les régions
-  'Europe_Europe': 1500,
-  'Europe_Afrique': 4000,
-  'Europe_Asie': 8000,
-  'Europe_Amérique': 7000,
-  'Europe_Océanie': 16000,
-  'Asie_Asie': 4000,
-  'Asie_Amérique': 10000,
-  'Amérique_Amérique': 5000,
+const COUNTRY_NAME_TO_ISO: Record<string, string> = {
+  'France': 'FR',
+  'Allemagne': 'DE',
+  'Espagne': 'ES',
+  'Italie': 'IT',
+  'Belgique': 'BE',
+  'Pays-Bas': 'NL',
+  'Royaume-Uni': 'GB',
+  'Pologne': 'PL',
+  'États-Unis': 'US',
+  'Chine': 'CN',
+  'Japon': 'JP',
+  'Australie': 'AU',
+  'Brésil': 'BR',
+  'Canada': 'CA',
+  'Inde': 'IN',
+  'Afrique du Sud': 'ZA',
+  'Maroc': 'MA',
+  'Algérie': 'DZ',
+  'Tunisie': 'TN',
+  'Côte d\'Ivoire': 'CI',
+  'Sénégal': 'SN',
 };
 
 /**
  * Fonction helper pour obtenir la distance entre deux pays
+ * Utilise la configuration dynamique des distances depuis la base de données
  *
  * Stratégie :
- * 1. Chercher la distance exacte (Pays1_Pays2)
- * 2. Chercher la distance inverse (Pays2_Pays1)
- * 3. Utiliser une distance régionale par défaut
- * 4. Distance mondiale par défaut : 10000 km
+ * 1. Convertir les noms de pays en codes ISO
+ * 2. Récupérer la distance depuis la base de données (avec cache)
+ * 3. Fallback aux valeurs par défaut si non trouvée
  *
- * @param origin - Pays d'origine
- * @param destination - Pays de destination
- * @returns Distance approximative en kilomètres
+ * @param origin - Pays d'origine (nom complet ou code ISO)
+ * @param destination - Pays de destination (nom complet ou code ISO)
+ * @returns Distance en kilomètres
  */
-function getDistance(origin: string, destination: string): number {
-  // Nettoyer les noms de pays
+async function getDistance(origin: string, destination: string): Promise<number> {
+  // Import dynamique pour éviter les dépendances circulaires
+  const { getCountryDistance } = await import('@/modules/pricing-config');
+
+  // Nettoyer et convertir en code ISO si nécessaire
   const cleanOrigin = origin.trim();
   const cleanDestination = destination.trim();
 
-  // Chercher la distance exacte
-  const key1 = `${cleanOrigin}_${cleanDestination}`;
-  const key2 = `${cleanDestination}_${cleanOrigin}`;
+  // Convertir en code ISO si c'est un nom complet
+  const originCode = COUNTRY_NAME_TO_ISO[cleanOrigin] || cleanOrigin.toUpperCase().substring(0, 2);
+  const destinationCode = COUNTRY_NAME_TO_ISO[cleanDestination] || cleanDestination.toUpperCase().substring(0, 2);
 
-  if (COUNTRY_DISTANCES[key1]) return COUNTRY_DISTANCES[key1];
-  if (COUNTRY_DISTANCES[key2]) return COUNTRY_DISTANCES[key2];
-
-  // Distance régionale par défaut
-  const regions: Record<string, string[]> = {
-    Europe: ['France', 'Allemagne', 'Espagne', 'Italie', 'Belgique', 'Pays-Bas', 'Royaume-Uni', 'Pologne'],
-    Afrique: ['Maroc', 'Algérie', 'Tunisie', 'Côte d\'Ivoire', 'Sénégal', 'Afrique du Sud'],
-    Asie: ['Chine', 'Japon', 'Inde', 'Corée du Sud', 'Thaïlande', 'Vietnam'],
-    Amérique: ['États-Unis', 'Canada', 'Brésil', 'Mexique', 'Argentine'],
-    Océanie: ['Australie', 'Nouvelle-Zélande'],
-  };
-
-  // Déterminer les régions
-  let originRegion = 'Monde';
-  let destinationRegion = 'Monde';
-
-  for (const [region, countries] of Object.entries(regions)) {
-    if (countries.some(c => cleanOrigin.includes(c) || c.includes(cleanOrigin))) {
-      originRegion = region;
-    }
-    if (countries.some(c => cleanDestination.includes(c) || c.includes(cleanDestination))) {
-      destinationRegion = region;
-    }
-  }
-
-  // Chercher la distance régionale
-  const regionalKey = `${originRegion}_${destinationRegion}`;
-  if (COUNTRY_DISTANCES[regionalKey]) return COUNTRY_DISTANCES[regionalKey];
-
-  // Distance mondiale par défaut
-  return 10000;
+  // Récupérer la distance depuis la configuration
+  return getCountryDistance(originCode, destinationCode);
 }
 
 /**
@@ -1014,9 +973,13 @@ export async function calculateQuoteEstimateAction(
   data: unknown
 ): Promise<ActionResult<import('../schemas/quote.schema').QuoteEstimateResult>> {
   try {
-    // Importer le schéma et les types
+    // Importer le schéma, les types et la configuration
     const { quoteEstimateSchema } = await import('../schemas/quote.schema');
     const { TransportMode, CargoType } = await import('@/generated/prisma');
+    const { getPricingConfig } = await import('@/modules/pricing-config');
+
+    // Récupérer la configuration dynamique des prix
+    const config = await getPricingConfig();
 
     // Valider les données
     const validatedData = quoteEstimateSchema.parse(data);
@@ -1033,14 +996,13 @@ export async function calculateQuoteEstimateAction(
     }
 
     // === 2. Calculer la distance ===
-    const distance = getDistance(
+    const distance = await getDistance(
       validatedData.originCountry,
       validatedData.destinationCountry
     );
 
-    // === 3. Coût de base (0.50 EUR/kg) ===
-    const BASE_RATE_PER_KG = 0.5;
-    const baseCost = effectiveWeight * BASE_RATE_PER_KG;
+    // === 3. Coût de base (depuis la configuration) ===
+    const baseCost = effectiveWeight * config.baseRatePerKg;
 
     // === 4. Facteur de distance (distance / 1000 * baseCost) ===
     const distanceFactor = (distance / 1000) * baseCost;
@@ -1049,40 +1011,16 @@ export async function calculateQuoteEstimateAction(
     // Prendre le mode de transport principal (premier de la liste)
     const primaryTransportMode = validatedData.transportMode[0];
 
-    const transportMultipliers: Record<string, number> = {
-      ROAD: 1.0,
-      SEA: 0.6,
-      AIR: 3.0,
-      RAIL: 0.8,
-    };
-
-    const transportMultiplier = transportMultipliers[primaryTransportMode] || 1.0;
+    const transportMultiplier = config.transportMultipliers[primaryTransportMode] || 1.0;
     const transportModeCost = (baseCost + distanceFactor) * transportMultiplier;
 
     // === 6. Supplément type de marchandise ===
-    const cargoTypeSurcharges: Record<string, number> = {
-      GENERAL: 0,
-      DANGEROUS: 0.5,     // +50%
-      PERISHABLE: 0.4,    // +40%
-      FRAGILE: 0.3,       // +30%
-      BULK: -0.1,         // -10%
-      CONTAINER: 0.2,     // +20%
-      PALLETIZED: 0.15,   // +15%
-      OTHER: 0.1,         // +10%
-    };
-
-    const cargoSurchargeRate = cargoTypeSurcharges[validatedData.cargoType] || 0;
+    const cargoSurchargeRate = config.cargoTypeSurcharges[validatedData.cargoType] || 0;
     const cargoTypeSurcharge = transportModeCost * cargoSurchargeRate;
 
     // === 7. Supplément priorité ===
     const priority = validatedData.priority || 'STANDARD';
-    const prioritySurcharges: Record<string, number> = {
-      STANDARD: 0,
-      EXPRESS: 0.5,  // +50%
-      URGENT: 1.0,   // +100%
-    };
-
-    const prioritySurchargeRate = prioritySurcharges[priority] || 0;
+    const prioritySurchargeRate = config.prioritySurcharges[priority] || 0;
     const prioritySurcharge = transportModeCost * prioritySurchargeRate;
 
     // === 8. Coût total estimé ===
@@ -1091,25 +1029,22 @@ export async function calculateQuoteEstimateAction(
     );
 
     // === 9. Estimation du délai de livraison (en jours) ===
-    // Basé sur le mode de transport et la distance
-    const deliveryDaysPerMode: Record<string, number> = {
-      ROAD: distance / 500,      // ~500 km/jour
-      SEA: distance / 400,       // ~400 km/jour
-      AIR: distance / 5000,      // ~5000 km/jour
-      RAIL: distance / 600,      // ~600 km/jour
-    };
+    // Basé sur le mode de transport et les délais configurés
+    const deliverySpeed = config.deliverySpeedsPerMode[primaryTransportMode];
 
-    let estimatedDeliveryDays = deliveryDaysPerMode[primaryTransportMode] || 7;
+    // Calculer un délai basé sur la distance et les limites configurées
+    // Plus la distance est grande, plus on tend vers le délai max
+    const distanceRatio = Math.min(distance / 10000, 1); // Normaliser sur 10000 km max
+    let estimatedDeliveryDays = Math.round(
+      deliverySpeed.min + (deliverySpeed.max - deliverySpeed.min) * distanceRatio
+    );
 
     // Ajuster selon la priorité
     if (priority === 'EXPRESS') {
-      estimatedDeliveryDays *= 0.7; // -30%
+      estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays * 0.7); // -30%
     } else if (priority === 'URGENT') {
-      estimatedDeliveryDays *= 0.5; // -50%
+      estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays * 0.5); // -50%
     }
-
-    // Arrondir à l'entier supérieur
-    estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays);
 
     // Minimum 1 jour
     if (estimatedDeliveryDays < 1) estimatedDeliveryDays = 1;

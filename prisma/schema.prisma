@@ -120,24 +120,25 @@ enum TransporterType {
 }
 
 model User {
-  id                String     @id() @default(cuid())
-  email             String     @unique()
-  emailVerified     Boolean    @default(false)
+  id                String          @id() @default(cuid())
+  email             String          @unique()
+  emailVerified     Boolean         @default(false)
   name              String?
   image             String?
   phone             String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt()
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt()
   accounts          Account[]
   sessions          Session[]
-  role              UserRole   @default(CLIENT)
+  role              UserRole        @default(CLIENT)
   companyId         String?
-  company           Company?   @relation(fields: [companyId], references: [id])
+  company           Company?        @relation(fields: [companyId], references: [id])
   permissions       Json?
-  createdShipments  Shipment[] @relation("CreatedBy")
-  createdInvoices   Invoice[]  @relation("CreatedBy")
-  uploadedDocuments Document[] @relation("UploadedDocuments")
+  createdShipments  Shipment[]      @relation("CreatedBy")
+  createdInvoices   Invoice[]       @relation("CreatedBy")
+  uploadedDocuments Document[]      @relation("UploadedDocuments")
   prospect          Prospect?
+  pricingConfigs    PricingConfig[]
 
   @@index([companyId])
   @@map("user")
@@ -471,4 +472,33 @@ model Transporter {
   @@index([companyId])
   @@index([type])
   @@map("transporter")
+}
+
+model PricingConfig {
+  id                    String   @id() @default(cuid())
+  baseRatePerKg         Float    @default(0.5)
+  transportMultipliers  Json
+  cargoTypeSurcharges   Json
+  prioritySurcharges    Json
+  deliverySpeedsPerMode Json
+  updatedById           String
+  updatedBy             User     @relation(fields: [updatedById], references: [id])
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt()
+
+  @@map("pricing_config")
+}
+
+model CountryDistance {
+  id                 String   @id() @default(cuid())
+  originCountry      String
+  destinationCountry String
+  distanceKm         Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt()
+
+  @@unique([originCountry, destinationCountry])
+  @@index([originCountry])
+  @@index([destinationCountry])
+  @@map("country_distance")
 }

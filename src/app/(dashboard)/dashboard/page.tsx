@@ -9,14 +9,14 @@ import { Suspense } from 'react';
 import { getSession } from '@/lib/auth/config';
 import {
   Package,
-  TrendingUp,
-  Users,
-  DollarSign,
+  TrendUp,
+  UsersThree,
+  CurrencyDollar,
   MapPin,
   Clock,
-  AlertCircle,
-  CheckCircle2,
-} from 'lucide-react';
+  WarningCircle,
+  CheckCircle,
+} from '@phosphor-icons/react/dist/ssr';
 import {
   Card,
   CardContent,
@@ -97,10 +97,10 @@ function RecentShipment({
     CONFIRMED: { label: 'Confirmée', color: 'text-blue-600 bg-blue-50', icon: Package },
     IN_TRANSIT: { label: 'En transit', color: 'text-blue-600 bg-blue-50', icon: MapPin },
     AT_PORT: { label: 'Au port', color: 'text-purple-600 bg-purple-50', icon: MapPin },
-    CUSTOMS: { label: 'Douane', color: 'text-yellow-600 bg-yellow-50', icon: AlertCircle },
-    OUT_FOR_DELIVERY: { label: 'En livraison', color: 'text-indigo-600 bg-indigo-50', icon: TrendingUp },
-    DELIVERED: { label: 'Livrée', color: 'text-green-600 bg-green-50', icon: CheckCircle2 },
-    CANCELLED: { label: 'Annulée', color: 'text-red-600 bg-red-50', icon: AlertCircle },
+    CUSTOMS: { label: 'Douane', color: 'text-yellow-600 bg-yellow-50', icon: WarningCircle },
+    OUT_FOR_DELIVERY: { label: 'En livraison', color: 'text-indigo-600 bg-indigo-50', icon: TrendUp },
+    DELIVERED: { label: 'Livrée', color: 'text-green-600 bg-green-50', icon: CheckCircle },
+    CANCELLED: { label: 'Annulée', color: 'text-red-600 bg-red-50', icon: WarningCircle },
   };
 
   const config = statusConfig[status] || statusConfig.PENDING;
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
           title="Clients actifs"
           value={stats.activeClients}
           change={`+${stats.newClientsThisMonth} nouveaux ce mois`}
-          icon={Users}
+          icon={UsersThree}
           trend={stats.newClientsThisMonth > 0 ? 'up' : 'neutral'}
         />
         <StatCard
@@ -197,14 +197,14 @@ export default async function DashboardPage() {
             maximumFractionDigits: 0,
           })}`}
           change={formatChange(stats.revenueGrowth)}
-          icon={DollarSign}
+          icon={CurrencyDollar}
           trend={stats.revenueGrowth >= 0 ? 'up' : 'down'}
         />
         <StatCard
           title="Taux de livraison"
           value={`${stats.deliveryRate.toFixed(1)}%`}
           change={`${stats.totalShipments} expéditions totales`}
-          icon={TrendingUp}
+          icon={TrendUp}
           trend={stats.deliveryRate >= 95 ? 'up' : stats.deliveryRate >= 85 ? 'neutral' : 'down'}
         />
       </div>
@@ -266,7 +266,7 @@ export default async function DashboardPage() {
               {stats.overdueInvoices > 0 && (
                 <Link href="/dashboard/invoices?status=OVERDUE">
                   <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 hover:bg-red-100 transition-colors cursor-pointer">
-                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <WarningCircle className="h-5 w-5 text-red-600 mt-0.5" />
                     <div className="flex-1 space-y-1">
                       <p className="text-sm font-medium">
                         {stats.overdueInvoices} facture{stats.overdueInvoices > 1 ? 's' : ''} en retard
@@ -283,7 +283,7 @@ export default async function DashboardPage() {
               {stats.pendingInvoices > 0 && (
                 <Link href="/dashboard/invoices?status=SENT">
                   <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-3 hover:bg-orange-100 transition-colors cursor-pointer">
-                    <DollarSign className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <CurrencyDollar className="h-5 w-5 text-orange-600 mt-0.5" />
                     <div className="flex-1 space-y-1">
                       <p className="text-sm font-medium">
                         {stats.pendingInvoices} facture{stats.pendingInvoices > 1 ? 's' : ''} en attente
@@ -319,7 +319,7 @@ export default async function DashboardPage() {
               {/* Livraisons du jour (positif) */}
               {stats.deliveredToday > 0 && (
                 <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium">
                       {stats.deliveredToday} livraison{stats.deliveredToday > 1 ? 's' : ''} réussie{stats.deliveredToday > 1 ? 's' : ''} aujourd'hui
@@ -366,7 +366,7 @@ export default async function DashboardPage() {
 
             <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
               <Link href="/dashboard/quotes/new">
-                <DollarSign className="h-6 w-6" />
+                <CurrencyDollar className="h-6 w-6" />
                 <div className="text-center">
                   <div className="font-medium">Nouveau devis</div>
                   <div className="text-xs text-muted-foreground">
@@ -378,7 +378,7 @@ export default async function DashboardPage() {
 
             <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
               <Link href="/dashboard/clients/new">
-                <Users className="h-6 w-6" />
+                <UsersThree className="h-6 w-6" />
                 <div className="text-center">
                   <div className="font-medium">Nouveau client</div>
                   <div className="text-xs text-muted-foreground">

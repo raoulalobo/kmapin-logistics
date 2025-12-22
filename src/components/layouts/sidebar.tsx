@@ -13,16 +13,18 @@ import { cn } from '@/lib/utils';
 import {
   Package,
   MapPin,
-  Users,
-  UserCog,
+  UsersThree,
+  UserGear,
   Truck,
   FileText,
   CreditCard,
-  BarChart3,
-  Settings,
-  LayoutDashboard,
-  FileSpreadsheet,
-} from 'lucide-react';
+  ChartBar,
+  Gear,
+  SquaresFour,
+  Table,
+  CurrencyEur,
+  House,
+} from '@phosphor-icons/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { hasPermission } from '@/lib/auth/permissions-client';
@@ -56,9 +58,15 @@ const navigation: NavSection[] = [
     title: 'Principal',
     links: [
       {
+        label: 'Accueil',
+        href: '/',
+        icon: House,
+        // Pas de permission requise - accessible à tous
+      },
+      {
         label: 'Dashboard',
         href: '/dashboard',
-        icon: LayoutDashboard,
+        icon: SquaresFour,
         // Pas de permission requise - accessible à tous
       },
     ],
@@ -92,13 +100,13 @@ const navigation: NavSection[] = [
       {
         label: 'Clients',
         href: '/dashboard/clients',
-        icon: Users,
+        icon: UsersThree,
         permission: 'clients:read', // Seulement ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER, VIEWER
       },
       {
         label: 'Devis',
         href: '/dashboard/quotes',
-        icon: FileSpreadsheet,
+        icon: Table,
         permission: 'quotes:read',
       },
       {
@@ -115,7 +123,13 @@ const navigation: NavSection[] = [
       {
         label: 'Utilisateurs',
         href: '/dashboard/users',
-        icon: UserCog,
+        icon: UserGear,
+        // Pas de permission - réservé aux ADMIN via wildcard '*'
+      },
+      {
+        label: 'Configuration des Prix',
+        href: '/dashboard/settings/pricing',
+        icon: CurrencyEur,
         // Pas de permission - réservé aux ADMIN via wildcard '*'
       },
       {
@@ -127,13 +141,13 @@ const navigation: NavSection[] = [
       {
         label: 'Rapports',
         href: '/dashboard/reports',
-        icon: BarChart3,
+        icon: ChartBar,
         permission: 'reports:read',
       },
       {
         label: 'Paramètres',
         href: '/dashboard/settings',
-        icon: Settings,
+        icon: Gear,
         // Pas de permission - accessible à tous (paramètres personnels)
       },
     ],

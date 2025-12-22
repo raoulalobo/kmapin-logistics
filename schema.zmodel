@@ -62,6 +62,7 @@ model User {
   createdInvoices    Invoice[]  @relation("CreatedBy")
   uploadedDocuments  Document[] @relation("UploadedDocuments")
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
+  pricingConfigs     PricingConfig[] // Configurations de prix modifiées par cet utilisateur
 
   // 🔐 Access Policies Zenstack
 
@@ -897,4 +898,101 @@ model Transporter {
   @@index([companyId])
   @@index([type])
   @@map("transporter")
+}
+
+// ============================================
+// CONFIGURATION DES PRIX
+// ============================================
+
+/**
+ * Modèle PricingConfig (Configuration globale des prix)
+ *
+ * Stocke tous les paramètres de tarification utilisés dans le calcul des devis.
+ * Il ne doit exister qu'une seule instance de ce modèle (singleton).
+ *
+ * Structure des champs JSON :
+ * - transportMultipliers : { ROAD: 1.0, SEA: 0.6, AIR: 3.0, RAIL: 0.8 }
+ * - cargoTypeSurcharges : { GENERAL: 0, DANGEROUS: 1.5, PERISHABLE: 1.2, ... }
+ * - prioritySurcharges : { STANDARD: 0, EXPRESS: 0.5, URGENT: 1.0 }
+ * - deliverySpeedsPerMode : {
+ *     ROAD: { min: 3, max: 7 },
+ *     SEA: { min: 20, max: 45 },
+ *     AIR: { min: 1, max: 3 },
+ *     RAIL: { min: 7, max: 14 }
+ *   }
+ *
+ * Access policies :
+ * - ADMIN uniquement pour toutes les opérations
+ */
+model PricingConfig {
+  id                   String   @id @default(cuid())
+
+  // Taux de base
+  baseRatePerKg        Float    @default(0.5) // € par kg
+
+  // Multiplicateurs par mode de transport
+  transportMultipliers Json     // { ROAD: Float, SEA: Float, AIR: Float, RAIL: Float }
+
+  // Surcharges par type de cargo
+  cargoTypeSurcharges  Json     // { GENERAL: Float, DANGEROUS: Float, PERISHABLE: Float, ... }
+
+  // Surcharges par priorité
+  prioritySurcharges   Json     // { STANDARD: Float, EXPRESS: Float, URGENT: Float }
+
+  // Délais de livraison par mode (en jours)
+  deliverySpeedsPerMode Json    // { ROAD: {min, max}, SEA: {min, max}, ... }
+
+  // Métadonnées
+  updatedById          String
+  updatedBy            User     @relation(fields: [updatedById], references: [id])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // 🔐 Access Policies
+
+  // Seuls les admins peuvent gérer la configuration des prix
+  @@allow('all', auth().role == ADMIN)
+
+  @@deny('all', true)
+
+  @@map("pricing_config")
+}
+
+/**
+ * Modèle CountryDistance (Distances entre pays)
+ *
+ * Table de référence des distances en kilomètres entre les pays.
+ * Utilisée dans le calcul du facteur de distance pour les devis.
+ *
+ * Contraintes :
+ * - Chaque paire (originCountry, destinationCountry) doit être unique
+ * - Les distances sont bidirectionnelles (FR->DE = DE->FR)
+ *
+ * Access policies :
+ * - Lecture publique (nécessaire pour le calcul des devis publics)
+ * - Création/Modification/Suppression : ADMIN uniquement
+ */
+model CountryDistance {
+  id                 String   @id @default(cuid())
+  originCountry      String   // Code pays ISO (ex: "FR", "DE", "ES")
+  destinationCountry String   // Code pays ISO
+  distanceKm         Int      // Distance en kilomètres
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // 🔐 Access Policies
+
+  // Lecture publique nécessaire pour calcul des devis
+  @@allow('read', true)
+
+  // Seuls les admins peuvent créer, modifier ou supprimer
+  @@allow('create,update,delete', auth().role == ADMIN)
+
+  @@deny('all', true)
+
+  @@unique([originCountry, destinationCountry])
+  @@index([originCountry])
+  @@index([destinationCountry])
+  @@map("country_distance")
 }
