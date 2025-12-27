@@ -44,6 +44,14 @@ import {
   type PricingConfigInput,
   type CountryDistanceInput,
 } from '@/modules/pricing-config';
+import {
+  getTransportRates,
+  createTransportRate,
+  updateTransportRate,
+  deleteTransportRate,
+  toggleTransportRateStatus,
+} from '@/modules/transport-rates';
+import { TransportMode } from '@/generated/prisma';
 
 export default function PricingConfigPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +61,20 @@ export default function PricingConfigPage() {
     originCountry: '',
     destinationCountry: '',
     distanceKm: 0,
+  });
+
+  // États pour la gestion des tarifs de transport
+  const [transportRates, setTransportRates] = useState<any[]>([]);
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+  const [editingRateId, setEditingRateId] = useState<string | null>(null);
+  const [newRate, setNewRate] = useState({
+    originCountryCode: 'FR',
+    destinationCountryCode: '',
+    transportMode: 'SEA' as TransportMode,
+    ratePerKg: 0,
+    ratePerM3: 0,
+    notes: '',
+    isActive: true,
   });
 
   // Form pour la configuration générale
@@ -108,6 +130,7 @@ export default function PricingConfigPage() {
   useEffect(() => {
     loadConfiguration();
     loadDistances();
+    loadTransportRates();
   }, []);
 
   async function loadConfiguration() {
@@ -179,6 +202,86 @@ export default function PricingConfigPage() {
     }
   }
 
+  // === FONCTIONS POUR LES TARIFS DE TRANSPORT ===
+
+  async function loadTransportRates() {
+    setIsLoadingRates(true);
+    const result = await getTransportRates({});
+    if (result.success) {
+      setTransportRates(result.data);
+    }
+    setIsLoadingRates(false);
+  }
+
+  async function handleCreateRate() {
+    if (!newRate.destinationCountryCode || newRate.ratePerKg <= 0 || newRate.ratePerM3 <= 0) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await createTransportRate(newRate);
+
+    if (result.success) {
+      toast.success('Tarif créé avec succès');
+      setNewRate({
+        originCountryCode: 'FR',
+        destinationCountryCode: '',
+        transportMode: 'SEA' as TransportMode,
+        ratePerKg: 0,
+        ratePerM3: 0,
+        notes: '',
+        isActive: true,
+      });
+      loadTransportRates();
+    } else {
+      toast.error(result.error || 'Erreur lors de la création');
+    }
+    setIsLoading(false);
+  }
+
+  async function handleUpdateRate(id: string, data: any) {
+    setIsLoading(true);
+    const result = await updateTransportRate(id, data);
+
+    if (result.success) {
+      toast.success('Tarif mis à jour avec succès');
+      setEditingRateId(null);
+      loadTransportRates();
+    } else {
+      toast.error(result.error || 'Erreur lors de la mise à jour');
+    }
+    setIsLoading(false);
+  }
+
+  async function handleDeleteRate(id: string) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce tarif ?')) return;
+
+    setIsLoading(true);
+    const result = await deleteTransportRate(id);
+
+    if (result.success) {
+      toast.success('Tarif supprimé avec succès');
+      loadTransportRates();
+    } else {
+      toast.error(result.error || 'Erreur lors de la suppression');
+    }
+    setIsLoading(false);
+  }
+
+  async function handleToggleRateStatus(id: string, isActive: boolean) {
+    setIsLoading(true);
+    const result = await toggleTransportRateStatus(id, isActive);
+
+    if (result.success) {
+      toast.success(`Tarif ${isActive ? 'activé' : 'désactivé'} avec succès`);
+      loadTransportRates();
+    } else {
+      toast.error(result.error || 'Erreur lors du changement de statut');
+    }
+    setIsLoading(false);
+  }
+
   if (isFetching) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -201,10 +304,14 @@ export default function PricingConfigPage() {
 
       {/* Onglets de configuration */}
       <Tabs defaultValue="base" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="base">
             <CurrencyEur className="h-4 w-4 mr-2" />
             Taux de Base
+          </TabsTrigger>
+          <TabsTrigger value="rates">
+            <Truck className="h-4 w-4 mr-2" />
+            Tarifs Routes
           </TabsTrigger>
           <TabsTrigger value="volumetric">
             <Package className="h-4 w-4 mr-2" />
@@ -301,7 +408,206 @@ export default function PricingConfigPage() {
           </Card>
         </TabsContent>
 
-        {/* Onglet 2 : Poids Volumétrique */}
+        {/* Onglet 2 : Tarifs par Routes */}
+        <TabsContent value="rates">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tarifs par Routes (TransportRate)</CardTitle>
+              <CardDescription>
+                Configurez les tarifs spécifiques par route (origine → destination) et mode de transport.
+                Ces tarifs ont la priorité sur les tarifs par défaut.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Formulaire de création */}
+              <div className="border rounded-lg p-4 space-y-4 bg-blue-50/50">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Créer un nouveau tarif
+                </h3>
+                <div className="grid gap-4 md:grid-cols-6">
+                  <div className="space-y-2">
+                    <Label>Origine (ISO)</Label>
+                    <Input
+                      placeholder="FR"
+                      maxLength={2}
+                      value={newRate.originCountryCode}
+                      onChange={(e) =>
+                        setNewRate({ ...newRate, originCountryCode: e.target.value.toUpperCase() })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Destination (ISO) *</Label>
+                    <Input
+                      placeholder="BF"
+                      maxLength={2}
+                      value={newRate.destinationCountryCode}
+                      onChange={(e) =>
+                        setNewRate({ ...newRate, destinationCountryCode: e.target.value.toUpperCase() })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Mode *</Label>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={newRate.transportMode}
+                      onChange={(e) =>
+                        setNewRate({ ...newRate, transportMode: e.target.value as TransportMode })
+                      }
+                    >
+                      <option value="SEA">Maritime</option>
+                      <option value="AIR">Aérien</option>
+                      <option value="ROAD">Routier</option>
+                      <option value="RAIL">Ferroviaire</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>€/kg *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0.80"
+                      value={newRate.ratePerKg || ''}
+                      onChange={(e) =>
+                        setNewRate({ ...newRate, ratePerKg: parseFloat(e.target.value) || 0 })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>€/m³ *</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="150.00"
+                      value={newRate.ratePerM3 || ''}
+                      onChange={(e) =>
+                        setNewRate({ ...newRate, ratePerM3: parseFloat(e.target.value) || 0 })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-end">
+                    <Button onClick={handleCreateRate} disabled={isLoading} className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Créer
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Notes (optionnel)</Label>
+                  <Input
+                    placeholder="Maritime via Abidjan, délai 30-45j..."
+                    value={newRate.notes}
+                    onChange={(e) => setNewRate({ ...newRate, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Liste des tarifs */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">
+                  Tarifs configurés ({transportRates.length})
+                </h3>
+
+                {isLoadingRates ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Chargement des tarifs...
+                  </div>
+                ) : transportRates.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground border rounded-lg">
+                    Aucun tarif configuré. Créez-en un ci-dessus.
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-50">
+                          <TableHead>Route</TableHead>
+                          <TableHead>Mode</TableHead>
+                          <TableHead className="text-right">€/kg</TableHead>
+                          <TableHead className="text-right">€/m³</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {transportRates.map((rate) => (
+                          <TableRow key={rate.id}>
+                            <TableCell className="font-mono">
+                              <span className="font-semibold">{rate.originCountryCode}</span>
+                              {' → '}
+                              <span className="font-semibold">{rate.destinationCountryCode}</span>
+                            </TableCell>
+                            <TableCell>
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                {rate.transportMode === 'SEA' && '🌊 Maritime'}
+                                {rate.transportMode === 'AIR' && '✈️ Aérien'}
+                                {rate.transportMode === 'ROAD' && '🚛 Routier'}
+                                {rate.transportMode === 'RAIL' && '🚂 Ferroviaire'}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {rate.ratePerKg.toFixed(2)} €
+                            </TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {rate.ratePerM3.toFixed(2)} €
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                              {rate.notes || '-'}
+                            </TableCell>
+                            <TableCell>
+                              <button
+                                onClick={() => handleToggleRateStatus(rate.id, !rate.isActive)}
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  rate.isActive
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}
+                              >
+                                {rate.isActive ? '✓ Actif' : '✗ Inactif'}
+                              </button>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteRate(rate.id)}
+                                  disabled={isLoading}
+                                >
+                                  <Trash className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Important :</strong> Les tarifs configurés ici ont la priorité absolue sur les tarifs par défaut.
+                  Si aucun tarif spécifique n'existe pour une route, le système utilisera les "Taux de Base" (defaultRatePerKg/defaultRatePerM3).
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Onglet 3 : Poids Volumétrique */}
         <TabsContent value="volumetric">
           <Card>
             <CardHeader>
