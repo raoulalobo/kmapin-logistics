@@ -251,8 +251,11 @@ export async function toggleCountryStatus(id: string) {
   // Vérifier que l'utilisateur est admin
   const session = await requireAdmin();
 
-  // Récupérer l'état actuel
-  const country = await prisma.country.findUnique({
+  // Utiliser le client enhanced pour TOUTES les opérations (lecture ET écriture)
+  const db = getEnhancedPrismaFromSession(session);
+
+  // Récupérer l'état actuel avec le client enhanced
+  const country = await db.country.findUnique({
     where: { id },
   });
 
@@ -261,7 +264,6 @@ export async function toggleCountryStatus(id: string) {
   }
 
   // Basculer l'état avec access control automatique
-  const db = getEnhancedPrismaFromSession(session);
   const updated = await db.country.update({
     where: { id },
     data: { isActive: !country.isActive },
