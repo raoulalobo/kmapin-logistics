@@ -259,25 +259,50 @@ export const quoteEstimateSchema = z.object({
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
   // === Dimensions (optionnelles) - Volume = L × W × H ===
-  // Utilisation de .nonnegative() pour accepter 0 comme valeur par défaut
-  // 0 signifie "non renseigné" dans le formulaire
-  length: z.coerce
-    .number()
-    .nonnegative('La longueur doit être positive ou nulle')
-    .max(100, 'La longueur ne peut pas dépasser 100 mètres')
-    .default(0),
+  // Utilisation d'un préprocesseur pour gérer les champs vides et NaN
+  // Convertit automatiquement : NaN, undefined, null, '' → 0
+  // Accepte 0 comme valeur par défaut (= "non renseigné" dans le formulaire)
+  length: z.preprocess(
+    (val) => {
+      // Si la valeur est NaN, undefined, null, ou chaîne vide, retourner 0
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La longueur doit être positive ou nulle')
+      .max(100, 'La longueur ne peut pas dépasser 100 mètres')
+  ),
 
-  width: z.coerce
-    .number()
-    .nonnegative('La largeur doit être positive ou nulle')
-    .max(100, 'La largeur ne peut pas dépasser 100 mètres')
-    .default(0),
+  width: z.preprocess(
+    (val) => {
+      // Si la valeur est NaN, undefined, null, ou chaîne vide, retourner 0
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La largeur doit être positive ou nulle')
+      .max(100, 'La largeur ne peut pas dépasser 100 mètres')
+  ),
 
-  height: z.coerce
-    .number()
-    .nonnegative('La hauteur doit être positive ou nulle')
-    .max(100, 'La hauteur ne peut pas dépasser 100 mètres')
-    .default(0),
+  height: z.preprocess(
+    (val) => {
+      // Si la valeur est NaN, undefined, null, ou chaîne vide, retourner 0
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La hauteur doit être positive ou nulle')
+      .max(100, 'La hauteur ne peut pas dépasser 100 mètres')
+  ),
 
   // === Transport ===
   transportMode: z

@@ -502,12 +502,6 @@ export function QuoteCalculator() {
                   />
                 </div>
               </div>
-              {/* Affichage du volume calculé en temps réel */}
-              {watch('length') && watch('width') && watch('height') && (
-                <p className="text-sm font-medium text-[#003D82] mt-2">
-                  Volume : {((watch('length') || 0) * (watch('width') || 0) * (watch('height') || 0)).toFixed(2)} m³
-                </p>
-              )}
               {errors.length && (
                 <p className="text-sm text-red-500">{errors.length.message}</p>
               )}

@@ -211,13 +211,19 @@ export async function calculerPrixDevisDynamic(
   // === ÉTAPE 1 : Récupérer la configuration globale ===
   const config = await getPricingConfig();
 
-  // === ÉTAPE 2 : Calcul du Volume ===
-  const volume_m3 = calculerVolume(input.longueur, input.largeur, input.hauteur);
+  // === ÉTAPE 2 : Calcul du Volume (optionnel) ===
+  // Si toutes les dimensions sont fournies (> 0), calculer le volume
+  // Sinon, considérer le volume comme 0 (dimensions non renseignées)
+  let volume_m3 = 0;
+  if (input.longueur > 0 && input.largeur > 0 && input.hauteur > 0) {
+    volume_m3 = calculerVolume(input.longueur, input.largeur, input.hauteur);
+  }
 
   // === ÉTAPE 3 : Calcul du Poids Volumétrique (si activé pour ce mode) ===
   const useVolumetric = config.useVolumetricWeightPerMode[input.modeTransport];
   const volumetricRatio = config.volumetricWeightRatios[input.modeTransport];
-  const poidsVolumetrique_kg = useVolumetric ? volume_m3 * volumetricRatio : 0;
+  // Si volume = 0 (dimensions non fournies), le poids volumétrique sera aussi 0
+  const poidsVolumetrique_kg = useVolumetric && volume_m3 > 0 ? volume_m3 * volumetricRatio : 0;
 
   // === ÉTAPE 4 : Détermination de la Masse Taxable ===
   let masseTaxable: number;
