@@ -34,6 +34,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import {
   getCurrentPricingConfig,
@@ -51,6 +58,7 @@ import {
   deleteTransportRate,
   toggleTransportRateStatus,
 } from '@/modules/transport-rates';
+import { listCountries } from '@/modules/countries/actions/country.actions';
 import { TransportMode } from '@/generated/prisma';
 
 export default function PricingConfigPage() {
@@ -67,6 +75,7 @@ export default function PricingConfigPage() {
   const [transportRates, setTransportRates] = useState<any[]>([]);
   const [isLoadingRates, setIsLoadingRates] = useState(false);
   const [editingRateId, setEditingRateId] = useState<string | null>(null);
+  const [activeCountries, setActiveCountries] = useState<any[]>([]);
   const [newRate, setNewRate] = useState({
     originCountryCode: 'FR',
     destinationCountryCode: '',
@@ -131,6 +140,7 @@ export default function PricingConfigPage() {
     loadConfiguration();
     loadDistances();
     loadTransportRates();
+    loadActiveCountries();
   }, []);
 
   async function loadConfiguration() {
@@ -203,6 +213,11 @@ export default function PricingConfigPage() {
   }
 
   // === FONCTIONS POUR LES TARIFS DE TRANSPORT ===
+
+  async function loadActiveCountries() {
+    const countries = await listCountries(true); // true = uniquement les pays actifs
+    setActiveCountries(countries);
+  }
 
   async function loadTransportRates() {
     setIsLoadingRates(true);
@@ -427,43 +442,71 @@ export default function PricingConfigPage() {
                 </h3>
                 <div className="grid gap-4 md:grid-cols-6">
                   <div className="space-y-2">
-                    <Label>Origine (ISO)</Label>
-                    <Input
-                      placeholder="FR"
-                      maxLength={2}
+                    <Label>Origine *</Label>
+                    <Select
                       value={newRate.originCountryCode}
-                      onChange={(e) =>
-                        setNewRate({ ...newRate, originCountryCode: e.target.value.toUpperCase() })
+                      onValueChange={(value) =>
+                        setNewRate({ ...newRate, originCountryCode: value })
                       }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un pays" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeCountries.map((country) => (
+                          <SelectItem key={country.id} value={country.code}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500 font-mono">{country.code}</span>
+                              <span>{country.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Destination (ISO) *</Label>
-                    <Input
-                      placeholder="BF"
-                      maxLength={2}
+                    <Label>Destination *</Label>
+                    <Select
                       value={newRate.destinationCountryCode}
-                      onChange={(e) =>
-                        setNewRate({ ...newRate, destinationCountryCode: e.target.value.toUpperCase() })
+                      onValueChange={(value) =>
+                        setNewRate({ ...newRate, destinationCountryCode: value })
                       }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un pays" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {activeCountries.map((country) => (
+                          <SelectItem key={country.id} value={country.code}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500 font-mono">{country.code}</span>
+                              <span>{country.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Mode *</Label>
-                    <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    <Select
                       value={newRate.transportMode}
-                      onChange={(e) =>
-                        setNewRate({ ...newRate, transportMode: e.target.value as TransportMode })
+                      onValueChange={(value) =>
+                        setNewRate({ ...newRate, transportMode: value as TransportMode })
                       }
                     >
-                      <option value="SEA">Maritime</option>
-                      <option value="AIR">Aérien</option>
-                      <option value="ROAD">Routier</option>
-                      <option value="RAIL">Ferroviaire</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SEA">🌊 Maritime</SelectItem>
+                        <SelectItem value="AIR">✈️ Aérien</SelectItem>
+                        <SelectItem value="ROAD">🚛 Routier</SelectItem>
+                        <SelectItem value="RAIL">🚂 Ferroviaire</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
