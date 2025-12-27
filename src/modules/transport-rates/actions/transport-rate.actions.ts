@@ -94,16 +94,44 @@ export async function createTransportRate(
   } catch (error) {
     console.error('[createTransportRate] Erreur:', error);
 
-    if (error instanceof Error && error.name === 'ZodError') {
-      return {
-        success: false,
-        error: 'Données invalides. Veuillez vérifier tous les champs.',
-      };
+    // Gestion des erreurs d'autorisation Zenstack
+    if (error instanceof Error) {
+      // Erreur Zenstack : accès refusé par les policies
+      if (error.message.includes('denied by policy')) {
+        return {
+          success: false,
+          error: '🚫 Accès refusé : Vous devez être administrateur pour créer des tarifs de transport. Veuillez vérifier que vous êtes bien connecté avec un compte ayant le rôle ADMIN.',
+        };
+      }
+
+      // Erreur Better Auth : pas authentifié
+      if (error.message.includes('Unauthorized')) {
+        return {
+          success: false,
+          error: '🔒 Non authentifié : Veuillez vous connecter pour accéder à cette fonctionnalité.',
+        };
+      }
+
+      // Erreur Better Auth : pas admin
+      if (error.message.includes('Forbidden') || error.message.includes('Admin access required')) {
+        return {
+          success: false,
+          error: '🚫 Accès interdit : Seuls les administrateurs peuvent créer des tarifs de transport. Votre rôle actuel ne vous autorise pas à effectuer cette action.',
+        };
+      }
+
+      // Erreur Zod : validation
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: '❌ Données invalides : Veuillez vérifier tous les champs du formulaire.',
+        };
+      }
     }
 
     return {
       success: false,
-      error: 'Une erreur est survenue lors de la création du tarif',
+      error: 'Une erreur est survenue lors de la création du tarif. Veuillez réessayer.',
     };
   }
 }

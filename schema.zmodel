@@ -27,6 +27,29 @@ datasource db {
 }
 
 // ============================================
+// CONTEXTE D'AUTHENTIFICATION
+// ============================================
+
+/**
+ * Type Auth - Définit la forme du contexte utilisateur pour Zenstack
+ *
+ * CRITIQUE : Ce type est obligatoire pour que Zenstack comprenne la structure
+ * de auth() utilisée dans les access policies.
+ *
+ * Sans ce type, auth().role, auth().id, etc. ne fonctionnent PAS correctement
+ * et les policies sont rejetées même si l'utilisateur a les bonnes permissions.
+ *
+ * Le contexte est fourni via enhance(prisma, { user: context })
+ */
+type Auth {
+  id        String   @id      // ID de l'utilisateur (depuis Better Auth)
+  role      UserRole          // Rôle de l'utilisateur (ADMIN, CLIENT, etc.)
+  companyId String?           // ID de la company (pour multi-tenancy)
+
+  @@auth                       // Directive Zenstack : marque ce type comme contexte auth()
+}
+
+// ============================================
 // AUTHENTIFICATION (Better Auth)
 // ============================================
 
@@ -71,7 +94,7 @@ model User {
   @@allow('all', auth().role == ADMIN)
 
   // Chaque user peut lire et modifier son propre profil
-  @@allow('read,update', auth() == this)
+  @@allow('read,update', auth().id == id)
 
   // Les managers peuvent lire les users de leur entreprise
   @@allow('read', auth().companyId == companyId &&
@@ -1223,9 +1246,7 @@ model TransportRate {
   @@allow('read', true)
 
   // Seuls les admins peuvent créer, modifier ou supprimer
-  @@allow('create,update,delete', auth().role == ADMIN)
-
-  @@deny('all', true)
+  @@allow('all', auth().role == ADMIN)
 
   // Index et contraintes
   @@unique([originCountryCode, destinationCountryCode, transportMode])

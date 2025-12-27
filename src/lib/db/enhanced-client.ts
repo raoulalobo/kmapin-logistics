@@ -70,14 +70,15 @@ export function getEnhancedPrisma(user?: AuthContext | null) {
     });
   }
 
+  // Préparer le contexte pour Zenstack
+  const context = {
+    id: user.id,
+    role: user.role,
+    companyId: user.companyId,
+  };
+
   // Appliquer les access policies avec le contexte utilisateur
-  return enhance(prisma, {
-    user: {
-      id: user.id,
-      role: user.role,
-      companyId: user.companyId,
-    },
-  });
+  return enhance(prisma, { user: context });
 }
 
 /**
@@ -105,9 +106,19 @@ export function getEnhancedPrismaFromSession(session: any) {
     return enhance(prisma, { user: undefined });
   }
 
+  // Convertir la string du rôle en enum UserRole pour Zenstack
+  // Better Auth retourne une string ("ADMIN") mais Zenstack attend l'enum (UserRole.ADMIN)
+  const roleString = session.user.role as string;
+  const roleEnum = UserRole[roleString as keyof typeof UserRole];
+
+  if (!roleEnum) {
+    console.error(`[getEnhancedPrismaFromSession] Rôle invalide: ${roleString}`);
+    throw new Error(`Invalid user role: ${roleString}`);
+  }
+
   return getEnhancedPrisma({
     id: session.user.id,
-    role: session.user.role as UserRole,
+    role: roleEnum,
     companyId: session.user.companyId,
   });
 }

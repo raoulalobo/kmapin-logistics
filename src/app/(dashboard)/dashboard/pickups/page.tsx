@@ -31,7 +31,7 @@ import {
   XCircle,
   ArrowRight,
   Plus,
-  Filter,
+  Funnel,
   Download,
 } from '@phosphor-icons/react';
 import Link from 'next/link';
@@ -200,7 +200,7 @@ export default function PickupsPage() {
                 onValueChange={(value) => setStatusFilter(value as PickupStatus | 'ALL')}
               >
                 <SelectTrigger className="w-[180px]">
-                  <Filter className="mr-2 h-4 w-4" />
+                  <Funnel className="mr-2 h-4 w-4" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

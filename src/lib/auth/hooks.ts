@@ -1,27 +1,59 @@
 /**
- * Client-side auth hooks
+ * Hooks sécurisés pour Better Auth
+ *
+ * Gère les incompatibilités entre Better Auth 1.4.5 et React 19.2.1
+ *
+ * @module lib/auth/hooks
  */
 
 'use client';
 
-import { authClient } from '@/lib/auth/client';
+import { useState, useEffect } from 'react';
+import { authClient } from './client';
 
 /**
- * Hook sécurisé pour obtenir la session côté client
+ * Hook sécurisé pour récupérer la session utilisateur
  *
- * @returns {Object} Données de session
- * @property {Object|null} data - Données de session de l'utilisateur
- * @property {boolean} isLoading - Indique si la session est en cours de chargement
- * @property {Error|null} error - Erreur éventuelle lors du chargement de la session
- * @property {boolean} isAuthenticated - Indique si l'utilisateur est authentifié
+ * Gère gracieusement les erreurs de compatibilité React 19 + Better Auth 1.4.5
+ *
+ * @returns Session utilisateur ou null
+ *
+ * @example
+ * ```tsx
+ * const session = useSafeSession();
+ *
+ * if (session?.user) {
+ *   return <div>Bonjour {session.user.name}</div>;
+ * }
+ * ```
  */
 export function useSafeSession() {
-  const { data: session, isPending, error } = authClient.useSession();
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  return {
-    data: session ?? null,
-    isLoading: isPending,
-    error,
-    isAuthenticated: !!session?.user,
-  };
+  useEffect(() => {
+    // Vérifier la session côté client uniquement
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
+    // Utiliser l'API fetch pour récupérer la session
+    // Plus stable que le hook useSession avec React 19
+    fetch('/api/auth/get-session', {
+      credentials: 'include',
+    })
+      .then(res => res.json())
+      .then(data => {
+        setSession(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Erreur lors de la récupération de la session:', err);
+        setSession(null);
+        setIsLoading(false);
+      });
+  }, []);
+
+  return { data: session, isLoading };
 }
