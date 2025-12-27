@@ -1272,7 +1272,9 @@ model Country {
   // Seuls les admins peuvent créer, modifier ou supprimer
   @@allow('create,update,delete', auth().role == ADMIN)
 
-  @@deny('all', true)
+  // Par défaut, refuser ce qui n'est pas explicitement autorisé
+  // Note: Ne pas utiliser @@deny('all', true) car cela bloquerait même les @@allow ci-dessus
+  @@deny('all', auth() == null)
 
   @@index([code])
   @@index([isActive])
