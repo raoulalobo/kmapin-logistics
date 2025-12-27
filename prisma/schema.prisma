@@ -62,6 +62,22 @@ enum ShipmentStatus {
   EXCEPTION
 }
 
+enum PickupStatus {
+  REQUESTED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum PickupTimeSlot {
+  MORNING
+  AFTERNOON
+  EVENING
+  SPECIFIC_TIME
+  FLEXIBLE
+}
+
 enum InvoiceStatus {
   DRAFT
   SENT
@@ -101,6 +117,8 @@ enum NotificationType {
 enum DocumentType {
   INVOICE_SCAN
   PROOF_OF_DELIVERY
+  PROOF_OF_PICKUP
+  PICKUP_SIGNATURE
   CUSTOMS_DOCUMENT
   PACKING_LIST
   BILL_OF_LADING
@@ -139,6 +157,7 @@ model User {
   uploadedDocuments Document[]      @relation("UploadedDocuments")
   prospect          Prospect?
   pricingConfigs    PricingConfig[]
+  createdPickups    PickupRequest[] @relation("CreatedPickups")
 
   @@index([companyId])
   @@map("user")
@@ -201,25 +220,26 @@ model Verification {
 }
 
 model Company {
-  id           String        @id() @default(cuid())
-  name         String
-  legalName    String?
-  taxId        String?       @unique()
-  email        String
-  phone        String?
-  address      String
-  city         String
-  postalCode   String?
-  country      String
-  website      String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt()
-  users        User[]
-  shipments    Shipment[]
-  invoices     Invoice[]
-  quotes       Quote[]
-  documents    Document[]
-  transporters Transporter[]
+  id             String          @id() @default(cuid())
+  name           String
+  legalName      String?
+  taxId          String?         @unique()
+  email          String
+  phone          String?
+  address        String
+  city           String
+  postalCode     String?
+  country        String
+  website        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt()
+  users          User[]
+  shipments      Shipment[]
+  invoices       Invoice[]
+  quotes         Quote[]
+  documents      Document[]
+  transporters   Transporter[]
+  pickupRequests PickupRequest[]
 
   @@index([taxId])
 }
@@ -243,7 +263,9 @@ model Shipment {
   destinationPhone      String?
   cargoType             CargoType
   weight                Float
-  volume                Float?
+  length                Float?
+  width                 Float?
+  height                Float?
   packageCount          Int
   value                 Float?
   currency              String          @default("EUR")
@@ -268,11 +290,56 @@ model Shipment {
   updatedAt             DateTime        @updatedAt()
   trackingEvents        TrackingEvent[]
   documents             Document[]
+  pickupRequests        PickupRequest[]
 
   @@index([companyId])
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
+}
+
+model PickupRequest {
+  id                  String         @id() @default(cuid())
+  shipmentId          String
+  shipment            Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  pickupAddress       String
+  pickupCity          String
+  pickupPostalCode    String
+  pickupCountry       String
+  pickupContact       String?
+  pickupPhone         String?
+  requestedDate       DateTime
+  scheduledDate       DateTime?
+  timeSlot            PickupTimeSlot @default(FLEXIBLE)
+  pickupTime          String?
+  actualPickupDate    DateTime?
+  status              PickupStatus   @default(REQUESTED)
+  transporterId       String?
+  transporter         Transporter?   @relation(fields: [transporterId], references: [id])
+  driverName          String?
+  driverPhone         String?
+  vehiclePlate        String?
+  specialInstructions String?
+  accessInstructions  String?
+  internalNotes       String?
+  completionNotes     String?
+  documents           Document[]
+  notificationSent    Boolean        @default(false)
+  reminderSent        Boolean        @default(false)
+  confirmationSent    Boolean        @default(false)
+  companyId           String
+  company             Company        @relation(fields: [companyId], references: [id])
+  createdById         String
+  createdBy           User           @relation("CreatedPickups", fields: [createdById], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt()
+
+  @@index([shipmentId])
+  @@index([companyId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@index([requestedDate])
+  @@index([transporterId])
 }
 
 model TrackingEvent {
@@ -345,7 +412,9 @@ model Quote {
   transportMode      TransportMode[]
   cargoType          CargoType
   weight             Float
-  volume             Float?
+  length             Float?
+  width              Float?
+  height             Float?
   estimatedCost      Float
   validUntil         DateTime
   currency           String          @default("EUR")
@@ -392,7 +461,9 @@ model GuestQuote {
   transportMode      TransportMode[]
   cargoType          CargoType
   weight             Float
-  volume             Float?
+  length             Float?
+  width              Float?
+  height             Float?
   estimatedCost      Float
   validUntil         DateTime
   currency           String          @default("EUR")
@@ -420,54 +491,58 @@ model Notification {
 }
 
 model Document {
-  id          String       @id() @default(cuid())
-  name        String
-  fileUrl     String
-  fileKey     String
-  fileSize    Int
-  mimeType    String
-  type        DocumentType
-  description String?
-  shipmentId  String?
-  shipment    Shipment?    @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  invoiceId   String?
-  invoice     Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  quoteId     String?
-  quote       Quote?       @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  companyId   String
-  company     Company      @relation(fields: [companyId], references: [id])
-  uploadedBy  String
-  uploader    User         @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
-  uploadedAt  DateTime     @default(now())
+  id              String         @id() @default(cuid())
+  name            String
+  fileUrl         String
+  fileKey         String
+  fileSize        Int
+  mimeType        String
+  type            DocumentType
+  description     String?
+  shipmentId      String?
+  shipment        Shipment?      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  invoiceId       String?
+  invoice         Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  quoteId         String?
+  quote           Quote?         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  pickupRequestId String?
+  pickupRequest   PickupRequest? @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
+  companyId       String
+  company         Company        @relation(fields: [companyId], references: [id])
+  uploadedBy      String
+  uploader        User           @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
+  uploadedAt      DateTime       @default(now())
 
   @@index([companyId])
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])
+  @@index([pickupRequestId])
   @@index([uploadedBy])
 }
 
 model Transporter {
-  id            String          @id() @default(cuid())
-  name          String
-  type          TransporterType
-  email         String          @unique()
-  phone         String
-  address       String?
-  city          String?
-  postalCode    String?
-  country       String?
-  website       String?
-  contactPerson String?
-  taxId         String?
-  iban          String?
-  notes         String?
-  isActive      Boolean         @default(true)
-  rating        Float?          @default(0)
-  companyId     String
-  company       Company         @relation(fields: [companyId], references: [id])
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt()
+  id             String          @id() @default(cuid())
+  name           String
+  type           TransporterType
+  email          String          @unique()
+  phone          String
+  address        String?
+  city           String?
+  postalCode     String?
+  country        String?
+  website        String?
+  contactPerson  String?
+  taxId          String?
+  iban           String?
+  notes          String?
+  isActive       Boolean         @default(true)
+  rating         Float?          @default(0)
+  companyId      String
+  company        Company         @relation(fields: [companyId], references: [id])
+  pickupRequests PickupRequest[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt()
 
   @@index([companyId])
   @@index([type])
@@ -475,16 +550,20 @@ model Transporter {
 }
 
 model PricingConfig {
-  id                    String   @id() @default(cuid())
-  baseRatePerKg         Float    @default(0.5)
-  transportMultipliers  Json
-  cargoTypeSurcharges   Json
-  prioritySurcharges    Json
-  deliverySpeedsPerMode Json
-  updatedById           String
-  updatedBy             User     @relation(fields: [updatedById], references: [id])
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt()
+  id                         String   @id() @default(cuid())
+  baseRatePerKg              Float    @default(0.5)
+  defaultRatePerKg           Float    @default(1.0)
+  defaultRatePerM3           Float    @default(200.0)
+  transportMultipliers       Json
+  cargoTypeSurcharges        Json
+  prioritySurcharges         Json
+  deliverySpeedsPerMode      Json
+  volumetricWeightRatios     Json     @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1,\"RAIL\":250}")
+  useVolumetricWeightPerMode Json     @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false,\"RAIL\":true}")
+  updatedById                String
+  updatedBy                  User     @relation(fields: [updatedById], references: [id])
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt()
 
   @@map("pricing_config")
 }
@@ -501,4 +580,39 @@ model CountryDistance {
   @@index([originCountry])
   @@index([destinationCountry])
   @@map("country_distance")
+}
+
+model TransportRate {
+  id                     String        @id() @default(cuid())
+  originCountryCode      String
+  destinationCountryCode String
+  transportMode          TransportMode
+  ratePerKg              Float
+  ratePerM3              Float
+  cargoTypeSurcharges    Json?
+  prioritySurcharges     Json?
+  isActive               Boolean       @default(true)
+  notes                  String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt()
+
+  @@unique([originCountryCode, destinationCountryCode, transportMode])
+  @@index([originCountryCode])
+  @@index([destinationCountryCode])
+  @@index([transportMode])
+  @@index([isActive])
+  @@map("transport_rate")
+}
+
+model Country {
+  id        String   @id() @default(cuid())
+  code      String   @unique()
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@index([code])
+  @@index([isActive])
+  @@map("country")
 }

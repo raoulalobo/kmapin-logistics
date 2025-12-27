@@ -16,6 +16,7 @@ import {
   UsersThree,
   UserGear,
   Truck,
+  Van,
   FileText,
   CreditCard,
   ChartBar,
@@ -24,6 +25,7 @@ import {
   Table,
   CurrencyEur,
   House,
+  Globe,
 } from '@phosphor-icons/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -81,6 +83,12 @@ const navigation: NavSection[] = [
         permission: 'shipments:read', // Utilisera aussi shipments:read:own pour les CLIENTs
       },
       {
+        label: 'Enlèvements',
+        href: '/dashboard/pickups',
+        icon: Van,
+        permission: 'pickups:read',
+      },
+      {
         label: 'Tracking',
         href: '/dashboard/tracking',
         icon: MapPin,
@@ -130,6 +138,12 @@ const navigation: NavSection[] = [
         label: 'Configuration des Prix',
         href: '/dashboard/settings/pricing',
         icon: CurrencyEur,
+        // Pas de permission - réservé aux ADMIN via wildcard '*'
+      },
+      {
+        label: 'Pays',
+        href: '/dashboard/countries',
+        icon: Globe,
         // Pas de permission - réservé aux ADMIN via wildcard '*'
       },
       {

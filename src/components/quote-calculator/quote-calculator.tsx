@@ -24,12 +24,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { calculateQuoteEstimateAction } from '@/modules/quotes/actions/quote.actions';
+import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult } from '@/modules/quotes/schemas/quote.schema';
 import { CargoType, TransportMode } from '@/generated/prisma';
 import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
 import type { QuoteDataFormData } from '@/modules/prospects';
 import { useSafeSession } from '@/lib/auth/hooks';
+import { CountrySelect } from '@/components/countries';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -60,8 +61,9 @@ const transportModeLabels: Record<TransportMode, { label: string; icon: any }> =
  */
 const priorityLabels = {
   STANDARD: 'Standard',
-  EXPRESS: 'Express',
-  URGENT: 'Urgent',
+  NORMAL: 'Normal (+10%)',
+  EXPRESS: 'Express (+50%)',
+  URGENT: 'Urgent (+30%)',
 };
 
 export function QuoteCalculator() {
@@ -117,7 +119,9 @@ export function QuoteCalculator() {
       destinationCountry: '',
       cargoType: 'GENERAL',
       weight: 0,
-      volume: 0,
+      length: 0,
+      width: 0,
+      height: 0,
       transportMode: [],
       priority: 'STANDARD',
     },
@@ -181,8 +185,8 @@ export function QuoteCalculator() {
       // Sauvegarder les données du formulaire pour le modal email
       setLastFormData(data);
 
-      // Appeler la Server Action
-      const response = await calculateQuoteEstimateAction(data);
+      // Appeler la Server Action V2 (algorithme dynamique du PDF)
+      const response = await calculateQuoteEstimateV2Action(data);
 
       if (response.success && response.data) {
         setResult(response.data);
@@ -291,12 +295,18 @@ export function QuoteCalculator() {
         doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, 50, yPos);
         yPos += 6;
 
-        // Volume (si présent)
-        if (lastFormData.volume) {
+        // Dimensions (si présentes)
+        if (lastFormData.length && lastFormData.width && lastFormData.height) {
+          const volume = lastFormData.length * lastFormData.width * lastFormData.height;
+          doc.setFont('helvetica', 'bold');
+          doc.text('Dimensions :', 25, yPos);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`${lastFormData.length}m × ${lastFormData.width}m × ${lastFormData.height}m`, 50, yPos);
+          yPos += 6;
           doc.setFont('helvetica', 'bold');
           doc.text('Volume :', 25, yPos);
           doc.setFont('helvetica', 'normal');
-          doc.text(`${lastFormData.volume.toLocaleString('fr-FR')} m³`, 50, yPos);
+          doc.text(`${volume.toFixed(2)} m³`, 50, yPos);
           yPos += 6;
         }
 
@@ -353,16 +363,22 @@ export function QuoteCalculator() {
   /**
    * Préparer les données pour le QuoteRequestModal
    * Convertit QuoteEstimateData en QuoteDataFormData
+   * Calcule le volume à partir des dimensions si présentes
    */
   const prepareQuoteDataForModal = (): QuoteDataFormData | null => {
     if (!lastFormData || !result) return null;
+
+    // Calculer le volume à partir des dimensions si toutes sont présentes
+    const volume = lastFormData.length && lastFormData.width && lastFormData.height
+      ? lastFormData.length * lastFormData.width * lastFormData.height
+      : null;
 
     return {
       originCountry: lastFormData.originCountry,
       destinationCountry: lastFormData.destinationCountry,
       cargoType: lastFormData.cargoType,
       weight: lastFormData.weight,
-      volume: lastFormData.volume || null,
+      volume,
       transportMode: lastFormData.transportMode,
       estimatedCost: result.estimatedCost,
       currency: 'EUR',
@@ -390,18 +406,19 @@ export function QuoteCalculator() {
         </CardHeader>
         <CardContent className="p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Grille principale - 4 colonnes sur grand écran */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* Première ligne - Origine, Destination, Poids */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {/* Pays d'origine */}
               <div className="space-y-2">
                 <Label htmlFor="originCountry" className="text-base font-semibold flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-[#003D82]" />
                   Pays d'origine
                 </Label>
-                <Input
+                <CountrySelect
                   id="originCountry"
-                  placeholder="Ex: France"
-                  {...register('originCountry')}
+                  value={watch('originCountry')}
+                  onValueChange={(value) => setValue('originCountry', value)}
+                  placeholder="Sélectionnez un pays"
                   className={`h-11 ${errors.originCountry ? 'border-red-500' : ''}`}
                 />
                 {errors.originCountry && (
@@ -415,10 +432,11 @@ export function QuoteCalculator() {
                   <MapPin className="h-4 w-4 text-[#003D82]" />
                   Pays de destination
                 </Label>
-                <Input
+                <CountrySelect
                   id="destinationCountry"
-                  placeholder="Ex: Allemagne"
-                  {...register('destinationCountry')}
+                  value={watch('destinationCountry')}
+                  onValueChange={(value) => setValue('destinationCountry', value)}
+                  placeholder="Sélectionnez un pays"
                   className={`h-11 ${errors.destinationCountry ? 'border-red-500' : ''}`}
                 />
                 {errors.destinationCountry && (
@@ -443,28 +461,59 @@ export function QuoteCalculator() {
                   <p className="text-sm text-red-500">{errors.weight.message}</p>
                 )}
               </div>
-
-              {/* Volume */}
-              <div className="space-y-2">
-                <Label htmlFor="volume" className="text-base font-semibold flex items-center gap-2">
-                  <Package className="h-4 w-4 text-[#003D82]" />
-                  Volume (m³)
-                </Label>
-                <Input
-                  id="volume"
-                  type="number"
-                  step="0.01"
-                  placeholder="0 (entrez 0 si inconnu)"
-                  {...register('volume', { valueAsNumber: true })}
-                  className={`h-11 ${errors.volume ? 'border-red-500' : ''}`}
-                />
-                {errors.volume && (
-                  <p className="text-sm text-red-500">{errors.volume.message}</p>
-                )}
-              </div>
             </div>
 
-            {/* Deuxième ligne - Type de marchandise et Priorité */}
+            {/* Deuxième ligne - Dimensions (optionnel) */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <Package className="h-4 w-4 text-[#003D82]" />
+                Dimensions (optionnel)
+              </Label>
+              <p className="text-xs text-gray-500 mb-2">Volume calculé : L × W × H</p>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2">
+                  <Input
+                    id="length"
+                    type="number"
+                    step="0.01"
+                    placeholder="Longueur (m)"
+                    {...register('length', { valueAsNumber: true })}
+                    className={`h-11 ${errors.length ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    id="width"
+                    type="number"
+                    step="0.01"
+                    placeholder="Largeur (m)"
+                    {...register('width', { valueAsNumber: true })}
+                    className={`h-11 ${errors.width ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    id="height"
+                    type="number"
+                    step="0.01"
+                    placeholder="Hauteur (m)"
+                    {...register('height', { valueAsNumber: true })}
+                    className={`h-11 ${errors.height ? 'border-red-500' : ''}`}
+                  />
+                </div>
+              </div>
+              {/* Affichage du volume calculé en temps réel */}
+              {watch('length') && watch('width') && watch('height') && (
+                <p className="text-sm font-medium text-[#003D82] mt-2">
+                  Volume : {((watch('length') || 0) * (watch('width') || 0) * (watch('height') || 0)).toFixed(2)} m³
+                </p>
+              )}
+              {errors.length && (
+                <p className="text-sm text-red-500">{errors.length.message}</p>
+              )}
+            </div>
+
+            {/* Troisième ligne - Type de marchandise et Priorité */}
             <div className="grid gap-6 md:grid-cols-2">
               {/* Type de marchandise */}
               <div className="space-y-2">

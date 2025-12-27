@@ -12,14 +12,20 @@ import type {
   CargoTypeSurcharges,
   PrioritySurcharges,
   DeliverySpeedsPerMode,
+  VolumetricWeightRatios,
+  UseVolumetricWeightPerMode,
 } from '../schemas/pricing-config.schema';
 
 /**
  * Valeurs par défaut pour la configuration des prix
  * Utilisées si aucune configuration n'existe en base de données
+ *
+ * Basées sur les spécifications du document "calculs.pdf"
  */
 export const DEFAULT_PRICING_CONFIG = {
-  baseRatePerKg: 0.5,
+  baseRatePerKg: 0.5,           // ANCIEN (conservé pour compatibilité)
+  defaultRatePerKg: 1.0,        // NOUVEAU : Tarif par défaut pour fallback
+  defaultRatePerM3: 200.0,      // NOUVEAU : Tarif par défaut pour fallback
   transportMultipliers: {
     ROAD: 1.0,
     SEA: 0.6,
@@ -37,9 +43,10 @@ export const DEFAULT_PRICING_CONFIG = {
     OTHER: 0.1,        // +10%
   } as CargoTypeSurcharges,
   prioritySurcharges: {
-    STANDARD: 0,
-    EXPRESS: 0.5,
-    URGENT: 1.0,
+    STANDARD: 0,       // +0% (coefficient 1.0)
+    NORMAL: 0.1,       // +10% (coefficient 1.1)
+    EXPRESS: 0.5,      // +50% (coefficient 1.5)
+    URGENT: 0.3,       // +30% (coefficient 1.3)
   } as PrioritySurcharges,
   deliverySpeedsPerMode: {
     ROAD: { min: 3, max: 7 },
@@ -47,17 +54,46 @@ export const DEFAULT_PRICING_CONFIG = {
     AIR: { min: 1, max: 3 },
     RAIL: { min: 7, max: 14 },
   } as DeliverySpeedsPerMode,
+  /**
+   * NOUVEAU : Ratios de conversion du poids volumétrique
+   * Basés sur les spécifications du PDF :
+   * - AIR: 167 kg/m³  (ratio 1/6 = 6000)
+   * - ROAD: 333 kg/m³ (ratio 1/3 = 5000)
+   * - SEA: 1 kg/m³    (ratio 1/1 = 1000)
+   * - RAIL: 250 kg/m³ (estimation)
+   */
+  volumetricWeightRatios: {
+    AIR: 167,
+    ROAD: 333,
+    SEA: 1,
+    RAIL: 250,
+  } as VolumetricWeightRatios,
+  /**
+   * NOUVEAU : Activation du poids volumétrique par mode
+   * Maritime (SEA) n'utilise PAS le poids volumétrique car il utilise
+   * le système "Poids ou Mesure" (Unité Payante) selon le PDF
+   */
+  useVolumetricWeightPerMode: {
+    AIR: true,
+    ROAD: true,
+    SEA: false,  // Maritime utilise "Poids ou Mesure" (Unité Payante)
+    RAIL: true,
+  } as UseVolumetricWeightPerMode,
 } as const;
 
 /**
  * Type pour la configuration complète
  */
 export interface PricingConfigData {
-  baseRatePerKg: number;
+  baseRatePerKg: number;                        // ANCIEN (conservé)
+  defaultRatePerKg: number;                     // NOUVEAU : Tarif par défaut €/kg
+  defaultRatePerM3: number;                     // NOUVEAU : Tarif par défaut €/m³
   transportMultipliers: TransportMultipliers;
   cargoTypeSurcharges: CargoTypeSurcharges;
   prioritySurcharges: PrioritySurcharges;
   deliverySpeedsPerMode: DeliverySpeedsPerMode;
+  volumetricWeightRatios: VolumetricWeightRatios;               // NOUVEAU
+  useVolumetricWeightPerMode: UseVolumetricWeightPerMode;       // NOUVEAU
 }
 
 /**
@@ -83,10 +119,14 @@ export const getPricingConfig = unstable_cache(
       // Convertir les champs JSON en types TypeScript
       return {
         baseRatePerKg: config.baseRatePerKg,
+        defaultRatePerKg: config.defaultRatePerKg,
+        defaultRatePerM3: config.defaultRatePerM3,
         transportMultipliers: config.transportMultipliers as TransportMultipliers,
         cargoTypeSurcharges: config.cargoTypeSurcharges as CargoTypeSurcharges,
         prioritySurcharges: config.prioritySurcharges as PrioritySurcharges,
         deliverySpeedsPerMode: config.deliverySpeedsPerMode as DeliverySpeedsPerMode,
+        volumetricWeightRatios: config.volumetricWeightRatios as VolumetricWeightRatios,
+        useVolumetricWeightPerMode: config.useVolumetricWeightPerMode as UseVolumetricWeightPerMode,
       };
     } catch (error) {
       console.error('[getPricingConfig] Erreur lors de la récupération de la configuration:', error);
@@ -100,15 +140,6 @@ export const getPricingConfig = unstable_cache(
     tags: ['pricing-config'],
   }
 );
-
-/**
- * Type pour une distance entre pays
- */
-export interface CountryDistanceData {
-  originCountry: string;
-  destinationCountry: string;
-  distanceKm: number;
-}
 
 /**
  * Distances par défaut entre pays (en km)
@@ -129,29 +160,38 @@ export const DEFAULT_COUNTRY_DISTANCES: Record<string, Record<string, number>> =
 };
 
 /**
+ * Type pour une distance en cache
+ */
+interface CachedDistance {
+  originCountry: string;
+  destinationCountry: string;
+  distanceKm: number;
+}
+
+/**
  * Récupère toutes les distances entre pays depuis la base de données
  * Utilise un cache Next.js avec revalidation toutes les heures
  *
- * @returns Map des distances (originCountry -> destinationCountry -> distanceKm)
+ * IMPORTANT: Retourne un tableau de données brutes au lieu d'un Map
+ * car Next.js unstable_cache sérialise en JSON (les Maps perdent leurs méthodes)
+ *
+ * @returns Tableau des distances entre pays
  */
-export const getCountryDistancesMap = unstable_cache(
-  async (): Promise<Map<string, Map<string, number>>> => {
+export const getCountryDistancesData = unstable_cache(
+  async (): Promise<CachedDistance[]> => {
     try {
-      const distances = await prisma.countryDistance.findMany();
+      const distances = await prisma.countryDistance.findMany({
+        select: {
+          originCountry: true,
+          destinationCountry: true,
+          distanceKm: true,
+        },
+      });
 
-      const distanceMap = new Map<string, Map<string, number>>();
-
-      for (const distance of distances) {
-        if (!distanceMap.has(distance.originCountry)) {
-          distanceMap.set(distance.originCountry, new Map());
-        }
-        distanceMap.get(distance.originCountry)!.set(distance.destinationCountry, distance.distanceKm);
-      }
-
-      return distanceMap;
+      return distances;
     } catch (error) {
-      console.error('[getCountryDistancesMap] Erreur lors de la récupération des distances:', error);
-      return new Map();
+      console.error('[getCountryDistancesData] Erreur lors de la récupération des distances:', error);
+      return [];
     }
   },
   ['country-distances'],
@@ -173,13 +213,15 @@ export async function getCountryDistance(
   originCountry: string,
   destinationCountry: string
 ): Promise<number> {
-  // Récupérer la map des distances depuis le cache
-  const distanceMap = await getCountryDistancesMap();
+  // Récupérer les données des distances depuis le cache
+  const distancesData = await getCountryDistancesData();
 
-  // Chercher dans la base de données
-  const dbDistance = distanceMap.get(originCountry)?.get(destinationCountry);
+  // Chercher dans la base de données (recherche dans le tableau)
+  const dbDistance = distancesData.find(
+    (d) => d.originCountry === originCountry && d.destinationCountry === destinationCountry
+  );
   if (dbDistance) {
-    return dbDistance;
+    return dbDistance.distanceKm;
   }
 
   // Fallback aux valeurs par défaut

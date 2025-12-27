@@ -39,9 +39,11 @@ export const cargoTypeSurchargesSchema = z.object({
 /**
  * Schéma pour les surcharges de priorité
  * Valeur >= 0 (0 = pas de surcharge)
+ * Coefficients multiplicateurs : ex: NORMAL: 0.1 = +10%
  */
 export const prioritySurchargesSchema = z.object({
   STANDARD: z.number().nonnegative().max(5),
+  NORMAL: z.number().nonnegative().max(5),   // Nouveau : priorité normale (+10% dans le PDF)
   EXPRESS: z.number().nonnegative().max(5),
   URGENT: z.number().nonnegative().max(5),
 });
@@ -68,15 +70,53 @@ export const deliverySpeedsPerModeSchema = z.object({
 });
 
 /**
+ * Schéma pour les ratios de conversion du poids volumétrique
+ * Définit combien de kg équivaut 1 m³ pour chaque mode de transport
+ *
+ * Exemples de valeurs (basées sur le PDF) :
+ * - AIR: 167 kg/m³  (ratio 1/6 = 6000)
+ * - ROAD: 333 kg/m³ (ratio 1/3 = 5000)
+ * - SEA: 1 kg/m³    (ratio 1/1 = 1000, utilisé pour Unité Payante)
+ * - RAIL: 250 kg/m³
+ */
+export const volumetricWeightRatiosSchema = z.object({
+  AIR: z.number().positive().min(1).max(1000),
+  ROAD: z.number().positive().min(1).max(1000),
+  SEA: z.number().positive().min(0.1).max(1000),
+  RAIL: z.number().positive().min(1).max(1000),
+});
+
+/**
+ * Schéma pour l'activation du poids volumétrique par mode
+ * Permet d'activer/désactiver le calcul de poids volumétrique pour chaque mode
+ *
+ * Exemples :
+ * - AIR: true  → Utilise le poids volumétrique
+ * - ROAD: true → Utilise le poids volumétrique
+ * - SEA: false → Maritime utilise "Poids ou Mesure" (Unité Payante)
+ * - RAIL: true → Utilise le poids volumétrique
+ */
+export const useVolumetricWeightPerModeSchema = z.object({
+  AIR: z.boolean(),
+  ROAD: z.boolean(),
+  SEA: z.boolean(),
+  RAIL: z.boolean(),
+});
+
+/**
  * Schéma complet pour la configuration des prix
  * Utilisé pour la création et la mise à jour complète
  */
 export const pricingConfigSchema = z.object({
   baseRatePerKg: z.number().positive().min(0.01).max(100),
+  defaultRatePerKg: z.number().positive().min(0.01).max(100),
+  defaultRatePerM3: z.number().positive().min(1).max(10000),
   transportMultipliers: transportMultipliersSchema,
   cargoTypeSurcharges: cargoTypeSurchargesSchema,
   prioritySurcharges: prioritySurchargesSchema,
   deliverySpeedsPerMode: deliverySpeedsPerModeSchema,
+  volumetricWeightRatios: volumetricWeightRatiosSchema,
+  useVolumetricWeightPerMode: useVolumetricWeightPerModeSchema,
 });
 
 /**
@@ -115,3 +155,5 @@ export type TransportMultipliers = z.infer<typeof transportMultipliersSchema>;
 export type CargoTypeSurcharges = z.infer<typeof cargoTypeSurchargesSchema>;
 export type PrioritySurcharges = z.infer<typeof prioritySurchargesSchema>;
 export type DeliverySpeedsPerMode = z.infer<typeof deliverySpeedsPerModeSchema>;
+export type VolumetricWeightRatios = z.infer<typeof volumetricWeightRatiosSchema>;
+export type UseVolumetricWeightPerMode = z.infer<typeof useVolumetricWeightPerModeSchema>;

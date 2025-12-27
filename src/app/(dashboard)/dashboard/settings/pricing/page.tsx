@@ -59,6 +59,20 @@ export default function PricingConfigPage() {
   const form = useForm<any>({
     defaultValues: {
       baseRatePerKg: 0.5,
+      defaultRatePerKg: 1.0,
+      defaultRatePerM3: 200.0,
+      volumetricWeightRatios: {
+        AIR: 167,
+        ROAD: 333,
+        SEA: 1,
+        RAIL: 250,
+      },
+      useVolumetricWeightPerMode: {
+        AIR: true,
+        ROAD: true,
+        SEA: false,
+        RAIL: true,
+      },
       transportMultipliers: {
         ROAD: 1.0,
         SEA: 0.6,
@@ -77,8 +91,9 @@ export default function PricingConfigPage() {
       },
       prioritySurcharges: {
         STANDARD: 0,
+        NORMAL: 0.1,
         EXPRESS: 0.5,
-        URGENT: 1.0,
+        URGENT: 0.3,
       },
       deliverySpeedsPerMode: {
         ROAD: { min: 3, max: 7 },
@@ -101,6 +116,10 @@ export default function PricingConfigPage() {
     if (result.success && result.data) {
       form.reset({
         baseRatePerKg: result.data.baseRatePerKg,
+        defaultRatePerKg: result.data.defaultRatePerKg,
+        defaultRatePerM3: result.data.defaultRatePerM3,
+        volumetricWeightRatios: result.data.volumetricWeightRatios,
+        useVolumetricWeightPerMode: result.data.useVolumetricWeightPerMode,
         transportMultipliers: result.data.transportMultipliers,
         cargoTypeSurcharges: result.data.cargoTypeSurcharges,
         prioritySurcharges: result.data.prioritySurcharges,
@@ -182,10 +201,14 @@ export default function PricingConfigPage() {
 
       {/* Onglets de configuration */}
       <Tabs defaultValue="base" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="base">
             <CurrencyEur className="h-4 w-4 mr-2" />
             Taux de Base
+          </TabsTrigger>
+          <TabsTrigger value="volumetric">
+            <Package className="h-4 w-4 mr-2" />
+            Poids Vol.
           </TabsTrigger>
           <TabsTrigger value="transport">
             <Truck className="h-4 w-4 mr-2" />
@@ -215,21 +238,223 @@ export default function PricingConfigPage() {
             <CardHeader>
               <CardTitle>Taux de Base</CardTitle>
               <CardDescription>
-                Configurez le coût de base par kilogramme pour tous les transports
+                Configurez les tarifs de base par défaut pour le calcul des devis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="baseRatePerKg">Taux de base (€/kg)</Label>
-                <Input
-                  id="baseRatePerKg"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  {...form.register('baseRatePerKg', { valueAsNumber: true })}
-                />
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor="baseRatePerKg">Taux de base (€/kg)</Label>
+                  <Input
+                    id="baseRatePerKg"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    {...form.register('baseRatePerKg', { valueAsNumber: true })}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Prix de base historique (référence)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="defaultRatePerKg">Tarif par défaut (€/kg)</Label>
+                  <Input
+                    id="defaultRatePerKg"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    {...form.register('defaultRatePerKg', { valueAsNumber: true })}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Tarif appliqué par kg si aucune route spécifique
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="defaultRatePerM3">Tarif par défaut (€/m³)</Label>
+                  <Input
+                    id="defaultRatePerM3"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    {...form.register('defaultRatePerM3', { valueAsNumber: true })}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Tarif appliqué par m³ (maritime, volume)
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Info :</strong> Ces tarifs sont utilisés comme fallback quand aucun tarif spécifique
+                  n'est configuré pour une route dans la table TransportRate.
+                </p>
+              </div>
+
+              <Button onClick={handleSaveConfig} disabled={isLoading}>
+                <FloppyDisk className="h-4 w-4 mr-2" />
+                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Onglet 2 : Poids Volumétrique */}
+        <TabsContent value="volumetric">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configuration du Poids Volumétrique</CardTitle>
+              <CardDescription>
+                Configurez les ratios de conversion volume → poids et l'activation par mode
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Ratios Volumétriques */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Ratios de Conversion (kg/m³)</h3>
                 <p className="text-sm text-muted-foreground">
-                  Prix de base appliqué par kilogramme de marchandise
+                  Définit combien de kilogrammes équivaut 1 mètre cube pour chaque mode de transport
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="volumetric-air">Aérien (AIR)</Label>
+                    <Input
+                      id="volumetric-air"
+                      type="number"
+                      step="1"
+                      min="1"
+                      {...form.register('volumetricWeightRatios.AIR', { valueAsNumber: true })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Standard : 167 kg/m³ (ratio 1/6 = 6000 cm³/kg)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="volumetric-road">Routier (ROAD)</Label>
+                    <Input
+                      id="volumetric-road"
+                      type="number"
+                      step="1"
+                      min="1"
+                      {...form.register('volumetricWeightRatios.ROAD', { valueAsNumber: true })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Standard : 333 kg/m³ (ratio 1/3 = 3000 cm³/kg)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="volumetric-sea">Maritime (SEA)</Label>
+                    <Input
+                      id="volumetric-sea"
+                      type="number"
+                      step="1"
+                      min="1"
+                      {...form.register('volumetricWeightRatios.SEA', { valueAsNumber: true })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Non utilisé (système Unité Payante - UP)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="volumetric-rail">Ferroviaire (RAIL)</Label>
+                    <Input
+                      id="volumetric-rail"
+                      type="number"
+                      step="1"
+                      min="1"
+                      {...form.register('volumetricWeightRatios.RAIL', { valueAsNumber: true })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Standard : 250 kg/m³
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Activation par Mode */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Activation du Poids Volumétrique</h3>
+                <p className="text-sm text-muted-foreground">
+                  Active ou désactive le calcul du poids volumétrique pour chaque mode
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center justify-between space-x-2 rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="use-volumetric-air">Aérien (AIR)</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Facturer au MAX(poids réel, poids volumétrique)
+                      </p>
+                    </div>
+                    <input
+                      id="use-volumetric-air"
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-gray-300"
+                      {...form.register('useVolumetricWeightPerMode.AIR')}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between space-x-2 rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="use-volumetric-road">Routier (ROAD)</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Facturer au MAX(poids réel, poids volumétrique)
+                      </p>
+                    </div>
+                    <input
+                      id="use-volumetric-road"
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-gray-300"
+                      {...form.register('useVolumetricWeightPerMode.ROAD')}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between space-x-2 rounded-lg border p-4 bg-gray-50">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="use-volumetric-sea" className="text-gray-500">Maritime (SEA)</Label>
+                      <p className="text-xs text-gray-500">
+                        Utilise Unité Payante (UP) au lieu du poids vol.
+                      </p>
+                    </div>
+                    <input
+                      id="use-volumetric-sea"
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-gray-300"
+                      disabled
+                      {...form.register('useVolumetricWeightPerMode.SEA')}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between space-x-2 rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="use-volumetric-rail">Ferroviaire (RAIL)</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Facturer au MAX(poids réel, poids volumétrique)
+                      </p>
+                    </div>
+                    <input
+                      id="use-volumetric-rail"
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-gray-300"
+                      {...form.register('useVolumetricWeightPerMode.RAIL')}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                <p className="text-sm text-amber-800">
+                  <strong>Note Maritime :</strong> Le mode maritime utilise le système
+                  "Poids ou Mesure" (Unité Payante = UP) où l'on facture sur
+                  MAX(poids en tonnes, volume en m³). Le poids volumétrique classique ne s'applique pas.
                 </p>
               </div>
 
@@ -423,16 +648,33 @@ export default function PricingConfigPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="priority-standard">Standard (STANDARD)</Label>
                   <Input
                     id="priority-standard"
                     type="number"
-                    step="0.1"
+                    step="0.01"
                     min="0"
                     {...form.register('prioritySurcharges.STANDARD', { valueAsNumber: true })}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Livraison normale (généralement 0%)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="priority-normal">Normal (NORMAL)</Label>
+                  <Input
+                    id="priority-normal"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...form.register('prioritySurcharges.NORMAL', { valueAsNumber: true })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Livraison accélérée (recommandé : 0.1 = +10%)
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -440,10 +682,13 @@ export default function PricingConfigPage() {
                   <Input
                     id="priority-express"
                     type="number"
-                    step="0.1"
+                    step="0.01"
                     min="0"
                     {...form.register('prioritySurcharges.EXPRESS', { valueAsNumber: true })}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Livraison rapide (recommandé : 0.5 = +50%)
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -451,16 +696,22 @@ export default function PricingConfigPage() {
                   <Input
                     id="priority-urgent"
                     type="number"
-                    step="0.1"
+                    step="0.01"
                     min="0"
                     {...form.register('prioritySurcharges.URGENT', { valueAsNumber: true })}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Livraison urgente (recommandé : 0.3 = +30%)
+                  </p>
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                Exemple : 0.5 pour EXPRESS = +50% de surcharge, 1.0 pour URGENT = +100% (doublement du prix)
-              </p>
+              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Info :</strong> Les coefficients sont appliqués multiplicativement sur le coût de base.
+                  Par exemple, une surcharge de 0.3 pour URGENT sur un coût de base de 100€ donnera un prix final de 130€.
+                </p>
+              </div>
 
               <Button onClick={handleSaveConfig} disabled={isLoading}>
                 <FloppyDisk className="h-4 w-4 mr-2" />

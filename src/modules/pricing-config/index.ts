@@ -11,11 +11,10 @@ export * from './schemas/pricing-config.schema';
 export {
   getPricingConfig,
   getCountryDistance,
-  getCountryDistancesMap,
+  getCountryDistancesData,
   DEFAULT_PRICING_CONFIG,
   DEFAULT_COUNTRY_DISTANCES,
   type PricingConfigData,
-  type CountryDistanceData,
 } from './lib/get-pricing-config';
 
 // Server Actions

@@ -47,14 +47,10 @@ export const quoteSchema = z.object({
     .positive('Le poids doit être positif')
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
-  volume: z
-    .number({
-      required_error: 'Le volume est requis',
-      invalid_type_error: 'Le volume doit être un nombre',
-    })
-    .min(0, 'Le volume doit être positif ou zéro')
-    .max(10000, 'Le volume ne peut pas dépasser 10000 m³')
-    .default(0),
+  // === Dimensions (optionnelles) - Volume = L × W × H ===
+  length: z.number().positive().max(100).optional(),
+  width: z.number().positive().max(100).optional(),
+  height: z.number().positive().max(100).optional(),
 
   // === Transport ===
   transportMode: z
@@ -262,13 +258,25 @@ export const quoteEstimateSchema = z.object({
     .positive('Le poids doit être positif')
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
-  volume: z
-    .number({
-      required_error: 'Le volume est requis',
-      invalid_type_error: 'Le volume doit être un nombre',
-    })
-    .min(0, 'Le volume doit être positif ou zéro')
-    .max(10000, 'Le volume ne peut pas dépasser 10000 m³')
+  // === Dimensions (optionnelles) - Volume = L × W × H ===
+  // Utilisation de .nonnegative() pour accepter 0 comme valeur par défaut
+  // 0 signifie "non renseigné" dans le formulaire
+  length: z.coerce
+    .number()
+    .nonnegative('La longueur doit être positive ou nulle')
+    .max(100, 'La longueur ne peut pas dépasser 100 mètres')
+    .default(0),
+
+  width: z.coerce
+    .number()
+    .nonnegative('La largeur doit être positive ou nulle')
+    .max(100, 'La largeur ne peut pas dépasser 100 mètres')
+    .default(0),
+
+  height: z.coerce
+    .number()
+    .nonnegative('La hauteur doit être positive ou nulle')
+    .max(100, 'La hauteur ne peut pas dépasser 100 mètres')
     .default(0),
 
   // === Transport ===
@@ -278,8 +286,12 @@ export const quoteEstimateSchema = z.object({
     .max(4, 'Maximum 4 modes de transport'),
 
   // === Priorité (optionnelle) ===
+  // STANDARD : Livraison normale (0%)
+  // NORMAL   : Livraison accélérée (+10%)
+  // EXPRESS  : Livraison rapide (+50%)
+  // URGENT   : Livraison express (+30%)
   priority: z
-    .enum(['STANDARD', 'EXPRESS', 'URGENT'])
+    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
     .default('STANDARD')
     .optional(),
 });

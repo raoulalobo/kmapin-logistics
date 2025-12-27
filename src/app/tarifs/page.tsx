@@ -11,6 +11,7 @@
 
 import { Metadata } from 'next';
 import { PricingTable } from '@/components/pricing-table';
+import { HomepageHeader } from '@/components/layouts/homepage-header';
 
 /**
  * Métadonnées SEO de la page
@@ -38,9 +39,12 @@ export const metadata: Metadata = {
  */
 export default function TarifsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
+      {/* Header avec navigation */}
+      <HomepageHeader />
+
       {/* Container principal */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 mt-20">
         {/* En-tête de page */}
         <div className="text-center mb-12 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900">

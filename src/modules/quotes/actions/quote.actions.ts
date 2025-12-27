@@ -975,8 +975,8 @@ export async function calculateQuoteEstimateAction(
   try {
     // Importer le schéma, les types et la configuration
     const { quoteEstimateSchema } = await import('../schemas/quote.schema');
-    const { TransportMode, CargoType } = await import('@/generated/prisma');
     const { getPricingConfig } = await import('@/modules/pricing-config');
+    const { getTransportRate } = await import('@/modules/transport-rates');
 
     // Récupérer la configuration dynamique des prix
     const config = await getPricingConfig();
@@ -984,56 +984,80 @@ export async function calculateQuoteEstimateAction(
     // Valider les données
     const validatedData = quoteEstimateSchema.parse(data);
 
-    // === 1. Calculer le poids effectif (réel vs volumétrique) ===
-    let effectiveWeight = validatedData.weight;
+    // === 1. Calculer le volume à partir des dimensions ===
+    const volume =
+      validatedData.length && validatedData.width && validatedData.height
+        ? validatedData.length * validatedData.width * validatedData.height
+        : 0;
 
-    // Si un volume est fourni, calculer le poids volumétrique
-    // Formule standard : volume_m3 * 200 kg/m3
-    if (validatedData.volume && validatedData.volume > 0) {
-      const volumetricWeight = validatedData.volume * 200;
-      // Prendre le maximum entre poids réel et poids volumétrique
-      effectiveWeight = Math.max(effectiveWeight, volumetricWeight);
+    // === 2. NOUVEAU : Chercher le tarif spécifique pour cette route ===
+    const primaryTransportMode = validatedData.transportMode[0];
+
+    // Convertir les noms de pays en codes ISO
+    const originCode = COUNTRY_NAME_TO_ISO[validatedData.originCountry] || validatedData.originCountry;
+    const destCode = COUNTRY_NAME_TO_ISO[validatedData.destinationCountry] || validatedData.destinationCountry;
+
+    const transportRate = await getTransportRate(
+      originCode,
+      destCode,
+      primaryTransportMode
+    );
+
+    // === 3. Déterminer les tarifs à utiliser (route ou défaut) ===
+    let ratePerKg: number;
+    let ratePerM3: number;
+    let cargoSurcharges: any;
+    let prioritySurcharges: any;
+    let usedDefaultRate = false;
+
+    if (transportRate && transportRate.isActive) {
+      // ROUTE CONFIGURÉE : Utiliser les tarifs spécifiques
+      ratePerKg = transportRate.ratePerKg;
+      ratePerM3 = transportRate.ratePerM3;
+
+      // Surcharges : utiliser celles de la route si définies, sinon globales
+      cargoSurcharges = transportRate.cargoTypeSurcharges || config.cargoTypeSurcharges;
+      prioritySurcharges = transportRate.prioritySurcharges || config.prioritySurcharges;
+    } else {
+      // ROUTE NON CONFIGURÉE : Utiliser les tarifs par défaut avec multiplicateur de mode de transport
+      // Le multiplicateur permet de différencier les prix selon le mode (AIR: 3.0x, SEA: 0.6x, etc.)
+      const transportMultiplier = config.transportMultipliers[primaryTransportMode] || 1.0;
+
+      ratePerKg = config.defaultRatePerKg * transportMultiplier;
+      ratePerM3 = config.defaultRatePerM3 * transportMultiplier;
+      cargoSurcharges = config.cargoTypeSurcharges;
+      prioritySurcharges = config.prioritySurcharges;
+      usedDefaultRate = true;
     }
 
-    // === 2. Calculer la distance ===
+    // === 4. Calcul du prix de base : MAX(poids × ratePerKg, volume × ratePerM3) ===
+    const weightCost = validatedData.weight * ratePerKg;
+    const volumeCost = volume * ratePerM3;
+    const baseCost = Math.max(weightCost, volumeCost);
+
+    // === 5. Supplément type de marchandise ===
+    const cargoSurchargeRate = cargoSurcharges[validatedData.cargoType] || 0;
+    const cargoTypeSurcharge = baseCost * cargoSurchargeRate;
+
+    // === 6. Supplément priorité ===
+    const priority = validatedData.priority || 'STANDARD';
+    const prioritySurchargeRate = prioritySurcharges[priority] || 0;
+    const prioritySurcharge = baseCost * prioritySurchargeRate;
+
+    // === 7. Coût total estimé ===
+    const estimatedCost = Math.round(baseCost + cargoTypeSurcharge + prioritySurcharge);
+
+    // === 8. Estimation du délai de livraison (en jours) ===
+    // Basé sur le mode de transport et les délais configurés
+    const deliverySpeed = config.deliverySpeedsPerMode[primaryTransportMode];
+
+    // Calculer la distance (utilisée uniquement pour varier le délai entre min et max)
     const distance = await getDistance(
       validatedData.originCountry,
       validatedData.destinationCountry
     );
 
-    // === 3. Coût de base (depuis la configuration) ===
-    const baseCost = effectiveWeight * config.baseRatePerKg;
-
-    // === 4. Facteur de distance (distance / 1000 * baseCost) ===
-    const distanceFactor = (distance / 1000) * baseCost;
-
-    // === 5. Multiplicateur par mode de transport ===
-    // Prendre le mode de transport principal (premier de la liste)
-    const primaryTransportMode = validatedData.transportMode[0];
-
-    const transportMultiplier = config.transportMultipliers[primaryTransportMode] || 1.0;
-    const transportModeCost = (baseCost + distanceFactor) * transportMultiplier;
-
-    // === 6. Supplément type de marchandise ===
-    const cargoSurchargeRate = config.cargoTypeSurcharges[validatedData.cargoType] || 0;
-    const cargoTypeSurcharge = transportModeCost * cargoSurchargeRate;
-
-    // === 7. Supplément priorité ===
-    const priority = validatedData.priority || 'STANDARD';
-    const prioritySurchargeRate = config.prioritySurcharges[priority] || 0;
-    const prioritySurcharge = transportModeCost * prioritySurchargeRate;
-
-    // === 8. Coût total estimé ===
-    const estimatedCost = Math.round(
-      transportModeCost + cargoTypeSurcharge + prioritySurcharge
-    );
-
-    // === 9. Estimation du délai de livraison (en jours) ===
-    // Basé sur le mode de transport et les délais configurés
-    const deliverySpeed = config.deliverySpeedsPerMode[primaryTransportMode];
-
     // Calculer un délai basé sur la distance et les limites configurées
-    // Plus la distance est grande, plus on tend vers le délai max
     const distanceRatio = Math.min(distance / 10000, 1); // Normaliser sur 10000 km max
     let estimatedDeliveryDays = Math.round(
       deliverySpeed.min + (deliverySpeed.max - deliverySpeed.min) * distanceRatio
@@ -1049,6 +1073,21 @@ export async function calculateQuoteEstimateAction(
     // Minimum 1 jour
     if (estimatedDeliveryDays < 1) estimatedDeliveryDays = 1;
 
+    // === 9. Calculer le coût de base SANS le multiplicateur de transport ===
+    // Pour montrer au client l'impact du mode de transport
+    const baseRatePerKg = usedDefaultRate ? config.defaultRatePerKg : ratePerKg / (config.transportMultipliers[primaryTransportMode] || 1.0);
+    const baseRatePerM3 = usedDefaultRate ? config.defaultRatePerM3 : ratePerM3 / (config.transportMultipliers[primaryTransportMode] || 1.0);
+
+    const baseWeightCost = validatedData.weight * baseRatePerKg;
+    const baseVolumeCost = volume * baseRatePerM3;
+    const baseCostWithoutTransport = Math.max(baseWeightCost, baseVolumeCost);
+
+    // Coût ajouté par le mode de transport (différence entre avec et sans multiplicateur)
+    const transportModeCost = Math.round(baseCost - baseCostWithoutTransport);
+
+    // Facteur distance (pour l'instant 0, mais pourrait être calculé selon la distance)
+    const distanceFactor = 0;
+
     // === 10. Retourner le résultat ===
     return {
       success: true,
@@ -1056,11 +1095,11 @@ export async function calculateQuoteEstimateAction(
         estimatedCost,
         currency: 'EUR',
         breakdown: {
-          baseCost: Math.round(baseCost),
-          transportModeCost: Math.round(transportModeCost),
+          baseCost: Math.round(baseCostWithoutTransport),
+          transportModeCost,
           cargoTypeSurcharge: Math.round(cargoTypeSurcharge),
           prioritySurcharge: Math.round(prioritySurcharge),
-          distanceFactor: Math.round(distanceFactor),
+          distanceFactor,
         },
         estimatedDeliveryDays,
       },

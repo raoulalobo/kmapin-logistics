@@ -6,10 +6,10 @@
  * et de lancer un calcul pré-rempli.
  *
  * Fonctionnalités:
- * - Recherche par destination
+ * - Sélection de destination depuis la base de données (pays actifs)
  * - Filtre par mode de transport
  * - Bouton "Utiliser ce mode" pour pré-remplir le calculateur
- * - Pagination pour grandes listes
+ * - Chargement dynamique depuis TransportRate (avec fallback)
  *
  * @module components/pricing-table
  */
@@ -23,7 +23,6 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -42,6 +41,7 @@ import {
 } from '@/components/ui/table';
 
 import { getStandardRatesAction } from '@/modules/pricing';
+import { listCountries } from '@/modules/countries/actions/country.actions';
 import { TransportMode } from '@prisma/client';
 import type { StandardRate } from '@/modules/pricing/data/standard-rates';
 
@@ -59,17 +59,28 @@ export function PricingTable() {
   /**
    * États des filtres
    */
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string>('ALL');
   const [selectedMode, setSelectedMode] = useState<TransportMode | 'ALL'>('ALL');
+
+  /**
+   * Charger la liste des pays depuis la base de données
+   */
+  const { data: countries, isLoading: isLoadingCountries } = useQuery({
+    queryKey: ['countries-active'],
+    queryFn: async () => {
+      return await listCountries(true); // true = uniquement les pays actifs
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes (les pays changent rarement)
+  });
 
   /**
    * Charger les tarifs avec TanStack Query
    */
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['standard-rates', searchQuery, selectedMode],
+    queryKey: ['standard-rates', selectedCountryCode, selectedMode],
     queryFn: async () => {
       const filters = {
-        search: searchQuery || undefined,
+        destinationCode: selectedCountryCode === 'ALL' ? undefined : selectedCountryCode,
         transportMode: selectedMode === 'ALL' ? undefined : selectedMode,
       };
 
@@ -114,19 +125,32 @@ export function PricingTable() {
         {/* Filtres */}
         <CardContent className="p-6">
           <div className="grid gap-4 md:grid-cols-2 mb-6">
-            {/* Recherche par destination */}
+            {/* Sélection de la destination */}
             <div className="space-y-2">
-              <Label htmlFor="search" className="text-base font-semibold flex items-center gap-2">
+              <Label htmlFor="country" className="text-base font-semibold flex items-center gap-2">
                 <MagnifyingGlass className="h-4 w-4 text-[#003D82]" />
-                Rechercher une destination
+                Destination
               </Label>
-              <Input
-                id="search"
-                placeholder="Ex: Allemagne, DE, Espagne..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11"
-              />
+              <Select
+                value={selectedCountryCode}
+                onValueChange={(value) => setSelectedCountryCode(value)}
+                disabled={isLoadingCountries}
+              >
+                <SelectTrigger id="country" className="h-11">
+                  <SelectValue placeholder={isLoadingCountries ? "Chargement..." : "Toutes les destinations"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Toutes les destinations</SelectItem>
+                  {countries?.map((country) => (
+                    <SelectItem key={country.id} value={country.code}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 font-mono">{country.code}</span>
+                        <span>{country.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Filtre par mode de transport */}

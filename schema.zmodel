@@ -63,6 +63,7 @@ model User {
   uploadedDocuments  Document[] @relation("UploadedDocuments")
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
   pricingConfigs     PricingConfig[] // Configurations de prix modifiées par cet utilisateur
+  createdPickups     PickupRequest[] @relation("CreatedPickups") // Demandes d'enlèvement créées
 
   // 🔐 Access Policies Zenstack
 
@@ -217,12 +218,13 @@ model Company {
   updatedAt  DateTime @updatedAt
 
   // Relations
-  users        User[]
-  shipments    Shipment[]
-  invoices     Invoice[]
-  quotes       Quote[]
-  documents    Document[]
-  transporters Transporter[]
+  users          User[]
+  shipments      Shipment[]
+  invoices       Invoice[]
+  quotes         Quote[]
+  documents      Document[]
+  transporters   Transporter[]
+  pickupRequests PickupRequest[] // Demandes d'enlèvement de cette company
 
   // 🔐 Access Policies
 
@@ -276,7 +278,12 @@ model Shipment {
   // Détails marchandise
   cargoType           CargoType
   weight              Float
-  volume              Float?
+
+  // Dimensions (optionnelles) - Volume calculé = L × W × H
+  length              Float?            // Longueur en mètres
+  width               Float?            // Largeur en mètres
+  height              Float?            // Hauteur en mètres
+
   packageCount        Int
   value               Float?
   currency            String          @default("EUR")
@@ -313,6 +320,7 @@ model Shipment {
   // Relations
   trackingEvents TrackingEvent[]
   documents      Document[]
+  pickupRequests PickupRequest[]
 
   // 🔐 Access Policies
 
@@ -377,6 +385,132 @@ enum ShipmentStatus {
   CANCELLED
   ON_HOLD
   EXCEPTION
+}
+
+// ============================================
+// ENLÈVEMENTS (PICKUPS)
+// ============================================
+
+/**
+ * Statuts d'une demande d'enlèvement
+ * Workflow: REQUESTED → SCHEDULED → IN_PROGRESS → COMPLETED
+ * Possibilité d'annulation à tout moment (CANCELED)
+ */
+enum PickupStatus {
+  REQUESTED      // Demande d'enlèvement créée, en attente de planification
+  SCHEDULED      // Enlèvement planifié avec date et créneau horaire
+  IN_PROGRESS    // Transporteur en route ou sur place
+  COMPLETED      // Enlèvement effectué avec succès
+  CANCELED       // Enlèvement annulé
+}
+
+/**
+ * Créneaux horaires pour les enlèvements
+ */
+enum PickupTimeSlot {
+  MORNING        // Matin (8h-12h)
+  AFTERNOON      // Après-midi (12h-17h)
+  EVENING        // Soirée (17h-20h)
+  SPECIFIC_TIME  // Heure précise (voir pickupTime)
+  FLEXIBLE       // Flexible (toute la journée)
+}
+
+/**
+ * Modèle PickupRequest (Demandes d'enlèvement)
+ * Gère le workflow complet d'enlèvement de colis avec notifications et suivi
+ *
+ * Access Control:
+ * - ADMIN : accès complet
+ * - OPERATIONS_MANAGER : peut créer, lire, modifier, assigner
+ * - FINANCE_MANAGER : peut lire
+ * - CLIENT : peut créer et lire ses propres demandes
+ * - Transporteur assigné : peut lire et mettre à jour le statut
+ */
+model PickupRequest {
+  id         String   @id @default(cuid())
+
+  // Relation avec l'expédition
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  // Informations de collecte
+  pickupAddress    String
+  pickupCity       String
+  pickupPostalCode String
+  pickupCountry    String
+  pickupContact    String?  // Nom du contact sur place
+  pickupPhone      String?  // Téléphone du contact
+
+  // Planification
+  requestedDate DateTime              // Date souhaitée par le client
+  scheduledDate DateTime?             // Date confirmée par l'opérateur
+  timeSlot      PickupTimeSlot        @default(FLEXIBLE)
+  pickupTime    String?               // Heure précise si SPECIFIC_TIME (format "HH:MM")
+
+  // Réalisation
+  actualPickupDate DateTime?          // Date/heure réelle de l'enlèvement
+
+  // Statut et workflow
+  status PickupStatus @default(REQUESTED)
+
+  // Transporteur
+  transporterId String?
+  transporter   Transporter? @relation(fields: [transporterId], references: [id])
+  driverName    String?              // Nom du chauffeur effectuant l'enlèvement
+  driverPhone   String?              // Téléphone du chauffeur
+  vehiclePlate  String?              // Plaque d'immatriculation du véhicule
+
+  // Instructions et notes
+  specialInstructions String?        // Instructions spéciales (code porte, étage, etc.)
+  accessInstructions  String?        // Instructions d'accès (interphone, parking, etc.)
+  internalNotes       String?        // Notes internes (visibles uniquement par l'équipe)
+
+  // Résultat de l'enlèvement
+  completionNotes String?            // Notes après enlèvement (état colis, incidents, etc.)
+
+  // Photos (via relation Document)
+  documents Document[]               // Photos de preuve d'enlèvement, signature, etc.
+
+  // Notifications
+  notificationSent    Boolean  @default(false)  // Notification 24h envoyée ?
+  reminderSent        Boolean  @default(false)  // Rappel J-1 envoyé ?
+  confirmationSent    Boolean  @default(false)  // Confirmation d'enlèvement envoyée ?
+
+  // Métadonnées
+  companyId   String                 // Company propriétaire (dénormalisé depuis shipment)
+  company     Company @relation(fields: [companyId], references: [id])
+
+  createdById String
+  createdBy   User     @relation("CreatedPickups", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 🔐 Access Policies
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent tout faire
+  @@allow('all', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent créer des demandes et lire les leurs
+  @@allow('create', auth().companyId == companyId && auth().role == CLIENT)
+  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+
+  // Le créateur peut lire et modifier ses demandes (sauf si COMPLETED ou CANCELED)
+  @@allow('read,update', auth().id == createdById && status != COMPLETED && status != CANCELED)
+
+  @@deny('all', true)
+
+  @@index([shipmentId])
+  @@index([companyId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@index([requestedDate])
+  @@index([transporterId])
 }
 
 // ============================================
@@ -531,7 +665,13 @@ model Quote {
   transportMode      TransportMode[]
   cargoType          CargoType
   weight             Float
-  volume             Float?
+
+  // Dimensions (optionnelles) - Volume calculé = L × W × H
+  // Champs nullable car optionnels dans le formulaire
+  length             Float?           // Longueur en mètres
+  width              Float?           // Largeur en mètres
+  height             Float?           // Hauteur en mètres
+
   estimatedCost      Float
   validUntil         DateTime
   currency           String          @default("EUR")
@@ -667,7 +807,13 @@ model GuestQuote {
   transportMode      TransportMode[]
   cargoType          CargoType
   weight             Float
-  volume             Float?
+
+  // Dimensions (optionnelles) - Volume calculé = L × W × H
+  // Champs nullable car optionnels dans le formulaire
+  length             Float?           // Longueur en mètres
+  width              Float?           // Largeur en mètres
+  height             Float?           // Hauteur en mètres
+
   estimatedCost      Float
   validUntil         DateTime
   currency           String          @default("EUR")
@@ -756,6 +902,8 @@ enum NotificationType {
 enum DocumentType {
   INVOICE_SCAN           // Scan de facture
   PROOF_OF_DELIVERY      // Preuve de livraison
+  PROOF_OF_PICKUP        // Preuve d'enlèvement
+  PICKUP_SIGNATURE       // Signature d'enlèvement
   CUSTOMS_DOCUMENT       // Document douanier
   PACKING_LIST           // Liste de colisage
   BILL_OF_LADING         // Connaissement
@@ -794,6 +942,9 @@ model Document {
   quoteId String?
   quote   Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 
+  pickupRequestId String?
+  pickupRequest   PickupRequest? @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
+
   // Métadonnées
   companyId   String
   company     Company  @relation(fields: [companyId], references: [id])
@@ -824,6 +975,7 @@ model Document {
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])
+  @@index([pickupRequestId])
   @@index([uploadedBy])
 }
 
@@ -872,8 +1024,9 @@ model Transporter {
   rating   Float?   @default(0) // Note de 0 à 5
 
   // Relations
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  companyId      String
+  company        Company @relation(fields: [companyId], references: [id])
+  pickupRequests PickupRequest[] // Enlèvements assignés à ce transporteur
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -912,14 +1065,20 @@ model Transporter {
  *
  * Structure des champs JSON :
  * - transportMultipliers : { ROAD: 1.0, SEA: 0.6, AIR: 3.0, RAIL: 0.8 }
- * - cargoTypeSurcharges : { GENERAL: 0, DANGEROUS: 1.5, PERISHABLE: 1.2, ... }
- * - prioritySurcharges : { STANDARD: 0, EXPRESS: 0.5, URGENT: 1.0 }
+ * - cargoTypeSurcharges : { GENERAL: 0, DANGEROUS: 0.5, PERISHABLE: 0.4, ... }
+ * - prioritySurcharges : { STANDARD: 0, NORMAL: 0.1, EXPRESS: 0.5, URGENT: 0.3 }
  * - deliverySpeedsPerMode : {
  *     ROAD: { min: 3, max: 7 },
  *     SEA: { min: 20, max: 45 },
  *     AIR: { min: 1, max: 3 },
  *     RAIL: { min: 7, max: 14 }
  *   }
+ * - volumetricWeightRatios : { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 }
+ *   → Définit combien de kg équivaut 1 m³ pour chaque mode
+ *   → Basé sur les ratios du PDF : AIR (1/6 = 6000), ROAD (1/3 = 5000), SEA (1/1 = 1000)
+ * - useVolumetricWeightPerMode : { AIR: true, ROAD: true, SEA: false, RAIL: true }
+ *   → Active/désactive le poids volumétrique par mode
+ *   → Maritime (SEA) utilise "Poids ou Mesure" (Unité Payante) au lieu du poids volumétrique
  *
  * Access policies :
  * - ADMIN uniquement pour toutes les opérations
@@ -928,19 +1087,37 @@ model PricingConfig {
   id                   String   @id @default(cuid())
 
   // Taux de base
-  baseRatePerKg        Float    @default(0.5) // € par kg
+  baseRatePerKg        Float    @default(0.5) // € par kg (ANCIEN - conservé pour compatibilité)
 
-  // Multiplicateurs par mode de transport
+  // NOUVEAUX : Tarifs par défaut pour fallback (si route non configurée dans matrice)
+  defaultRatePerKg     Float    @default(1.0)   // € par kg
+  defaultRatePerM3     Float    @default(200.0) // € par m³
+
+  // Multiplicateurs par mode de transport (utilisés uniquement si route non configurée)
   transportMultipliers Json     // { ROAD: Float, SEA: Float, AIR: Float, RAIL: Float }
 
-  // Surcharges par type de cargo
+  // Surcharges par type de cargo (coefficients multiplicateurs, ex: DANGEROUS: 0.5 = +50%)
   cargoTypeSurcharges  Json     // { GENERAL: Float, DANGEROUS: Float, PERISHABLE: Float, ... }
 
-  // Surcharges par priorité
-  prioritySurcharges   Json     // { STANDARD: Float, EXPRESS: Float, URGENT: Float }
+  // Surcharges par priorité (coefficients multiplicateurs, ex: NORMAL: 0.1 = +10%)
+  prioritySurcharges   Json     // { STANDARD: Float, NORMAL: Float, EXPRESS: Float, URGENT: Float }
 
   // Délais de livraison par mode (en jours)
   deliverySpeedsPerMode Json    // { ROAD: {min, max}, SEA: {min, max}, ... }
+
+  // === NOUVEAUX CHAMPS POUR ALGORITHME PDF ===
+
+  // Ratios de conversion poids volumétrique : combien de kg = 1 m³
+  // Exemple : { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 }
+  // AIR: 167 signifie que 1 m³ = 167 kg (ratio 1/6 = 6000)
+  // ROAD: 333 signifie que 1 m³ = 333 kg (ratio 1/3 = 5000)
+  // SEA: 1 signifie que 1 m³ = 1 tonne (ratio 1/1 = 1000)
+  volumetricWeightRatios Json @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1,\"RAIL\":250}")
+
+  // Activation du poids volumétrique par mode de transport
+  // Exemple : { AIR: true, ROAD: true, SEA: false, RAIL: true }
+  // SEA: false car le maritime utilise "Poids ou Mesure" (Unité Payante)
+  useVolumetricWeightPerMode Json @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false,\"RAIL\":true}")
 
   // Métadonnées
   updatedById          String
@@ -995,4 +1172,109 @@ model CountryDistance {
   @@index([originCountry])
   @@index([destinationCountry])
   @@map("country_distance")
+}
+
+/**
+ * Modèle TransportRate (Tarifs de Transport par Route)
+ *
+ * Stocke les tarifs spécifiques pour chaque combinaison origine-destination-mode.
+ * Permet une tarification granulaire avec des surcharges personnalisées par route.
+ *
+ * Structure :
+ * - Clé unique : (originCountryCode, destinationCountryCode, transportMode)
+ * - Tarifs : ratePerKg (€/kg) et ratePerM3 (€/m³)
+ * - Surcharges optionnelles : JSON pour cargo et priorité
+ *
+ * Logique de calcul :
+ * 1. prixBase = MAX(poids × ratePerKg, volume × ratePerM3)
+ * 2. Appliquer surcharges cargo de la route (ou fallback PricingConfig)
+ * 3. Appliquer surcharges priorité de la route (ou fallback PricingConfig)
+ *
+ * Access policies :
+ * - Lecture publique (nécessaire pour calcul des devis publics)
+ * - Création/Modification/Suppression : ADMIN uniquement
+ */
+model TransportRate {
+  id                     String        @id @default(cuid())
+
+  // Clé de route
+  originCountryCode      String        // Code pays ISO (ex: "FR")
+  destinationCountryCode String        // Code pays ISO (ex: "BF")
+  transportMode          TransportMode // ROAD | SEA | AIR | RAIL
+
+  // Tarifs de base (requis)
+  ratePerKg              Float         // Tarif en €/kg
+  ratePerM3              Float         // Tarif en €/m³
+
+  // Surcharges personnalisées (optionnelles, JSON)
+  // Si null, utilise les surcharges globales de PricingConfig
+  cargoTypeSurcharges    Json?         // { GENERAL: 0, DANGEROUS: 0.3, ... }
+  prioritySurcharges     Json?         // { STANDARD: 0, EXPRESS: 0.5, ... }
+
+  // Métadonnées
+  isActive               Boolean       @default(true) // Permet de désactiver une route
+  notes                  String?       // Notes internes
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  // 🔐 Access Policies
+
+  // Lecture publique nécessaire pour calcul des devis
+  @@allow('read', true)
+
+  // Seuls les admins peuvent créer, modifier ou supprimer
+  @@allow('create,update,delete', auth().role == ADMIN)
+
+  @@deny('all', true)
+
+  // Index et contraintes
+  @@unique([originCountryCode, destinationCountryCode, transportMode])
+  @@index([originCountryCode])
+  @@index([destinationCountryCode])
+  @@index([transportMode])
+  @@index([isActive])
+  @@map("transport_rate")
+}
+
+// ============================================
+// GESTION DES PAYS
+// ============================================
+
+/**
+ * Modèle Country (Pays)
+ *
+ * Table de référence des pays disponibles pour les expéditions.
+ * Utilisée pour les sélecteurs de pays d'origine et de destination.
+ *
+ * Structure :
+ * - code : Code ISO 3166-1 alpha-2 (ex: "FR", "DE", "US")
+ * - name : Nom du pays en français (ex: "France", "Allemagne", "États-Unis")
+ * - isActive : Indique si le pays est actif pour les expéditions
+ *
+ * Access policies :
+ * - Lecture publique (nécessaire pour les formulaires de devis publics)
+ * - Création/Modification/Suppression : ADMIN uniquement
+ */
+model Country {
+  id        String   @id @default(cuid())
+  code      String   @unique // Code ISO 3166-1 alpha-2 (ex: "FR", "DE")
+  name      String   // Nom en français (ex: "France", "Allemagne")
+  isActive  Boolean  @default(true) // Pays activé pour les expéditions
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔐 Access Policies
+
+  // Lecture publique nécessaire pour les formulaires de devis
+  @@allow('read', true)
+
+  // Seuls les admins peuvent créer, modifier ou supprimer
+  @@allow('create,update,delete', auth().role == ADMIN)
+
+  @@deny('all', true)
+
+  @@index([code])
+  @@index([isActive])
+  @@map("country")
 }
