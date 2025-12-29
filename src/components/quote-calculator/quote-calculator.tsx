@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'next/navigation';
@@ -103,6 +103,30 @@ export function QuoteCalculator() {
   const searchParams = useSearchParams();
 
   /**
+   * Préparer les valeurs par défaut depuis les query params
+   * Cela évite le warning "uncontrolled to controlled"
+   */
+  const defaultValues = useMemo(() => {
+    const origin = searchParams.get('origin');
+    const destination = searchParams.get('destination');
+    const mode = searchParams.get('mode');
+
+    return {
+      originCountry: origin || '',
+      destinationCountry: destination || '',
+      cargoType: 'GENERAL' as const,
+      weight: 0,
+      length: 0,
+      width: 0,
+      height: 0,
+      transportMode: mode && Object.values(TransportMode).includes(mode as TransportMode)
+        ? [mode as TransportMode]
+        : [],
+      priority: 'STANDARD' as const,
+    };
+  }, [searchParams]);
+
+  /**
    * Configuration de React Hook Form avec validation Zod
    */
   const {
@@ -114,47 +138,42 @@ export function QuoteCalculator() {
     formState: { errors },
   } = useForm<QuoteEstimateData>({
     resolver: zodResolver(quoteEstimateSchema),
-    defaultValues: {
-      originCountry: '',
-      destinationCountry: '',
-      cargoType: 'GENERAL',
-      weight: 0,
-      length: 0,
-      width: 0,
-      height: 0,
-      transportMode: [],
-      priority: 'STANDARD',
-    },
+    defaultValues,
   });
 
   /**
-   * Pré-remplir le formulaire si des query params sont présents
-   * Exemple: /#calculateur?destination=Allemagne&mode=ROAD
+   * Afficher les notifications et scroller si des query params sont présents
    */
   useEffect(() => {
+    const origin = searchParams.get('origin');
     const destination = searchParams.get('destination');
     const mode = searchParams.get('mode');
 
-    if (destination) {
-      setValue('destinationCountry', destination);
-      toast.info(`Destination pré-remplie : ${destination}`);
-    }
+    // Afficher les notifications après un petit délai pour laisser le composant se monter
+    const timer = setTimeout(() => {
+      if (origin) {
+        toast.info(`Origine pré-remplie : ${origin}`);
+      }
 
-    if (mode && Object.values(TransportMode).includes(mode as TransportMode)) {
-      setValue('transportMode', [mode as TransportMode]);
-      toast.info(`Mode de transport sélectionné : ${transportModeLabels[mode as TransportMode].label}`);
-    }
+      if (destination) {
+        toast.info(`Destination pré-remplie : ${destination}`);
+      }
 
-    // Scroll smooth vers le calculateur si params présents
-    if (destination || mode) {
-      setTimeout(() => {
+      if (mode && Object.values(TransportMode).includes(mode as TransportMode)) {
+        toast.info(`Mode de transport sélectionné : ${transportModeLabels[mode as TransportMode].label}`);
+      }
+
+      // Scroll smooth vers le calculateur si params présents
+      if (origin || destination || mode) {
         const element = document.getElementById('calculateur');
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 100);
-    }
-  }, [searchParams, setValue]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchParams]);
 
   /**
    * Observer les modes de transport sélectionnés

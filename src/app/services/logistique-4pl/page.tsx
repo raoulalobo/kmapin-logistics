@@ -110,7 +110,7 @@ export default function Logistique4PLPage() {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">Intégration complète</h3>
                     <p className="text-gray-600">
-                      Coordination de tous vos flux : transport, entreposage, douane, IT
+                      Coordination de tous vos flux : transport, douane, IT
                     </p>
                   </div>
                 </div>

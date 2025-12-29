@@ -96,6 +96,8 @@ export function PricingTable() {
    */
   const getCalculatorUrl = (rate: StandardRate) => {
     const params = new URLSearchParams({
+      origin: rate.origin,
+      originCode: rate.originCode,
       destination: rate.destination,
       destinationCode: rate.destinationCode,
       mode: rate.transportMode,
@@ -200,6 +202,7 @@ export function PricingTable() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
+                    <TableHead className="font-bold text-gray-900">Origine</TableHead>
                     <TableHead className="font-bold text-gray-900">Destination</TableHead>
                     <TableHead className="font-bold text-gray-900">Mode de transport</TableHead>
                     <TableHead className="font-bold text-gray-900">Prix estimé</TableHead>
@@ -212,6 +215,14 @@ export function PricingTable() {
                     const { label, icon: Icon, color } = transportModeLabels[rate.transportMode];
                     return (
                       <TableRow key={rate.id} className="hover:bg-blue-50/50 transition-colors">
+                        {/* Origine */}
+                        <TableCell className="font-medium">
+                          <div className="flex flex-col">
+                            <span className="text-gray-900">{rate.origin}</span>
+                            <span className="text-xs text-gray-500">{rate.originCode}</span>
+                          </div>
+                        </TableCell>
+
                         {/* Destination */}
                         <TableCell className="font-medium">
                           <div className="flex flex-col">

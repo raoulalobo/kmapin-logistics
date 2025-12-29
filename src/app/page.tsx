@@ -208,13 +208,13 @@ export default function House() {
               Services complets pour votre logistique
             </h2>
             <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
-              De la mer à la route, en passant par l'air et l'entreposage
+              Transport maritime, routier et aérien pour vos expéditions
             </p>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
               {/* Service 1 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-48 overflow-hidden">
+              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                <div className="relative h-56 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
@@ -235,8 +235,8 @@ export default function House() {
               </Card>
 
               {/* Service 2 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-48 overflow-hidden">
+              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                <div className="relative h-56 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
@@ -257,8 +257,8 @@ export default function House() {
               </Card>
 
               {/* Service 3 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-48 overflow-hidden">
+              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                <div className="relative h-56 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
                     style={{
@@ -273,28 +273,6 @@ export default function House() {
                     Transport rapide et fiable par avion avec services de courrier à bord et affrètement.
                   </p>
                   <Link href="/services/transport-aerien" className="text-[#003D82] font-semibold text-sm hover:underline">
-                    Découvrir →
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Service 4 */}
-              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-48 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                      backgroundImage: "url('https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=2865')",
-                    }}
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <Buildings className="h-10 w-10 text-[#003D82] mb-4" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Solutions d'entreposage</h3>
-                  <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                    Stockage sécurisé avec plus de 180 sites et système de gestion d'entrepôt moderne.
-                  </p>
-                  <Link href="/services/entreposage" className="text-[#003D82] font-semibold text-sm hover:underline">
                     Découvrir →
                   </Link>
                 </CardContent>
@@ -418,7 +396,6 @@ export default function House() {
                 <li><Link href="/services/transport-aerien" className="hover:text-white transition-colors">Transport aérien</Link></li>
                 <li><Link href="/services/transport-maritime" className="hover:text-white transition-colors">Transport maritime</Link></li>
                 <li><Link href="/services/transport-routier" className="hover:text-white transition-colors">Transport routier</Link></li>
-                <li><Link href="/services/entreposage" className="hover:text-white transition-colors">Solutions d'entreposage</Link></li>
                 <li><Link href="/services/services-portuaires" className="hover:text-white transition-colors">Services portuaires</Link></li>
                 <li><Link href="/services/logistique-4pl" className="hover:text-white transition-colors">Logistique 4PL</Link></li>
               </ul>

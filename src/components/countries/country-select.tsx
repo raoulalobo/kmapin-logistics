@@ -83,7 +83,7 @@ export function CountrySelect({
 
   if (isLoading) {
     return (
-      <Select disabled>
+      <Select disabled value={value} onValueChange={onValueChange}>
         <SelectTrigger id={id} className={className}>
           <div className="flex items-center gap-2">
             <CircleNotch className="h-4 w-4 animate-spin" />

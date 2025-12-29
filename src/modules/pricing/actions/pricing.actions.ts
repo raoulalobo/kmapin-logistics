@@ -54,11 +54,14 @@ export async function getStandardRatesAction(filters?: PricingFiltersData) {
       },
     });
 
-    // === ÉTAPE 2 : Récupérer les noms de pays (lookup) ===
-    const uniqueCountryCodes = [...new Set(transportRates.map((r) => r.destinationCountryCode))];
+    // === ÉTAPE 2 : Récupérer les noms de pays (lookup pour origine ET destination) ===
+    const uniqueDestinationCodes = [...new Set(transportRates.map((r) => r.destinationCountryCode))];
+    const uniqueOriginCodes = [...new Set(transportRates.map((r) => r.originCountryCode))];
+    const allCountryCodes = [...new Set([...uniqueDestinationCodes, ...uniqueOriginCodes])];
+
     const countries = await prisma.country.findMany({
       where: {
-        code: { in: uniqueCountryCodes },
+        code: { in: allCountryCodes },
       },
     });
     const countryMap = new Map(countries.map((c) => [c.code, c.name]));
@@ -68,7 +71,8 @@ export async function getStandardRatesAction(filters?: PricingFiltersData) {
 
     // === ÉTAPE 4 : Convertir en format StandardRate ===
     let ratesFromDB: StandardRate[] = transportRates.map((rate) => {
-      const countryName = countryMap.get(rate.destinationCountryCode) || rate.destinationCountryCode;
+      const originName = countryMap.get(rate.originCountryCode) || rate.originCountryCode;
+      const destinationName = countryMap.get(rate.destinationCountryCode) || rate.destinationCountryCode;
 
       // Récupérer les délais depuis la config
       const deliverySpeed = config.deliverySpeedsPerMode[rate.transportMode];
@@ -77,7 +81,9 @@ export async function getStandardRatesAction(filters?: PricingFiltersData) {
 
       return {
         id: rate.id,
-        destination: countryName,
+        origin: originName,
+        originCode: rate.originCountryCode,
+        destination: destinationName,
         destinationCode: rate.destinationCountryCode,
         transportMode: rate.transportMode,
         cargoType: CargoType.GENERAL, // Valeur par défaut

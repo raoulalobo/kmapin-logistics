@@ -81,15 +81,6 @@ export function HomepageHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/services/entreposage" className="flex items-center gap-3 cursor-pointer">
-                  <Warehouse className="h-5 w-5 text-[#003D82]" />
-                  <div>
-                    <div className="font-medium">Solutions d'Entreposage</div>
-                    <div className="text-xs text-gray-500">Stockage et distribution</div>
-                  </div>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
                 <Link href="/services/services-portuaires" className="flex items-center gap-3 cursor-pointer">
                   <Anchor className="h-5 w-5 text-[#003D82]" />
                   <div>

@@ -12,6 +12,10 @@ import { TransportMode, CargoType } from '@/generated/prisma';
 export interface StandardRate {
   /** ID unique du tarif */
   id: string;
+  /** Nom du pays d'origine */
+  origin: string;
+  /** Code pays d'origine (ISO 2 lettres) */
+  originCode: string;
   /** Nom de la destination */
   destination: string;
   /** Code pays de la destination (ISO 2 lettres) */
