@@ -163,7 +163,7 @@ export function generateInvitationReminderTemplate(
 
         <!-- Pied de page -->
         <div class="footer">
-          <p><strong>KmapIn Logistics</strong></p>
+          <p><strong>Faso Fret Logistics</strong></p>
           <p>Transport multi-modal international</p>
         </div>
       </div>

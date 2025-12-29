@@ -7,7 +7,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "KmapIn Logistics - Gestion de Fret Multi-Modal",
+  title: "Faso Fret Logistics - Gestion de Fret Multi-Modal",
   description: "Plateforme de gestion logistique pour transport routier, maritime, aérien et ferroviaire",
 };
 

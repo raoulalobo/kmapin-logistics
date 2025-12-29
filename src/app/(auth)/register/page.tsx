@@ -97,10 +97,11 @@ export default function RegisterPage() {
         });
       } else {
         toast.success('Compte créé avec succès !', {
-          description: 'Vérifiez votre email pour activer votre compte.',
+          description: 'Vous pouvez maintenant vous connecter avec vos identifiants.',
+          duration: 5000,
         });
-        // Succès : rediriger vers la page de vérification email
-        router.push(result.redirectTo || '/verify-email');
+        // Succès : rediriger vers la page de connexion
+        router.push(result.redirectTo || '/login');
       }
     });
   }
@@ -123,7 +124,7 @@ export default function RegisterPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
                 <Package className="h-7 w-7 text-white" />
               </div>
-              <span className="text-2xl font-bold">KmapIn Logistics</span>
+              <span className="text-2xl font-bold">Faso Fret Logistics</span>
             </Link>
 
             <div className="space-y-6 max-w-md">

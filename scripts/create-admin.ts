@@ -2,7 +2,7 @@
  * Script de création d'un utilisateur administrateur
  *
  * Ce script crée :
- * - Une entreprise "KmapIn Admin"
+ * - Une entreprise "Faso Fret Admin"
  * - Un utilisateur avec le rôle ADMIN
  * - Un mot de passe hashé de manière sécurisée
  *
@@ -20,7 +20,7 @@ import bcrypt from 'bcrypt';
 const DEFAULT_EMAIL = 'admin@kmapin.com';
 const DEFAULT_PASSWORD = 'Admin123!';
 const DEFAULT_NAME = 'Administrateur';
-const DEFAULT_COMPANY_NAME = 'KmapIn Admin';
+const DEFAULT_COMPANY_NAME = 'Faso Fret Admin';
 
 // Nombre de rounds pour bcrypt (10 est le standard, plus = plus sécurisé mais plus lent)
 const BCRYPT_ROUNDS = 10;

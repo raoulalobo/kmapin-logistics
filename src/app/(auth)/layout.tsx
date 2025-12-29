@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Authentification - KmapIn Logistics',
-  description: 'Connexion et inscription à la plateforme KmapIn Logistics',
+  title: 'Authentification - Faso Fret Logistics',
+  description: 'Connexion et inscription à la plateforme Faso Fret Logistics',
 };
 
 export default function AuthLayout({

@@ -46,11 +46,15 @@ import { CountrySelect } from '@/components/countries/country-select';
 import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/quotes';
 import { CargoType, TransportMode } from '@/generated/prisma';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
+import { useSafeSession } from '@/lib/auth/hooks';
 
 export default function NewQuotePage() {
   const router = useRouter();
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  // Récupérer la session utilisateur pour gérer l'affichage conditionnel du champ client
+  const { data: session } = useSafeSession();
 
   // Calculer la date de validité par défaut (30 jours à partir d'aujourd'hui)
   const getDefaultValidUntil = () => {
@@ -59,10 +63,15 @@ export default function NewQuotePage() {
     return date.toISOString(); // Format ISO 8601 complet
   };
 
+  // Vérifier si l'utilisateur est un CLIENT (ne peut créer des devis que pour sa propre company)
+  const isClient = session?.user?.role === 'CLIENT';
+  const userCompanyId = session?.user?.companyId || '';
+
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
-      companyId: '',
+      // Si CLIENT : pré-remplir automatiquement avec son companyId, sinon laisser vide
+      companyId: isClient ? userCompanyId : '',
       originCountry: 'FR',
       destinationCountry: '',
       cargoType: 'GENERAL' as CargoType,
@@ -251,7 +260,7 @@ export default function NewQuotePage() {
         </Button>
         <h1 className="text-3xl font-bold tracking-tight">Nouveau Devis</h1>
         <p className="text-muted-foreground">
-          Créez un nouveau devis pour votre client
+          {isClient ? 'Créez un nouveau devis pour votre entreprise' : 'Créez un nouveau devis pour votre client'}
         </p>
       </div>
 
@@ -260,37 +269,39 @@ export default function NewQuotePage() {
       {/* Formulaire */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Client */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Client</CardTitle>
-              <CardDescription>
-                Sélectionnez le client pour ce devis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="companyId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Client *</FormLabel>
-                    <FormControl>
-                      <ClientSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Rechercher un client..."
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Recherchez par nom, raison sociale ou email
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+          {/* Client - Masqué pour les CLIENTs (ils ne peuvent créer des devis que pour leur propre company) */}
+          {!isClient && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Client</CardTitle>
+                <CardDescription>
+                  Sélectionnez le client pour ce devis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="companyId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client *</FormLabel>
+                      <FormControl>
+                        <ClientSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Rechercher un client..."
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Recherchez par nom, raison sociale ou email
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Route */}
           <Card>

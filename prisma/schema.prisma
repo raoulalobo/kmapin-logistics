@@ -437,6 +437,7 @@ model Prospect {
   phone               String?
   name                String?
   company             String?
+  subject             String?
   invitationToken     String         @unique() @default(cuid())
   invitationExpiresAt DateTime
   status              ProspectStatus @default(PENDING)

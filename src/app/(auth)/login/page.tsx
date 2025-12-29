@@ -87,7 +87,7 @@ export default function LoginPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
                 <Package className="h-7 w-7 text-white" />
               </div>
-              <span className="text-2xl font-bold">KmapIn Logistics</span>
+              <span className="text-2xl font-bold">Faso Fret Logistics</span>
             </Link>
 
             <div className="space-y-6 max-w-md">

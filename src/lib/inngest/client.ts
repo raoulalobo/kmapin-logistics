@@ -1,5 +1,5 @@
 /**
- * Configuration Inngest - KmapIn Logistics
+ * Configuration Inngest - Faso Fret Logistics
  *
  * Client Inngest pour orchestrer les workflows et jobs asynchrones
  *
@@ -174,7 +174,7 @@ type Events = {
  */
 export const inngest = new Inngest({
   id: 'kmapin-logistics',
-  name: 'KmapIn Logistics',
+  name: 'Faso Fret Logistics',
 
   /**
    * Schémas d'événements pour validation

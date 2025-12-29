@@ -230,6 +230,17 @@ export async function getAllDocumentsAction(params?: {
     const { page = 1, limit = 20, type, search } = params || {};
     const skip = (page - 1) * limit;
 
+    // Si l'utilisateur n'a pas de companyId, retourner une liste vide
+    if (!session.user.companyId) {
+      return {
+        success: true,
+        data: {
+          documents: [],
+          total: 0,
+        },
+      };
+    }
+
     // Construire les conditions de filtrage
     const where: any = {
       companyId: session.user.companyId,

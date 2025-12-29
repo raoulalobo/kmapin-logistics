@@ -80,7 +80,7 @@ export function generateGuestQuotePDF(data: GuestQuotePDFData): Buffer {
   let yPos = 20;
 
   // Couleurs
-  const primaryColor: [number, number, number] = [0, 51, 255]; // Bleu KmapIn
+  const primaryColor: [number, number, number] = [0, 51, 255]; // Bleu Faso Fret
   const textColor: [number, number, number] = [51, 51, 51]; // Gris foncé
   const lightGray: [number, number, number] = [240, 240, 240];
 
@@ -97,7 +97,7 @@ export function generateGuestQuotePDF(data: GuestQuotePDFData): Buffer {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('KmapIn Logistics', 20, 33);
+  doc.text('Faso Fret Logistics', 20, 33);
 
   yPos = 50;
 
@@ -292,7 +292,7 @@ export function generateGuestQuotePDF(data: GuestQuotePDFData): Buffer {
   doc.setTextColor(100, 100, 100);
   doc.setFont('helvetica', 'italic');
   doc.text(
-    'Merci de votre intérêt pour KmapIn Logistics - Votre partenaire en logistique multi-modale',
+    'Merci de votre intérêt pour Faso Fret Logistics - Votre partenaire en logistique multi-modale',
     pageWidth / 2,
     pageHeight - 15,
     { align: 'center' }

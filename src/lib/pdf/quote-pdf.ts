@@ -104,7 +104,7 @@ export function generateQuotePDF(data: QuotePDFData): Buffer {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('KmapIn Logistics', 20, 33);
+  doc.text('Faso Fret Logistics', 20, 33);
 
   yPos = 50;
 
@@ -310,7 +310,7 @@ export function generateQuotePDF(data: QuotePDFData): Buffer {
 
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'KmapIn Logistics - Votre partenaire en logistique multi-modale',
+    'Faso Fret Logistics - Votre partenaire en logistique multi-modale',
     pageWidth / 2,
     pageHeight - 10,
     { align: 'center' }

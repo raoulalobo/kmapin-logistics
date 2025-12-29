@@ -1,5 +1,5 @@
 /**
- * API Route Inngest - KmapIn Logistics
+ * API Route Inngest - Faso Fret Logistics
  *
  * Endpoint pour l'orchestration Inngest
  * - En développement : utilise le Dev Server local

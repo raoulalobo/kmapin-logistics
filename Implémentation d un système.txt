@@ -227,7 +227,7 @@ Implémentation d'un système de devis en deux modes (calculateur interactif + t
  export const resend = new Resend(process.env.RESEND_API_KEY);
 
  export const EMAIL_CONFIG = {
-   from: 'KmapIn Logistics <noreply@kmapin.com>',
+   from: 'Faso Fret Logistics <noreply@kmapin.com>',
    replyTo: 'support@kmapin.com',
  };
 
@@ -267,7 +267,7 @@ Implémentation d'un système de devis en deux modes (calculateur interactif + t
 
  Structure template :
  - HTML responsive avec gradient bleu (#0033FF)
- - Logo KmapIn Logistics
+ - Logo Faso Fret Logistics
  - Résumé du devis
  - CTA "Créer mon compte gratuitement" (lien avec token)
  - Footer avec mentions

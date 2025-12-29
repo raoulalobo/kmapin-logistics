@@ -49,7 +49,7 @@ export function HomepageHeader() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#003D82]">
             <Package className="h-7 w-7 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900">KmapIn</span>
+          <span className="text-2xl font-bold text-gray-900">Faso Fret</span>
         </Link>
 
         {/* Navigation principale */}

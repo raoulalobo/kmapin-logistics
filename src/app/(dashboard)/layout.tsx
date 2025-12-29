@@ -17,8 +17,8 @@ import { Header } from '@/components/layouts/header';
  */
 export const metadata: Metadata = {
   title: {
-    template: '%s | KmapIn Logistics',
-    default: 'Dashboard | KmapIn Logistics',
+    template: '%s | Faso Fret Logistics',
+    default: 'Dashboard | Faso Fret Logistics',
   },
   description: 'Gestion de fret multi-modal',
 };

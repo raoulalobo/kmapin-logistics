@@ -99,7 +99,7 @@ export default function House() {
         {/* Section FAQ */}
         <FaqSection />
 
-        {/* Section Pourquoi KmapIn */}
+        {/* Section Pourquoi Faso Fret */}
         <section id="why-kmapin" className="py-20 bg-white">
           <div className="container mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -116,7 +116,7 @@ export default function House() {
               {/* Contenu */}
               <div>
                 <h2 className="text-4xl font-bold text-gray-900 mb-12">
-                  KmapIn – Expérimenté, innovant et international
+                  Faso Fret – Expérimenté, innovant et international
                 </h2>
 
                 <div className="space-y-8">
@@ -311,7 +311,7 @@ export default function House() {
                     <Badge variant="secondary">Communiqué</Badge>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    KmapIn renforce son réseau en Afrique de l'Ouest
+                    Faso Fret renforce son réseau en Afrique de l'Ouest
                   </h3>
                   <Link href="#" className="text-[#003D82] font-semibold hover:underline inline-flex items-center">
                     Lire l'article complet
@@ -396,8 +396,6 @@ export default function House() {
                 <li><Link href="/services/transport-aerien" className="hover:text-white transition-colors">Transport aérien</Link></li>
                 <li><Link href="/services/transport-maritime" className="hover:text-white transition-colors">Transport maritime</Link></li>
                 <li><Link href="/services/transport-routier" className="hover:text-white transition-colors">Transport routier</Link></li>
-                <li><Link href="/services/services-portuaires" className="hover:text-white transition-colors">Services portuaires</Link></li>
-                <li><Link href="/services/logistique-4pl" className="hover:text-white transition-colors">Logistique 4PL</Link></li>
               </ul>
             </div>
 
@@ -405,12 +403,8 @@ export default function House() {
             <div>
               <h4 className="text-white font-bold text-lg mb-6">À propos</h4>
               <ul className="space-y-3">
-                <li><Link href="#" className="hover:text-white transition-colors">À propos de KmapIn</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Carrières</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Durabilité</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Newsletter</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">À propos de Faso Fret</Link></li>
                 <li><Link href="#" className="hover:text-white transition-colors">Actualités</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
               </ul>
             </div>
 
@@ -443,7 +437,7 @@ export default function House() {
           {/* Bottom bar */}
           <div className="border-t border-gray-800 pt-8">
             <div className="flex justify-center items-center">
-              <p className="text-sm">2025 © KmapIn Logistics. Tous droits réservés.</p>
+              <p className="text-sm">2025 © Faso Fret Logistics. Tous droits réservés.</p>
             </div>
           </div>
         </div>

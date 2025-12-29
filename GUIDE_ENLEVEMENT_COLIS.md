@@ -2,7 +2,7 @@
 
 ## 📦 Vue d'ensemble
 
-Ce guide explique comment utiliser le système complet de gestion des enlèvements de colis dans KmapIn Logistics v2.
+Ce guide explique comment utiliser le système complet de gestion des enlèvements de colis dans Faso Fret Logistics v2.
 
 ## ✅ Fonctionnalités Implémentées
 

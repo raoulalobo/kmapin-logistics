@@ -167,7 +167,7 @@ export const onProspectConverted = inngest.createFunction(
 
       await sendEmail({
         to: user.email,
-        subject: 'Bienvenue sur KmapIn Logistics ! 🎉',
+        subject: 'Bienvenue sur Faso Fret Logistics ! 🎉',
         html,
       });
     });

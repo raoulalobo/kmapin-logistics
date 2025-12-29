@@ -1,7 +1,7 @@
 /**
  * Page : Mentions Légales
  *
- * Informations légales obligatoires concernant KmapIn Logistics
+ * Informations légales obligatoires concernant Faso Fret Logistics
  */
 
 import { HomepageHeader } from '@/components/layouts/homepage-header';
@@ -20,7 +20,7 @@ export default function MentionsLegalesPage() {
             <h1 className="text-4xl font-bold">Mentions Légales</h1>
           </div>
           <p className="text-lg text-gray-100">
-            Informations légales relatives à KmapIn Logistics
+            Informations légales relatives à Faso Fret Logistics
           </p>
         </div>
       </section>
@@ -33,7 +33,7 @@ export default function MentionsLegalesPage() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Éditeur du site</h2>
               <div className="text-gray-700 space-y-2">
-                <p><strong>Raison sociale :</strong> KmapIn Logistics SAS</p>
+                <p><strong>Raison sociale :</strong> Faso Fret Logistics SAS</p>
                 <p><strong>Forme juridique :</strong> Société par Actions Simplifiée</p>
                 <p><strong>Capital social :</strong> 100 000 €</p>
                 <p><strong>Siège social :</strong> [Adresse complète]</p>
@@ -68,12 +68,12 @@ export default function MentionsLegalesPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Propriété intellectuelle</h2>
               <p className="text-gray-700 mb-4">
                 L'ensemble du contenu de ce site (textes, images, vidéos, logos, icônes, etc.)
-                est la propriété exclusive de KmapIn Logistics, sauf mention contraire.
+                est la propriété exclusive de Faso Fret Logistics, sauf mention contraire.
               </p>
               <p className="text-gray-700 mb-4">
                 Toute reproduction, représentation, modification, publication ou adaptation
                 totale ou partielle des éléments du site, quel que soit le moyen ou le procédé utilisé,
-                est interdite sans l'autorisation écrite préalable de KmapIn Logistics.
+                est interdite sans l'autorisation écrite préalable de Faso Fret Logistics.
               </p>
               <p className="text-gray-700">
                 Toute exploitation non autorisée du site ou de l'un des éléments qu'il contient
@@ -117,16 +117,16 @@ export default function MentionsLegalesPage() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Limitation de responsabilité</h2>
               <p className="text-gray-700 mb-4">
-                KmapIn Logistics met tout en œuvre pour offrir aux utilisateurs des informations
+                Faso Fret Logistics met tout en œuvre pour offrir aux utilisateurs des informations
                 exactes et mises à jour. Toutefois, des erreurs ou omissions peuvent survenir.
               </p>
               <p className="text-gray-700 mb-4">
-                KmapIn Logistics ne pourra être tenue responsable des dommages directs ou indirects
+                Faso Fret Logistics ne pourra être tenue responsable des dommages directs ou indirects
                 qui pourraient résulter de l'accès au site ou de l'utilisation des informations
                 qui y sont contenues.
               </p>
               <p className="text-gray-700">
-                KmapIn Logistics décline toute responsabilité concernant les sites vers lesquels
+                Faso Fret Logistics décline toute responsabilité concernant les sites vers lesquels
                 des liens hypertextes peuvent renvoyer.
               </p>
             </div>

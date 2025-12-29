@@ -1,5 +1,5 @@
 /**
- * Configuration Prisma - KmapIn Logistics
+ * Configuration Prisma - Faso Fret Logistics
  * Base de données Neon PostgreSQL
  */
 import "dotenv/config";

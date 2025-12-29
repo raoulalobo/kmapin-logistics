@@ -132,19 +132,19 @@ const navigation: NavSection[] = [
         label: 'Utilisateurs',
         href: '/dashboard/users',
         icon: UserGear,
-        // Pas de permission - réservé aux ADMIN via wildcard '*'
+        permission: 'users:read', // Réservé aux ADMIN uniquement
       },
       {
         label: 'Configuration des Prix',
         href: '/dashboard/settings/pricing',
         icon: CurrencyEur,
-        // Pas de permission - réservé aux ADMIN via wildcard '*'
+        permission: 'settings:pricing', // Réservé aux ADMIN uniquement
       },
       {
         label: 'Pays',
         href: '/dashboard/countries',
         icon: Globe,
-        // Pas de permission - réservé aux ADMIN via wildcard '*'
+        permission: 'countries:read', // Réservé aux ADMIN uniquement
       },
       {
         label: 'Documents',
@@ -226,7 +226,7 @@ export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Package className="h-4 w-4" />
           </div>
-          <span className="text-lg">KmapIn</span>
+          <span className="text-lg">Faso Fret</span>
         </Link>
       </div>
 

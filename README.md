@@ -1,4 +1,4 @@
-# KmapIn Logistics - Gestion de Fret Multi-Modal
+# Faso Fret Logistics - Gestion de Fret Multi-Modal
 
 Plateforme de gestion logistique pour transport routier, maritime, aérien et ferroviaire.
 
@@ -144,4 +144,4 @@ Voir `.env.example` pour la liste complète des variables d'environnement néces
 
 ## 📄 Licence
 
-Propriétaire - KmapIn
+Propriétaire - Faso Fret

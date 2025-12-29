@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
  * Metadata de la page
  */
 export const metadata = {
-  title: 'Gestion des pays | KmapIn Logistics',
+  title: 'Gestion des pays | Faso Fret Logistics',
   description: 'Gérer les pays d\'origine et de destination pour les expéditions',
 };
 

@@ -264,10 +264,19 @@ export async function getQuotesAction(
 
     // Si l'utilisateur est CLIENT, il ne voit que ses propres devis
     if (canReadOwn && !canReadAll) {
+      // Si l'utilisateur n'a pas de companyId, retourner une liste vide
       if (!session.user.companyId) {
         return {
-          success: false,
-          error: 'Votre compte n\'est pas associé à une compagnie',
+          success: true,
+          data: {
+            quotes: [],
+            pagination: {
+              page,
+              limit,
+              total: 0,
+              totalPages: 0,
+            },
+          },
         };
       }
       where.companyId = session.user.companyId;

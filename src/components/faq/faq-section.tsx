@@ -58,7 +58,7 @@ const faqItems: FaqItem[] = [
   },
   {
     question: 'Quelles zones géographiques couvrez-vous ?',
-    answer: 'KmapIn dispose d\'un réseau mondial couvrant plus de 150 pays. Nous opérons principalement en Europe, Afrique, Asie et Amérique avec des partenaires locaux fiables. Notre expérience particulière en Afrique de l\'Ouest nous permet d\'offrir des services optimisés dans cette région.',
+    answer: 'Faso Fret dispose d\'un réseau mondial couvrant plus de 150 pays. Nous opérons principalement en Europe, Afrique, Asie et Amérique avec des partenaires locaux fiables. Notre expérience particulière en Afrique de l\'Ouest nous permet d\'offrir des services optimisés dans cette région.',
     icon: MapPin,
   },
   {

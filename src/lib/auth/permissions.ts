@@ -1,5 +1,5 @@
 /**
- * Système de permissions RBAC - KmapIn Logistics
+ * Système de permissions RBAC - Faso Fret Logistics
  *
  * Définit les permissions par rôle et fournit des helpers
  * pour vérifier les autorisations dans les Server Actions.

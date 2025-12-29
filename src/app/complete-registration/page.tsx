@@ -25,9 +25,9 @@ import { CompleteRegistrationForm } from '@/components/registration';
  * Métadonnées SEO de la page
  */
 export const metadata: Metadata = {
-  title: 'Finaliser mon inscription | KmapIn Logistics',
+  title: 'Finaliser mon inscription | Faso Fret Logistics',
   description:
-    'Créez votre compte KmapIn Logistics pour accéder à vos devis et suivre vos expéditions en temps réel.',
+    'Créez votre compte Faso Fret Logistics pour accéder à vos devis et suivre vos expéditions en temps réel.',
   robots: 'noindex, nofollow', // Page privée, ne pas indexer
 };
 

@@ -149,10 +149,10 @@ export async function registerAction(
         return { error: 'Impossible de créer le compte' };
       }
 
-      // Rediriger vers la page de vérification email
+      // Rediriger vers la page de connexion
       return {
         success: true,
-        redirectTo: '/verify-email?email=' + encodeURIComponent(validatedData.email),
+        redirectTo: '/login',
       };
     } catch (authError: any) {
       // Gérer les erreurs de Better Auth (email déjà existant, etc.)

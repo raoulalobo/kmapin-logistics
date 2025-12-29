@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de configuration des variables d'environnement Vercel
-# Pour KmapIn Logistics - Déploiement Production
+# Pour Faso Fret Logistics - Déploiement Production
 
 echo "🚀 Configuration des variables d'environnement Vercel"
 echo "=================================================="

@@ -1,5 +1,5 @@
 /**
- * Configuration Better Auth - KmapIn Logistics
+ * Configuration Better Auth - Faso Fret Logistics
  *
  * Configuration de l'authentification avec Better Auth incluant:
  * - Email/Password
@@ -70,11 +70,11 @@ export const auth = betterAuth({
 
   /**
    * Configuration Email/Password
-   * Authentification traditionnelle avec vérification d'email obligatoire
+   * Authentification traditionnelle (vérification d'email désactivée temporairement)
    */
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     minPasswordLength: 8,
 
     /**
@@ -113,7 +113,7 @@ export const auth = betterAuth({
       // import { sendEmail } from '@/lib/email';
       // await sendEmail({
       //   to: user.email,
-      //   subject: 'Réinitialisation de mot de passe - KmapIn Logistics',
+      //   subject: 'Réinitialisation de mot de passe - Faso Fret Logistics',
       //   html: `
       //     <h1>Réinitialisation de mot de passe</h1>
       //     <p>Bonjour ${user.name},</p>
@@ -153,7 +153,7 @@ export const auth = betterAuth({
    */
   twoFactor: {
     enabled: true,
-    issuer: 'KmapIn Logistics',
+    issuer: 'Faso Fret Logistics',
   },
 
   /**

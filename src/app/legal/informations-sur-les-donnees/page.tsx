@@ -34,7 +34,7 @@ export default function InformationsDonneesPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Introduction</h2>
               <p className="text-gray-700">
                 Cette page détaille les informations relatives à la collecte et au traitement
-                de vos données personnelles lorsque vous utilisez notre plateforme KmapIn Logistics.
+                de vos données personnelles lorsque vous utilisez notre plateforme Faso Fret Logistics.
                 Nous nous engageons à respecter votre vie privée et à protéger vos données conformément
                 aux réglementations en vigueur.
               </p>
@@ -247,7 +247,7 @@ export default function InformationsDonneesPage() {
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2">
                 <li>Nous contacter par email : <strong>dpo@kmapin.com</strong></li>
-                <li>Nous écrire à l'adresse : KmapIn Logistics - Service DPO - [Adresse complète]</li>
+                <li>Nous écrire à l'adresse : Faso Fret Logistics - Service DPO - [Adresse complète]</li>
                 <li>Utiliser le formulaire de contact dans votre espace client</li>
               </ul>
               <p className="text-gray-700 mt-4">
@@ -265,7 +265,7 @@ export default function InformationsDonneesPage() {
               <div className="bg-blue-50 border-l-4 border-[#003D82] p-6 rounded">
                 <p className="text-gray-900 font-semibold mb-2">Délégué à la Protection des Données (DPO)</p>
                 <p className="text-gray-700">Email : <strong>dpo@kmapin.com</strong></p>
-                <p className="text-gray-700">Adresse : KmapIn Logistics - Service DPO - [Adresse complète]</p>
+                <p className="text-gray-700">Adresse : Faso Fret Logistics - Service DPO - [Adresse complète]</p>
               </div>
             </div>
 

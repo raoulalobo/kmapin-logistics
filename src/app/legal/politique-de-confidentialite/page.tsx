@@ -33,7 +33,7 @@ export default function PolitiqueConfidentialitePage() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Introduction</h2>
               <p className="text-gray-700 mb-4">
-                KmapIn Logistics s'engage à protéger la vie privée et les données personnelles
+                Faso Fret Logistics s'engage à protéger la vie privée et les données personnelles
                 de ses utilisateurs. La présente politique de confidentialité explique comment
                 nous collectons, utilisons, partageons et protégeons vos données personnelles
                 conformément au Règlement Général sur la Protection des Données (RGPD).
@@ -47,7 +47,7 @@ export default function PolitiqueConfidentialitePage() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Responsable du traitement des données</h2>
               <div className="text-gray-700 space-y-2">
-                <p><strong>Société :</strong> KmapIn Logistics SAS</p>
+                <p><strong>Société :</strong> Faso Fret Logistics SAS</p>
                 <p><strong>Adresse :</strong> [Adresse complète]</p>
                 <p><strong>Email :</strong> dpo@kmapin.com</p>
                 <p><strong>Délégué à la Protection des Données (DPO) :</strong> [Nom du DPO]</p>
@@ -107,7 +107,7 @@ export default function PolitiqueConfidentialitePage() {
                 Vos données personnelles peuvent être communiquées aux catégories de destinataires suivantes :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2">
-                <li>Personnel autorisé de KmapIn Logistics</li>
+                <li>Personnel autorisé de Faso Fret Logistics</li>
                 <li>Prestataires techniques (hébergement, maintenance)</li>
                 <li>Partenaires logistiques pour l'exécution des services</li>
                 <li>Autorités administratives et judiciaires sur demande légale</li>
@@ -180,7 +180,7 @@ export default function PolitiqueConfidentialitePage() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Sécurité des données</h2>
               <p className="text-gray-700 mb-4">
-                KmapIn Logistics met en œuvre des mesures techniques et organisationnelles
+                Faso Fret Logistics met en œuvre des mesures techniques et organisationnelles
                 appropriées pour garantir la sécurité de vos données personnelles :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2">

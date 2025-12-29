@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-**KmapIn Logistics v2** - Plateforme de gestion logistique pour transport multi-modal (routier, maritime, aérien, ferroviaire).
+**Faso Fret Logistics v2** - Plateforme de gestion logistique pour transport multi-modal (routier, maritime, aérien, ferroviaire).
 
 ## Stack Technique Clé
 

@@ -1,4 +1,4 @@
-// Schéma Zenstack - KmapIn Logistics
+// Schéma Zenstack - Faso Fret Logistics
 // Application de gestion de fret multi-modal avec Access Control
 
 /**
@@ -766,6 +766,7 @@ model Prospect {
   phone                 String?
   name                  String?
   company               String?        // Nom entreprise (texte libre, pas lié à Company)
+  subject               String?        // Objet de la demande de contact
 
   // Token d'invitation sécurisé
   invitationToken       String         @unique @default(cuid())

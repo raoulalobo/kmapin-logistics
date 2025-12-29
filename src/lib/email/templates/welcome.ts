@@ -29,7 +29,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Bienvenue sur KmapIn Logistics</title>
+      <title>Bienvenue sur Faso Fret Logistics</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -133,7 +133,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
         <!-- En-tête -->
         <div class="header">
           <div class="emoji">🎉</div>
-          <h1>Bienvenue sur KmapIn Logistics !</h1>
+          <h1>Bienvenue sur Faso Fret Logistics !</h1>
           <p>Votre compte a été créé avec succès</p>
         </div>
 
@@ -187,7 +187,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
 
         <!-- Pied de page -->
         <div class="footer">
-          <p><strong>KmapIn Logistics</strong></p>
+          <p><strong>Faso Fret Logistics</strong></p>
           <p>Transport multi-modal international</p>
           <p style="margin-top: 10px;">
             Besoin d'aide ? Répondez à cet email ou contactez-nous à support@kmapin.com

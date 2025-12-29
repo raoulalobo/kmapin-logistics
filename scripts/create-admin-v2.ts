@@ -17,7 +17,7 @@ import bcrypt from 'bcrypt';
 const ADMIN_EMAIL = process.env.EMAIL || 'admin@kmapin.com';
 const ADMIN_PASSWORD = process.env.PASSWORD || 'Admin123!';
 const ADMIN_NAME = process.env.NAME || 'Administrateur';
-const COMPANY_NAME = 'KmapIn Admin';
+const COMPANY_NAME = 'Faso Fret Admin';
 const BCRYPT_ROUNDS = 10;
 
 async function main() {

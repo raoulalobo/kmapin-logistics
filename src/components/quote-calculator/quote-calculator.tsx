@@ -255,7 +255,7 @@ export function QuoteCalculator() {
         doc.text('ESTIMATION DE DEVIS', 20, 25);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text('KmapIn Logistics', 20, 33);
+        doc.text('Faso Fret Logistics', 20, 33);
         yPos = 50;
 
         // NUMÉRO ET DATE
@@ -364,17 +364,22 @@ export function QuoteCalculator() {
     try {
       const { saveQuoteFromCalculatorAction } = await import('@/modules/quotes/actions/quote.actions');
 
-      toast.loading('Sauvegarde en cours...');
+      // Créer un toast de chargement et récupérer son ID
+      const toastId = toast.loading('Sauvegarde en cours...');
 
       const response = await saveQuoteFromCalculatorAction(lastFormData);
 
       if (response.success && response.data) {
-        toast.success(`Devis ${response.data.quoteNumber} sauvegardé dans votre espace !`);
+        // Remplacer le toast de chargement par le toast de succès
+        toast.success(`Devis ${response.data.quoteNumber} sauvegardé dans votre espace !`, { id: toastId });
       } else {
-        toast.error(response.error || 'Erreur lors de la sauvegarde');
+        // Remplacer le toast de chargement par le toast d'erreur
+        toast.error(response.error || 'Erreur lors de la sauvegarde', { id: toastId });
       }
     } catch (error) {
       console.error('Erreur sauvegarde devis:', error);
+      // Dismiss le toast de chargement en cas d'erreur inattendue
+      toast.dismiss();
       toast.error('Erreur lors de la sauvegarde du devis');
     }
   };
@@ -735,7 +740,7 @@ export function QuoteCalculator() {
                           className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
                           <FloppyDisk className="mr-2 h-5 w-5" />
-                          Sauvegarder dans mon espace
+                          Sauvegarder
                         </Button>
                       </div>
                     </>

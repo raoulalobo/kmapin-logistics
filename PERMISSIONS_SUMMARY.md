@@ -1,4 +1,4 @@
-# Résumé des Permissions par Rôle - KmapIn Logistics
+# Résumé des Permissions par Rôle - Faso Fret Logistics
 
 ## 📋 Rôles Disponibles
 

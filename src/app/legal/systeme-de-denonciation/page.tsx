@@ -35,13 +35,13 @@ export default function SystemeDenonciationPage() {
               <p className="text-gray-700 mb-4">
                 Conformément à la loi Sapin 2 du 9 décembre 2016 relative à la transparence,
                 à la lutte contre la corruption et à la modernisation de la vie économique,
-                KmapIn Logistics a mis en place un dispositif d'alerte professionnelle.
+                Faso Fret Logistics a mis en place un dispositif d'alerte professionnelle.
               </p>
               <p className="text-gray-700">
                 Ce système permet à toute personne (employé, collaborateur, partenaire, client, etc.)
                 de signaler de bonne foi des faits susceptibles de constituer un crime, un délit,
                 une menace ou un préjudice pour l'intérêt général, portés à sa connaissance dans
-                le cadre de ses relations professionnelles avec KmapIn Logistics.
+                le cadre de ses relations professionnelles avec Faso Fret Logistics.
               </p>
             </div>
 
@@ -67,7 +67,7 @@ export default function SystemeDenonciationPage() {
                 Le dispositif d'alerte est accessible à :
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2">
-                <li>Tous les employés de KmapIn Logistics</li>
+                <li>Tous les employés de Faso Fret Logistics</li>
                 <li>Les collaborateurs externes (consultants, prestataires, intérimaires)</li>
                 <li>Les partenaires commerciaux</li>
                 <li>Les clients et fournisseurs</li>
@@ -139,7 +139,7 @@ export default function SystemeDenonciationPage() {
               <div className="bg-blue-50 border-l-4 border-[#003D82] p-6 rounded mb-6">
                 <p className="text-gray-900 font-semibold mb-4">Courrier postal confidentiel</p>
                 <p className="text-gray-700">
-                  KmapIn Logistics<br />
+                  Faso Fret Logistics<br />
                   À l'attention du Référent Déontologie<br />
                   Mention "Confidentiel - Alerte professionnelle"<br />
                   [Adresse complète]
@@ -260,7 +260,7 @@ export default function SystemeDenonciationPage() {
               <div className="bg-blue-50 border-l-4 border-[#003D82] p-6 rounded">
                 <p className="text-gray-900 font-semibold mb-2">Référent Déontologie</p>
                 <p className="text-gray-700">Email : <strong>deontologie@kmapin.com</strong></p>
-                <p className="text-gray-700">Adresse : KmapIn Logistics - Référent Déontologie - [Adresse complète]</p>
+                <p className="text-gray-700">Adresse : Faso Fret Logistics - Référent Déontologie - [Adresse complète]</p>
               </div>
             </div>
 

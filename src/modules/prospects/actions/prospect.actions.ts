@@ -14,9 +14,11 @@ import {
   prospectSchema,
   completeRegistrationSchema,
   attachToAccountSchema,
+  contactFormSchema,
   type ProspectFormData,
   type CompleteRegistrationFormData,
   type AttachToAccountFormData,
+  type ContactFormData,
 } from '../schemas/prospect.schema';
 import { sendEmail } from '@/lib/email/resend';
 import { generateGuestQuotePDF } from '@/lib/pdf/guest-quote-pdf';
@@ -177,7 +179,7 @@ export async function createProspectAndSendQuoteAction(data: unknown) {
 
     const emailResult = await sendEmail({
       to: prospect.email,
-      subject: `Votre devis KmapIn Logistics - ${guestQuote.quoteNumber}`,
+      subject: `Votre devis Faso Fret Logistics - ${guestQuote.quoteNumber}`,
       html: emailHtml,
       attachments: [
         {
@@ -565,6 +567,97 @@ export async function attachProspectToExistingUserAction(
     return {
       success: false,
       error: error.message || 'Erreur lors du rattachement au compte',
+    };
+  }
+}
+
+/**
+ * Créer un prospect depuis le formulaire de contact simple
+ *
+ * Workflow :
+ * 1. Valider les données (nom, email, téléphone, objet)
+ * 2. Créer ou mettre à jour le prospect
+ * 3. Envoyer une notification email à l'équipe
+ *
+ * @param data - Données du formulaire de contact
+ * @returns Résultat avec prospectId
+ */
+export async function createContactProspectAction(data: unknown) {
+  try {
+    // 1. Valider les données
+    const validated = contactFormSchema.parse(data);
+
+    // 2. Vérifier si le prospect existe déjà
+    let prospect = await prisma.prospect.findUnique({
+      where: { email: validated.email },
+    });
+
+    // Si le prospect existe, le mettre à jour avec les nouvelles infos
+    if (prospect) {
+      prospect = await prisma.prospect.update({
+        where: { id: prospect.id },
+        data: {
+          phone: validated.phone,
+          name: validated.name,
+          subject: validated.subject,
+          // Réinitialiser l'expiration si le prospect était expiré
+          invitationExpiresAt: prospect.status === 'EXPIRED'
+            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 jours
+            : prospect.invitationExpiresAt,
+          status: prospect.status === 'EXPIRED' ? 'PENDING' : prospect.status,
+        },
+      });
+    }
+    // Sinon, créer un nouveau prospect
+    else {
+      const invitationExpiresAt = new Date();
+      invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7); // 7 jours
+
+      prospect = await prisma.prospect.create({
+        data: {
+          email: validated.email,
+          phone: validated.phone,
+          name: validated.name,
+          subject: validated.subject,
+          invitationExpiresAt,
+          status: 'PENDING',
+        },
+      });
+    }
+
+    // 3. Envoyer une notification email à l'équipe (optionnel)
+    // Vous pouvez ajouter ici l'envoi d'un email de notification à l'équipe commerciale
+    // Par exemple : sendEmail({ to: 'commercial@fasofret.fr', ... })
+
+    return {
+      success: true,
+      data: {
+        prospectId: prospect.id,
+        email: prospect.email,
+      },
+    };
+  } catch (error: any) {
+    console.error('Erreur createContactProspectAction:', error);
+
+    // Gérer les erreurs de validation Zod
+    if (error.name === 'ZodError') {
+      return {
+        success: false,
+        error: error.errors[0]?.message || 'Données invalides',
+      };
+    }
+
+    // Gérer les erreurs de contrainte unique (email déjà utilisé)
+    if (error.code === 'P2002') {
+      return {
+        success: false,
+        error: 'Un problème est survenu avec cet email',
+      };
+    }
+
+    return {
+      success: false,
+      error: error.message || 'Erreur lors de l\'enregistrement de votre demande',
     };
   }
 }

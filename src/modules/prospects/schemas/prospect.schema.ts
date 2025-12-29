@@ -90,9 +90,27 @@ export const attachToAccountSchema = z.object({
 });
 
 /**
+ * Schéma pour le formulaire de contact simple (modal)
+ */
+export const contactFormSchema = z.object({
+  /** Nom du contact (obligatoire) */
+  name: z.string().min(2, 'Nom trop court').max(100, 'Nom trop long'),
+
+  /** Email du contact (obligatoire) */
+  email: z.string().email('Email invalide').max(100, 'Email trop long'),
+
+  /** Téléphone du contact (obligatoire) */
+  phone: z.string().min(10, 'Numéro de téléphone invalide').max(20, 'Numéro trop long'),
+
+  /** Objet de la demande (obligatoire) */
+  subject: z.string().min(5, 'Objet trop court').max(200, 'Objet trop long'),
+});
+
+/**
  * Types TypeScript inférés des schémas
  */
 export type ProspectFormData = z.infer<typeof prospectSchema>;
 export type CompleteRegistrationFormData = z.infer<typeof completeRegistrationSchema>;
 export type AttachToAccountFormData = z.infer<typeof attachToAccountSchema>;
 export type QuoteDataFormData = z.infer<typeof quoteDataSchema>;
+export type ContactFormData = z.infer<typeof contactFormSchema>;

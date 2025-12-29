@@ -17,7 +17,7 @@ import { HomepageHeader } from '@/components/layouts/homepage-header';
  * Métadonnées SEO de la page
  */
 export const metadata: Metadata = {
-  title: 'Tarifs Standards - Transport International | KmapIn Logistics',
+  title: 'Tarifs Standards - Transport International | Faso Fret Logistics',
   description:
     'Consultez nos tarifs indicatifs pour le transport international multi-modal (routier, maritime, aérien, ferroviaire). Prix transparents par destination avec délais estimés.',
   keywords: [

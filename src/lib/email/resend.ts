@@ -22,7 +22,7 @@ export const resend = process.env.RESEND_API_KEY
  * En production, vérifier le domaine kmapin.com sur https://resend.com/domains
  */
 export const EMAIL_CONFIG = {
-  from: 'KmapIn Logistics <onboarding@resend.dev>', // Domaine de test Resend
+  from: 'Faso Fret Logistics <onboarding@resend.dev>', // Domaine de test Resend
   replyTo: 'onboarding@resend.dev',
 };
 
@@ -70,7 +70,7 @@ export interface EmailResult {
  * ```typescript
  * const result = await sendEmail({
  *   to: 'client@example.com',
- *   subject: 'Votre devis KmapIn',
+ *   subject: 'Votre devis Faso Fret',
  *   html: '<h1>Devis</h1><p>Votre devis est prêt</p>',
  *   attachments: [{
  *     filename: 'devis.pdf',

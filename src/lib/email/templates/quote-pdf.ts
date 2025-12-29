@@ -42,7 +42,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Votre devis KmapIn Logistics</title>
+      <title>Votre devis Faso Fret Logistics</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -164,7 +164,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
       <div class="container">
         <!-- En-tête -->
         <div class="header">
-          <h1>KmapIn Logistics</h1>
+          <h1>Faso Fret Logistics</h1>
           <p>Votre partenaire en logistique multi-modale</p>
         </div>
 
@@ -221,7 +221,7 @@ export function generateQuoteEmailTemplate(params: QuoteEmailParams): string {
 
         <!-- Pied de page -->
         <div class="footer">
-          <p><strong>KmapIn Logistics</strong></p>
+          <p><strong>Faso Fret Logistics</strong></p>
           <p>Transport multi-modal international</p>
           <p style="margin-top: 10px;">
             Cet email a été envoyé automatiquement suite à votre demande de devis sur notre plateforme.
