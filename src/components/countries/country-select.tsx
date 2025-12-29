@@ -19,9 +19,9 @@ interface Country {
 }
 
 interface CountrySelectProps {
-  /** Valeur sélectionnée (nom du pays) */
+  /** Valeur sélectionnée (code ISO du pays, ex: "FR", "CM") */
   value?: string;
-  /** Callback lors du changement de sélection */
+  /** Callback lors du changement de sélection (retourne le code ISO) */
   onValueChange: (value: string) => void;
   /** Placeholder du select */
   placeholder?: string;
@@ -34,10 +34,11 @@ interface CountrySelectProps {
 /**
  * Sélecteur de pays avec chargement asynchrone depuis la base de données
  *
- * Affiche uniquement les pays actifs, triés par nom
+ * Affiche uniquement les pays actifs, triés par nom.
+ * IMPORTANT: Retourne le code ISO (ex: "FR", "CM") et non le nom du pays.
  *
- * @param value - Nom du pays sélectionné
- * @param onValueChange - Callback appelé lors du changement
+ * @param value - Code ISO du pays sélectionné (ex: "FR", "CM")
+ * @param onValueChange - Callback appelé lors du changement (reçoit le code ISO)
  * @param placeholder - Texte du placeholder
  * @param id - ID HTML du select
  * @param className - Classes CSS supplémentaires
@@ -45,8 +46,8 @@ interface CountrySelectProps {
  * @example
  * ```tsx
  * <CountrySelect
- *   value={originCountry}
- *   onValueChange={(value) => setValue('originCountry', value)}
+ *   value={originCountry}  // "FR"
+ *   onValueChange={(code) => setValue('originCountry', code)}  // code = "FR"
  *   placeholder="Sélectionnez un pays"
  *   id="originCountry"
  * />
@@ -101,8 +102,11 @@ export function CountrySelect({
       </SelectTrigger>
       <SelectContent>
         {countries.map((country) => (
-          <SelectItem key={country.id} value={country.name}>
-            {country.name}
+          <SelectItem key={country.id} value={country.code}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 font-mono">{country.code}</span>
+              <span>{country.name}</span>
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

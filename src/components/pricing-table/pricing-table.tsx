@@ -241,14 +241,9 @@ export function PricingTable() {
 
                         {/* Prix estimé */}
                         <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[#003D82]">
-                              {rate.pricePerKg.toFixed(2)} € /kg
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Min: {rate.minPrice} € - Max: {rate.maxPrice} €
-                            </span>
-                          </div>
+                          <span className="font-bold text-[#003D82]">
+                            {rate.pricePerKg.toFixed(2)} € /kg
+                          </span>
                         </TableCell>
 
                         {/* Délai */}

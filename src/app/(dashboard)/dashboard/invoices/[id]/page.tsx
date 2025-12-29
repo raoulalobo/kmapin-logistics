@@ -129,7 +129,7 @@ export default async function InvoiceDetailsPage({
             <>
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
-                  <Edit className="mr-2 h-4 w-4" />
+                  <PencilSimple className="mr-2 h-4 w-4" />
                   Modifier
                 </Link>
               </Button>

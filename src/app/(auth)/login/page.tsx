@@ -2,33 +2,28 @@
  * Page : Connexion
  *
  * Formulaire de connexion avec email/password ou OAuth
+ * Design moderne split-screen avec branding
  */
 
 'use client';
 
-import { useTransition } from 'react';
+import { useTransition, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { SignIn, Envelope, Lock, CircleNotch, House, ArrowLeft } from '@phosphor-icons/react';
+import { SignIn, Envelope, Lock, CircleNotch, ArrowLeft, Package, CheckSquare, Square } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import { authClient } from '@/lib/auth/client';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [rememberMe, setRememberMe] = useState(false);
 
   /**
    * Handler pour la soumission du formulaire
@@ -75,36 +70,105 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-between mb-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Retour à l'accueil</span>
+    <div className="min-h-screen flex">
+      {/* Côté gauche - Branding & Hero */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#003D82] via-[#002952] to-[#001a33] relative overflow-hidden">
+        {/* Pattern de fond décoratif */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-300 rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Contenu */}
+        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
+          {/* Logo et titre */}
+          <div>
+            <Link href="/" className="flex items-center space-x-3 mb-12 group">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                <Package className="h-7 w-7 text-white" />
+              </div>
+              <span className="text-2xl font-bold">KmapIn Logistics</span>
             </Link>
-            <div className="p-3 bg-primary/10 rounded-full">
-              <SignIn className="w-6 h-6 text-primary" />
+
+            <div className="space-y-6 max-w-md">
+              <h1 className="text-4xl font-bold leading-tight">
+                Connectez-vous à votre espace professionnel
+              </h1>
+              <p className="text-lg text-blue-100">
+                Gérez vos expéditions internationales, suivez vos envois en temps réel et accédez à tous vos documents logistiques.
+              </p>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            Connexion
-          </CardTitle>
-          <CardDescription className="text-center">
-            Accédez à votre espace KmapIn Logistics
-          </CardDescription>
-        </CardHeader>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          {/* Points clés */}
+          <div className="space-y-4 max-w-md">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <CheckSquare className="h-5 w-5 text-blue-200" weight="fill" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Suivi en temps réel</h3>
+                <p className="text-sm text-blue-100">Suivez vos expéditions à chaque étape</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <CheckSquare className="h-5 w-5 text-blue-200" weight="fill" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Gestion complète</h3>
+                <p className="text-sm text-blue-100">Devis, factures, documents douaniers</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <CheckSquare className="h-5 w-5 text-blue-200" weight="fill" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Support dédié</h3>
+                <p className="text-sm text-blue-100">Une équipe à votre écoute 24/7</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Côté droit - Formulaire */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+        <div className="w-full max-w-md space-y-8">
+          {/* Retour à l'accueil (mobile) */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors lg:hidden mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Retour à l'accueil</span>
+          </Link>
+
+          {/* Header du formulaire */}
+          <div className="text-center lg:text-left">
+            {/* Logo mobile */}
+            <div className="flex justify-center lg:hidden mb-6">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#003D82]">
+                <Package className="h-8 w-8 text-white" />
+              </div>
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-900">Bienvenue !</h2>
+            <p className="mt-2 text-gray-600">
+              Connectez-vous pour accéder à votre espace
+            </p>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-900">
+                Adresse email
+              </Label>
               <div className="relative">
-                <Envelope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   id="email"
                   name="email"
@@ -112,7 +176,7 @@ export default function LoginPage() {
                   placeholder="vous@entreprise.com"
                   required
                   disabled={isPending}
-                  className="pl-10"
+                  className="pl-11 h-12 border-gray-300 focus:border-[#003D82] focus:ring-[#003D82]"
                 />
               </div>
             </div>
@@ -120,16 +184,18 @@ export default function LoginPage() {
             {/* Mot de passe */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password" className="text-sm font-medium text-gray-900">
+                  Mot de passe
+                </Label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-[#003D82] hover:underline font-medium"
                 >
                   Mot de passe oublié ?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   id="password"
                   name="password"
@@ -137,94 +203,71 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   required
                   disabled={isPending}
-                  className="pl-10"
+                  className="pl-11 h-12 border-gray-300 focus:border-[#003D82] focus:ring-[#003D82]"
                 />
               </div>
+            </div>
+
+            {/* Se souvenir de moi */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              />
+              <label
+                htmlFor="remember"
+                className="text-sm text-gray-700 cursor-pointer select-none"
+              >
+                Se souvenir de moi
+              </label>
             </div>
 
             {/* Bouton de connexion */}
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 bg-[#003D82] hover:bg-[#002952] text-white font-medium text-base shadow-lg hover:shadow-xl transition-all"
               disabled={isPending}
             >
               {isPending ? (
                 <>
-                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-5 w-5 animate-spin" />
                   Connexion en cours...
                 </>
               ) : (
                 <>
-                  <SignIn className="mr-2 h-4 w-4" />
+                  <SignIn className="mr-2 h-5 w-5" />
                   Se connecter
                 </>
               )}
             </Button>
+          </form>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Ou continuer avec
-                </span>
-              </div>
-            </div>
-
-            {/* OAuth Buttons (placeholder pour l'instant) */}
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                disabled
-                className="w-full"
-              >
-                <svg
-                  className="mr-2 h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                Google
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                disabled
-                className="w-full"
-              >
-                <svg
-                  className="mr-2 h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M11.4 24H0V8.6h4.2V19.6H11.4V24ZM23.9 8.6H19.7V19.6H12.5V24H23.9V8.6ZM23.9 0H12.5V4.4H19.7V15.4H23.9V0Z" />
-                </svg>
-                Microsoft
-              </Button>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4">
-            <div className="text-sm text-center text-muted-foreground">
+          {/* Lien inscription */}
+          <div className="text-center pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
               Pas encore de compte ?{' '}
               <Link
                 href="/register"
-                className="text-primary font-medium hover:underline"
+                className="text-[#003D82] font-semibold hover:underline"
               >
-                S'inscrire
+                Créer un compte
               </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
+            </p>
+          </div>
+
+          {/* Retour à l'accueil (desktop) */}
+          <div className="hidden lg:block text-center pt-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour à l'accueil</span>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

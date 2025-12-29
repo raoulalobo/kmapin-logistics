@@ -48,9 +48,9 @@ export const quoteSchema = z.object({
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
   // === Dimensions (optionnelles) - Volume = L × W × H ===
-  length: z.number().positive().max(100).optional(),
-  width: z.number().positive().max(100).optional(),
-  height: z.number().positive().max(100).optional(),
+  length: z.number().nonnegative('La longueur doit être positive ou nulle').max(100).optional(),
+  width: z.number().nonnegative('La largeur doit être positive ou nulle').max(100).optional(),
+  height: z.number().nonnegative('La hauteur doit être positive ou nulle').max(100).optional(),
 
   // === Transport ===
   transportMode: z

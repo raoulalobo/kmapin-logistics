@@ -22,6 +22,7 @@ import {
   Buildings,
   Scales,
   Cube,
+  Package,
   CheckCircle,
   XCircle,
   WarningCircle,
@@ -283,7 +284,7 @@ export default async function QuoteDetailPage({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="flex items-center gap-3">
-              <Box className="h-5 w-5 text-muted-foreground" />
+              <Package className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Type</p>
                 <p className="text-sm text-muted-foreground">
@@ -293,7 +294,7 @@ export default async function QuoteDetailPage({
             </div>
 
             <div className="flex items-center gap-3">
-              <Weight className="h-5 w-5 text-muted-foreground" />
+              <Scales className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Poids</p>
                 <p className="text-sm text-muted-foreground">
@@ -304,7 +305,7 @@ export default async function QuoteDetailPage({
 
             {quote.volume && (
               <div className="flex items-center gap-3">
-                <Box className="h-5 w-5 text-muted-foreground" />
+                <Cube className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Volume</p>
                   <p className="text-sm text-muted-foreground">
@@ -455,7 +456,7 @@ export default async function QuoteDetailPage({
         {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/quotes/${quote.id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
+              <PencilSimple className="mr-2 h-4 w-4" />
               Modifier
             </Link>
           </Button>

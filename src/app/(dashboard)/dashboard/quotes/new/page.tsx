@@ -4,6 +4,7 @@
  * Formulaire de création d'un nouveau devis.
  * - Client Component avec React Hook Form
  * - Validation Zod via le schéma du module quotes
+ * - Calcul automatique du prix estimé (même logique que la homepage)
  * - Redirection vers la liste après création réussie
  * - Toast de confirmation/erreur
  * - Chargement dynamique de la liste des clients
@@ -15,8 +16,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { ArrowLeft, FloppyDisk, FileText } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, Calculator } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -39,12 +41,23 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ClientSelect } from '@/components/forms/client-select';
+import { CountrySelect } from '@/components/countries/country-select';
 
 import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/quotes';
 import { CargoType, TransportMode } from '@/generated/prisma';
+import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 
 export default function NewQuotePage() {
   const router = useRouter();
+  const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  // Calculer la date de validité par défaut (30 jours à partir d'aujourd'hui)
+  const getDefaultValidUntil = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30); // +30 jours
+    return date.toISOString(); // Format ISO 8601 complet
+  };
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -54,14 +67,133 @@ export default function NewQuotePage() {
       destinationCountry: '',
       cargoType: 'GENERAL' as CargoType,
       weight: 0,
-      volume: 0,
+      length: 0,
+      width: 0,
+      height: 0,
       transportMode: ['ROAD' as TransportMode],
       estimatedCost: 0,
       currency: 'EUR',
-      validUntil: '',
+      validUntil: getDefaultValidUntil(),
       status: 'DRAFT',
     },
   });
+
+  // Surveiller la devise sélectionnée
+  const selectedCurrency = form.watch('currency');
+
+  // Taux de conversion depuis EUR (approximatifs)
+  const conversionRates: Record<string, number> = {
+    EUR: 1,
+    USD: 1.09,
+    GBP: 0.86,
+    CHF: 0.96,
+  };
+
+  // Symboles de devises
+  const currencySymbols: Record<string, string> = {
+    EUR: '€',
+    USD: '$',
+    GBP: '£',
+    CHF: 'CHF',
+  };
+
+  // Convertir le prix selon la devise sélectionnée
+  const getConvertedPrice = (priceInEUR: number, targetCurrency: string): number => {
+    const rate = conversionRates[targetCurrency] || 1;
+    return priceInEUR * rate;
+  };
+
+  // Obtenir le symbole de la devise
+  const getCurrencySymbol = (currency: string): string => {
+    return currencySymbols[currency] || currency;
+  };
+
+  // Watcher pour recalculer le prix automatiquement
+  const watchedFields = form.watch([
+    'originCountry',
+    'destinationCountry',
+    'cargoType',
+    'weight',
+    'length',
+    'width',
+    'height',
+    'transportMode',
+  ]);
+
+  /**
+   * Mettre à jour le champ estimatedCost quand la devise change
+   */
+  useEffect(() => {
+    if (estimatedPrice !== null) {
+      const convertedPrice = getConvertedPrice(estimatedPrice, selectedCurrency);
+      form.setValue('estimatedCost', convertedPrice);
+    }
+  }, [selectedCurrency, estimatedPrice]);
+
+  /**
+   * Calculer automatiquement le prix estimé
+   * Utilise la même logique que le calculateur de la homepage
+   */
+  useEffect(() => {
+    async function calculatePrice() {
+      const values = form.getValues();
+
+      // Vérifier que les champs obligatoires sont remplis
+      if (
+        !values.originCountry ||
+        !values.destinationCountry ||
+        !values.weight ||
+        values.weight <= 0 ||
+        !values.transportMode ||
+        values.transportMode.length === 0
+      ) {
+        setEstimatedPrice(null);
+        return;
+      }
+
+      setIsCalculating(true);
+
+      try {
+        // Préparer les données pour le calculateur
+        const estimateData = {
+          originCountry: values.originCountry,
+          destinationCountry: values.destinationCountry,
+          cargoType: values.cargoType,
+          weight: values.weight,
+          length: values.length || 0,
+          width: values.width || 0,
+          height: values.height || 0,
+          transportMode: values.transportMode,
+          priority: 'STANDARD' as const,
+        };
+
+        // Calculer le prix avec la Server Action
+        const result = await calculateQuoteEstimateV2Action(estimateData);
+
+        if (result.success && result.data) {
+          const calculatedPrice = result.data.estimatedCost;
+          setEstimatedPrice(calculatedPrice);
+
+          // Mettre à jour le champ estimatedCost dans le formulaire
+          form.setValue('estimatedCost', calculatedPrice);
+        } else {
+          setEstimatedPrice(null);
+          toast.error('Impossible de calculer le prix', {
+            description: result.error || 'Vérifiez les paramètres saisis',
+          });
+        }
+      } catch (error) {
+        console.error('Erreur calcul prix:', error);
+        setEstimatedPrice(null);
+      } finally {
+        setIsCalculating(false);
+      }
+    }
+
+    // Déclencher le calcul avec un debounce
+    const timeoutId = setTimeout(calculatePrice, 500);
+    return () => clearTimeout(timeoutId);
+  }, watchedFields);
 
   /**
    * Soumission du formulaire
@@ -78,7 +210,11 @@ export default function NewQuotePage() {
       formData.append('destinationCountry', data.destinationCountry);
       formData.append('cargoType', data.cargoType);
       formData.append('weight', data.weight.toString());
-      if (data.volume) formData.append('volume', data.volume.toString());
+
+      // Dimensions (optionnelles)
+      if (data.length) formData.append('length', data.length.toString());
+      if (data.width) formData.append('width', data.width.toString());
+      if (data.height) formData.append('height', data.height.toString());
 
       // Transport mode (array)
       data.transportMode.forEach(mode => formData.append('transportMode', mode));
@@ -171,12 +307,17 @@ export default function NewQuotePage() {
                   name="originCountry"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Pays d'origine (ISO) *</FormLabel>
+                      <FormLabel>Pays d'origine *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="FR" maxLength={2} />
+                        <CountrySelect
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Sélectionnez un pays"
+                          id="originCountry"
+                        />
                       </FormControl>
                       <FormDescription>
-                        Code pays ISO (2 lettres en majuscules)
+                        Pays de départ de la marchandise
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -188,12 +329,17 @@ export default function NewQuotePage() {
                   name="destinationCountry"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Pays de destination (ISO) *</FormLabel>
+                      <FormLabel>Pays de destination *</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="DE" maxLength={2} />
+                        <CountrySelect
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Sélectionnez un pays"
+                          id="destinationCountry"
+                        />
                       </FormControl>
                       <FormDescription>
-                        Code pays ISO (2 lettres en majuscules)
+                        Pays d'arrivée de la marchandise
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -243,37 +389,102 @@ export default function NewQuotePage() {
                 )}
               />
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="weight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Poids (kg) *</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="number" min="0" step="0.1" onChange={e => field.onChange(parseFloat(e.target.value))} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="weight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Poids (kg) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="0"
+                        onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Poids total de la marchandise en kilogrammes
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="volume"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Volume (m³)</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ''} type="number" min="0" step="0.01" onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} />
-                      </FormControl>
-                      <FormDescription>
-                        Optionnel
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {/* Dimensions (optionnelles) */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Dimensions (optionnelles)
+                </label>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground">Longueur (m)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="width"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground">Largeur (m)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm text-muted-foreground">Hauteur (m)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Les dimensions permettent un calcul plus précis du prix (volume = L × l × h)
+                </p>
               </div>
 
               <FormField
@@ -314,6 +525,22 @@ export default function NewQuotePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Prix estimé calculé automatiquement */}
+              {estimatedPrice !== null && (
+                <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calculator className="h-5 w-5 text-blue-600" />
+                    <span className="font-semibold text-blue-900">Prix calculé automatiquement</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {getConvertedPrice(estimatedPrice, selectedCurrency).toFixed(2)} {getCurrencySymbol(selectedCurrency)}
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Basé sur les paramètres saisis. Vous pouvez ajuster le prix manuellement ci-dessous.
+                  </p>
+                </div>
+              )}
+
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
@@ -322,10 +549,16 @@ export default function NewQuotePage() {
                     <FormItem>
                       <FormLabel>Coût estimé *</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" min="0" step="0.01" onChange={e => field.onChange(parseFloat(e.target.value))} />
+                        <Input
+                          {...field}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
                       </FormControl>
                       <FormDescription>
-                        Montant du devis en euros
+                        {isCalculating ? 'Calcul en cours...' : 'Montant du devis en euros (modifiable)'}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -345,7 +578,7 @@ export default function NewQuotePage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="EUR">EUR (CurrencyEur)</SelectItem>
+                          <SelectItem value="EUR">EUR (Euro)</SelectItem>
                           <SelectItem value="USD">USD (Dollar)</SelectItem>
                           <SelectItem value="GBP">GBP (Livre)</SelectItem>
                           <SelectItem value="CHF">CHF (Franc suisse)</SelectItem>
@@ -364,7 +597,17 @@ export default function NewQuotePage() {
                   <FormItem>
                     <FormLabel>Valide jusqu'au *</FormLabel>
                     <FormControl>
-                      <Input {...field} type="datetime-local" />
+                      <Input
+                        type="datetime-local"
+                        value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            // Convertir datetime-local vers ISO 8601
+                            const isoDate = new Date(e.target.value).toISOString();
+                            field.onChange(isoDate);
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormDescription>
                       Date et heure limite de validité du devis

@@ -261,7 +261,7 @@ export default async function ShipmentDetailPage({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="flex items-center gap-3">
-              <Box className="h-5 w-5 text-muted-foreground" />
+              <Package className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Type</p>
                 <p className="text-sm text-muted-foreground">
@@ -271,7 +271,7 @@ export default async function ShipmentDetailPage({
             </div>
 
             <div className="flex items-center gap-3">
-              <Weight className="h-5 w-5 text-muted-foreground" />
+              <Scales className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Poids</p>
                 <p className="text-sm text-muted-foreground">
@@ -292,7 +292,7 @@ export default async function ShipmentDetailPage({
 
             {shipment.volume && (
               <div className="flex items-center gap-3">
-                <Box className="h-5 w-5 text-muted-foreground" />
+                <Cube className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Volume</p>
                   <p className="text-sm text-muted-foreground">
@@ -593,7 +593,7 @@ export default async function ShipmentDetailPage({
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
+              <PencilSimple className="mr-2 h-4 w-4" />
               Modifier
             </Link>
           </Button>

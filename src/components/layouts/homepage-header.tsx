@@ -9,18 +9,37 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Truck, Warehouse, Anchor, Strategy, CaretDown } from '@phosphor-icons/react';
+import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { useSafeSession } from '@/lib/auth/hooks';
+import { authClient } from '@/lib/auth/client';
+import { useRouter } from 'next/navigation';
 
 export function HomepageHeader() {
   const { data: session, isLoading } = useSafeSession();
+  const router = useRouter();
+
+  /**
+   * Gérer la déconnexion de l'utilisateur
+   */
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+      // Forcer un rechargement complet de la page pour invalider toute la session
+      // Cela garantit que tous les caches sont vidés et la session mise à jour
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
@@ -72,29 +91,20 @@ export function HomepageHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/services/transport-routier" className="flex items-center gap-3 cursor-pointer">
-                  <Truck className="h-5 w-5 text-[#003D82]" />
+                <Link href="/#calculateur" className="flex items-center gap-3 cursor-pointer">
+                  <Calculator className="h-5 w-5 text-[#003D82]" />
                   <div>
-                    <div className="font-medium">Transport Routier</div>
-                    <div className="text-xs text-gray-500">Livraison porte-à-porte</div>
+                    <div className="font-medium">Calcul devis</div>
+                    <div className="text-xs text-gray-500">Obtenez un devis gratuit</div>
                   </div>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/services/services-portuaires" className="flex items-center gap-3 cursor-pointer">
-                  <Anchor className="h-5 w-5 text-[#003D82]" />
+                <Link href="/dashboard/pickups" className="flex items-center gap-3 cursor-pointer">
+                  <CalendarBlank className="h-5 w-5 text-[#003D82]" />
                   <div>
-                    <div className="font-medium">Services Portuaires</div>
-                    <div className="text-xs text-gray-500">Dédouanement et manutention</div>
-                  </div>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/services/logistique-4pl" className="flex items-center gap-3 cursor-pointer">
-                  <Strategy className="h-5 w-5 text-[#003D82]" />
-                  <div>
-                    <div className="font-medium">Logistique 4PL</div>
-                    <div className="text-xs text-gray-500">Pilotage stratégique</div>
+                    <div className="font-medium">Réserver un enlèvement</div>
+                    <div className="text-xs text-gray-500">Planifiez votre collecte</div>
                   </div>
                 </Link>
               </DropdownMenuItem>
@@ -130,9 +140,35 @@ export function HomepageHeader() {
               Chargement...
             </Button>
           ) : session?.user ? (
-            <Button asChild className="bg-[#003D82] hover:bg-[#002952] text-white">
-              <Link href="/dashboard">Mon compte</Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-[#003D82] hover:bg-[#002952] text-white">
+                  <User className="h-4 w-4 mr-2" />
+                  {session.user.name || session.user.email?.split('@')[0]}
+                  <CaretDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{session.user.name || 'Utilisateur'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="flex items-center cursor-pointer">
+                    <SquaresFour className="h-4 w-4 mr-2" />
+                    Tableau de bord
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="flex items-center cursor-pointer text-red-600">
+                  <SignOut className="h-4 w-4 mr-2" />
+                  Se déconnecter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button asChild className="bg-[#003D82] hover:bg-[#002952] text-white">
               <Link href="/login">Se connecter</Link>
