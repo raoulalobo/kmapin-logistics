@@ -159,6 +159,30 @@ const getCountryName = (code: string): string => {
   return countryNames[code.toUpperCase()] || code;
 };
 
+/**
+ * Formater un nombre pour l'affichage dans le PDF (compatible jsPDF)
+ *
+ * jsPDF ne supporte pas les espaces insécables Unicode (U+00A0, U+202F)
+ * générés par toLocaleString('fr-FR'), qui s'affichent comme "/" ou "?"
+ *
+ * Cette fonction formate le nombre avec des espaces normaux
+ *
+ * @param num - Nombre à formater
+ * @param decimals - Nombre de décimales (défaut: 0)
+ * @returns Nombre formaté avec espaces normaux (ex: "112 725" au lieu de "112 725")
+ */
+const formatNumberForPDF = (num: number, decimals: number = 0): string => {
+  // Formater avec toLocaleString pour obtenir le format français
+  const formatted = num.toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+
+  // Remplacer les espaces insécables (U+00A0, U+202F) par des espaces normaux
+  // pour compatibilité avec jsPDF
+  return formatted.replace(/[\u00A0\u202F]/g, ' ');
+};
+
 export function QuoteCalculator() {
   /**
    * État local pour stocker le résultat du calcul
@@ -469,7 +493,7 @@ export function QuoteCalculator() {
         doc.setFont('helvetica', 'bold');
         doc.text('Poids réel :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, valueCol, yPos);
+        doc.text(`${formatNumberForPDF(lastFormData.weight)} kg`, valueCol, yPos);
         yPos += 6;
 
         // Dimensions et volume (si présents)
@@ -505,7 +529,7 @@ export function QuoteCalculator() {
           doc.setTextColor(...secondaryColor);
           doc.text('POIDS TAXABLE RETENU :', leftCol, yPos + 3);
           doc.setFontSize(11);
-          doc.text(`${poidsTaxable.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} kg`, valueCol + 40, yPos + 3);
+          doc.text(`${formatNumberForPDF(poidsTaxable, 2)} kg`, valueCol + 40, yPos + 3);
           yPos += 12;
         } else {
           // Pas de dimensions, poids taxable = poids réel
@@ -520,7 +544,7 @@ export function QuoteCalculator() {
           doc.setTextColor(...secondaryColor);
           doc.text('POIDS TAXABLE RETENU :', leftCol, yPos + 3);
           doc.setFontSize(11);
-          doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, valueCol + 40, yPos + 3);
+          doc.text(`${formatNumberForPDF(lastFormData.weight)} kg`, valueCol + 40, yPos + 3);
           yPos += 12;
         }
 
@@ -537,7 +561,7 @@ export function QuoteCalculator() {
         doc.text('TARIFICATION', 20, yPos + 8);
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${result.estimatedCost.toLocaleString('fr-FR')} €`, pageWidth / 2, yPos + 20, { align: 'center' });
+        doc.text(`${formatNumberForPDF(result.estimatedCost)} €`, pageWidth / 2, yPos + 20, { align: 'center' });
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
         doc.text('Prix estimé TTC', pageWidth / 2, yPos + 26, { align: 'center' });
