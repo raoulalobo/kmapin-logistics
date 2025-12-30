@@ -41,6 +41,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 import {
   getCurrentPricingConfig,
@@ -85,6 +93,10 @@ export default function PricingConfigPage() {
     notes: '',
     isActive: true,
   });
+
+  // États pour le modal d'édition
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRate, setEditingRate] = useState<any>(null);
 
   // Form pour la configuration générale
   const form = useForm<any>({
@@ -255,13 +267,42 @@ export default function PricingConfigPage() {
     setIsLoading(false);
   }
 
-  async function handleUpdateRate(id: string, data: any) {
+  /**
+   * Ouvrir le modal d'édition avec les données du tarif
+   */
+  function handleOpenEditModal(rate: any) {
+    setEditingRate({
+      id: rate.id,
+      originCountryCode: rate.originCountryCode,
+      destinationCountryCode: rate.destinationCountryCode,
+      transportMode: rate.transportMode,
+      ratePerKg: rate.ratePerKg,
+      ratePerM3: rate.ratePerM3,
+      notes: rate.notes || '',
+      isActive: rate.isActive,
+    });
+    setIsEditModalOpen(true);
+  }
+
+  /**
+   * Sauvegarder les modifications du tarif
+   */
+  async function handleSaveEdit() {
+    if (!editingRate || !editingRate.id) return;
+
+    if (editingRate.ratePerKg <= 0 || editingRate.ratePerM3 <= 0) {
+      toast.error('Les tarifs doivent être positifs');
+      return;
+    }
+
     setIsLoading(true);
+    const { id, ...data } = editingRate;
     const result = await updateTransportRate(id, data);
 
     if (result.success) {
       toast.success('Tarif mis à jour avec succès');
-      setEditingRateId(null);
+      setIsEditModalOpen(false);
+      setEditingRate(null);
       loadTransportRates();
     } else {
       toast.error(result.error || 'Erreur lors de la mise à jour');
@@ -625,8 +666,18 @@ export default function PricingConfigPage() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  onClick={() => handleOpenEditModal(rate)}
+                                  disabled={isLoading}
+                                  title="Éditer le tarif"
+                                >
+                                  <FloppyDisk className="h-4 w-4 text-blue-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => handleDeleteRate(rate.id)}
                                   disabled={isLoading}
+                                  title="Supprimer le tarif"
                                 >
                                   <Trash className="h-4 w-4 text-destructive" />
                                 </Button>
@@ -646,6 +697,146 @@ export default function PricingConfigPage() {
                   Si aucun tarif spécifique n'existe pour une route, le système utilisera les "Taux de Base" (defaultRatePerKg/defaultRatePerM3).
                 </p>
               </div>
+
+              {/* Modal d'édition de tarif */}
+              <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Modifier le tarif de transport</DialogTitle>
+                    <DialogDescription>
+                      Modifiez les informations du tarif pour la route{' '}
+                      {editingRate?.originCountryCode} → {editingRate?.destinationCountryCode}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {editingRate && (
+                    <div className="grid gap-4 py-4">
+                      {/* Route (lecture seule) */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Origine</Label>
+                          <Input
+                            value={editingRate.originCountryCode}
+                            disabled
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Destination</Label>
+                          <Input
+                            value={editingRate.destinationCountryCode}
+                            disabled
+                            className="bg-gray-50"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Mode (lecture seule) */}
+                      <div className="space-y-2">
+                        <Label>Mode de transport</Label>
+                        <Input
+                          value={
+                            editingRate.transportMode === 'SEA' ? '🌊 Maritime' :
+                            editingRate.transportMode === 'AIR' ? '✈️ Aérien' :
+                            editingRate.transportMode === 'ROAD' ? '🚛 Routier' :
+                            '🚂 Ferroviaire'
+                          }
+                          disabled
+                          className="bg-gray-50"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Pour changer la route ou le mode, créez un nouveau tarif
+                        </p>
+                      </div>
+
+                      {/* Tarifs (modifiables) */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-ratePerKg">Tarif par kg (€) *</Label>
+                          <Input
+                            id="edit-ratePerKg"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            value={editingRate.ratePerKg}
+                            onChange={(e) =>
+                              setEditingRate({
+                                ...editingRate,
+                                ratePerKg: parseFloat(e.target.value) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-ratePerM3">Tarif par m³ (€) *</Label>
+                          <Input
+                            id="edit-ratePerM3"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            value={editingRate.ratePerM3}
+                            onChange={(e) =>
+                              setEditingRate({
+                                ...editingRate,
+                                ratePerM3: parseFloat(e.target.value) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      {/* Notes (modifiable) */}
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-notes">Notes (optionnel)</Label>
+                        <Input
+                          id="edit-notes"
+                          placeholder="Maritime via Abidjan, délai 30-45j..."
+                          value={editingRate.notes}
+                          onChange={(e) =>
+                            setEditingRate({
+                              ...editingRate,
+                              notes: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+
+                      {/* Statut (modifiable) */}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          id="edit-isActive"
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300"
+                          checked={editingRate.isActive}
+                          onChange={(e) =>
+                            setEditingRate({
+                              ...editingRate,
+                              isActive: e.target.checked,
+                            })
+                          }
+                        />
+                        <Label htmlFor="edit-isActive" className="cursor-pointer">
+                          Tarif actif (coché = utilisé dans les calculs)
+                        </Label>
+                      </div>
+                    </div>
+                  )}
+
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditModalOpen(false)}
+                      disabled={isLoading}
+                    >
+                      Annuler
+                    </Button>
+                    <Button onClick={handleSaveEdit} disabled={isLoading}>
+                      <FloppyDisk className="h-4 w-4 mr-2" />
+                      {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </TabsContent>
