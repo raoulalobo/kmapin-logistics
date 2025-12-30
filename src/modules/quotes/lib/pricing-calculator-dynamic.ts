@@ -265,9 +265,11 @@ export async function calculerPrixDevisDynamic(
 
   if (transportRate && transportRate.isActive) {
     // ROUTE CONFIGURÉE : Utiliser le tarif spécifique
-    // Pour le maritime et le poids volumétrique, utiliser ratePerM3
-    // Pour les autres modes ou si poids réel utilisé, utiliser ratePerKg
-    if (input.modeTransport === 'SEA' || factureSurVolume) {
+    // Pour le maritime (unité = UP/m³), utiliser ratePerM3
+    // Pour les autres modes (unité = kg), utiliser ratePerKg
+    // CORRECTION BUG : Ne PAS utiliser ratePerM3 pour le poids volumétrique aérien/routier !
+    // Le poids volumétrique est en KG, donc on utilise le tarif par KG
+    if (uniteMasseTaxable === 'UP') {
       tarifParUnite = transportRate.ratePerM3;
     } else {
       tarifParUnite = transportRate.ratePerKg;
@@ -277,7 +279,8 @@ export async function calculerPrixDevisDynamic(
     // ROUTE NON CONFIGURÉE : Utiliser les tarifs par défaut avec multiplicateur
     const transportMultiplier = config.transportMultipliers[input.modeTransport] || 1.0;
 
-    if (input.modeTransport === 'SEA' || factureSurVolume) {
+    // CORRECTION BUG : Utiliser ratePerM3 UNIQUEMENT pour le maritime (UP)
+    if (uniteMasseTaxable === 'UP') {
       tarifParUnite = config.defaultRatePerM3 * transportMultiplier;
     } else {
       tarifParUnite = config.defaultRatePerKg * transportMultiplier;
