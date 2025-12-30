@@ -48,9 +48,10 @@ export const quoteSchema = z.object({
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
   // === Dimensions (optionnelles) - Volume = L × W × H ===
-  length: z.number().nonnegative('La longueur doit être positive ou nulle').max(100).optional(),
-  width: z.number().nonnegative('La largeur doit être positive ou nulle').max(100).optional(),
-  height: z.number().nonnegative('La hauteur doit être positive ou nulle').max(100).optional(),
+  // ⚠️ ATTENTION : Les dimensions sont en CENTIMÈTRES (cm)
+  length: z.number().nonnegative('La longueur doit être positive ou nulle').max(10000, 'La longueur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
+  width: z.number().nonnegative('La largeur doit être positive ou nulle').max(10000, 'La largeur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
+  height: z.number().nonnegative('La hauteur doit être positive ou nulle').max(10000, 'La hauteur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
 
   // === Transport ===
   transportMode: z
@@ -259,6 +260,7 @@ export const quoteEstimateSchema = z.object({
     .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
 
   // === Dimensions (optionnelles) - Volume = L × W × H ===
+  // ⚠️ ATTENTION : Les dimensions sont en CENTIMÈTRES (cm)
   // Utilisation d'un préprocesseur pour gérer les champs vides et NaN
   // Convertit automatiquement : NaN, undefined, null, '' → 0
   // Accepte 0 comme valeur par défaut (= "non renseigné" dans le formulaire)
@@ -273,7 +275,7 @@ export const quoteEstimateSchema = z.object({
     z
       .number()
       .nonnegative('La longueur doit être positive ou nulle')
-      .max(100, 'La longueur ne peut pas dépasser 100 mètres')
+      .max(10000, 'La longueur ne peut pas dépasser 10000 centimètres (100 mètres)')
   ),
 
   width: z.preprocess(
@@ -287,7 +289,7 @@ export const quoteEstimateSchema = z.object({
     z
       .number()
       .nonnegative('La largeur doit être positive ou nulle')
-      .max(100, 'La largeur ne peut pas dépasser 100 mètres')
+      .max(10000, 'La largeur ne peut pas dépasser 10000 centimètres (100 mètres)')
   ),
 
   height: z.preprocess(
@@ -301,7 +303,7 @@ export const quoteEstimateSchema = z.object({
     z
       .number()
       .nonnegative('La hauteur doit être positive ou nulle')
-      .max(100, 'La hauteur ne peut pas dépasser 100 mètres')
+      .max(10000, 'La hauteur ne peut pas dépasser 10000 centimètres (100 mètres)')
   ),
 
   // === Transport ===

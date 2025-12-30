@@ -66,6 +66,99 @@ const priorityLabels = {
   URGENT: 'Urgent (+30%)',
 };
 
+/**
+ * Mapping des codes pays (ISO 2 lettres) vers noms complets
+ * Utilisé pour l'affichage dans le PDF et autres documents
+ */
+const countryNames: Record<string, string> = {
+  // Afrique de l'Ouest
+  'BF': 'Burkina Faso',
+  'CI': 'Côte d\'Ivoire',
+  'SN': 'Sénégal',
+  'ML': 'Mali',
+  'NE': 'Niger',
+  'BJ': 'Bénin',
+  'TG': 'Togo',
+  'GH': 'Ghana',
+  'NG': 'Nigéria',
+  'GM': 'Gambie',
+  'GN': 'Guinée',
+  'GW': 'Guinée-Bissau',
+  'LR': 'Libéria',
+  'SL': 'Sierra Leone',
+  'CV': 'Cap-Vert',
+  // Afrique Centrale
+  'CM': 'Cameroun',
+  'TD': 'Tchad',
+  'CF': 'République Centrafricaine',
+  'CG': 'Congo',
+  'CD': 'République Démocratique du Congo',
+  'GA': 'Gabon',
+  'GQ': 'Guinée Équatoriale',
+  'ST': 'Sao Tomé-et-Principe',
+  // Afrique du Nord
+  'MA': 'Maroc',
+  'DZ': 'Algérie',
+  'TN': 'Tunisie',
+  'LY': 'Libye',
+  'EG': 'Égypte',
+  // Afrique de l'Est
+  'KE': 'Kenya',
+  'ET': 'Éthiopie',
+  'TZ': 'Tanzanie',
+  'UG': 'Ouganda',
+  'RW': 'Rwanda',
+  'BI': 'Burundi',
+  'SO': 'Somalie',
+  'DJ': 'Djibouti',
+  'ER': 'Érythrée',
+  // Afrique Australe
+  'ZA': 'Afrique du Sud',
+  'ZW': 'Zimbabwe',
+  'MZ': 'Mozambique',
+  'MW': 'Malawi',
+  'ZM': 'Zambie',
+  'NA': 'Namibie',
+  'BW': 'Botswana',
+  'LS': 'Lesotho',
+  'SZ': 'Eswatini',
+  // Europe
+  'FR': 'France',
+  'BE': 'Belgique',
+  'DE': 'Allemagne',
+  'ES': 'Espagne',
+  'IT': 'Italie',
+  'GB': 'Royaume-Uni',
+  'PT': 'Portugal',
+  'NL': 'Pays-Bas',
+  'CH': 'Suisse',
+  'LU': 'Luxembourg',
+  // Amérique
+  'US': 'États-Unis',
+  'CA': 'Canada',
+  'MX': 'Mexique',
+  'BR': 'Brésil',
+  // Asie
+  'CN': 'Chine',
+  'IN': 'Inde',
+  'JP': 'Japon',
+  'KR': 'Corée du Sud',
+  'AE': 'Émirats Arabes Unis',
+  'SA': 'Arabie Saoudite',
+  'TR': 'Turquie',
+  // Océanie
+  'AU': 'Australie',
+  'NZ': 'Nouvelle-Zélande',
+};
+
+/**
+ * Convertit un code pays (ex: "FR") en nom complet (ex: "France")
+ * Si le code n'est pas trouvé, retourne le code tel quel
+ */
+const getCountryName = (code: string): string => {
+  return countryNames[code.toUpperCase()] || code;
+};
+
 export function QuoteCalculator() {
   /**
    * État local pour stocker le résultat du calcul
@@ -223,7 +316,7 @@ export function QuoteCalculator() {
 
   /**
    * Télécharger le devis en PDF
-   * Génère un PDF côté client en utilisant jsPDF
+   * Génère un PDF professionnel côté client avec jsPDF
    */
   const handleDownloadPDF = () => {
     if (!result || !lastFormData) {
@@ -241,109 +334,240 @@ export function QuoteCalculator() {
         });
 
         const pageWidth = doc.internal.pageSize.getWidth();
-        const primaryColor: [number, number, number] = [0, 51, 255];
-        const textColor: [number, number, number] = [51, 51, 51];
-        const lightGray: [number, number, number] = [240, 240, 240];
-        let yPos = 20;
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-        // EN-TÊTE
+        // Couleurs professionnelles
+        const primaryColor: [number, number, number] = [0, 61, 130]; // Bleu professionnel
+        const secondaryColor: [number, number, number] = [255, 152, 0]; // Orange accent
+        const textDark: [number, number, number] = [33, 33, 33];
+        const textLight: [number, number, number] = [100, 100, 100];
+        const lightGray: [number, number, number] = [245, 245, 245];
+        const borderGray: [number, number, number] = [220, 220, 220];
+
+        let yPos = 15;
+
+        // ============================================
+        // EN-TÊTE AVEC INFORMATIONS SOCIÉTÉ
+        // ============================================
         doc.setFillColor(...primaryColor);
-        doc.rect(0, 0, pageWidth, 40, 'F');
+        doc.rect(0, 0, pageWidth, 50, 'F');
+
+        // Logo et nom société (gauche)
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(28);
+        doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
-        doc.text('ESTIMATION DE DEVIS', 20, 25);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Faso Fret Logistics', 20, 33);
-        yPos = 50;
-
-        // NUMÉRO ET DATE
-        const quoteNumber = `EST-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-5)}`;
-        const rightCol = pageWidth - 80;
-        doc.setTextColor(...textColor);
-        doc.setFont('helvetica', 'bold');
+        doc.text('FASO FRET', 15, 20);
         doc.setFontSize(10);
-        doc.text('N° ESTIMATION :', rightCol, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(quoteNumber, rightCol + 35, yPos);
-        yPos += 7;
-        doc.setFont('helvetica', 'bold');
-        doc.text('DATE :', rightCol, yPos);
-        doc.setFont('helvetica', 'normal');
-        doc.text(new Date().toLocaleDateString('fr-FR'), rightCol + 35, yPos);
-        yPos = 80;
+        doc.text('Solutions Logistiques Internationales', 15, 27);
 
-        // DÉTAILS DU TRANSPORT
-        doc.setFillColor(...lightGray);
-        doc.rect(20, yPos, pageWidth - 40, 8, 'F');
-        doc.setTextColor(...textColor);
+        // Coordonnées société (gauche, sous le nom)
+        doc.setFontSize(8);
+        doc.text('Adresse : Ouagadougou, Burkina Faso', 15, 35);
+        doc.text('Tel : +226 XX XX XX XX', 15, 40);
+        doc.text('Email : contact@fasofret.com', 15, 45);
+
+        // N° Devis et Date (droite)
+        const quoteNumber = `DEV-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-5)}`;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        const rightX = pageWidth - 15;
+        doc.text('N° DEVIS', rightX, 20, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        doc.text(quoteNumber, rightX, 26, { align: 'right' });
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('DATE', rightX, 34, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        doc.text(new Date().toLocaleDateString('fr-FR'), rightX, 39, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('VALIDITÉ', rightX, 45, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        const validityDate = new Date();
+        validityDate.setDate(validityDate.getDate() + 30);
+        doc.text(validityDate.toLocaleDateString('fr-FR'), rightX, 50, { align: 'right' });
+
+        yPos = 60;
+
+        // ============================================
+        // SECTION TRAJET
+        // ============================================
+        doc.setFillColor(...secondaryColor);
+        doc.rect(15, yPos, pageWidth - 30, 8, 'F');
+        doc.setTextColor(255, 255, 255);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
-        doc.text('DÉTAILS DU TRANSPORT', 25, yPos + 5);
+        doc.text('TRAJET', 20, yPos + 5.5);
         yPos += 14;
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
 
-        // Route
+        doc.setTextColor(...textDark);
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text('Route :', 25, yPos);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${lastFormData.originCountry} → ${lastFormData.destinationCountry}`, 50, yPos);
-        yPos += 6;
+        // Convertir les codes pays en noms complets
+        const originName = getCountryName(lastFormData.originCountry);
+        const destinationName = getCountryName(lastFormData.destinationCountry);
+        doc.text(`${originName} vers ${destinationName}`, pageWidth / 2, yPos, { align: 'center' });
+        yPos += 10;
+
+        // ============================================
+        // SECTION CARACTÉRISTIQUES DU TRANSPORT
+        // ============================================
+        doc.setFillColor(...lightGray);
+        doc.rect(15, yPos, pageWidth - 30, 8, 'F');
+        doc.setTextColor(...textDark);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CARACTERISTIQUES DU TRANSPORT', 20, yPos + 5.5);
+        yPos += 14;
+
+        doc.setFontSize(9);
+        const leftCol = 20;
+        const valueCol = 75;
 
         // Modes de transport
         doc.setFont('helvetica', 'bold');
-        doc.text('Modes :', 25, yPos);
+        doc.text('Modes de transport :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...textDark);
         const modes = lastFormData.transportMode.map(m => transportModeLabels[m].label).join(', ');
-        doc.text(modes, 50, yPos);
+        doc.text(modes, valueCol, yPos);
         yPos += 6;
 
         // Type de marchandise
         doc.setFont('helvetica', 'bold');
-        doc.text('Marchandise :', 25, yPos);
+        doc.setTextColor(...textDark);
+        doc.text('Type de marchandise :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(cargoTypeLabels[lastFormData.cargoType], 50, yPos);
+        doc.text(cargoTypeLabels[lastFormData.cargoType], valueCol, yPos);
         yPos += 6;
 
-        // Poids
+        // Priorité
         doc.setFont('helvetica', 'bold');
-        doc.text('Poids :', 25, yPos);
+        doc.text('Priorité :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, 50, yPos);
-        yPos += 6;
-
-        // Dimensions (si présentes)
-        if (lastFormData.length && lastFormData.width && lastFormData.height) {
-          const volume = lastFormData.length * lastFormData.width * lastFormData.height;
-          doc.setFont('helvetica', 'bold');
-          doc.text('Dimensions :', 25, yPos);
-          doc.setFont('helvetica', 'normal');
-          doc.text(`${lastFormData.length}m × ${lastFormData.width}m × ${lastFormData.height}m`, 50, yPos);
-          yPos += 6;
-          doc.setFont('helvetica', 'bold');
-          doc.text('Volume :', 25, yPos);
-          doc.setFont('helvetica', 'normal');
-          doc.text(`${volume.toFixed(2)} m³`, 50, yPos);
-          yPos += 6;
-        }
-
+        const priorityValue = lastFormData.priority || 'STANDARD';
+        doc.text(priorityValue, valueCol, yPos);
         yPos += 10;
 
-        // TARIFICATION
-        doc.setFillColor(230, 247, 237);
-        doc.rect(20, yPos, pageWidth - 40, 25, 'F');
-        doc.setTextColor(46, 125, 50);
+        // ============================================
+        // SECTION MESURES ET POIDS
+        // ============================================
+        doc.setFillColor(...lightGray);
+        doc.rect(15, yPos, pageWidth - 30, 8, 'F');
+        doc.setTextColor(...textDark);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
-        doc.text('TARIFICATION ESTIMÉE', 25, yPos + 6);
-        doc.setFontSize(20);
-        doc.text(`${result.estimatedCost.toLocaleString('fr-FR')} EUR`, 25, yPos + 18);
+        doc.text('MESURES ET POIDS', 20, yPos + 5.5);
+        yPos += 14;
+
+        doc.setFontSize(9);
+
+        // Poids réel
+        doc.setFont('helvetica', 'bold');
+        doc.text('Poids réel :', leftCol, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, valueCol, yPos);
+        yPos += 6;
+
+        // Dimensions et volume (si présents)
+        if (lastFormData.length && lastFormData.width && lastFormData.height) {
+          const volume_cm3 = lastFormData.length * lastFormData.width * lastFormData.height;
+          const volume_m3 = volume_cm3 / 1_000_000;
+
+          doc.setFont('helvetica', 'bold');
+          doc.text('Dimensions :', leftCol, yPos);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`${lastFormData.length} × ${lastFormData.width} × ${lastFormData.height} cm`, valueCol, yPos);
+          yPos += 6;
+
+          doc.setFont('helvetica', 'bold');
+          doc.text('Volume calculé :', leftCol, yPos);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`${volume_m3.toFixed(4)} m³`, valueCol, yPos);
+          yPos += 6;
+
+          // POIDS TAXABLE RETENU (mise en évidence)
+          doc.setDrawColor(...secondaryColor);
+          doc.setLineWidth(0.5);
+          doc.rect(15, yPos - 2, pageWidth - 30, 8);
+          doc.setFillColor(255, 248, 240);
+          doc.rect(15, yPos - 2, pageWidth - 30, 8, 'F');
+
+          // Calculer le poids volumétrique et le poids taxable
+          const poidsVolumetrique = volume_m3 * 167; // Ratio aérien par défaut
+          const poidsTaxable = Math.max(lastFormData.weight, poidsVolumetrique);
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...secondaryColor);
+          doc.text('POIDS TAXABLE RETENU :', leftCol, yPos + 3);
+          doc.setFontSize(11);
+          doc.text(`${poidsTaxable.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} kg`, valueCol + 40, yPos + 3);
+          yPos += 12;
+        } else {
+          // Pas de dimensions, poids taxable = poids réel
+          doc.setDrawColor(...secondaryColor);
+          doc.setLineWidth(0.5);
+          doc.rect(15, yPos - 2, pageWidth - 30, 8);
+          doc.setFillColor(255, 248, 240);
+          doc.rect(15, yPos - 2, pageWidth - 30, 8, 'F');
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...secondaryColor);
+          doc.text('POIDS TAXABLE RETENU :', leftCol, yPos + 3);
+          doc.setFontSize(11);
+          doc.text(`${lastFormData.weight.toLocaleString('fr-FR')} kg`, valueCol + 40, yPos + 3);
+          yPos += 12;
+        }
+
+        yPos += 5;
+
+        // ============================================
+        // SECTION TARIFICATION
+        // ============================================
+        doc.setFillColor(...primaryColor);
+        doc.rect(15, yPos, pageWidth - 30, 30, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TARIFICATION', 20, yPos + 8);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${result.estimatedCost.toLocaleString('fr-FR')} €`, pageWidth / 2, yPos + 20, { align: 'center' });
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Prix estimé TTC', pageWidth / 2, yPos + 26, { align: 'center' });
+        yPos += 38;
+
+        // ============================================
+        // FOOTER - CONDITIONS
+        // ============================================
+        const footerY = pageHeight - 35;
+        doc.setDrawColor(...borderGray);
+        doc.setLineWidth(0.3);
+        doc.line(15, footerY, pageWidth - 15, footerY);
+
+        doc.setFontSize(7);
+        doc.setTextColor(...textLight);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Ce devis est valable 30 jours à compter de la date d\'émission.', pageWidth / 2, footerY + 5, { align: 'center' });
+        doc.text('Les tarifs indiqués sont donnés à titre indicatif et peuvent varier selon les conditions réelles d\'expédition.', pageWidth / 2, footerY + 9, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...primaryColor);
+        doc.text('FASO FRET - Solutions Logistiques Professionnelles', pageWidth / 2, footerY + 15, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...textLight);
+        doc.text('www.fasofret.com | contact@fasofret.com | +226 XX XX XX XX', pageWidth / 2, footerY + 20, { align: 'center' });
 
         // Télécharger le PDF
-        doc.save(`devis-kmapin-${quoteNumber}.pdf`);
-        toast.success('PDF téléchargé avec succès !');
+        doc.save(`devis-fasofret-${quoteNumber}.pdf`);
+        toast.success('Devis téléchargé avec succès !');
       });
     } catch (error) {
       console.error('Erreur génération PDF:', error);
@@ -493,42 +717,51 @@ export function QuoteCalculator() {
                 <Package className="h-4 w-4 text-[#003D82]" />
                 Dimensions (optionnel)
               </Label>
-              <p className="text-xs text-gray-500 mb-2">Volume calculé : L × W × H</p>
+              <p className="text-xs text-gray-500 mb-2">
+                <strong>⚠️ Attention :</strong> Les dimensions doivent être saisies en <strong>centimètres (cm)</strong>.
+                {' '}Volume calculé : L × W × H
+              </p>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                   <Input
                     id="length"
                     type="number"
                     step="0.01"
-                    placeholder="Longueur (m)"
+                    placeholder="Longueur (cm)"
                     {...register('length', { valueAsNumber: true })}
                     className={`h-11 ${errors.length ? 'border-red-500' : ''}`}
                   />
+                  {errors.length && (
+                    <p className="text-sm text-red-500">{errors.length.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Input
                     id="width"
                     type="number"
                     step="0.01"
-                    placeholder="Largeur (m)"
+                    placeholder="Largeur (cm)"
                     {...register('width', { valueAsNumber: true })}
                     className={`h-11 ${errors.width ? 'border-red-500' : ''}`}
                   />
+                  {errors.width && (
+                    <p className="text-sm text-red-500">{errors.width.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Input
                     id="height"
                     type="number"
                     step="0.01"
-                    placeholder="Hauteur (m)"
+                    placeholder="Hauteur (cm)"
                     {...register('height', { valueAsNumber: true })}
                     className={`h-11 ${errors.height ? 'border-red-500' : ''}`}
                   />
+                  {errors.height && (
+                    <p className="text-sm text-red-500">{errors.height.message}</p>
+                  )}
                 </div>
               </div>
-              {errors.length && (
-                <p className="text-sm text-red-500">{errors.length.message}</p>
-              )}
             </div>
 
             {/* Troisième ligne - Type de marchandise et Priorité */}
