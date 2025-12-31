@@ -112,6 +112,10 @@ export const PERMISSIONS = {
     // Factures personnelles
     'invoices:read:own',
 
+    // Enlèvements personnels
+    'pickups:read:own',
+    'pickups:create:own', // Peut réserver un enlèvement
+
     // Documents personnels
     'documents:read:own',
 
