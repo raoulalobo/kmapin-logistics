@@ -121,9 +121,9 @@ export default function PickupsPage() {
             Planifiez et suivez les enlèvements de colis en temps réel
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Link href="/dashboard/pickups/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-5 w-5" weight="fill" />
             Nouvelle demande
           </Link>
         </Button>
@@ -350,9 +350,9 @@ export default function PickupsPage() {
               <p className="text-sm text-gray-600 mt-1 mb-4">
                 Créez votre première demande pour commencer
               </p>
-              <Button asChild>
+              <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
                 <Link href="/dashboard/pickups/new">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="h-5 w-5" weight="fill" />
                   Nouvelle demande
                 </Link>
               </Button>

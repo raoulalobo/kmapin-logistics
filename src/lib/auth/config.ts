@@ -65,6 +65,17 @@ export const auth = betterAuth({
         input: false, // Empêche les utilisateurs de choisir leur compagnie lors de l'inscription
         returned: true, // Inclure dans la session et les réponses API
       },
+      /**
+       * Numéro de téléphone de l'utilisateur
+       * Optionnel, peut être modifié par l'utilisateur
+       */
+      phone: {
+        type: 'string',
+        required: false,
+        defaultValue: null,
+        input: true, // Permet aux utilisateurs de modifier leur numéro
+        returned: true, // Inclure dans la session et les réponses API
+      },
     },
   },
 

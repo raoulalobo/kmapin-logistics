@@ -1231,3 +1231,48 @@ export async function saveQuoteFromCalculatorAction(
     };
   }
 }
+
+/**
+ * Compter les devis en attente de validation
+ *
+ * Compte les devis avec statut SENT créés par des utilisateurs CLIENT
+ * qui nécessitent une validation par les ADMIN/MANAGERS
+ *
+ * @returns Nombre de devis en attente
+ */
+export async function countPendingQuotesAction(): Promise<ActionResult<number>> {
+  try {
+    const session = await requireAuth();
+
+    // Seuls les ADMIN et MANAGERS peuvent voir les notifications
+    const canSeeNotifications = hasPermission(
+      session.user.role as UserRole,
+      'quotes',
+      'read'
+    );
+
+    if (!canSeeNotifications) {
+      return { success: true, data: 0 };
+    }
+
+    // Compter les devis SENT créés par des CLIENTs
+    const count = await prisma.quote.count({
+      where: {
+        status: 'SENT',
+        // Récupérer les devis créés par des utilisateurs avec rôle CLIENT
+        company: {
+          users: {
+            some: {
+              role: 'CLIENT',
+            },
+          },
+        },
+      },
+    });
+
+    return { success: true, data: count };
+  } catch (error) {
+    console.error('Error counting pending quotes:', error);
+    return { success: false, error: 'Erreur lors du comptage des devis' };
+  }
+}

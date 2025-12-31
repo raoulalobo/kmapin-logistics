@@ -17,8 +17,36 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { User, Buildings, Bell, Lock, FloppyDisk } from '@phosphor-icons/react';
+import { useSafeSession } from '@/lib/auth/hooks';
 
 export default function SettingsPage() {
+  const { data: session, isLoading } = useSafeSession();
+
+  // Données utilisateur
+  const userName = session?.user?.name || '';
+  const userEmail = session?.user?.email || '';
+  const userPhone = session?.user?.phone || '';
+
+  // DEBUG: Afficher le contenu de la session dans la console
+  console.log('Session utilisateur:', {
+    name: userName,
+    email: userEmail,
+    phone: userPhone,
+    fullSession: session?.user,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+          <p className="text-muted-foreground">
+            Chargement de vos informations...
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* En-tête de page */}
@@ -49,17 +77,24 @@ export default function SettingsPage() {
                 <Label htmlFor="name">Nom complet</Label>
                 <Input
                   id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
                   placeholder="Jean Dupont"
-                  defaultValue=""
+                  defaultValue={userName}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="jean@example.com"
-                  defaultValue=""
+                  defaultValue={userEmail}
+                  disabled
+                  className="bg-muted"
                 />
               </div>
             </div>
@@ -67,13 +102,15 @@ export default function SettingsPage() {
               <Label htmlFor="phone">Téléphone</Label>
               <Input
                 id="phone"
+                name="phone"
                 type="tel"
+                autoComplete="tel"
                 placeholder="+33 1 23 45 67 89"
-                defaultValue=""
+                defaultValue={userPhone}
               />
             </div>
-            <Button className="gap-2">
-              <FloppyDisk className="h-4 w-4" />
+            <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+              <FloppyDisk className="h-5 w-5" weight="fill" />
               Enregistrer les modifications
             </Button>
           </CardContent>
@@ -125,7 +162,7 @@ export default function SettingsPage() {
                 une minuscule et un chiffre.
               </p>
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" size="lg" className="gap-2">
               <Lock className="h-4 w-4" />
               Changer le mot de passe
             </Button>
@@ -205,8 +242,8 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-            <Button className="gap-2">
-              <FloppyDisk className="h-4 w-4" />
+            <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+              <FloppyDisk className="h-5 w-5" weight="fill" />
               Mettre à jour
             </Button>
           </CardContent>

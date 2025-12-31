@@ -7,8 +7,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { List, Bell, SignOut, User, Gear } from '@phosphor-icons/react';
+import { useState, useEffect } from 'react';
+import { List, Bell, SignOut, Gear } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import { Sidebar } from './sidebar';
 import { logoutAction } from '@/app/(auth)/_actions/auth';
 import { useRouter } from 'next/navigation';
 import type { UserRole } from '@/generated/prisma';
+import { countPendingQuotesAction } from '@/modules/quotes';
 
 /**
  * Props du composant Header
@@ -48,6 +49,31 @@ interface HeaderProps {
 export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingQuotesCount, setPendingQuotesCount] = useState(0);
+
+  /**
+   * Charger le nombre de devis en attente de validation
+   * Uniquement pour les ADMIN et MANAGERS
+   */
+  useEffect(() => {
+    async function loadPendingQuotes() {
+      // Seuls les ADMIN et MANAGERS voient les notifications
+      if (userRole === 'CLIENT' || userRole === 'VIEWER') {
+        return;
+      }
+
+      const result = await countPendingQuotesAction();
+      if (result.success) {
+        setPendingQuotesCount(result.data);
+      }
+    }
+
+    loadPendingQuotes();
+
+    // Recharger toutes les 30 secondes
+    const interval = setInterval(loadPendingQuotes, 30000);
+    return () => clearInterval(interval);
+  }, [userRole]);
 
   /**
    * Handler pour la déconnexion
@@ -97,12 +123,24 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
 
       {/* Actions rapides */}
       <div className="flex items-center gap-2">
-        {/* Notifications (placeholder pour plus tard) */}
-        <Button variant="ghost" size="icon" className="relative">
+        {/* Notifications - Badge pour les devis en attente */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={() => router.push('/dashboard/quotes')}
+          title={pendingQuotesCount > 0 ? `${pendingQuotesCount} devis en attente de validation` : 'Notifications'}
+        >
           <Bell className="h-5 w-5" />
-          {/* Badge de notification */}
-          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-          <span className="sr-only">Notifications</span>
+          {/* Badge de notification dynamique */}
+          {pendingQuotesCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              {pendingQuotesCount > 9 ? '9+' : pendingQuotesCount}
+            </span>
+          )}
+          <span className="sr-only">
+            {pendingQuotesCount > 0 ? `${pendingQuotesCount} notifications` : 'Notifications'}
+          </span>
         </Button>
 
         {/* List utilisateur */}
@@ -134,13 +172,6 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
             <DropdownMenuSeparator />
 
             {/* Actions */}
-            <DropdownMenuItem asChild>
-              <a href="/dashboard/profile" className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Mon profil</span>
-              </a>
-            </DropdownMenuItem>
-
             <DropdownMenuItem asChild>
               <a href="/dashboard/settings" className="cursor-pointer">
                 <Gear className="mr-2 h-4 w-4" />

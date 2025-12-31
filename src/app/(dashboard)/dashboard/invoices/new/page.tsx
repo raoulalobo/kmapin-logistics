@@ -159,9 +159,10 @@ export default function NewInvoicePage() {
     <div className="space-y-6">
       {/* En-tête */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="outline" size="lg" asChild className="gap-2">
           <Link href="/dashboard/invoices">
             <ArrowLeft className="h-4 w-4" />
+            Retour
           </Link>
         </Button>
         <div>
@@ -367,20 +368,28 @@ export default function NewInvoicePage() {
             <Button
               type="button"
               variant="outline"
+              size="lg"
               onClick={() => router.back()}
               disabled={isPending}
+              className="gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Annuler
             </Button>
-            <Button type="submit" disabled={isPending || items.length === 0}>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isPending || items.length === 0}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
               {isPending ? (
                 <>
-                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="h-5 w-5 animate-spin" />
                   Création en cours...
                 </>
               ) : (
                 <>
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="h-5 w-5" weight="fill" />
                   Créer la facture
                 </>
               )}

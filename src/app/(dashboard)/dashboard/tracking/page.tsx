@@ -11,7 +11,7 @@
  */
 
 import Link from 'next/link';
-import { MapPin, Package, Airplane, Boat, Truck, Clock, ArrowRight, CheckCircle, House } from '@phosphor-icons/react/dist/ssr';
+import { MapPin, Package, Airplane, Boat, Truck, Clock, ArrowRight, CheckCircle, House, Plus } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -165,8 +165,9 @@ export default async function TrackingPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Il n&apos;y a actuellement aucune expédition en cours de traitement
             </p>
-            <Button asChild>
+            <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Link href="/dashboard/shipments/new">
+                <Plus className="h-5 w-5" weight="fill" />
                 Créer une expédition
               </Link>
             </Button>

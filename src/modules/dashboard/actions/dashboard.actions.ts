@@ -57,9 +57,39 @@ export interface RecentShipmentData {
 
 /**
  * Récupérer les statistiques du dashboard
+ * Les CLIENTs ne voient QUE les données de leur company
+ * Les ADMIN/MANAGERS voient TOUTES les données
  */
 export async function getDashboardStats(): Promise<DashboardStats> {
   const session = await requireAuth();
+
+  // Déterminer si l'utilisateur est un CLIENT/VIEWER (données limitées) ou ADMIN/MANAGER (données globales)
+  const userRole = session.user.role;
+  const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
+  const companyId = session.user.companyId;
+
+  // Sécurité : Si CLIENT sans company, retourner des stats vides
+  if (isClient && !companyId) {
+    return {
+      totalShipments: 0,
+      activeShipments: 0,
+      shipmentsGrowth: 0,
+      totalClients: 0,
+      activeClients: 0,
+      newClientsThisMonth: 0,
+      totalRevenue: 0,
+      revenueGrowth: 0,
+      pendingRevenue: 0,
+      deliveryRate: 0,
+      pendingInvoices: 0,
+      overdueInvoices: 0,
+      pendingQuotes: 0,
+      deliveredToday: 0,
+    };
+  }
+
+  // Filtre par company pour les CLIENTs uniquement
+  const whereCompany = isClient ? { companyId: companyId! } : {};
 
   // Dates pour les calculs
   const now = new Date();
@@ -92,11 +122,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     pendingQuotesCount,
     deliveredTodayCount,
   ] = await Promise.all([
-    // Expéditions
-    prisma.shipment.count(),
+    // Expéditions (filtrées par company pour les CLIENTs)
+    prisma.shipment.count({
+      where: whereCompany,
+    }),
     // Compte les expéditions actives (en cours de traitement/transit)
     prisma.shipment.count({
       where: {
+        ...whereCompany,
         status: {
           in: [
             ShipmentStatus.PENDING_APPROVAL,
@@ -110,31 +143,39 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       },
     }),
     prisma.shipment.count({
-      where: { createdAt: { gte: startOfMonth } },
+      where: {
+        ...whereCompany,
+        createdAt: { gte: startOfMonth }
+      },
     }),
     prisma.shipment.count({
       where: {
+        ...whereCompany,
         createdAt: { gte: startOfLastMonth, lt: startOfMonth },
       },
     }),
     prisma.shipment.count({
-      where: { status: ShipmentStatus.DELIVERED },
+      where: {
+        ...whereCompany,
+        status: ShipmentStatus.DELIVERED
+      },
     }),
 
-    // Clients
-    prisma.company.count(),
-    prisma.company.count({
+    // Clients (ADMIN/MANAGER uniquement - CLIENTs retournent 0)
+    isClient ? Promise.resolve(0) : prisma.company.count(),
+    isClient ? Promise.resolve(0) : prisma.company.count({
       where: {
         shipments: { some: {} },
       },
     }),
-    prisma.company.count({
+    isClient ? Promise.resolve(0) : prisma.company.count({
       where: { createdAt: { gte: startOfMonth } },
     }),
 
-    // Revenus
+    // Revenus (filtrés par company pour les CLIENTs)
     prisma.invoice.findMany({
       where: {
+        ...whereCompany,
         status: InvoiceStatus.PAID,
         paidDate: { gte: startOfMonth },
       },
@@ -142,6 +183,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }),
     prisma.invoice.findMany({
       where: {
+        ...whereCompany,
         status: InvoiceStatus.PAID,
         paidDate: { gte: startOfLastMonth, lt: startOfMonth },
       },
@@ -149,6 +191,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }),
     prisma.invoice.findMany({
       where: {
+        ...whereCompany,
         status: {
           in: [InvoiceStatus.SENT, InvoiceStatus.VIEWED],
         },
@@ -156,15 +199,22 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       select: { total: true },
     }),
     prisma.invoice.count({
-      where: { status: InvoiceStatus.OVERDUE },
+      where: {
+        ...whereCompany,
+        status: InvoiceStatus.OVERDUE
+      },
     }),
 
-    // Alertes
+    // Alertes (filtrées par company pour les CLIENTs)
     prisma.quote.count({
-      where: { status: QuoteStatus.SENT },
+      where: {
+        ...whereCompany,
+        status: QuoteStatus.SENT
+      },
     }),
     prisma.shipment.count({
       where: {
+        ...whereCompany,
         status: ShipmentStatus.DELIVERED,
         updatedAt: { gte: startOfToday },
       },
@@ -212,11 +262,25 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
 /**
  * Récupérer les expéditions récentes
+ * Les CLIENTs ne voient QUE les expéditions de leur company
  */
 export async function getRecentShipments(limit: number = 5): Promise<RecentShipmentData[]> {
   const session = await requireAuth();
 
+  // Filtrer par company pour les CLIENTs
+  const userRole = session.user.role;
+  const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
+  const companyId = session.user.companyId;
+
+  // Sécurité : Si CLIENT sans company, retourner tableau vide
+  if (isClient && !companyId) {
+    return [];
+  }
+
+  const whereCompany = isClient ? { companyId: companyId! } : {};
+
   const shipments = await prisma.shipment.findMany({
+    where: whereCompany,
     take: limit,
     orderBy: { createdAt: 'desc' },
     select: {
@@ -248,15 +312,25 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
 /**
  * Récupérer les données pour le graphique d'évolution des revenus
  * (derniers 6 mois)
+ * Les CLIENTs ne voient QUE les factures de leur company
  */
 export async function getRevenueChartData() {
   const session = await requireAuth();
 
+  // Filtrer par company pour les CLIENTs
+  const userRole = session.user.role;
+  const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
+  const companyId = session.user.companyId;
+
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
-  const invoices = await prisma.invoice.findMany({
+  // Sécurité : Si CLIENT sans company, retourner données vides
+  const whereCompany = (isClient && !companyId) ? null : (isClient ? { companyId: companyId! } : {});
+
+  const invoices = whereCompany === null ? [] : await prisma.invoice.findMany({
     where: {
+      ...whereCompany,
       status: InvoiceStatus.PAID,
       paidDate: { gte: sixMonthsAgo },
     },
@@ -295,15 +369,25 @@ export async function getRevenueChartData() {
 /**
  * Récupérer les données pour le graphique d'évolution des expéditions
  * (derniers 6 mois)
+ * Les CLIENTs ne voient QUE les expéditions de leur company
  */
 export async function getShipmentsChartData() {
   const session = await requireAuth();
 
+  // Filtrer par company pour les CLIENTs
+  const userRole = session.user.role;
+  const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
+  const companyId = session.user.companyId;
+
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
-  const shipments = await prisma.shipment.findMany({
+  // Sécurité : Si CLIENT sans company, retourner données vides
+  const whereCompany = (isClient && !companyId) ? null : (isClient ? { companyId: companyId! } : {});
+
+  const shipments = whereCompany === null ? [] : await prisma.shipment.findMany({
     where: {
+      ...whereCompany,
       createdAt: { gte: sixMonthsAgo },
     },
     select: {

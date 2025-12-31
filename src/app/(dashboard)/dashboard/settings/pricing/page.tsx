@@ -25,6 +25,7 @@ import {
   FloppyDisk,
   Trash,
   Plus,
+  ArrowLeft,
 } from '@phosphor-icons/react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -456,9 +457,14 @@ export default function PricingConfigPage() {
                 </p>
               </div>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -579,8 +585,13 @@ export default function PricingConfigPage() {
                   </div>
 
                   <div className="flex items-end">
-                    <Button onClick={handleCreateRate} disabled={isLoading} className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button
+                      onClick={handleCreateRate}
+                      disabled={isLoading}
+                      size="lg"
+                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-5 w-5" weight="fill" />
                       Créer
                     </Button>
                   </div>
@@ -825,14 +836,22 @@ export default function PricingConfigPage() {
                   <DialogFooter>
                     <Button
                       variant="outline"
+                      size="lg"
                       onClick={() => setIsEditModalOpen(false)}
                       disabled={isLoading}
+                      className="gap-2"
                     >
+                      <ArrowLeft className="h-4 w-4" />
                       Annuler
                     </Button>
-                    <Button onClick={handleSaveEdit} disabled={isLoading}>
-                      <FloppyDisk className="h-4 w-4 mr-2" />
-                      {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+                    <Button
+                      onClick={handleSaveEdit}
+                      disabled={isLoading}
+                      size="lg"
+                      className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <FloppyDisk className="h-5 w-5" weight="fill" />
+                      {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -998,9 +1017,14 @@ export default function PricingConfigPage() {
                 </p>
               </div>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -1066,9 +1090,14 @@ export default function PricingConfigPage() {
                 Exemple : Un multiplicateur de 3.0 pour l'aérien signifie que le transport aérien coûte 3x plus cher que le taux de base
               </p>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -1170,9 +1199,14 @@ export default function PricingConfigPage() {
                 Valeurs positives = surcharge (ex: 0.5 = +50%), valeurs négatives = réduction (ex: -0.1 = -10%)
               </p>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -1253,9 +1287,14 @@ export default function PricingConfigPage() {
                 </p>
               </div>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -1353,9 +1392,14 @@ export default function PricingConfigPage() {
                 Les délais estimés varient entre min et max selon la distance. Plus la distance est grande, plus on tend vers le max.
               </p>
 
-              <Button onClick={handleSaveConfig} disabled={isLoading}>
-                <FloppyDisk className="h-4 w-4 mr-2" />
-                {isLoading ? 'Sauvegarde...' : 'Sauvegarder'}
+              <Button
+                onClick={handleSaveConfig}
+                disabled={isLoading}
+                size="lg"
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <FloppyDisk className="h-5 w-5" weight="fill" />
+                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
               </Button>
             </CardContent>
           </Card>
@@ -1412,8 +1456,12 @@ export default function PricingConfigPage() {
                   </div>
 
                   <div className="flex items-end">
-                    <Button onClick={handleAddDistance} className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button
+                      onClick={handleAddDistance}
+                      size="lg"
+                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-5 w-5" weight="fill" />
                       Ajouter
                     </Button>
                   </div>

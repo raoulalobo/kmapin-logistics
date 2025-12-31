@@ -139,9 +139,9 @@ export default async function InvoicesPage({
             Gérez vos factures et suivez les paiements
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Link href="/dashboard/invoices/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-5 w-5" weight="fill" />
             Nouvelle facture
           </Link>
         </Button>
@@ -238,9 +238,9 @@ export default async function InvoicesPage({
               <p className="text-sm text-muted-foreground mb-4">
                 Commencez par créer votre première facture
               </p>
-              <Button asChild>
+              <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
                 <Link href="/dashboard/invoices/new">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="h-5 w-5" weight="fill" />
                   Créer une facture
                 </Link>
               </Button>

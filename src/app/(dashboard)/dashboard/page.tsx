@@ -146,6 +146,10 @@ export default async function DashboardPage() {
   // Récupérer l'utilisateur connecté
   const session = await getSession();
   const user = session?.user;
+  const userRole = user?.role || 'CLIENT';
+
+  // Déterminer si l'utilisateur est un CLIENT ou un ADMIN/MANAGER
+  const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
 
   // Récupérer les données du dashboard
   const [stats, recentShipments, revenueData, shipmentsData] = await Promise.all([
@@ -174,32 +178,41 @@ export default async function DashboardPage() {
       </div>
 
       {/* Cartes de statistiques (KPIs) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid gap-4 md:grid-cols-2 ${isClient ? 'lg:grid-cols-2' : 'lg:grid-cols-4'}`}>
         <StatCard
-          title="Expéditions actives"
+          title={isClient ? "Mes expéditions actives" : "Expéditions actives"}
           value={stats.activeShipments}
           change={formatChange(stats.shipmentsGrowth)}
           icon={Package}
           trend={stats.shipmentsGrowth >= 0 ? 'up' : 'down'}
         />
-        <StatCard
-          title="Clients actifs"
-          value={stats.activeClients}
-          change={`+${stats.newClientsThisMonth} nouveaux ce mois`}
-          icon={UsersThree}
-          trend={stats.newClientsThisMonth > 0 ? 'up' : 'neutral'}
-        />
-        <StatCard
-          title="Chiffre d'affaires"
-          value={`${stats.totalRevenue.toLocaleString('fr-FR', {
-            style: 'currency',
-            currency: 'EUR',
-            maximumFractionDigits: 0,
-          })}`}
-          change={formatChange(stats.revenueGrowth)}
-          icon={CurrencyDollar}
-          trend={stats.revenueGrowth >= 0 ? 'up' : 'down'}
-        />
+
+        {/* ADMIN/MANAGER uniquement : Clients actifs */}
+        {!isClient && (
+          <StatCard
+            title="Clients actifs"
+            value={stats.activeClients}
+            change={`+${stats.newClientsThisMonth} nouveaux ce mois`}
+            icon={UsersThree}
+            trend={stats.newClientsThisMonth > 0 ? 'up' : 'neutral'}
+          />
+        )}
+
+        {/* ADMIN/MANAGER uniquement : Chiffre d'affaires */}
+        {!isClient && (
+          <StatCard
+            title="Chiffre d'affaires"
+            value={`${stats.totalRevenue.toLocaleString('fr-FR', {
+              style: 'currency',
+              currency: 'EUR',
+              maximumFractionDigits: 0,
+            })}`}
+            change={formatChange(stats.revenueGrowth)}
+            icon={CurrencyDollar}
+            trend={stats.revenueGrowth >= 0 ? 'up' : 'down'}
+          />
+        )}
+
         <StatCard
           title="Taux de livraison"
           value={`${stats.deliveryRate.toFixed(1)}%`}
@@ -209,11 +222,13 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Graphiques d'évolution */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <RevenueChart data={revenueData} />
-        <ShipmentsChart data={shipmentsData} />
-      </div>
+      {/* Graphiques d'évolution - ADMIN/MANAGER uniquement */}
+      {!isClient && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <RevenueChart data={revenueData} />
+          <ShipmentsChart data={shipmentsData} />
+        </div>
+      )}
 
       {/* Grille de contenu principal */}
       <div className="grid gap-6 md:grid-cols-2">
@@ -351,42 +366,74 @@ export default async function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
-              <Link href="/dashboard/shipments/new">
-                <Package className="h-6 w-6" />
-                <div className="text-center">
-                  <div className="font-medium">Nouvelle expédition</div>
-                  <div className="text-xs text-muted-foreground">
-                    Créer une expédition
-                  </div>
-                </div>
-              </Link>
-            </Button>
+          <div className={`grid gap-4 ${isClient ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+            {/* CLIENT : uniquement création de devis */}
+            {isClient ? (
+              <>
+                <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+                  <Link href="/dashboard/quotes/new">
+                    <CurrencyDollar className="h-6 w-6" />
+                    <div className="text-center">
+                      <div className="font-medium">Demander un devis</div>
+                      <div className="text-xs text-muted-foreground">
+                        Obtenir une estimation
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
 
-            <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
-              <Link href="/dashboard/quotes/new">
-                <CurrencyDollar className="h-6 w-6" />
-                <div className="text-center">
-                  <div className="font-medium">Nouveau devis</div>
-                  <div className="text-xs text-muted-foreground">
-                    Générer un devis
-                  </div>
-                </div>
-              </Link>
-            </Button>
+                <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+                  <Link href="/dashboard/tracking">
+                    <MapPin className="h-6 w-6" />
+                    <div className="text-center">
+                      <div className="font-medium">Suivre mes colis</div>
+                      <div className="text-xs text-muted-foreground">
+                        Tracking en temps réel
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              /* ADMIN/MANAGER : toutes les actions */
+              <>
+                <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+                  <Link href="/dashboard/shipments/new">
+                    <Package className="h-6 w-6" />
+                    <div className="text-center">
+                      <div className="font-medium">Nouvelle expédition</div>
+                      <div className="text-xs text-muted-foreground">
+                        Créer une expédition
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
 
-            <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
-              <Link href="/dashboard/clients/new">
-                <UsersThree className="h-6 w-6" />
-                <div className="text-center">
-                  <div className="font-medium">Nouveau client</div>
-                  <div className="text-xs text-muted-foreground">
-                    Ajouter un client
-                  </div>
-                </div>
-              </Link>
-            </Button>
+                <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+                  <Link href="/dashboard/quotes/new">
+                    <CurrencyDollar className="h-6 w-6" />
+                    <div className="text-center">
+                      <div className="font-medium">Nouveau devis</div>
+                      <div className="text-xs text-muted-foreground">
+                        Générer un devis
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
+                  <Link href="/dashboard/clients/new">
+                    <UsersThree className="h-6 w-6" />
+                    <div className="text-center">
+                      <div className="font-medium">Nouveau client</div>
+                      <div className="text-xs text-muted-foreground">
+                        Ajouter un client
+                      </div>
+                    </div>
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

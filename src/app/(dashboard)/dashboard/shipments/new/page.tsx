@@ -11,11 +11,12 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { ArrowLeft, FloppyDisk, Package } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, Package, Calculator } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -44,9 +45,14 @@ import { ClientSelect } from '@/components/forms/client-select';
 
 import { shipmentSchema, type ShipmentFormData, createShipmentAction } from '@/modules/shipments';
 import { CargoType, TransportMode, Priority } from '@/generated/prisma';
+import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 
 export default function NewShipmentPage() {
   const router = useRouter();
+
+  // État pour le calcul automatique du coût
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [calculatedCost, setCalculatedCost] = useState<number | null>(null);
 
   const form = useForm<ShipmentFormData>({
     resolver: zodResolver(shipmentSchema),
@@ -67,6 +73,9 @@ export default function NewShipmentPage() {
       cargoType: 'GENERAL' as CargoType,
       weight: 0,
       volume: 0,
+      length: 0,
+      width: 0,
+      height: 0,
       packageCount: 1,
       value: 0,
       currency: 'EUR',
@@ -81,6 +90,69 @@ export default function NewShipmentPage() {
       estimatedCost: 0,
     },
   });
+
+  /**
+   * Calculer automatiquement le coût estimé
+   * Réutilise la même logique que le calculateur de devis
+   */
+  async function handleCalculateCost() {
+    try {
+      setIsCalculating(true);
+
+      // Récupérer les valeurs actuelles du formulaire
+      const formValues = form.getValues();
+
+      // Vérifier que les champs requis pour le calcul sont remplis
+      if (!formValues.originCountry || !formValues.destinationCountry) {
+        toast.error('Veuillez renseigner les pays d\'origine et de destination');
+        setIsCalculating(false);
+        return;
+      }
+
+      if (!formValues.weight || formValues.weight <= 0) {
+        toast.error('Veuillez renseigner le poids de la marchandise');
+        setIsCalculating(false);
+        return;
+      }
+
+      if (formValues.transportMode.length === 0) {
+        toast.error('Veuillez sélectionner au moins un mode de transport');
+        setIsCalculating(false);
+        return;
+      }
+
+      // Préparer les données pour le calculateur (même format que quote)
+      const calculationData = {
+        originCountry: formValues.originCountry,
+        destinationCountry: formValues.destinationCountry,
+        cargoType: formValues.cargoType,
+        weight: formValues.weight,
+        length: formValues.length || 0,
+        width: formValues.width || 0,
+        height: formValues.height || 0,
+        transportMode: formValues.transportMode,
+        priority: formValues.priority,
+      };
+
+      // Appeler la même Server Action que le calculateur de devis
+      const result = await calculateQuoteEstimateV2Action(calculationData);
+
+      if (result.success && result.data) {
+        // Mettre à jour le champ estimatedCost avec le résultat calculé
+        const cost = result.data.estimatedCost;
+        setCalculatedCost(cost);
+        form.setValue('estimatedCost', cost);
+        toast.success(`Coût calculé : ${cost.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}`);
+      } else {
+        toast.error(result.error || 'Erreur lors du calcul du coût');
+      }
+    } catch (error) {
+      console.error('Erreur calcul coût:', error);
+      toast.error('Une erreur est survenue lors du calcul');
+    } finally {
+      setIsCalculating(false);
+    }
+  }
 
   /**
    * Soumission du formulaire
@@ -110,6 +182,9 @@ export default function NewShipmentPage() {
       formData.append('cargoType', data.cargoType);
       formData.append('weight', data.weight.toString());
       if (data.volume) formData.append('volume', data.volume.toString());
+      if (data.length) formData.append('length', data.length.toString());
+      if (data.width) formData.append('width', data.width.toString());
+      if (data.height) formData.append('height', data.height.toString());
       formData.append('packageCount', data.packageCount.toString());
       if (data.value) formData.append('value', data.value.toString());
       formData.append('currency', data.currency);
@@ -145,9 +220,9 @@ export default function NewShipmentPage() {
     <div className="space-y-6">
       {/* En-tête */}
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button variant="outline" size="lg" asChild className="mb-4 gap-2">
           <Link href="/dashboard/shipments">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Retour à la liste
           </Link>
         </Button>
@@ -492,6 +567,80 @@ export default function NewShipmentPage() {
                 />
               </div>
 
+              {/* Dimensions pour calcul automatique du coût */}
+              <div>
+                <p className="text-xs text-gray-500 mb-2">
+                  <strong>⚠️ Attention :</strong> Les dimensions doivent être saisies en <strong>centimètres (cm)</strong> pour le calcul automatique du coût.
+                </p>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longueur (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="Longueur (cm)"
+                            onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="width"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Largeur (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="Largeur (cm)"
+                            onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hauteur (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ''}
+                            type="number"
+                            min="0"
+                            step="1"
+                            placeholder="Hauteur (cm)"
+                            onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
                 name="description"
@@ -586,6 +735,26 @@ export default function NewShipmentPage() {
                 )}
               />
 
+              {/* Bouton de calcul automatique du coût */}
+              <div className="flex items-center gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={handleCalculateCost}
+                  disabled={isCalculating}
+                  className="gap-2"
+                >
+                  <Calculator className="h-5 w-5" weight="fill" />
+                  {isCalculating ? 'Calcul en cours...' : 'Calculer le coût automatiquement'}
+                </Button>
+                {calculatedCost !== null && (
+                  <span className="text-sm text-green-600 font-medium">
+                    ✓ Coût calculé avec succès
+                  </span>
+                )}
+              </div>
+
               <FormField
                 control={form.control}
                 name="estimatedCost"
@@ -593,10 +762,19 @@ export default function NewShipmentPage() {
                   <FormItem>
                     <FormLabel>Coût estimé (€)</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value || ''} type="number" min="0" step="0.01" onChange={e => field.onChange(e.target.value ? parseFloat(e.target.value) : null)} />
+                      <Input
+                        {...field}
+                        value={field.value || ''}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        readOnly
+                        className="bg-muted cursor-not-allowed"
+                        placeholder="Utilisez le bouton 'Calculer le coût automatiquement'"
+                      />
                     </FormControl>
                     <FormDescription>
-                      Coût estimé de l'expédition (optionnel)
+                      Le coût est calculé automatiquement en fonction du poids, des dimensions, et du trajet
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -607,15 +785,23 @@ export default function NewShipmentPage() {
 
           {/* Actions */}
           <div className="flex gap-4">
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              <FloppyDisk className="mr-2 h-4 w-4" />
-              {form.formState.isSubmitting ? 'Création...' : 'Créer l\'expédition'}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={form.formState.isSubmitting}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <FloppyDisk className="h-5 w-5" weight="fill" />
+              {form.formState.isSubmitting ? 'Création en cours...' : 'Créer l\'expédition'}
             </Button>
             <Button
               type="button"
               variant="outline"
+              size="lg"
               onClick={() => router.back()}
+              className="gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Annuler
             </Button>
           </div>

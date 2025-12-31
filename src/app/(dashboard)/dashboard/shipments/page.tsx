@@ -105,9 +105,9 @@ export default async function ShipmentsPage({
             Gérez vos expéditions et suivez leur statut
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Link href="/dashboard/shipments/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-5 w-5" weight="fill" />
             Nouvelle expédition
           </Link>
         </Button>
@@ -181,9 +181,9 @@ export default async function ShipmentsPage({
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Commencez par créer votre première expédition'}
             </p>
-            <Button asChild>
+            <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Link href="/dashboard/shipments/new">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-5 w-5" weight="fill" />
                 Créer une expédition
               </Link>
             </Button>
@@ -256,7 +256,7 @@ export default async function ShipmentsPage({
                     <Badge variant={getStatusVariant(shipment.status)}>
                       {formatStatus(shipment.status)}
                     </Badge>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild>
                       <Link href={`/dashboard/shipments/${shipment.id}`}>
                         Voir détails
                       </Link>

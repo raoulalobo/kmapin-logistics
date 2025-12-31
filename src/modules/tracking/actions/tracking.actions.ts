@@ -71,6 +71,15 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
     ShipmentStatus.READY_FOR_PICKUP,
   ];
 
+  // Les clients ne voient que les expéditions de leur company
+  const isClient = session.user.role === 'CLIENT' || session.user.role === 'VIEWER';
+  const companyId = session.user.companyId;
+
+  // Sécurité : Si CLIENT sans company, retourner tableau vide
+  if (isClient && !companyId) {
+    return [];
+  }
+
   // Construire le filtre selon le rôle
   const where: any = {
     status: {
@@ -78,9 +87,8 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
     },
   };
 
-  // Les clients ne voient que les expéditions de leur company
-  if (session.user.role === 'CLIENT' || session.user.role === 'VIEWER') {
-    where.companyId = session.user.companyId;
+  if (isClient) {
+    where.companyId = companyId;
   }
 
   // Récupérer les expéditions avec tracking
@@ -208,10 +216,27 @@ export async function addTrackingEvent(data: {
 export async function getTrackingStats() {
   const session = await requireAuth();
 
+  // Déterminer si l'utilisateur est CLIENT/VIEWER et récupérer le companyId
+  const isClient = session.user.role === 'CLIENT' || session.user.role === 'VIEWER';
+  const companyId = session.user.companyId;
+
+  // Sécurité : Si CLIENT sans company, retourner des statistiques vides
+  if (isClient && !companyId) {
+    return {
+      pickedUp: 0,
+      readyForPickup: 0,
+      inTransit: 0,
+      atCustoms: 0,
+      outForDelivery: 0,
+      deliveredToday: 0,
+      totalActive: 0,
+    };
+  }
+
   // Construire le filtre selon le rôle
   const where: any = {};
-  if (session.user.role === 'CLIENT' || session.user.role === 'VIEWER') {
-    where.companyId = session.user.companyId;
+  if (isClient) {
+    where.companyId = companyId!; // TypeScript assertion - garanti non-null ici
   }
 
   // Compter les expéditions par statut

@@ -25,9 +25,10 @@ export function CreateCountryButton() {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="bg-[#003D82] hover:bg-[#002952]"
+        size="lg"
+        className="gap-2 bg-blue-600 hover:bg-blue-700"
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="h-5 w-5" weight="fill" />
         Ajouter un pays
       </Button>
 

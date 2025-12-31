@@ -128,6 +128,28 @@ export const shipmentSchema = z.object({
     .optional()
     .nullable(),
 
+  // === Dimensions (pour calcul automatique du coût) ===
+  length: z
+    .number()
+    .nonnegative('La longueur doit être positive ou nulle')
+    .max(10000, 'La longueur ne peut pas dépasser 10000 centimètres (100 mètres)')
+    .optional()
+    .nullable(),
+
+  width: z
+    .number()
+    .nonnegative('La largeur doit être positive ou nulle')
+    .max(10000, 'La largeur ne peut pas dépasser 10000 centimètres (100 mètres)')
+    .optional()
+    .nullable(),
+
+  height: z
+    .number()
+    .nonnegative('La hauteur doit être positive ou nulle')
+    .max(10000, 'La hauteur ne peut pas dépasser 10000 centimètres (100 mètres)')
+    .optional()
+    .nullable(),
+
   packageCount: z
     .number()
     .int('Le nombre de colis doit être un entier')

@@ -125,8 +125,8 @@ export default async function UsersPage({
           </p>
         </div>
         <UserCreateDialog>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-5 w-5" weight="fill" />
             Nouvel utilisateur
           </Button>
         </UserCreateDialog>
@@ -206,8 +206,8 @@ export default async function UsersPage({
                 : 'Commencez par créer votre premier utilisateur'}
             </p>
             <UserCreateDialog>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-5 w-5" weight="fill" />
                 Créer un utilisateur
               </Button>
             </UserCreateDialog>

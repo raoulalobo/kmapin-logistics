@@ -119,9 +119,9 @@ export default async function QuotesPage({
             Gérez vos devis et estimations tarifaires
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Link href="/dashboard/quotes/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-5 w-5" weight="fill" />
             Nouveau devis
           </Link>
         </Button>
@@ -195,9 +195,9 @@ export default async function QuotesPage({
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Commencez par créer votre premier devis'}
             </p>
-            <Button asChild>
+            <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Link href="/dashboard/quotes/new">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-5 w-5" weight="fill" />
                 Créer un devis
               </Link>
             </Button>
@@ -270,7 +270,7 @@ export default async function QuotesPage({
                     <Badge variant={getStatusVariant(quote.status)}>
                       {formatStatus(quote.status)}
                     </Badge>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild>
                       <Link href={`/dashboard/quotes/${quote.id}`}>
                         Voir détails
                       </Link>

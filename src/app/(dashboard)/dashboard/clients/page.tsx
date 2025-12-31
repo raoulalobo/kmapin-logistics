@@ -79,9 +79,9 @@ export default async function ClientsPage({
             Gérez vos clients et entreprises
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
           <Link href="/dashboard/clients/new">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-5 w-5" weight="fill" />
             Nouveau client
           </Link>
         </Button>
@@ -113,9 +113,9 @@ export default async function ClientsPage({
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Commencez par créer votre premier client'}
             </p>
-            <Button asChild>
+            <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Link href="/dashboard/clients/new">
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-5 w-5" weight="fill" />
                 Créer un client
               </Link>
             </Button>
@@ -186,7 +186,7 @@ export default async function ClientsPage({
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Button variant="ghost" size="sm" className="flex-1" asChild>
                     <Link href={`/dashboard/clients/${company.id}`}>
                       Voir détails
                     </Link>

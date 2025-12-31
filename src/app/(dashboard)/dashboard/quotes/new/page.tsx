@@ -183,7 +183,7 @@ export default function NewQuotePage() {
           const calculatedPrice = result.data.estimatedCost;
           setEstimatedPrice(calculatedPrice);
 
-          // Mettre à jour le champ estimatedCost dans le formulaire
+          // Mettre à jour le champ estimatedCost automatiquement
           form.setValue('estimatedCost', calculatedPrice);
         } else {
           setEstimatedPrice(null);
@@ -252,9 +252,9 @@ export default function NewQuotePage() {
     <div className="space-y-6">
       {/* En-tête */}
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button variant="ghost" size="sm" asChild className="mb-4 gap-2">
           <Link href="/dashboard/quotes">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Retour à la liste
           </Link>
         </Button>
@@ -435,13 +435,13 @@ export default function NewQuotePage() {
                     name="length"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Longueur (m)</FormLabel>
+                        <FormLabel className="text-sm text-muted-foreground">Longueur (cm)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="1"
                             placeholder="0"
                             onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -456,13 +456,13 @@ export default function NewQuotePage() {
                     name="width"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Largeur (m)</FormLabel>
+                        <FormLabel className="text-sm text-muted-foreground">Largeur (cm)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="1"
                             placeholder="0"
                             onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -477,13 +477,13 @@ export default function NewQuotePage() {
                     name="height"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Hauteur (m)</FormLabel>
+                        <FormLabel className="text-sm text-muted-foreground">Hauteur (cm)</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
                             type="number"
                             min="0"
-                            step="0.01"
+                            step="1"
                             placeholder="0"
                             onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -547,7 +547,7 @@ export default function NewQuotePage() {
                     {getConvertedPrice(estimatedPrice, selectedCurrency).toFixed(2)} {getCurrencySymbol(selectedCurrency)}
                   </p>
                   <p className="text-xs text-blue-700 mt-1">
-                    Basé sur les paramètres saisis. Vous pouvez ajuster le prix manuellement ci-dessous.
+                    Basé sur les paramètres saisis (poids, dimensions, route, mode de transport).
                   </p>
                 </div>
               )}
@@ -563,13 +563,12 @@ export default function NewQuotePage() {
                         <Input
                           {...field}
                           type="number"
-                          min="0"
-                          step="0.01"
-                          onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          readOnly
+                          className="bg-muted cursor-not-allowed"
                         />
                       </FormControl>
                       <FormDescription>
-                        {isCalculating ? 'Calcul en cours...' : 'Montant du devis en euros (modifiable)'}
+                        {isCalculating ? 'Calcul en cours...' : 'Montant calculé automatiquement (non modifiable)'}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -618,10 +617,14 @@ export default function NewQuotePage() {
                             field.onChange(isoDate);
                           }
                         }}
+                        readOnly={isClient}
+                        className={isClient ? 'bg-muted cursor-not-allowed' : ''}
                       />
                     </FormControl>
                     <FormDescription>
-                      Date et heure limite de validité du devis
+                      {isClient
+                        ? 'Validité par défaut : 30 jours (non modifiable)'
+                        : 'Date et heure limite de validité du devis'}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -642,11 +645,15 @@ export default function NewQuotePage() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="DRAFT">Brouillon</SelectItem>
-                        <SelectItem value="SENT">Envoyer au client</SelectItem>
+                        <SelectItem value="SENT">
+                          {isClient ? 'Soumettre pour validation' : 'Envoyer au client'}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Choisissez "Brouillon" pour sauvegarder sans envoyer
+                      {isClient
+                        ? 'Choisissez "Brouillon" pour sauvegarder sans envoyer, ou "Soumettre" pour notifier les responsables'
+                        : 'Choisissez "Brouillon" pour sauvegarder sans envoyer, ou "Envoyer" pour transmettre au client'}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -657,15 +664,23 @@ export default function NewQuotePage() {
 
           {/* Actions */}
           <div className="flex gap-4">
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              <FloppyDisk className="mr-2 h-4 w-4" />
-              {form.formState.isSubmitting ? 'Création...' : 'Créer le devis'}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={form.formState.isSubmitting}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <FloppyDisk className="h-5 w-5" weight="fill" />
+              {form.formState.isSubmitting ? 'Création en cours...' : 'Créer le devis'}
             </Button>
             <Button
               type="button"
               variant="outline"
+              size="lg"
               onClick={() => router.back()}
+              className="gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Annuler
             </Button>
           </div>

@@ -73,9 +73,9 @@ export default function NewClientPage() {
     <div className="space-y-6">
       {/* En-tête */}
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button variant="outline" size="lg" asChild className="mb-4 gap-2">
           <Link href="/dashboard/clients">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Retour à la liste
           </Link>
         </Button>
@@ -277,15 +277,23 @@ export default function NewClientPage() {
 
           {/* Actions */}
           <div className="flex gap-4">
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              <FloppyDisk className="mr-2 h-4 w-4" />
-              {form.formState.isSubmitting ? 'Création...' : 'Créer le client'}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={form.formState.isSubmitting}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <FloppyDisk className="h-5 w-5" weight="fill" />
+              {form.formState.isSubmitting ? 'Création en cours...' : 'Créer le client'}
             </Button>
             <Button
               type="button"
               variant="outline"
+              size="lg"
               onClick={() => router.back()}
+              className="gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Annuler
             </Button>
           </div>

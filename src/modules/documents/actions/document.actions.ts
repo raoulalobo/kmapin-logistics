@@ -76,6 +76,14 @@ export async function uploadDocumentAction(
   try {
     const session = await requireAuth();
 
+    // Sécurité : Vérifier que l'utilisateur a une companyId
+    if (!session.user.companyId) {
+      return {
+        success: false,
+        error: 'Votre compte n\'est pas associé à une compagnie',
+      };
+    }
+
     // Validation
     if (!data.shipmentId && !data.invoiceId && !data.quoteId) {
       return {
