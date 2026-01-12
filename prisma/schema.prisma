@@ -77,6 +77,19 @@ enum PickupTimeSlot {
   FLEXIBLE
 }
 
+enum PurchaseStatus {
+  NOUVEAU
+  EN_COURS
+  LIVRE
+  ANNULE
+}
+
+enum DeliveryMode {
+  STANDARD
+  EXPRESS
+  URGENT
+}
+
 enum InvoiceStatus {
   DRAFT
   SENT
@@ -137,28 +150,31 @@ enum TransporterType {
 }
 
 model User {
-  id                String          @id() @default(cuid())
-  email             String          @unique()
-  emailVerified     Boolean         @default(false)
+  id                String            @id() @default(cuid())
+  email             String            @unique()
+  emailVerified     Boolean           @default(false)
   name              String?
   image             String?
   phone             String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt()
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt()
   accounts          Account[]
   sessions          Session[]
-  role              UserRole        @default(CLIENT)
+  role              UserRole          @default(CLIENT)
   companyId         String?
-  company           Company?        @relation(fields: [companyId], references: [id])
+  company           Company?          @relation(fields: [companyId], references: [id])
   permissions       Json?
-  createdShipments  Shipment[]      @relation("CreatedBy")
-  createdInvoices   Invoice[]       @relation("CreatedBy")
-  uploadedDocuments Document[]      @relation("UploadedDocuments")
+  createdShipments  Shipment[]        @relation("CreatedBy")
+  createdInvoices   Invoice[]         @relation("CreatedBy")
+  uploadedDocuments Document[]        @relation("UploadedDocuments")
   prospect          Prospect?
   pricingConfigs    PricingConfig[]
-  createdPickups    PickupRequest[] @relation("CreatedPickups")
-  pickupLogs        PickupLog[]     @relation("PickupLogChangedBy")
-  userPickups       PickupRequest[] @relation("UserPickups")
+  createdPickups    PickupRequest[]   @relation("CreatedPickups")
+  pickupLogs        PickupLog[]       @relation("PickupLogChangedBy")
+  userPickups       PickupRequest[]   @relation("UserPickups")
+  createdPurchases  PurchaseRequest[] @relation("CreatedPurchases")
+  purchaseLogs      PurchaseLog[]     @relation("PurchaseLogChangedBy")
+  userPurchases     PurchaseRequest[] @relation("UserPurchases")
 
   @@index([companyId])
   @@map("user")
@@ -221,26 +237,27 @@ model Verification {
 }
 
 model Company {
-  id             String          @id() @default(cuid())
-  name           String
-  legalName      String?
-  taxId          String?         @unique()
-  email          String
-  phone          String?
-  address        String
-  city           String
-  postalCode     String?
-  country        String
-  website        String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt()
-  users          User[]
-  shipments      Shipment[]
-  invoices       Invoice[]
-  quotes         Quote[]
-  documents      Document[]
-  transporters   Transporter[]
-  pickupRequests PickupRequest[]
+  id               String            @id() @default(cuid())
+  name             String
+  legalName        String?
+  taxId            String?           @unique()
+  email            String
+  phone            String?
+  address          String
+  city             String
+  postalCode       String?
+  country          String
+  website          String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt()
+  users            User[]
+  shipments        Shipment[]
+  invoices         Invoice[]
+  quotes           Quote[]
+  documents        Document[]
+  transporters     Transporter[]
+  pickupRequests   PickupRequest[]
+  purchaseRequests PurchaseRequest[]
 
   @@index([taxId])
 }
@@ -379,6 +396,85 @@ model PickupLog {
   @@index([changedById])
   @@index([pickupId, createdAt])
   @@map("pickup_log")
+}
+
+model PurchaseRequest {
+  id                  String         @id() @default(cuid())
+  trackingNumber      String         @unique()
+  trackingToken       String         @unique() @default(cuid())
+  tokenExpiresAt      DateTime
+  userId              String?
+  user                User?          @relation("UserPurchases", fields: [userId], references: [id])
+  isAttachedToAccount Boolean        @default(false)
+  contactEmail        String
+  contactPhone        String
+  contactName         String?
+  productName         String
+  productUrl          String?        @db.Text()
+  quantity            Int            @default(1)
+  estimatedPrice      Float?
+  maxBudget           Float?
+  productDescription  String?        @db.Text()
+  deliveryAddress     String
+  deliveryCity        String
+  deliveryPostalCode  String
+  deliveryCountry     String         @default("FR")
+  requestedDate       DateTime
+  deliveryMode        DeliveryMode   @default(STANDARD)
+  actualDeliveryDate  DateTime?
+  specialInstructions String?        @db.Text()
+  internalNotes       String?        @db.Text()
+  status              PurchaseStatus @default(NOUVEAU)
+  cancellationReason  String?        @db.Text()
+  actualProductCost   Float?
+  deliveryCost        Float?
+  serviceFee          Float?
+  totalCost           Float?
+  purchaseProof       String?        @db.Text()
+  completionNotes     String?        @db.Text()
+  acceptedTerms       Boolean        @default(false)
+  acceptedUrgentFee   Boolean        @default(false)
+  acceptedPricing     Boolean        @default(false)
+  documents           Document[]
+  logs                PurchaseLog[]
+  companyId           String?
+  company             Company?       @relation(fields: [companyId], references: [id])
+  createdById         String?
+  createdBy           User?          @relation("CreatedPurchases", fields: [createdById], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt()
+
+  @@index([trackingNumber])
+  @@index([trackingToken])
+  @@index([userId])
+  @@index([contactEmail])
+  @@index([contactPhone])
+  @@index([status])
+  @@index([companyId])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("purchase_request")
+}
+
+model PurchaseLog {
+  id          String          @id() @default(cuid())
+  purchaseId  String
+  purchase    PurchaseRequest @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  oldStatus   PurchaseStatus?
+  newStatus   PurchaseStatus?
+  eventType   String
+  changedById String?
+  changedBy   User?           @relation("PurchaseLogChangedBy", fields: [changedById], references: [id])
+  notes       String?         @db.Text()
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+
+  @@index([purchaseId])
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([changedById])
+  @@index([purchaseId, createdAt])
+  @@map("purchase_log")
 }
 
 model TrackingEvent {
@@ -531,33 +627,36 @@ model Notification {
 }
 
 model Document {
-  id              String         @id() @default(cuid())
-  name            String
-  fileUrl         String
-  fileKey         String
-  fileSize        Int
-  mimeType        String
-  type            DocumentType
-  description     String?
-  shipmentId      String?
-  shipment        Shipment?      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  invoiceId       String?
-  invoice         Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  quoteId         String?
-  quote           Quote?         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  pickupRequestId String?
-  pickupRequest   PickupRequest? @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
-  companyId       String
-  company         Company        @relation(fields: [companyId], references: [id])
-  uploadedBy      String
-  uploader        User           @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
-  uploadedAt      DateTime       @default(now())
+  id                String           @id() @default(cuid())
+  name              String
+  fileUrl           String
+  fileKey           String
+  fileSize          Int
+  mimeType          String
+  type              DocumentType
+  description       String?
+  shipmentId        String?
+  shipment          Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  invoiceId         String?
+  invoice           Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  quoteId           String?
+  quote             Quote?           @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  pickupRequestId   String?
+  pickupRequest     PickupRequest?   @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
+  purchaseRequestId String?
+  purchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  companyId         String
+  company           Company          @relation(fields: [companyId], references: [id])
+  uploadedBy        String
+  uploader          User             @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
+  uploadedAt        DateTime         @default(now())
 
   @@index([companyId])
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])
   @@index([pickupRequestId])
+  @@index([purchaseRequestId])
   @@index([uploadedBy])
 }
 

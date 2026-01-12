@@ -164,6 +164,27 @@ export const DocumentType = PrismaModule.DocumentType;
 export const UserRole = PrismaModule.UserRole;
 
 /**
+ * Enum pour le statut des demandes d'achat délégué
+ *
+ * Valeurs possibles :
+ * - NOUVEAU : Demande créée, en attente de traitement (24-48h)
+ * - EN_COURS : Faso Fret a pris en charge l'achat
+ * - LIVRE : Produit acheté et livré au client
+ * - ANNULE : Annulé avec raison obligatoire
+ */
+export const PurchaseStatus = PrismaModule.PurchaseStatus;
+
+/**
+ * Enum pour les modes de livraison des achats
+ *
+ * Valeurs possibles :
+ * - STANDARD : Standard (5-7 jours)
+ * - EXPRESS : Express (2-3 jours, +20% frais)
+ * - URGENT : Urgent (24-48h, +50% frais)
+ */
+export const DeliveryMode = PrismaModule.DeliveryMode;
+
+/**
  * Export de tous les enums pour import groupé
  *
  * @example
@@ -186,6 +207,8 @@ export const Enums = {
   NotificationType,
   DocumentType,
   UserRole,
+  PurchaseStatus,
+  DeliveryMode,
 };
 
 // Export des types TypeScript pour l'autocomplétion
@@ -202,4 +225,6 @@ export type {
   NotificationType,
   DocumentType,
   UserRole,
+  PurchaseStatus,
+  DeliveryMode,
 } from '@/generated/prisma';
