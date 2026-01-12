@@ -13,7 +13,7 @@ import {
   TransportMode,
   Priority,
   ShipmentStatus,
-} from '@/generated/prisma';
+} from '@/lib/db/enums';
 
 /**
  * Schéma de validation pour la création d'une expédition

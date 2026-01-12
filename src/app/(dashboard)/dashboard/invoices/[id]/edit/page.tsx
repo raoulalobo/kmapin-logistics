@@ -66,9 +66,9 @@ import {
  * Props de la page
  */
 interface EditInvoicePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
@@ -82,6 +82,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
     { description: '', quantity: 1, unitPrice: 0, amount: 0 },
   ]);
   const [invoiceStatus, setInvoiceStatus] = useState<string>('DRAFT');
+  const [invoiceId, setInvoiceId] = useState<string>('');
 
   // Calculer les totaux
   const subtotal = calculateSubtotal(items);
@@ -106,7 +107,9 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
   useEffect(() => {
     async function loadInvoice() {
       try {
-        const result = await getInvoiceAction(params.id);
+        const { id } = await params;
+        setInvoiceId(id);
+        const result = await getInvoiceAction(id);
 
         if (!result.success || !result.data) {
           toast.error(result.error || 'Facture introuvable');
@@ -119,7 +122,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
         // Vérifier que la facture peut être modifiée
         if (invoice.status !== 'DRAFT') {
           toast.error('Seules les factures en brouillon peuvent être modifiées');
-          router.push(`/dashboard/invoices/${params.id}`);
+          router.push(`/dashboard/invoices/${id}`);
           return;
         }
 
@@ -154,7 +157,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
     }
 
     loadInvoice();
-  }, [params.id, router, form]);
+  }, [params, router, form]);
 
   /**
    * Ajouter une ligne de facture
@@ -212,13 +215,13 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
       // Ajouter les items en JSON
       formData.append('items', JSON.stringify(items));
 
-      const result = await updateInvoiceAction(params.id, formData);
+      const result = await updateInvoiceAction(invoiceId, formData);
 
       if (!result.success) {
         toast.error(result.error || 'Erreur lors de la mise à jour de la facture');
       } else {
         toast.success('Facture mise à jour avec succès !');
-        router.push(`/dashboard/invoices/${params.id}`);
+        router.push(`/dashboard/invoices/${invoiceId}`);
       }
     });
   }
@@ -240,12 +243,12 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
       {/* En-tête */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href={`/dashboard/invoices/${params.id}`}>
+          <Link href={`/dashboard/invoices/${invoiceId}`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Modifier la facture</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Modifier la facture</h1>
           <p className="text-muted-foreground">
             Modifiez les informations de la facture
           </p>
@@ -267,7 +270,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Informations client et dates */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
@@ -329,7 +332,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
           </Card>
 
           {/* Lignes de facture */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -429,7 +432,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
           </Card>
 
           {/* Notes */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Notes (optionnel)</CardTitle>
             </CardHeader>

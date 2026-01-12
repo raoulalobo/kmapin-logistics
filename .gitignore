@@ -8,6 +8,8 @@
 
 # testing
 /coverage
+/test-results
+*.log
 
 # next.js
 /.next/
@@ -28,6 +30,8 @@ yarn-error.log*
 # local env files
 .env
 .env*.local
+.env.jenkins
+.env.test
 
 # vercel
 .vercel

@@ -221,10 +221,10 @@ export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
   return (
     <div className={cn('flex h-full flex-col border-r bg-background', className)}>
       {/* Logo et titre */}
-      <div className="flex h-16 items-center border-b px-6">
+      <div className="flex h-20 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Package className="h-4 w-4" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#003D82] text-white">
+            <Package className="h-7 w-7" />
           </div>
           <span className="text-lg">Faso Fret</span>
         </Link>

@@ -68,7 +68,7 @@ import {
   toggleTransportRateStatus,
 } from '@/modules/transport-rates';
 import { listCountries } from '@/modules/countries/actions/country.actions';
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 
 export default function PricingConfigPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -351,7 +351,7 @@ export default function PricingConfigPage() {
     <div className="space-y-6">
       {/* En-tête */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configuration des Prix</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Configuration des Prix</h1>
         <p className="text-muted-foreground">
           Gérez les paramètres de tarification utilisés pour le calcul des devis
         </p>
@@ -398,7 +398,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 1 : Taux de Base */}
         <TabsContent value="base">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Taux de Base</CardTitle>
               <CardDescription>
@@ -472,7 +472,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 2 : Tarifs par Routes */}
         <TabsContent value="rates">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Tarifs par Routes (TransportRate)</CardTitle>
               <CardDescription>
@@ -862,7 +862,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 3 : Poids Volumétrique */}
         <TabsContent value="volumetric">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Configuration du Poids Volumétrique</CardTitle>
               <CardDescription>
@@ -1032,7 +1032,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 2 : Multiplicateurs Transport */}
         <TabsContent value="transport">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Multiplicateurs par Mode de Transport</CardTitle>
               <CardDescription>
@@ -1105,7 +1105,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 3 : Surcharges Cargo */}
         <TabsContent value="cargo">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Surcharges par Type de Cargo</CardTitle>
               <CardDescription>
@@ -1214,7 +1214,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 4 : Surcharges Priorité */}
         <TabsContent value="priority">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Surcharges par Priorité</CardTitle>
               <CardDescription>
@@ -1302,7 +1302,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 5 : Délais de Livraison */}
         <TabsContent value="delivery">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Délais de Livraison par Mode</CardTitle>
               <CardDescription>
@@ -1407,7 +1407,7 @@ export default function PricingConfigPage() {
 
         {/* Onglet 6 : Distances */}
         <TabsContent value="distances">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Distances entre Pays</CardTitle>
               <CardDescription>

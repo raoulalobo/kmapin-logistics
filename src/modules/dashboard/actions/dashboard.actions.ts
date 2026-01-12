@@ -14,7 +14,7 @@
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 // Import des enums depuis le client Prisma généré (valeurs runtime, pas seulement types)
-import { ShipmentStatus, InvoiceStatus, QuoteStatus } from '@/generated/prisma';
+import { ShipmentStatus, InvoiceStatus, QuoteStatus } from '@/lib/db/enums';
 
 /**
  * Type pour les statistiques du dashboard

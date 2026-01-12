@@ -166,7 +166,7 @@ export default function NewInvoicePage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nouvelle facture</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Nouvelle facture</h1>
           <p className="text-muted-foreground">
             Créez une nouvelle facture pour votre client
           </p>
@@ -177,7 +177,7 @@ export default function NewInvoicePage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Informations client et dates */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
@@ -239,7 +239,7 @@ export default function NewInvoicePage() {
           </Card>
 
           {/* Lignes de facture */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -339,7 +339,7 @@ export default function NewInvoicePage() {
           </Card>
 
           {/* Notes */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Notes (optionnel)</CardTitle>
             </CardHeader>

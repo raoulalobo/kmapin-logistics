@@ -9,6 +9,8 @@
 import { z } from 'zod';
 import { auth } from '@/lib/auth/config';
 import { redirect } from 'next/navigation';
+import { attachPickupToAccount } from '@/modules/pickups';
+import { prisma } from '@/lib/db/client';
 
 /**
  * Schéma de validation pour le login
@@ -147,6 +149,26 @@ export async function registerAction(
 
       if (!result) {
         return { error: 'Impossible de créer le compte' };
+      }
+
+      console.log('✅ [Register] Compte créé avec succès:', validatedData.email);
+
+      // US-1.3 : Rattacher automatiquement les demandes d'enlèvement orphelines
+      try {
+        // Récupérer l'utilisateur créé pour obtenir son ID
+        const user = await prisma.user.findUnique({
+          where: { email: validatedData.email },
+          select: { id: true, email: true },
+        });
+
+        if (user) {
+          console.log('🔗 [Register] Rattachement des demandes d\'enlèvement pour:', user.email);
+          const attachedCount = await attachPickupToAccount(user.id);
+          console.log(`✅ [Register] ${attachedCount} demande(s) rattachée(s) automatiquement`);
+        }
+      } catch (attachError) {
+        // Ne pas bloquer l'inscription si le rattachement échoue
+        console.error('⚠️ [Register] Erreur lors du rattachement automatique:', attachError);
       }
 
       // Rediriger vers la page de connexion

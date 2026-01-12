@@ -61,7 +61,7 @@ export default async function ClientDetailPage({
           <div className="flex items-center gap-4">
             <Buildings className="h-12 w-12 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
+              <h1 className="text-4xl font-bold tracking-tight">{client.name}</h1>
               {client.legalName && (
                 <p className="text-muted-foreground">{client.legalName}</p>
               )}
@@ -92,7 +92,7 @@ export default async function ClientDetailPage({
 
       {/* Statistiques */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Expéditions</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -105,7 +105,7 @@ export default async function ClientDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Factures</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -118,7 +118,7 @@ export default async function ClientDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Devis</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -131,7 +131,7 @@ export default async function ClientDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Documents</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -148,7 +148,7 @@ export default async function ClientDetailPage({
       {/* Informations détaillées */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Coordonnées */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Coordonnées</CardTitle>
             <CardDescription>
@@ -204,7 +204,7 @@ export default async function ClientDetailPage({
         </Card>
 
         {/* Adresse */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Adresse</CardTitle>
             <CardDescription>
@@ -230,7 +230,7 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Métadonnées */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Informations système</CardTitle>
         </CardHeader>
@@ -268,7 +268,7 @@ export default async function ClientDetailPage({
       </Card>
 
       {/* Expéditions récentes */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -315,7 +315,7 @@ export default async function ClientDetailPage({
       </Card>
 
       {/* Factures récentes */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

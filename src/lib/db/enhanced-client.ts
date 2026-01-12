@@ -28,7 +28,7 @@
 
 import { enhance } from '@zenstackhq/runtime';
 import { prisma } from './client';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '@/lib/db/enums';
 
 /**
  * Interface pour le contexte utilisateur

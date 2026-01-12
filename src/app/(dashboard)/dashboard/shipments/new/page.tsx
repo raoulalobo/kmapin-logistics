@@ -44,7 +44,7 @@ import { Separator } from '@/components/ui/separator';
 import { ClientSelect } from '@/components/forms/client-select';
 
 import { shipmentSchema, type ShipmentFormData, createShipmentAction } from '@/modules/shipments';
-import { CargoType, TransportMode, Priority } from '@/generated/prisma';
+import { CargoType, TransportMode, Priority } from '@/lib/db/enums';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 
 export default function NewShipmentPage() {
@@ -226,7 +226,7 @@ export default function NewShipmentPage() {
             Retour à la liste
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Nouvelle Expédition</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Nouvelle Expédition</h1>
         <p className="text-muted-foreground">
           Créez une nouvelle expédition pour votre client
         </p>
@@ -238,7 +238,7 @@ export default function NewShipmentPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Client */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Client</CardTitle>
               <CardDescription>
@@ -270,7 +270,7 @@ export default function NewShipmentPage() {
           </Card>
 
           {/* Origine */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Point d'origine</CardTitle>
               <CardDescription>
@@ -369,7 +369,7 @@ export default function NewShipmentPage() {
           </Card>
 
           {/* Destination */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Point de destination</CardTitle>
               <CardDescription>
@@ -468,7 +468,7 @@ export default function NewShipmentPage() {
           </Card>
 
           {/* Marchandise */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Détails de la marchandise</CardTitle>
               <CardDescription>
@@ -704,7 +704,7 @@ export default function NewShipmentPage() {
           </Card>
 
           {/* Transport et coût */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Transport et coût</CardTitle>
               <CardDescription>

@@ -14,7 +14,7 @@ import {
   calculerPrixDevisDynamic,
   type PriorityType,
 } from '../lib/pricing-calculator-dynamic';
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 
 /**
  * Type pour les résultats d'actions avec erreur ou succès

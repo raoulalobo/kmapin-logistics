@@ -36,7 +36,7 @@
  * Le maritime privilégie le poids réel (conteneurs standardisés).
  */
 
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 
 /**
  * Type de priorité pour le calcul de devis

@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { QuoteStatus, CargoType, TransportMode } from '@/generated/prisma';
+import { QuoteStatus, CargoType, TransportMode } from '@/lib/db/enums';
 
 /**
  * Schéma de validation pour la création d'un devis

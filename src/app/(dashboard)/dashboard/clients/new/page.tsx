@@ -79,7 +79,7 @@ export default function NewClientPage() {
             Retour à la liste
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Nouveau Client</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Nouveau Client</h1>
         <p className="text-muted-foreground">
           Créez un nouveau client (entreprise)
         </p>
@@ -91,7 +91,7 @@ export default function NewClientPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Informations générales */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Informations générales</CardTitle>
               <CardDescription>
@@ -152,7 +152,7 @@ export default function NewClientPage() {
           </Card>
 
           {/* Coordonnées */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Coordonnées</CardTitle>
               <CardDescription>
@@ -207,7 +207,7 @@ export default function NewClientPage() {
           </Card>
 
           {/* Adresse */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Adresse</CardTitle>
               <CardDescription>

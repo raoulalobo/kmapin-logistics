@@ -39,7 +39,7 @@ export default function SettingsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Paramètres</h1>
           <p className="text-muted-foreground">
             Chargement de vos informations...
           </p>
@@ -51,7 +51,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* En-tête de page */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Paramètres</h1>
         <p className="text-muted-foreground">
           Gérez vos préférences et votre compte
         </p>
@@ -61,7 +61,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* Section Profil utilisateur */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Section Sécurité */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary" />
@@ -170,7 +170,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Section Informations entreprise */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Buildings className="h-5 w-5 text-primary" />
@@ -250,7 +250,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Section Notifications */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />

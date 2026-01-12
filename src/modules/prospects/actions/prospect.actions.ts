@@ -373,11 +373,12 @@ export async function finalizeProspectConversionAction(
   userId: string
 ) {
   try {
-    // 1. Récupérer le prospect avec ses guest quotes
+    // 1. Récupérer le prospect avec ses guest quotes et guest pickups
     const prospect = await prisma.prospect.findUnique({
       where: { id: prospectId },
       include: {
         guestQuotes: true,
+        guestPickupRequests: true,
       },
     });
 
@@ -435,7 +436,63 @@ export async function finalizeProspectConversionAction(
       convertedQuotes.push(quote);
     }
 
-    // 4. Mettre à jour le Prospect
+    // 4. Convertir les GuestPickupRequests en PickupRequests
+    const convertedPickups = [];
+
+    for (const guestPickup of prospect.guestPickupRequests) {
+      // Créer PickupRequest authentifié
+      const pickup = await prisma.pickupRequest.create({
+        data: {
+          // Lien company et user
+          companyId: user.companyId,
+          createdById: userId,
+
+          // Adresse
+          pickupAddress: guestPickup.pickupAddress,
+          pickupCity: guestPickup.pickupCity,
+          pickupPostalCode: guestPickup.pickupPostalCode,
+          pickupCountry: guestPickup.pickupCountry,
+
+          // Contact
+          pickupContact: guestPickup.pickupContact,
+          pickupPhone: guestPickup.pickupPhone,
+
+          // Planification
+          requestedDate: guestPickup.requestedDate,
+          timeSlot: guestPickup.timeSlot,
+          pickupTime: guestPickup.pickupTime,
+
+          // Marchandise - Stockée dans specialInstructions pour compatibilité
+          specialInstructions: `Type: ${guestPickup.cargoType || 'Non spécifié'}
+Poids estimé: ${guestPickup.estimatedWeight || 'N/A'} kg
+Volume estimé: ${guestPickup.estimatedVolume || 'N/A'} m³
+Description: ${guestPickup.description || 'N/A'}
+
+${guestPickup.specialInstructions || ''}`.trim(),
+
+          accessInstructions: guestPickup.accessInstructions,
+
+          // Statut (conserver le statut actuel)
+          status: guestPickup.status,
+
+          // Pas de shipmentId (sera lié plus tard si nécessaire)
+          shipmentId: null,
+        },
+      });
+
+      // Marquer comme converti
+      await prisma.guestPickupRequest.update({
+        where: { id: guestPickup.id },
+        data: {
+          convertedToPickupId: pickup.id,
+          convertedAt: new Date(),
+        },
+      });
+
+      convertedPickups.push(pickup);
+    }
+
+    // 5. Mettre à jour le Prospect
     await prisma.prospect.update({
       where: { id: prospectId },
       data: {
@@ -444,7 +501,7 @@ export async function finalizeProspectConversionAction(
       },
     });
 
-    // 5. Déclencher l'événement Inngest
+    // 6. Déclencher l'événement Inngest
     await inngest.send({
       name: 'prospect/converted',
       data: {
@@ -458,6 +515,8 @@ export async function finalizeProspectConversionAction(
       data: {
         convertedQuotesCount: convertedQuotes.length,
         quoteIds: convertedQuotes.map(q => q.id),
+        convertedPickupsCount: convertedPickups.length,
+        pickupIds: convertedPickups.map(p => p.id),
       },
     };
   } catch (error: any) {

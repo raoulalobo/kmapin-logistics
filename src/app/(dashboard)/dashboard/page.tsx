@@ -58,13 +58,13 @@ function StatCard({
       : 'text-muted-foreground';
 
   return (
-    <Card>
+    <Card className="dashboard-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="text-base font-semibold">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-4xl font-bold">{value}</div>
         {change && (
           <p className={`text-xs ${trendColor} mt-1`}>
             {change}
@@ -166,10 +166,10 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* En-tête avec message de bienvenue */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-4xl font-bold tracking-tight">
           Bienvenue, {user?.name || 'Utilisateur'} 👋
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -233,7 +233,7 @@ export default async function DashboardPage() {
       {/* Grille de contenu principal */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Expéditions récentes */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Expéditions récentes</CardTitle>
             <CardDescription>
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Alertes et notifications */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Alertes</CardTitle>
             <CardDescription>
@@ -358,7 +358,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Actions rapides */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Actions rapides</CardTitle>
           <CardDescription>

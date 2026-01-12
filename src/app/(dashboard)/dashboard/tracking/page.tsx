@@ -62,7 +62,7 @@ export default async function TrackingPage() {
       {/* En-tête de page */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tracking en Temps Réel</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Tracking en Temps Réel</h1>
           <p className="text-muted-foreground">
             Suivez vos expéditions en cours
           </p>
@@ -77,7 +77,7 @@ export default async function TrackingPage() {
 
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Prise en charge</CardTitle>
             <CheckCircle className="h-4 w-4 text-orange-600" />
@@ -90,7 +90,7 @@ export default async function TrackingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Disponible</CardTitle>
             <House className="h-4 w-4 text-cyan-600" />
@@ -103,7 +103,7 @@ export default async function TrackingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En transit</CardTitle>
             <Truck className="h-4 w-4 text-blue-600" />
@@ -116,7 +116,7 @@ export default async function TrackingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En douane</CardTitle>
             <Package className="h-4 w-4 text-purple-600" />
@@ -129,7 +129,7 @@ export default async function TrackingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En livraison</CardTitle>
             <Truck className="h-4 w-4 text-indigo-600" />
@@ -142,7 +142,7 @@ export default async function TrackingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Livrées aujourd&apos;hui</CardTitle>
             <Package className="h-4 w-4 text-green-600" />

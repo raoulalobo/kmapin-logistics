@@ -26,7 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 import { quoteEstimateSchema, type QuoteEstimateData, type QuoteEstimateResult } from '@/modules/quotes/schemas/quote.schema';
-import { CargoType, TransportMode } from '@/generated/prisma';
+import { CargoType, TransportMode } from '@/lib/db/enums';
 import { QuoteRequestModal } from '@/components/quote-request/quote-request-modal';
 import type { QuoteDataFormData } from '@/modules/prospects';
 import { useSafeSession } from '@/lib/auth/hooks';

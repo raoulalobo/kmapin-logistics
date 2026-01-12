@@ -134,7 +134,7 @@ export default async function InvoicesPage({
       {/* En-tête de la page */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Factures</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Factures</h1>
           <p className="text-muted-foreground">
             Gérez vos factures et suivez les paiements
           </p>
@@ -152,7 +152,7 @@ export default async function InvoicesPage({
 
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total factures
@@ -167,7 +167,7 @@ export default async function InvoicesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Revenus encaissés
@@ -184,7 +184,7 @@ export default async function InvoicesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               En attente
@@ -201,7 +201,7 @@ export default async function InvoicesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               En retard
@@ -222,7 +222,7 @@ export default async function InvoicesPage({
       </div>
 
       {/* Tableau des factures */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Liste des factures</CardTitle>
           <CardDescription>

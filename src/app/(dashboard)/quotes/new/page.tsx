@@ -50,7 +50,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ClientSelect } from '@/components/forms/client-select';
 
 import { createQuoteAction, quoteSchema, type QuoteFormData } from '@/modules/quotes';
-import { CargoType, TransportMode } from '@/generated/prisma';
+import { CargoType, TransportMode } from '@/lib/db/enums';
 
 /**
  * Options de type de marchandise avec traductions

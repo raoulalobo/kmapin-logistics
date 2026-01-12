@@ -4,6 +4,9 @@
  * @module modules/tracking
  */
 
+// ============================================================================
+// Actions Authentifiées (Dashboard)
+// ============================================================================
 export {
   getActiveShipmentsWithTracking,
   getShipmentTracking,
@@ -12,3 +15,13 @@ export {
   type ShipmentWithTracking,
   type TrackingEventData,
 } from './actions/tracking.actions';
+
+// ============================================================================
+// Actions Publiques (Tracking sans authentification)
+// ============================================================================
+export {
+  getPublicTracking,
+  checkTrackingNumberExists,
+  type PublicShipmentTracking,
+  type PublicTrackingEvent,
+} from './actions/public-tracking.actions';

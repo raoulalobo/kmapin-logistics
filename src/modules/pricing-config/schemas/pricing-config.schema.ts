@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { CargoType, Priority, TransportMode } from '@/generated/prisma';
+import { CargoType, Priority, TransportMode } from '@/lib/db/enums';
 
 /**
  * Schéma pour les multiplicateurs de transport

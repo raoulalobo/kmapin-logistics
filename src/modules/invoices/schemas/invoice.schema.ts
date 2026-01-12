@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { InvoiceStatus } from '@/generated/prisma';
+import { InvoiceStatus } from '@/lib/db/enums';
 
 /**
  * Schéma pour une ligne de facture (InvoiceItem)

@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 
 /**
  * Schéma pour les filtres de tarifs standards

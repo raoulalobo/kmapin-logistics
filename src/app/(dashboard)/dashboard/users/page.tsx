@@ -83,7 +83,7 @@ export default async function UsersPage({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Utilisateurs</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Utilisateurs</h1>
           <p className="text-muted-foreground">
             Gérez les utilisateurs et leurs permissions
           </p>
@@ -119,7 +119,7 @@ export default async function UsersPage({
       {/* En-tête de page avec bouton de création */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Utilisateurs</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Utilisateurs</h1>
           <p className="text-muted-foreground">
             Gérez les utilisateurs et leurs permissions
           </p>
@@ -137,7 +137,7 @@ export default async function UsersPage({
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-4">
         {/* Total utilisateurs */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Total utilisateurs
@@ -150,7 +150,7 @@ export default async function UsersPage({
         </Card>
 
         {/* Administrateurs */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Administrateurs
@@ -163,7 +163,7 @@ export default async function UsersPage({
         </Card>
 
         {/* Actifs */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Actifs</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
@@ -176,7 +176,7 @@ export default async function UsersPage({
         </Card>
 
         {/* Désactivés */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Désactivés</CardTitle>
             <XCircle className="h-4 w-4 text-muted-foreground" />

@@ -63,11 +63,10 @@ enum ShipmentStatus {
 }
 
 enum PickupStatus {
-  REQUESTED
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELED
+  NOUVEAU
+  PRISE_EN_CHARGE
+  EFFECTUE
+  ANNULE
 }
 
 enum PickupTimeSlot {
@@ -158,6 +157,8 @@ model User {
   prospect          Prospect?
   pricingConfigs    PricingConfig[]
   createdPickups    PickupRequest[] @relation("CreatedPickups")
+  pickupLogs        PickupLog[]     @relation("PickupLogChangedBy")
+  userPickups       PickupRequest[] @relation("UserPickups")
 
   @@index([companyId])
   @@map("user")
@@ -300,46 +301,84 @@ model Shipment {
 
 model PickupRequest {
   id                  String         @id() @default(cuid())
-  shipmentId          String
-  shipment            Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  trackingNumber      String         @unique()
+  trackingToken       String         @unique() @default(cuid())
+  tokenExpiresAt      DateTime
+  userId              String?
+  user                User?          @relation("UserPickups", fields: [userId], references: [id])
+  isAttachedToAccount Boolean        @default(false)
+  contactEmail        String
+  contactPhone        String
+  contactName         String?
   pickupAddress       String
   pickupCity          String
   pickupPostalCode    String
-  pickupCountry       String
-  pickupContact       String?
-  pickupPhone         String?
+  pickupCountry       String         @default("FR")
   requestedDate       DateTime
   scheduledDate       DateTime?
+  actualPickupDate    DateTime?
   timeSlot            PickupTimeSlot @default(FLEXIBLE)
   pickupTime          String?
-  actualPickupDate    DateTime?
-  status              PickupStatus   @default(REQUESTED)
+  cargoType           String?
+  estimatedWeight     Float?
+  estimatedVolume     Float?
+  packageCount        Int?
+  description         String?        @db.Text()
+  specialInstructions String?        @db.Text()
+  accessInstructions  String?        @db.Text()
+  internalNotes       String?        @db.Text()
+  status              PickupStatus   @default(NOUVEAU)
+  cancellationReason  String?        @db.Text()
   transporterId       String?
   transporter         Transporter?   @relation(fields: [transporterId], references: [id])
   driverName          String?
   driverPhone         String?
   vehiclePlate        String?
-  specialInstructions String?
-  accessInstructions  String?
-  internalNotes       String?
-  completionNotes     String?
+  completionNotes     String?        @db.Text()
+  shipmentId          String?
+  shipment            Shipment?      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
   documents           Document[]
-  notificationSent    Boolean        @default(false)
-  reminderSent        Boolean        @default(false)
-  confirmationSent    Boolean        @default(false)
-  companyId           String
-  company             Company        @relation(fields: [companyId], references: [id])
-  createdById         String
-  createdBy           User           @relation("CreatedPickups", fields: [createdById], references: [id])
+  logs                PickupLog[]
+  companyId           String?
+  company             Company?       @relation(fields: [companyId], references: [id])
+  createdById         String?
+  createdBy           User?          @relation("CreatedPickups", fields: [createdById], references: [id])
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt()
 
-  @@index([shipmentId])
-  @@index([companyId])
+  @@index([trackingNumber])
+  @@index([trackingToken])
+  @@index([userId])
+  @@index([contactEmail])
+  @@index([contactPhone])
   @@index([status])
-  @@index([scheduledDate])
-  @@index([requestedDate])
+  @@index([companyId])
+  @@index([shipmentId])
   @@index([transporterId])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("pickup_request")
+}
+
+model PickupLog {
+  id          String        @id() @default(cuid())
+  pickupId    String
+  pickup      PickupRequest @relation(fields: [pickupId], references: [id], onDelete: Cascade)
+  oldStatus   PickupStatus?
+  newStatus   PickupStatus?
+  eventType   String
+  changedById String?
+  changedBy   User?         @relation("PickupLogChangedBy", fields: [changedById], references: [id])
+  notes       String?       @db.Text()
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([pickupId])
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([changedById])
+  @@index([pickupId, createdAt])
+  @@map("pickup_log")
 }
 
 model TrackingEvent {

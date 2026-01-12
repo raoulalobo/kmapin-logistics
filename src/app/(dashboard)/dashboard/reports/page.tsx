@@ -46,7 +46,7 @@ function KPICard({
   trendValue?: string;
 }) {
   return (
-    <Card>
+    <Card className="dashboard-card">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -81,7 +81,7 @@ export default async function ReportsPage() {
     <div className="space-y-6">
       {/* En-tête de page */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Rapports et Analytics</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Rapports et Analytics</h1>
         <p className="text-muted-foreground">
           Vue d&apos;ensemble de vos performances
         </p>
@@ -191,7 +191,7 @@ export default async function ReportsPage() {
       <div>
         <h2 className="text-xl font-semibold mb-4">Alertes</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -206,7 +206,7 @@ export default async function ReportsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <WarningCircle className="h-4 w-4 text-orange-500" />
@@ -221,7 +221,7 @@ export default async function ReportsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <WarningCircle className="h-4 w-4 text-red-500" />
@@ -245,7 +245,7 @@ export default async function ReportsPage() {
         <h2 className="text-xl font-semibold mb-4">Évolution sur 6 mois</h2>
         <div className="grid gap-6 md:grid-cols-2">
           {/* Données revenus */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ChartBar className="h-5 w-5" />
@@ -270,7 +270,7 @@ export default async function ReportsPage() {
           </Card>
 
           {/* Données expéditions */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />

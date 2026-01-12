@@ -9,7 +9,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour } from '@phosphor-icons/react';
+import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour, MagnifyingGlass } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -43,9 +43,9 @@ export function HomepageHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
-      <div className="container mx-auto flex h-20 items-center justify-between px-6">
+      <div className="max-w-7xl mx-auto flex h-20 items-center justify-between gap-4 px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-3">
+        <Link href="/" className="flex items-center space-x-3 flex-shrink-0">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#003D82]">
             <Package className="h-7 w-7 text-white" />
           </div>
@@ -53,7 +53,7 @@ export function HomepageHeader() {
         </Link>
 
         {/* Navigation principale */}
-        <nav className="hidden lg:flex items-center space-x-8 text-base">
+        <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 text-base min-w-0">
           <Link
             href="/#calculateur"
             className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
@@ -99,11 +99,21 @@ export function HomepageHeader() {
                   </div>
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/pickups" className="flex items-center gap-3 cursor-pointer">
+                <Link href="/tracking" className="flex items-center gap-3 cursor-pointer">
+                  <MagnifyingGlass className="h-5 w-5 text-[#003D82]" weight="bold" />
+                  <div>
+                    <div className="font-medium">Suivi de colis</div>
+                    <div className="text-xs text-gray-500">Suivez votre expédition</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/pickups/request" className="flex items-center gap-3 cursor-pointer">
                   <CalendarBlank className="h-5 w-5 text-[#003D82]" />
                   <div>
-                    <div className="font-medium">Réserver un enlèvement</div>
+                    <div className="font-medium">Demande d'enlèvement</div>
                     <div className="text-xs text-gray-500">Planifiez votre collecte</div>
                   </div>
                 </Link>

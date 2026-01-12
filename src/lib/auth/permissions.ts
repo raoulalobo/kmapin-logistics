@@ -7,7 +7,7 @@
  * @module lib/auth/permissions
  */
 
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '@/lib/db/enums';
 import { requireAuth } from './config';
 
 // Importer les fonctions côté client pour les utiliser dans ce fichier

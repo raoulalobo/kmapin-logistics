@@ -13,7 +13,7 @@
 
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
-import { ShipmentStatus } from '@/generated/prisma';
+import { ShipmentStatus } from '@/lib/db/enums';
 
 /**
  * Type pour une expédition avec ses événements de tracking

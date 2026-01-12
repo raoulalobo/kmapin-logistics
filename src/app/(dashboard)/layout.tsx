@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/config';
 import { Sidebar } from '@/components/layouts/sidebar';
 import { Header } from '@/components/layouts/header';
+import { DashboardOverflowFix } from '@/components/layouts/dashboard-overflow-fix';
 
 /**
  * Metadata pour les pages du dashboard
@@ -43,24 +44,29 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Sidebar - Masquée sur mobile, visible sur desktop */}
-      <aside className="hidden md:flex md:w-64 md:flex-col">
-        <Sidebar userRole={session.user.role} />
-      </aside>
+    <>
+      {/* Composant qui force le style overflow sur html/body */}
+      <DashboardOverflowFix />
 
-      {/* Contenu principal */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header avec menu mobile et infos utilisateur */}
-        <Header user={session.user} userRole={session.user.role} />
+      <div className="flex h-screen w-full max-w-full overflow-hidden" data-dashboard-layout>
+        {/* Sidebar - Masquée sur mobile, visible sur desktop */}
+        <aside className="hidden md:flex md:w-64 md:flex-col md:flex-shrink-0">
+          <Sidebar userRole={session.user.role} />
+        </aside>
 
-        {/* Zone de contenu scrollable */}
-        <main className="flex-1 overflow-y-auto bg-muted/10">
-          <div className="mx-auto max-w-7xl p-6">
-            {children}
-          </div>
-        </main>
+        {/* Contenu principal */}
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          {/* Header avec menu mobile et infos utilisateur */}
+          <Header user={session.user} userRole={session.user.role} />
+
+          {/* Zone de contenu scrollable */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-muted/10">
+            <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

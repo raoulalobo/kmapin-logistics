@@ -44,7 +44,7 @@ import { ClientSelect } from '@/components/forms/client-select';
 import { CountrySelect } from '@/components/countries/country-select';
 
 import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/quotes';
-import { CargoType, TransportMode } from '@/generated/prisma';
+import { CargoType, TransportMode } from '@/lib/db/enums';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 import { useSafeSession } from '@/lib/auth/hooks';
 
@@ -258,7 +258,7 @@ export default function NewQuotePage() {
             Retour à la liste
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Nouveau Devis</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Nouveau Devis</h1>
         <p className="text-muted-foreground">
           {isClient ? 'Créez un nouveau devis pour votre entreprise' : 'Créez un nouveau devis pour votre client'}
         </p>
@@ -271,7 +271,7 @@ export default function NewQuotePage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Client - Masqué pour les CLIENTs (ils ne peuvent créer des devis que pour leur propre company) */}
           {!isClient && (
-            <Card>
+            <Card className="dashboard-card">
               <CardHeader>
                 <CardTitle>Client</CardTitle>
                 <CardDescription>
@@ -304,7 +304,7 @@ export default function NewQuotePage() {
           )}
 
           {/* Route */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Itinéraire</CardTitle>
               <CardDescription>
@@ -361,7 +361,7 @@ export default function NewQuotePage() {
           </Card>
 
           {/* Marchandise */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Détails de la marchandise</CardTitle>
               <CardDescription>
@@ -528,7 +528,7 @@ export default function NewQuotePage() {
           </Card>
 
           {/* Coût et validité */}
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Tarification et validité</CardTitle>
               <CardDescription>

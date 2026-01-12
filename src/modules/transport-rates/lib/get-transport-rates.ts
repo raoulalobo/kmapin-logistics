@@ -9,7 +9,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/db/client';
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 
 /**
  * Interface pour un tarif de transport

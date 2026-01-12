@@ -44,7 +44,7 @@ export default async function CountriesPage() {
               <Globe className="h-6 w-6 text-[#003D82]" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestion des pays</h1>
+              <h1 className="text-4xl font-bold text-gray-900">Gestion des pays</h1>
               <p className="text-gray-600">
                 Gérez les pays d'origine et de destination pour les expéditions
               </p>
@@ -56,13 +56,13 @@ export default async function CountriesPage() {
 
       {/* Statistiques */}
       <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardDescription>Total des pays</CardDescription>
             <CardTitle className="text-3xl">{countries.length}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardDescription>Pays actifs</CardDescription>
             <CardTitle className="text-3xl">
@@ -70,7 +70,7 @@ export default async function CountriesPage() {
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardDescription>Pays inactifs</CardDescription>
             <CardTitle className="text-3xl">
@@ -81,7 +81,7 @@ export default async function CountriesPage() {
       </div>
 
       {/* Tableau des pays */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Liste des pays</CardTitle>
           <CardDescription>

@@ -13,7 +13,7 @@ import { prisma } from '@/lib/db/client';
 import { getPricingConfig } from '@/modules/pricing-config';
 import { STANDARD_RATES, type StandardRate } from '../data/standard-rates';
 import { pricingFiltersSchema, type PricingFiltersData } from '../schemas/pricing.schema';
-import { TransportMode, CargoType } from '@/generated/prisma';
+import { TransportMode, CargoType } from '@/lib/db/enums';
 
 /**
  * Récupérer les tarifs standards avec filtres optionnels

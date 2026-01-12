@@ -34,7 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getQuoteAction } from '@/modules/quotes';
-import { QuoteStatus } from '@/generated/prisma';
+import { QuoteStatus } from '@/lib/db/enums';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -147,7 +147,7 @@ export default async function QuoteDetailPage({
           <div className="flex items-center gap-4">
             {getStatusIcon(quote.status)}
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{quote.quoteNumber}</h1>
+              <h1 className="text-4xl font-bold tracking-tight">{quote.quoteNumber}</h1>
               <p className="text-muted-foreground mt-1">
                 {quote.originCountry} → {quote.destinationCountry}
               </p>
@@ -187,7 +187,7 @@ export default async function QuoteDetailPage({
       )}
 
       {/* Client */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Client</CardTitle>
         </CardHeader>
@@ -205,7 +205,7 @@ export default async function QuoteDetailPage({
       {/* Informations détaillées */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Itinéraire */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Itinéraire</CardTitle>
             <CardDescription>
@@ -232,7 +232,7 @@ export default async function QuoteDetailPage({
         </Card>
 
         {/* Validité */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Validité</CardTitle>
             <CardDescription>
@@ -274,7 +274,7 @@ export default async function QuoteDetailPage({
       </div>
 
       {/* Détails de la marchandise */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Détails de la marchandise</CardTitle>
           <CardDescription>
@@ -332,7 +332,7 @@ export default async function QuoteDetailPage({
       </Card>
 
       {/* Tarification */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Tarification</CardTitle>
           <CardDescription>
@@ -344,7 +344,7 @@ export default async function QuoteDetailPage({
             <CurrencyEur className="h-8 w-8 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium text-muted-foreground">Coût estimé</p>
-              <p className="text-3xl font-bold">
+              <p className="text-4xl font-bold">
                 {quote.estimatedCost.toFixed(2)} {quote.currency}
               </p>
             </div>
@@ -354,7 +354,7 @@ export default async function QuoteDetailPage({
 
       {/* Historique des modifications */}
       {(quote.acceptedAt || quote.rejectedAt) && (
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Historique</CardTitle>
           </CardHeader>
@@ -402,7 +402,7 @@ export default async function QuoteDetailPage({
       )}
 
       {/* Métadonnées */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Informations système</CardTitle>
         </CardHeader>

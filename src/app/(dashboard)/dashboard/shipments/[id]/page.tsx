@@ -35,7 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getShipmentAction } from '@/modules/shipments';
-import { ShipmentStatus } from '@/generated/prisma';
+import { ShipmentStatus } from '@/lib/db/enums';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -144,7 +144,7 @@ export default async function ShipmentDetailPage({
           <div className="flex items-center gap-4">
             <Package className="h-12 w-12 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{shipment.trackingNumber}</h1>
+              <h1 className="text-4xl font-bold tracking-tight">{shipment.trackingNumber}</h1>
               <p className="text-muted-foreground mt-1">
                 {shipment.originCity}, {shipment.originCountry} → {shipment.destinationCity}, {shipment.destinationCountry}
               </p>
@@ -162,7 +162,7 @@ export default async function ShipmentDetailPage({
       <Separator />
 
       {/* Client */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Client</CardTitle>
         </CardHeader>
@@ -180,7 +180,7 @@ export default async function ShipmentDetailPage({
       {/* Informations détaillées */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Origine */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Point d'origine</CardTitle>
             <CardDescription>
@@ -215,7 +215,7 @@ export default async function ShipmentDetailPage({
         </Card>
 
         {/* Destination */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Point de destination</CardTitle>
             <CardDescription>
@@ -251,7 +251,7 @@ export default async function ShipmentDetailPage({
       </div>
 
       {/* Détails de la marchandise */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Détails de la marchandise</CardTitle>
           <CardDescription>
@@ -377,7 +377,7 @@ export default async function ShipmentDetailPage({
 
       {/* Dates et coûts */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Dates</CardTitle>
           </CardHeader>
@@ -448,7 +448,7 @@ export default async function ShipmentDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Coûts</CardTitle>
           </CardHeader>
@@ -496,7 +496,7 @@ export default async function ShipmentDetailPage({
       </div>
 
       {/* Historique de tracking */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Historique de tracking</CardTitle>
           <CardDescription>
@@ -539,7 +539,7 @@ export default async function ShipmentDetailPage({
       </Card>
 
       {/* Métadonnées */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Informations système</CardTitle>
         </CardHeader>

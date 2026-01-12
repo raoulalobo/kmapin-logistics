@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getShipmentsAction } from '@/modules/shipments';
-import { ShipmentStatus } from '@/generated/prisma';
+import { ShipmentStatus } from '@/lib/db/enums';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -69,7 +69,7 @@ export default async function ShipmentsPage({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Expéditions</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Expéditions</h1>
           <p className="text-muted-foreground">
             Gérez vos expéditions et suivez leur statut
           </p>
@@ -100,7 +100,7 @@ export default async function ShipmentsPage({
       {/* En-tête de page */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Expéditions</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Expéditions</h1>
           <p className="text-muted-foreground">
             Gérez vos expéditions et suivez leur statut
           </p>
@@ -117,7 +117,7 @@ export default async function ShipmentsPage({
 
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total expéditions</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -130,7 +130,7 @@ export default async function ShipmentsPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En transit</CardTitle>
             <TrendUp className="h-4 w-4 text-muted-foreground" />
@@ -143,7 +143,7 @@ export default async function ShipmentsPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Livrées</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
@@ -156,7 +156,7 @@ export default async function ShipmentsPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">En attente</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />

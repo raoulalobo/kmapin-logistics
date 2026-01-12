@@ -52,7 +52,7 @@ export default async function ClientsPage({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Clients</h1>
           <p className="text-muted-foreground">
             Gérez vos clients et entreprises
           </p>
@@ -74,7 +74,7 @@ export default async function ClientsPage({
       {/* En-tête de page */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Clients</h1>
           <p className="text-muted-foreground">
             Gérez vos clients et entreprises
           </p>
@@ -91,7 +91,7 @@ export default async function ClientsPage({
 
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total clients</CardTitle>
             <Buildings className="h-4 w-4 text-muted-foreground" />

@@ -33,7 +33,7 @@
  *    - Prix_Final = Coût_Base × (1 + coefficient)
  */
 
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 import { getPricingConfig } from '@/modules/pricing-config';
 import { getTransportRate } from '@/modules/transport-rates';
 

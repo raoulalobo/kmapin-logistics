@@ -13,7 +13,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 import { requirePermission, hasPermission } from '@/lib/auth/permissions';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '@/lib/db/enums';
 import {
   quoteSchema,
   quoteUpdateSchema,

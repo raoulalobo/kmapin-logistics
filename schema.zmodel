@@ -87,6 +87,8 @@ model User {
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
   pricingConfigs     PricingConfig[] // Configurations de prix modifiées par cet utilisateur
   createdPickups     PickupRequest[] @relation("CreatedPickups") // Demandes d'enlèvement créées
+  pickupLogs         PickupLog[] @relation("PickupLogChangedBy") // Logs d'enlèvement effectués
+  userPickups        PickupRequest[] @relation("UserPickups") // Demandes d'enlèvement de cet utilisateur (connecté ou rattaché)
 
   // 🔐 Access Policies Zenstack
 
@@ -415,16 +417,15 @@ enum ShipmentStatus {
 // ============================================
 
 /**
- * Statuts d'une demande d'enlèvement
- * Workflow: REQUESTED → SCHEDULED → IN_PROGRESS → COMPLETED
- * Possibilité d'annulation à tout moment (CANCELED)
+ * Statuts simplifiés pour le workflow Sprint 1
+ * Workflow: NOUVEAU → PRISE_EN_CHARGE → EFFECTUE
+ * Annulation possible à tout moment: ANNULE (avec raison obligatoire)
  */
 enum PickupStatus {
-  REQUESTED      // Demande d'enlèvement créée, en attente de planification
-  SCHEDULED      // Enlèvement planifié avec date et créneau horaire
-  IN_PROGRESS    // Transporteur en route ou sur place
-  COMPLETED      // Enlèvement effectué avec succès
-  CANCELED       // Enlèvement annulé
+  NOUVEAU         // Demande créée, en attente de traitement (24-48h) - US-1.1
+  PRISE_EN_CHARGE // Agent Faso Fret a pris en charge la demande - US-3.2
+  EFFECTUE        // Enlèvement réalisé avec succès - US-3.2
+  ANNULE          // Annulé avec raison obligatoire - US-3.3
 }
 
 /**
@@ -439,101 +440,247 @@ enum PickupTimeSlot {
 }
 
 /**
- * Modèle PickupRequest (Demandes d'enlèvement)
- * Gère le workflow complet d'enlèvement de colis avec notifications et suivi
+ * Modèle PickupRequest UNIFIÉ
+ *
+ * Gère à la fois :
+ * - Demandes sans compte (US-1.1) : userId = null, accès via trackingToken
+ * - Demandes avec compte (US-1.4) : userId rempli dès la création
+ * - Rattachement automatique (US-1.3) : matching par contactEmail/contactPhone
  *
  * Access Control:
- * - ADMIN : accès complet
- * - OPERATIONS_MANAGER : peut créer, lire, modifier, assigner
- * - FINANCE_MANAGER : peut lire
- * - CLIENT : peut créer et lire ses propres demandes
- * - Transporteur assigné : peut lire et mettre à jour le statut
+ * - Lecture publique via trackingToken (72h) → US-1.2
+ * - Création publique → US-1.1
+ * - ADMIN/OPERATIONS_MANAGER : accès complet → US-3.1, US-3.2, US-3.3
+ * - User propriétaire : lecture/modification → US-2.3, US-1.4
  */
 model PickupRequest {
-  id         String   @id @default(cuid())
+  id                 String   @id @default(cuid())
 
-  // Relation avec l'expédition
-  shipmentId String
-  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  // ============================================
+  // TRACKING ET ACCÈS PUBLIC (US-1.1, US-1.2)
+  // ============================================
 
-  // Informations de collecte
-  pickupAddress    String
-  pickupCity       String
-  pickupPostalCode String
-  pickupCountry    String
-  pickupContact    String?  // Nom du contact sur place
-  pickupPhone      String?  // Téléphone du contact
+  trackingNumber     String   @unique      // Format: PK-YYYYMMDD-XXXXX
+  trackingToken      String   @unique @default(cuid())  // Token unique pour suivi public
+  tokenExpiresAt     DateTime              // Token valide 72h (US-1.2)
 
-  // Planification
-  requestedDate DateTime              // Date souhaitée par le client
-  scheduledDate DateTime?             // Date confirmée par l'opérateur
-  timeSlot      PickupTimeSlot        @default(FLEXIBLE)
-  pickupTime    String?               // Heure précise si SPECIFIC_TIME (format "HH:MM")
+  // ============================================
+  // RATTACHEMENT COMPTE (US-1.3, US-1.4)
+  // ============================================
 
-  // Réalisation
-  actualPickupDate DateTime?          // Date/heure réelle de l'enlèvement
+  userId             String?                // Null si non connecté, rempli si connecté ou après rattachement
+  user               User?    @relation("UserPickups", fields: [userId], references: [id])
+  isAttachedToAccount Boolean @default(false) // Indique si rattaché à un compte
 
-  // Statut et workflow
-  status PickupStatus @default(REQUESTED)
+  // ============================================
+  // INFORMATIONS DE CONTACT (pour matching US-1.3)
+  // ============================================
 
-  // Transporteur
-  transporterId String?
-  transporter   Transporter? @relation(fields: [transporterId], references: [id])
-  driverName    String?              // Nom du chauffeur effectuant l'enlèvement
-  driverPhone   String?              // Téléphone du chauffeur
-  vehiclePlate  String?              // Plaque d'immatriculation du véhicule
+  contactEmail       String               // Email de contact (utilisé pour matching)
+  contactPhone       String               // Téléphone de contact (utilisé pour matching)
+  contactName        String?              // Nom du contact sur place
 
-  // Instructions et notes
-  specialInstructions String?        // Instructions spéciales (code porte, étage, etc.)
-  accessInstructions  String?        // Instructions d'accès (interphone, parking, etc.)
-  internalNotes       String?        // Notes internes (visibles uniquement par l'équipe)
+  // ============================================
+  // ADRESSE D'ENLÈVEMENT
+  // ============================================
 
-  // Résultat de l'enlèvement
-  completionNotes String?            // Notes après enlèvement (état colis, incidents, etc.)
+  pickupAddress      String
+  pickupCity         String
+  pickupPostalCode   String
+  pickupCountry      String @default("FR")
 
-  // Photos (via relation Document)
-  documents Document[]               // Photos de preuve d'enlèvement, signature, etc.
+  // ============================================
+  // PLANIFICATION
+  // ============================================
 
-  // Notifications
-  notificationSent    Boolean  @default(false)  // Notification 24h envoyée ?
-  reminderSent        Boolean  @default(false)  // Rappel J-1 envoyé ?
-  confirmationSent    Boolean  @default(false)  // Confirmation d'enlèvement envoyée ?
+  requestedDate      DateTime              // Date souhaitée par le client
+  scheduledDate      DateTime?             // Date confirmée par l'agent
+  actualPickupDate   DateTime?             // Date/heure réelle de l'enlèvement (gardé pour performance)
+  timeSlot           PickupTimeSlot @default(FLEXIBLE)
+  pickupTime         String?               // Heure précise si SPECIFIC_TIME (format "HH:MM")
 
-  // Métadonnées
-  companyId   String                 // Company propriétaire (dénormalisé depuis shipment)
-  company     Company @relation(fields: [companyId], references: [id])
+  // ============================================
+  // DÉTAILS MARCHANDISE
+  // ============================================
 
-  createdById String
-  createdBy   User     @relation("CreatedPickups", fields: [createdById], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cargoType          String?               // Type de marchandise (texte libre)
+  estimatedWeight    Float?                // Poids estimé en kg
+  estimatedVolume    Float?                // Volume estimé en m³
+  packageCount       Int?                  // Nombre de colis
+  description        String?    @db.Text   // Description détaillée
 
-  // 🔐 Access Policies
+  // ============================================
+  // INSTRUCTIONS
+  // ============================================
 
-  // Les admins peuvent tout faire
+  specialInstructions String?  @db.Text   // Instructions spéciales (code porte, étage...)
+  accessInstructions  String?  @db.Text   // Instructions d'accès (interphone, parking...)
+  internalNotes       String?  @db.Text   // Notes internes (visibles uniquement par agents)
+
+  // ============================================
+  // WORKFLOW ET STATUT (US-3.2)
+  // ============================================
+
+  status             PickupStatus @default(NOUVEAU)
+
+  // ============================================
+  // ANNULATION (US-3.3)
+  // ============================================
+
+  cancellationReason String?   @db.Text   // Obligatoire si status = ANNULE (validation applicative)
+
+  // ============================================
+  // TRANSPORTEUR (optionnel, assigné par agent)
+  // ============================================
+
+  transporterId      String?
+  transporter        Transporter? @relation(fields: [transporterId], references: [id])
+  driverName         String?              // Nom du chauffeur
+  driverPhone        String?              // Téléphone du chauffeur
+  vehiclePlate       String?              // Plaque d'immatriculation
+  completionNotes    String?   @db.Text   // Notes après enlèvement
+
+  // ============================================
+  // RELATIONS
+  // ============================================
+
+  shipmentId         String?
+  shipment           Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  documents          Document[]            // Photos, signatures, preuves
+  logs               PickupLog[]           // Historique complet des événements (remplace statusHistory)
+
+  // ============================================
+  // MÉTADONNÉES
+  // ============================================
+
+  companyId          String?               // Null si non rattaché, sinon company du user
+  company            Company?  @relation(fields: [companyId], references: [id])
+
+  createdById        String?               // Null si création publique
+  createdBy          User?     @relation("CreatedPickups", fields: [createdById], references: [id])
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // ============================================
+  // 🔐 ACCESS POLICIES
+  // ============================================
+
+  // US-1.1 : Création publique (formulaire non connecté)
+  // NOTE: La lecture publique via token (US-1.2) est gérée par Server Action
+  // dédiée qui utilise le client Prisma standard (non enhanced) car le token
+  // n'est pas dans le contexte auth()
+  @@allow('create', true)
+
+  // US-3.1, US-3.2, US-3.3 : Admins et operations managers peuvent tout faire
   @@allow('all', auth().role == ADMIN)
-
-  // Les operations managers peuvent tout faire
   @@allow('all', auth().role == OPERATIONS_MANAGER)
 
   // Les finance managers peuvent lire
   @@allow('read', auth().role == FINANCE_MANAGER)
 
-  // Les clients peuvent créer des demandes et lire les leurs
-  @@allow('create', auth().companyId == companyId && auth().role == CLIENT)
-  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+  // US-1.4, US-2.3 : User propriétaire peut lire et modifier ses demandes (sauf si terminées)
+  // NOTE : Zenstack a un problème avec cette règle - voir ZENSTACK_ISSUE.md
+  // En attendant, le filtrage est fait manuellement dans les Server Actions
+  @@allow('read,update', userId != null && auth().id == userId && status != EFFECTUE && status != ANNULE)
 
-  // Le créateur peut lire et modifier ses demandes (sauf si COMPLETED ou CANCELED)
-  @@allow('read,update', auth().id == createdById && status != COMPLETED && status != CANCELED)
+  // Les clients peuvent lire les demandes de leur company
+  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
 
   @@deny('all', true)
 
-  @@index([shipmentId])
-  @@index([companyId])
-  @@index([status])
-  @@index([scheduledDate])
-  @@index([requestedDate])
-  @@index([transporterId])
+  // ============================================
+  // INDEXES (optimisation requêtes)
+  // ============================================
+
+  @@index([trackingNumber])    // Recherche par numéro (US-3.1)
+  @@index([trackingToken])     // Accès public (US-1.2)
+  @@index([userId])            // Historique user (US-2.3)
+  @@index([contactEmail])      // Matching rattachement (US-1.3)
+  @@index([contactPhone])      // Matching rattachement (US-1.3)
+  @@index([status])            // Filtres back-office (US-3.1)
+  @@index([companyId])         // Multi-tenancy
+  @@index([shipmentId])        // Relations
+  @@index([transporterId])     // Assignation transporteur
+  @@index([createdAt])         // Tri chronologique
+  @@index([status, createdAt]) // Composite pour filtres + tri optimisé
+
+  @@map("pickup_request")
+}
+
+/**
+ * Modèle PickupLog (Historique complet des événements)
+ *
+ * Enregistre TOUS les événements sur une demande d'enlèvement :
+ * - Changements de statut (US-3.2, US-3.4)
+ * - Annulations avec raison (US-3.3)
+ * - Rattachement à un compte (US-1.3)
+ * - Assignation transporteur
+ * - Modification de planification
+ *
+ * Utilisé pour :
+ * - Audit trail complet
+ * - Temps réel back-office (US-3.4)
+ * - Reconstitution de l'historique
+ *
+ * Access Control:
+ * - ADMIN/OPERATIONS_MANAGER : lecture/écriture complète
+ * - FINANCE_MANAGER : lecture seule
+ * - User propriétaire : lecture des logs de ses demandes
+ * - Lecture publique via token (pour suivi transparent)
+ */
+model PickupLog {
+  id        String   @id @default(cuid())
+
+  // Relation avec la demande d'enlèvement
+  pickupId  String
+  pickup    PickupRequest @relation(fields: [pickupId], references: [id], onDelete: Cascade)
+
+  // Changement de statut (peut être null pour d'autres types d'événements)
+  oldStatus PickupStatus?  // Null pour le premier log (création)
+  newStatus PickupStatus?  // Null si pas de changement de statut
+
+  // Type d'événement (pour différencier les logs)
+  // Valeurs: "CREATED", "STATUS_CHANGED", "ATTACHED_TO_ACCOUNT", "DRIVER_ASSIGNED", etc.
+  eventType String
+
+  // Auteur du changement
+  changedById String?      // Null si changement automatique (système)
+  changedBy   User?   @relation("PickupLogChangedBy", fields: [changedById], references: [id])
+
+  // Détails du changement
+  notes       String? @db.Text  // Raison annulation, commentaire, etc.
+  metadata    Json?             // Données additionnelles flexibles (ex: ancien/nouveau transporteur)
+
+  // Horodatage
+  createdAt   DateTime @default(now())
+
+  // 🔐 Access Policies
+
+  // Admins et operations managers peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+  @@allow('all', auth().role == OPERATIONS_MANAGER)
+
+  // Finance managers peuvent lire
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // User propriétaire peut lire les logs de ses demandes
+  @@allow('read', auth().id == pickup.userId)
+
+  // NOTE: La lecture publique via token est gérée par Server Action
+  // dédiée qui utilise le client Prisma standard (non enhanced)
+
+  @@deny('all', true)
+
+  // Indexes pour performance
+  @@index([pickupId])           // Récupérer l'historique d'une demande
+  @@index([createdAt])          // Tri chronologique
+  @@index([eventType])          // Filtrer par type d'événement
+  @@index([changedById])        // Tracer les actions d'un utilisateur
+  @@index([pickupId, createdAt]) // Composite pour historique optimisé
+
+  @@map("pickup_log")
 }
 
 // ============================================
@@ -866,6 +1013,7 @@ model GuestQuote {
   @@index([prospectId])
   @@index([quoteNumber])
 }
+
 
 // ============================================
 // NOTIFICATIONS

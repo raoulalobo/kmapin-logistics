@@ -7,7 +7,7 @@
  * @module lib/auth/permissions-client
  */
 
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '@/lib/db/enums';
 
 /**
  * Définition complète des permissions par rôle

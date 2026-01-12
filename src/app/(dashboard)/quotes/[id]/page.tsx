@@ -40,7 +40,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 import { getQuoteAction } from '@/modules/quotes';
-import { TransportMode } from '@/generated/prisma';
+import { TransportMode } from '@/lib/db/enums';
 import { QuoteActions } from '@/components/quotes/quote-actions';
 import { DocumentsSection } from '@/components/documents';
 

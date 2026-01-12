@@ -1,36 +1,55 @@
 /**
- * Module Pickups - Gestion des demandes d'enlèvement
+ * Module Pickups - Export principal
  *
- * Ce module gère le workflow complet d'enlèvement de colis :
- * - Création de demandes par les clients
- * - Planification et assignation par les opérateurs
- * - Suivi du statut en temps réel
- * - Notifications automatiques
- *
- * @module modules/pickups
+ * Centralise tous les exports du module pickups pour faciliter les imports
  */
 
-// Exports des schémas de validation
+// Schémas Zod de validation
 export {
-  pickupRequestSchema,
-  pickupRequestUpdateSchema,
-  pickupStatusUpdateSchema,
-  pickupSearchSchema,
-  assignTransporterSchema,
-  type PickupRequestFormData,
-  type PickupRequestUpdateData,
-  type PickupStatusUpdate,
-  type PickupSearchParams,
-  type AssignTransporterData,
+  createGuestPickupSchema,
+  createPickupSchema,
+  trackPickupByTokenSchema,
+  updatePickupStatusSchema,
+  cancelPickupSchema,
+  assignDriverSchema,
+  schedulePickupSchema,
+  type CreateGuestPickupInput,
+  type CreatePickupInput,
+  type TrackPickupByTokenInput,
+  type UpdatePickupStatusInput,
+  type CancelPickupInput,
+  type AssignDriverInput,
+  type SchedulePickupInput,
 } from './schemas/pickup.schema';
 
-// Exports des Server Actions
+// Server Actions
 export {
-  createPickupRequestAction,
-  updatePickupRequestAction,
-  updatePickupStatusAction,
-  listPickupRequestsAction,
-  getPickupRequestByIdAction,
-  assignTransporterAction,
-  cancelPickupRequestAction,
+  createGuestPickup,
+  createPickup,
+  trackPickupByToken,
+  attachPickupToAccount,
+  listPickups,
+  updatePickupStatus,
+  cancelPickup,
+  assignDriver,
+  schedulePickup,
+  getPickupDetails,
 } from './actions/pickup.actions';
+
+// Helpers pour les logs
+export {
+  createPickupLog,
+  logPickupCreated,
+  logStatusChanged,
+  logAttachedToAccount,
+  logDriverAssigned,
+  logDriverChanged,
+  logScheduled,
+  logRescheduled,
+  logDocumentUploaded,
+  logTokenRefreshed,
+  logSystemNote,
+  getPickupHistory,
+  getPickupLogsByEventType,
+  getLastStatusChange,
+} from './lib/pickup-log-helper';

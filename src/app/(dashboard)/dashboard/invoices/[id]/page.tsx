@@ -113,7 +113,7 @@ export default async function InvoiceDetailsPage({
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight font-mono">
+            <h1 className="text-4xl font-bold tracking-tight font-mono">
               {invoice.invoiceNumber}
             </h1>
             <p className="text-muted-foreground">
@@ -146,7 +146,7 @@ export default async function InvoiceDetailsPage({
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Informations client */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building className="h-5 w-5" />
@@ -169,7 +169,7 @@ export default async function InvoiceDetailsPage({
         </Card>
 
         {/* Dates */}
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
@@ -212,7 +212,7 @@ export default async function InvoiceDetailsPage({
       </div>
 
       {/* Lignes de facture */}
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -307,7 +307,7 @@ export default async function InvoiceDetailsPage({
 
       {/* Notes */}
       {invoice.notes && (
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Notes</CardTitle>
           </CardHeader>
@@ -327,7 +327,7 @@ export default async function InvoiceDetailsPage({
 
       {/* Liens avec devis et expédition */}
       {(invoice.quote || invoice.shipment) && (
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Documents associés</CardTitle>
           </CardHeader>

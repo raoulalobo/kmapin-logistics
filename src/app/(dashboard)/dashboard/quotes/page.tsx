@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getQuotesAction } from '@/modules/quotes';
-import { QuoteStatus } from '@/generated/prisma';
+import { QuoteStatus } from '@/lib/db/enums';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -86,7 +86,7 @@ export default async function QuotesPage({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Devis</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Devis</h1>
           <p className="text-muted-foreground">
             Gérez vos devis et estimations tarifaires
           </p>
@@ -114,7 +114,7 @@ export default async function QuotesPage({
       {/* En-tête de page */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Devis</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Devis</h1>
           <p className="text-muted-foreground">
             Gérez vos devis et estimations tarifaires
           </p>
@@ -131,7 +131,7 @@ export default async function QuotesPage({
 
       {/* Statistiques rapides */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total devis</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -144,7 +144,7 @@ export default async function QuotesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Envoyés</CardTitle>
             <TrendUp className="h-4 w-4 text-muted-foreground" />
@@ -157,7 +157,7 @@ export default async function QuotesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Acceptés</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
@@ -170,7 +170,7 @@ export default async function QuotesPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Brouillons</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
