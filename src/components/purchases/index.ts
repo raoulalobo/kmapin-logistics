@@ -10,3 +10,6 @@ export {
   PurchaseStatusBadgeSmall,
   PurchaseStatusBadgeWithIcon,
 } from './purchase-status-badge';
+
+// Formulaires
+export { PurchaseForm } from './purchase-form';
