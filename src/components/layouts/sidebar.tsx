@@ -26,6 +26,7 @@ import {
   CurrencyEur,
   House,
   Globe,
+  ShoppingCart,
 } from '@phosphor-icons/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -87,6 +88,12 @@ const navigation: NavSection[] = [
         href: '/dashboard/pickups',
         icon: Van,
         permission: 'pickups:read',
+      },
+      {
+        label: 'Achats Délégués',
+        href: '/dashboard/purchases',
+        icon: ShoppingCart,
+        permission: 'purchases:read',
       },
       {
         label: 'Tracking',
