@@ -8,7 +8,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Calculator, TrendUp } from '@phosphor-icons/react';
+import { Phone, Calculator, CalendarBlank } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
@@ -79,9 +79,9 @@ export function HeroSection() {
                     variant="outline"
                     className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
                   >
-                    <Link href="/tarifs" className="flex items-center gap-2">
-                      <TrendUp className="h-5 w-5" />
-                      Consulter les prix standard
+                    <Link href="/pickups/request" className="flex items-center gap-2">
+                      <CalendarBlank className="h-5 w-5" />
+                      Demander un enlèvement
                     </Link>
                   </Button>
                 </motion.div>
