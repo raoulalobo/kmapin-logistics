@@ -5,10 +5,13 @@
  * et redirige automatiquement les utilisateurs authentifiés vers les versions dashboard.
  *
  * Avantages du middleware :
- * - ⚡ Ultra-rapide (Edge Runtime, avant même le routing)
+ * - ⚡ Rapide (avant même le routing Next.js)
  * - 🚫 Pas de flash de contenu (redirection AVANT le rendu)
  * - 🎯 Logique centralisée (pas besoin de modifier chaque page)
  * - 🔒 Plus sécurisé (vérification côté serveur)
+ *
+ * IMPORTANT : Utilise Node.js Runtime (pas Edge) car Better Auth nécessite Prisma
+ * qui utilise des APIs Node.js complètes (setImmediate, fs, etc.)
  *
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
@@ -16,6 +19,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth/config';
+
+/**
+ * Force Node.js Runtime pour compatibilité avec Better Auth + Prisma
+ *
+ * Better Auth utilise Prisma qui nécessite des APIs Node.js complètes
+ * (setImmediate, fs, crypto natif) non disponibles dans Edge Runtime.
+ *
+ * Performance : Toujours très rapide, juste légèrement moins que Edge.
+ */
+export const runtime = 'nodejs';
 
 /**
  * Configuration du middleware
