@@ -9,7 +9,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour, MagnifyingGlass } from '@phosphor-icons/react';
+import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour, MagnifyingGlass, ShoppingCart } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -115,6 +115,15 @@ export function HomepageHeader() {
                   <div>
                     <div className="font-medium">Demande d'enlèvement</div>
                     <div className="text-xs text-gray-500">Planifiez votre collecte</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/purchases/request" className="flex items-center gap-3 cursor-pointer">
+                  <ShoppingCart className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Achat délégué</div>
+                    <div className="text-xs text-gray-500">Nous achetons pour vous</div>
                   </div>
                 </Link>
               </DropdownMenuItem>
