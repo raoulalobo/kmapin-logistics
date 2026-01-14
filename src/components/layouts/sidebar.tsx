@@ -265,7 +265,7 @@ export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
                   >
                     <Icon className={cn(
                       'h-4 w-4 transition-colors',
-                      isActive ? 'text-white' : 'text-[#003D82]'
+                      isActive ? 'text-green-500' : 'text-[#003D82]'
                     )} />
                     <span className="flex-1">{link.label}</span>
                     {link.badge && (
