@@ -263,7 +263,10 @@ export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={cn(
+                      'h-4 w-4 transition-colors',
+                      isActive ? 'text-white' : 'text-[#003D82]'
+                    )} />
                     <span className="flex-1">{link.label}</span>
                     {link.badge && (
                       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-xs">

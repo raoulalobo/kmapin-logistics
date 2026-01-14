@@ -109,7 +109,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
-            <List className="h-5 w-5" />
+            <List className="h-5 w-5 text-[#003D82]" />
             <span className="sr-only">Ouvrir le menu</span>
           </Button>
         </SheetTrigger>
@@ -131,7 +131,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
           onClick={() => router.push('/dashboard/quotes')}
           title={pendingQuotesCount > 0 ? `${pendingQuotesCount} devis en attente de validation` : 'Notifications'}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-[#003D82]" />
           {/* Badge de notification dynamique */}
           {pendingQuotesCount > 0 && (
             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
@@ -174,7 +174,7 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
             {/* Actions */}
             <DropdownMenuItem asChild>
               <a href="/dashboard/settings" className="cursor-pointer">
-                <Gear className="mr-2 h-4 w-4" />
+                <Gear className="mr-2 h-4 w-4 text-[#003D82]" />
                 <span>Paramètres</span>
               </a>
             </DropdownMenuItem>

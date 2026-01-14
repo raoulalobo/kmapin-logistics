@@ -61,7 +61,7 @@ function StatCard({
     <Card className="dashboard-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className="h-4 w-4 text-[#003D82]" />
       </CardHeader>
       <CardContent>
         <div className="text-4xl font-bold">{value}</div>
