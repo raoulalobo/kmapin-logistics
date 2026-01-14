@@ -28,6 +28,7 @@ import {
   ShieldWarning,
   Clock,
   CheckCircle,
+  User,
 } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
@@ -36,22 +37,34 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getShipmentAction } from '@/modules/shipments';
 import { ShipmentStatus } from '@/lib/db/enums';
+import { getSession } from '@/lib/auth/config';
+import { ShipmentAgentActions } from '@/components/shipments/shipment-agent-actions';
 
 /**
  * Fonction utilitaire pour formater le statut en français
+ * Labels adaptés au workflow agent :
+ * - PENDING_APPROVAL = "Enregistré" (statut initial après création depuis devis)
+ * - PICKED_UP = "Prise en charge"
+ * - IN_TRANSIT = "En cours d'acheminement"
+ * - AT_CUSTOMS = "En cours de dédouanement"
+ * - READY_FOR_PICKUP = "À retirer"
+ * - DELIVERED = "Retiré"
  */
 function formatStatus(status: ShipmentStatus): string {
   const statusMap: Record<ShipmentStatus, string> = {
     DRAFT: 'Brouillon',
-    PENDING_APPROVAL: 'En attente d\'approbation',
+    PENDING_APPROVAL: 'Enregistré',
     APPROVED: 'Approuvé',
-    PICKED_UP: 'Collecté',
-    IN_TRANSIT: 'En transit',
-    AT_CUSTOMS: 'En douane',
+    PICKED_UP: 'Prise en charge',
+    IN_TRANSIT: 'En cours d\'acheminement',
+    AT_CUSTOMS: 'En cours de dédouanement',
+    CUSTOMS_CLEARED: 'Dédouané',
     OUT_FOR_DELIVERY: 'En cours de livraison',
-    DELIVERED: 'Livré',
+    READY_FOR_PICKUP: 'À retirer',
+    DELIVERED: 'Retiré',
     CANCELLED: 'Annulé',
     ON_HOLD: 'En attente',
+    EXCEPTION: 'Exception',
   };
 
   return statusMap[status] || status;
@@ -59,11 +72,15 @@ function formatStatus(status: ShipmentStatus): string {
 
 /**
  * Fonction utilitaire pour obtenir la variante du badge selon le statut
+ * - default (vert) : DELIVERED, READY_FOR_PICKUP
+ * - destructive (rouge) : CANCELLED, EXCEPTION
+ * - secondary (gris) : DRAFT, PENDING_APPROVAL, ON_HOLD
+ * - outline (bordure) : autres statuts en cours
  */
 function getStatusVariant(status: ShipmentStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (status === 'DELIVERED') return 'default';
-  if (status === 'CANCELLED') return 'destructive';
-  if (status === 'DRAFT' || status === 'PENDING_APPROVAL') return 'secondary';
+  if (status === 'DELIVERED' || status === 'READY_FOR_PICKUP') return 'default';
+  if (status === 'CANCELLED' || status === 'EXCEPTION') return 'destructive';
+  if (status === 'DRAFT' || status === 'PENDING_APPROVAL' || status === 'ON_HOLD') return 'secondary';
   return 'outline';
 }
 
@@ -121,13 +138,20 @@ export default async function ShipmentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await getShipmentAction(id);
+
+  // Récupérer l'expédition et la session en parallèle
+  const [result, session] = await Promise.all([
+    getShipmentAction(id),
+    getSession(),
+  ]);
 
   if (!result.success || !result.data) {
     notFound();
   }
 
   const shipment = result.data;
+  const userRole = session?.user?.role || 'CLIENT';
+  const userName = session?.user?.name || session?.user?.email || 'Agent';
 
   return (
     <div className="space-y-6">
@@ -522,10 +546,19 @@ export default async function ShipmentDetailPage({
                     {event.description && (
                       <p className="text-sm mt-1">{event.description}</p>
                     )}
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
-                      <Clock className="h-3 w-3" />
-                      {new Date(event.timestamp).toLocaleString('fr-FR')}
-                    </p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {new Date(event.timestamp).toLocaleString('fr-FR')}
+                      </p>
+                      {/* Afficher le nom de l'agent qui a effectué l'action */}
+                      {event.performedBy && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {event.performedBy.name || event.performedBy.email}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -588,7 +621,35 @@ export default async function ShipmentDetailPage({
         </CardContent>
       </Card>
 
-      {/* Actions */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS WORKFLOW AGENT */}
+      {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle>Actions Agent</CardTitle>
+            <CardDescription>
+              Gestion du workflow d'expédition
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ShipmentAgentActions
+              shipmentId={shipment.id}
+              trackingNumber={shipment.trackingNumber}
+              shipmentStatus={shipment.status}
+              originCountry={shipment.originCountry}
+              destinationCountry={shipment.destinationCountry}
+              userRole={userRole}
+              agentName={userName}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS GÉNÉRALES */}
+      {/* ════════════════════════════════════════════════════════════════ */}
       {shipment.status === 'DRAFT' && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>

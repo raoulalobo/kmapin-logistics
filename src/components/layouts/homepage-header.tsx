@@ -9,7 +9,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour, MagnifyingGlass, ShoppingCart } from '@phosphor-icons/react';
+import { Package, Envelope, Globe, CircleNotch, Airplane, Boat, Calculator, CalendarBlank, CaretDown, User, SignOut, SquaresFour, MagnifyingGlass, ShoppingCart, FileText } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -95,7 +95,16 @@ export function HomepageHeader() {
                   <Calculator className="h-5 w-5 text-[#003D82]" />
                   <div>
                     <div className="font-medium">Calcul devis</div>
-                    <div className="text-xs text-gray-500">Obtenez un devis gratuit</div>
+                    <div className="text-xs text-gray-500">Estimation instantanée</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/quotes/request" className="flex items-center gap-3 cursor-pointer">
+                  <FileText className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Demande de devis</div>
+                    <div className="text-xs text-gray-500">Devis personnalisé par email</div>
                   </div>
                 </Link>
               </DropdownMenuItem>

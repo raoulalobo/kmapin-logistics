@@ -37,6 +37,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -85,6 +87,21 @@ export default function NewInvoicePage() {
       taxRate,
       discount: 0,
       items,
+    },
+  });
+
+  /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      companyId: 'Client',
+      dueDate: 'Date d\'échéance',
+      issueDate: 'Date d\'émission',
+      items: 'Lignes de facture',
+      taxRate: 'Taux de TVA',
+      discount: 'Remise',
     },
   });
 
@@ -175,7 +192,13 @@ export default function NewInvoicePage() {
 
       {/* Formulaire */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={onSubmitWithValidation(onSubmit)} className="space-y-6">
+          {/* Bannière de résumé des erreurs */}
+          <FormErrorSummary
+            errors={errorMessages}
+            title="Veuillez corriger les erreurs suivantes"
+            className="mb-6"
+          />
           {/* Informations client et dates */}
           <Card className="dashboard-card">
             <CardHeader>

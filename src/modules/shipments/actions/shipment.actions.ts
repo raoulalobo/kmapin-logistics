@@ -32,32 +32,64 @@ type ActionResult<T = void> =
 
 /**
  * Générer un numéro de tracking unique
- * Format: SHP-YYYYMMDD-XXXXX (ex: SHP-20250103-A1B2C)
+ *
+ * Format: {PAYS_DEST}-{CODE3}-{JJAA}-{SEQUENCE5}
+ * Exemple: BF-XK7-1425-00042
+ *
+ * Composants :
+ * - PAYS_DEST : Code pays destination ISO 3166-1 alpha-2 (ex: BF, FR, US)
+ * - CODE3 : Code aléatoire de 3 caractères alphanumériques pour unicité
+ * - JJAA : Jour (2 chiffres) + Année (2 derniers chiffres)
+ * - SEQUENCE5 : Numéro séquentiel sur 5 chiffres (compteur journalier)
+ *
+ * @param destinationCountry - Code pays de destination (ex: "BF", "FR")
+ * @returns Numéro de tracking unique
  */
-async function generateTrackingNumber(): Promise<string> {
+async function generateTrackingNumber(destinationCountry: string): Promise<string> {
   const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  const datePrefix = `${year}${month}${day}`;
+  const year = String(date.getFullYear()).slice(-2); // 2 derniers chiffres
+  const dateCode = `${day}${year}`; // Format: JJAA (ex: "1425" pour 14 janvier 2025)
 
-  // Générer un code aléatoire de 5 caractères
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // Générer un code aléatoire de 3 caractères pour garantir l'unicité
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sans I, O, 0, 1 pour éviter confusion
   let randomCode = '';
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     randomCode += chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
-  const trackingNumber = `SHP-${datePrefix}-${randomCode}`;
+  // Compter le nombre d'expéditions créées aujourd'hui pour ce pays
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
 
-  // Vérifier que le numéro n'existe pas déjà
+  const count = await prisma.shipment.count({
+    where: {
+      destinationCountry: destinationCountry.toUpperCase(),
+      createdAt: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+  });
+
+  // Formater le numéro séquentiel sur 5 chiffres
+  const sequence = String(count + 1).padStart(5, '0');
+
+  // Construire le numéro de tracking final
+  // Format: PAYS-CODE-JJAA-SEQUENCE (ex: BF-XK7-1425-00001)
+  const countryCode = destinationCountry.toUpperCase().slice(0, 2);
+  const trackingNumber = `${countryCode}-${randomCode}-${dateCode}-${sequence}`;
+
+  // Vérifier que le numéro n'existe pas déjà (très rare grâce au code aléatoire)
   const existing = await prisma.shipment.findUnique({
     where: { trackingNumber },
   });
 
-  // Si le numéro existe déjà (très rare), régénérer
+  // Si le numéro existe déjà, régénérer avec un nouveau code aléatoire
   if (existing) {
-    return generateTrackingNumber();
+    return generateTrackingNumber(destinationCountry);
   }
 
   return trackingNumber;
@@ -134,8 +166,8 @@ export async function createShipmentAction(
       };
     }
 
-    // Générer un numéro de tracking unique
-    const trackingNumber = await generateTrackingNumber();
+    // Générer un numéro de tracking unique avec le pays de destination
+    const trackingNumber = await generateTrackingNumber(validatedData.destinationCountry);
 
     // Créer l'expédition
     const shipment = await prisma.shipment.create({
@@ -473,6 +505,16 @@ export async function getShipmentAction(id: string) {
         invoice: true,
         trackingEvents: {
           orderBy: { timestamp: 'desc' },
+          include: {
+            // Inclure les informations de l'agent qui a effectué l'action
+            performedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
         },
       },
     });
@@ -772,9 +814,12 @@ export async function deleteShipmentAction(id: string): Promise<ActionResult> {
  * Change le statut d'une expédition et crée un événement de tracking associé
  * Utilisé pour les transitions d'état importantes (approuver, collecter, livrer, etc.)
  *
+ * L'action enregistre automatiquement l'agent qui effectue le changement de statut
+ * dans le TrackingEvent (champ performedById).
+ *
  * @param id - ID de l'expédition
  * @param statusData - Nouveau statut et notes optionnelles
- * @returns Résultat de la mise à jour
+ * @returns Résultat de la mise à jour avec l'ID de l'expédition
  *
  * @permissions 'shipments:update' - ADMIN, OPERATIONS_MANAGER
  */
@@ -784,10 +829,21 @@ export async function updateShipmentStatusAction(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     /**
-     * Vérifier l'authentification et les permissions
-     * Permission requise: 'shipments:update'
+     * Vérifier l'authentification et récupérer les infos de l'agent
+     * La session contient l'ID, le nom et le rôle de l'utilisateur
      */
-    await requirePermission('shipments:update');
+    const session = await requireAuth();
+    const agentId = session.user.id;
+    const agentRole = session.user.role as UserRole;
+
+    // Vérifier les permissions (ADMIN ou OPERATIONS_MANAGER uniquement)
+    const canUpdateShipments = agentRole === 'ADMIN' || agentRole === 'OPERATIONS_MANAGER';
+    if (!canUpdateShipments) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions nécessaires pour modifier le statut',
+      };
+    }
 
     // Vérifier que l'expédition existe
     const shipment = await prisma.shipment.findUnique({
@@ -803,24 +859,25 @@ export async function updateShipmentStatusAction(
 
     // Mettre à jour le statut et créer un événement de tracking
     await prisma.$transaction(async (tx) => {
-      // Mettre à jour le statut
+      // Mettre à jour le statut de l'expédition
       await tx.shipment.update({
         where: { id },
         data: { status: validatedData.status },
       });
 
-      // Créer un événement de tracking
+      // Créer un événement de tracking avec l'ID de l'agent
       await tx.trackingEvent.create({
         data: {
           shipmentId: id,
           status: validatedData.status,
           location: 'Mise à jour manuelle',
           description: validatedData.notes || `Statut changé en ${validatedData.status}`,
+          performedById: agentId, // Enregistrer l'agent qui a effectué l'action
         },
       });
     });
 
-    // Revalider les pages
+    // Revalider les pages pour mettre à jour l'affichage
     revalidatePath('/dashboard/shipments');
     revalidatePath(`/dashboard/shipments/${id}`);
 

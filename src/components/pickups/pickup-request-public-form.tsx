@@ -24,6 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -41,6 +43,25 @@ export function PickupRequestPublicForm() {
       prospectName: session?.user?.name || '',
       pickupCountry: 'FR',
       timeSlot: PickupTimeSlot.FLEXIBLE,
+    },
+  });
+
+  /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      prospectEmail: 'Email',
+      prospectPhone: 'Téléphone',
+      prospectName: 'Nom',
+      pickupAddress: 'Adresse d\'enlèvement',
+      pickupCity: 'Ville',
+      pickupPostalCode: 'Code postal',
+      pickupCountry: 'Pays',
+      requestedDate: 'Date souhaitée',
+      timeSlot: 'Créneau horaire',
+      description: 'Description',
     },
   });
 
@@ -93,7 +114,13 @@ export function PickupRequestPublicForm() {
 
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={onSubmitWithValidation(onSubmit)} className="space-y-8">
+            {/* Bannière de résumé des erreurs */}
+            <FormErrorSummary
+              errors={errorMessages}
+              title="Veuillez corriger les erreurs suivantes"
+              className="mb-6"
+            />
 
             {/* Section 1: Vos Coordonnées */}
             <div className="space-y-4">

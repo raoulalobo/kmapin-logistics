@@ -12,7 +12,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock } from '@phosphor-icons/react/dist/ssr';
+import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Play } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,27 @@ import { getQuotesAction } from '@/modules/quotes';
 import { QuoteStatus } from '@/lib/db/enums';
 
 /**
+ * Options de filtre par statut pour l'interface
+ * Chaque option contient le statut, le label, la variante de badge et une icône
+ */
+const STATUS_FILTERS: Array<{
+  status: QuoteStatus | 'ALL';
+  label: string;
+  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+}> = [
+  { status: 'ALL', label: 'Tous', variant: 'outline' },
+  { status: 'DRAFT', label: 'Brouillons', variant: 'secondary' },
+  { status: 'SENT', label: 'Envoyés', variant: 'outline' },
+  { status: 'ACCEPTED', label: 'Acceptés', variant: 'default' },
+  { status: 'IN_TREATMENT', label: 'En traitement', variant: 'outline' },
+  { status: 'VALIDATED', label: 'Validés', variant: 'default' },
+  { status: 'REJECTED', label: 'Rejetés', variant: 'destructive' },
+  { status: 'CANCELLED', label: 'Annulés', variant: 'destructive' },
+];
+
+/**
  * Fonction utilitaire pour formater le statut en français
+ * Inclut tous les statuts du workflow agent
  */
 function formatStatus(status: QuoteStatus): string {
   const statusMap: Record<QuoteStatus, string> = {
@@ -30,6 +50,8 @@ function formatStatus(status: QuoteStatus): string {
     ACCEPTED: 'Accepté',
     REJECTED: 'Rejeté',
     EXPIRED: 'Expiré',
+    IN_TREATMENT: 'En traitement',
+    VALIDATED: 'Validé',
     CANCELLED: 'Annulé',
   };
 
@@ -38,11 +60,13 @@ function formatStatus(status: QuoteStatus): string {
 
 /**
  * Fonction utilitaire pour obtenir la variante du badge selon le statut
+ * Inclut tous les statuts du workflow agent
  */
 function getStatusVariant(status: QuoteStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (status === 'ACCEPTED') return 'default';
+  if (status === 'ACCEPTED' || status === 'VALIDATED') return 'default';
   if (status === 'REJECTED' || status === 'CANCELLED') return 'destructive';
   if (status === 'DRAFT' || status === 'EXPIRED') return 'secondary';
+  if (status === 'IN_TREATMENT') return 'outline';
   return 'outline';
 }
 
@@ -184,6 +208,68 @@ export default async function QuotesPage({
         </Card>
       </div>
 
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* FILTRES PAR STATUT */}
+      {/* Permet à l'agent de filtrer la liste par statut */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <Card className="dashboard-card">
+        <CardContent className="py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Funnel className="h-4 w-4" />
+              <span>Filtrer par statut :</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {STATUS_FILTERS.map((filter) => {
+                // Déterminer si ce filtre est actif
+                const isActive =
+                  (filter.status === 'ALL' && !params.status) ||
+                  params.status === filter.status;
+
+                // Construire l'URL du filtre
+                const filterUrl =
+                  filter.status === 'ALL'
+                    ? `/dashboard/quotes${params.search ? `?search=${params.search}` : ''}`
+                    : `/dashboard/quotes?status=${filter.status}${params.search ? `&search=${params.search}` : ''}`;
+
+                return (
+                  <Link key={filter.status} href={filterUrl}>
+                    <Badge
+                      variant={isActive ? 'default' : filter.variant}
+                      className={`cursor-pointer transition-all hover:scale-105 ${
+                        isActive
+                          ? 'ring-2 ring-primary ring-offset-2'
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {filter.label}
+                    </Badge>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Indication du filtre actif */}
+          {params.status && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                Affichage des devis avec statut :{' '}
+                <span className="font-medium text-foreground">
+                  {formatStatus(params.status as QuoteStatus)}
+                </span>
+              </span>
+              <Link
+                href={`/dashboard/quotes${params.search ? `?search=${params.search}` : ''}`}
+                className="text-primary hover:underline"
+              >
+                (Réinitialiser)
+              </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Liste des devis */}
       {quotes.length === 0 ? (
         <Card className="p-12">
@@ -191,16 +277,27 @@ export default async function QuotesPage({
             <FileText className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucun devis trouvé</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {params.search
-                ? 'Essayez de modifier vos critères de recherche'
-                : 'Commencez par créer votre premier devis'}
+              {params.status
+                ? `Aucun devis avec le statut "${formatStatus(params.status as QuoteStatus)}"`
+                : params.search
+                  ? 'Essayez de modifier vos critères de recherche'
+                  : 'Commencez par créer votre premier devis'}
             </p>
-            <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Link href="/dashboard/quotes/new">
-                <Plus className="h-5 w-5" weight="fill" />
-                Créer un devis
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              {params.status && (
+                <Button variant="outline" asChild>
+                  <Link href={`/dashboard/quotes${params.search ? `?search=${params.search}` : ''}`}>
+                    Voir tous les devis
+                  </Link>
+                </Button>
+              )}
+              <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                <Link href="/dashboard/quotes/new">
+                  <Plus className="h-5 w-5" weight="fill" />
+                  Créer un devis
+                </Link>
+              </Button>
+            </div>
           </div>
         </Card>
       ) : (

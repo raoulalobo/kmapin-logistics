@@ -42,6 +42,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ClientSelect } from '@/components/forms/client-select';
 import { CountrySelect } from '@/components/countries/country-select';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 
 import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/quotes';
 import { CargoType, TransportMode } from '@/lib/db/enums';
@@ -84,6 +86,28 @@ export default function NewQuotePage() {
       currency: 'EUR',
       validUntil: getDefaultValidUntil(),
       status: 'DRAFT',
+    },
+  });
+
+  /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      companyId: 'Client',
+      originCountry: 'Pays d\'origine',
+      destinationCountry: 'Pays de destination',
+      cargoType: 'Type de marchandise',
+      weight: 'Poids',
+      length: 'Longueur',
+      width: 'Largeur',
+      height: 'Hauteur',
+      transportMode: 'Mode de transport',
+      estimatedCost: 'Coût estimé',
+      currency: 'Devise',
+      validUntil: 'Date de validité',
+      status: 'Statut',
     },
   });
 
@@ -268,7 +292,14 @@ export default function NewQuotePage() {
 
       {/* Formulaire */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={onSubmitWithValidation(onSubmit)} className="space-y-6">
+          {/* Bannière de résumé des erreurs */}
+          <FormErrorSummary
+            errors={errorMessages}
+            title="Veuillez corriger les erreurs suivantes"
+            className="mb-6"
+          />
+
           {/* Client - Masqué pour les CLIENTs (ils ne peuvent créer des devis que pour leur propre company) */}
           {!isClient && (
             <Card className="dashboard-card">

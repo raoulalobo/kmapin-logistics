@@ -35,9 +35,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getQuoteAction } from '@/modules/quotes';
 import { QuoteStatus } from '@/lib/db/enums';
+import { getSession } from '@/lib/auth/config';
+import { QuoteAgentActions } from '@/components/quotes/quote-agent-actions';
 
 /**
  * Fonction utilitaire pour formater le statut en français
+ * Inclut les nouveaux statuts du workflow agent
  */
 function formatStatus(status: QuoteStatus): string {
   const statusMap: Record<QuoteStatus, string> = {
@@ -46,6 +49,8 @@ function formatStatus(status: QuoteStatus): string {
     ACCEPTED: 'Accepté',
     REJECTED: 'Rejeté',
     EXPIRED: 'Expiré',
+    IN_TREATMENT: 'En traitement',
+    VALIDATED: 'Validé',
     CANCELLED: 'Annulé',
   };
 
@@ -54,11 +59,13 @@ function formatStatus(status: QuoteStatus): string {
 
 /**
  * Fonction utilitaire pour obtenir la variante du badge selon le statut
+ * Inclut les nouveaux statuts du workflow agent
  */
 function getStatusVariant(status: QuoteStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (status === 'ACCEPTED') return 'default';
+  if (status === 'ACCEPTED' || status === 'VALIDATED') return 'default';
   if (status === 'REJECTED' || status === 'CANCELLED') return 'destructive';
   if (status === 'DRAFT' || status === 'EXPIRED') return 'secondary';
+  if (status === 'IN_TREATMENT') return 'outline'; // Bleu/outline pour "en cours"
   return 'outline';
 }
 
@@ -99,17 +106,24 @@ function formatTransportMode(mode: string): string {
 
 /**
  * Fonction utilitaire pour obtenir l'icône selon le statut
+ * Inclut les nouveaux statuts du workflow agent
  */
 function getStatusIcon(status: QuoteStatus) {
   switch (status) {
     case 'ACCEPTED':
       return <CheckCircle className="h-5 w-5 text-green-600" />;
+    case 'VALIDATED':
+      return <CheckCircle className="h-5 w-5 text-emerald-600" />;
     case 'REJECTED':
+      return <XCircle className="h-5 w-5 text-red-600" />;
+    case 'CANCELLED':
       return <XCircle className="h-5 w-5 text-red-600" />;
     case 'EXPIRED':
       return <WarningCircle className="h-5 w-5 text-orange-600" />;
     case 'SENT':
       return <Clock className="h-5 w-5 text-blue-600" />;
+    case 'IN_TREATMENT':
+      return <Clock className="h-5 w-5 text-primary" />;
     default:
       return <FileText className="h-5 w-5 text-muted-foreground" />;
   }
@@ -121,13 +135,19 @@ export default async function QuoteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const result = await getQuoteAction(id);
+
+  // Récupérer le devis et la session en parallèle
+  const [result, session] = await Promise.all([
+    getQuoteAction(id),
+    getSession(),
+  ]);
 
   if (!result.success || !result.data) {
     notFound();
   }
 
   const quote = result.data;
+  const userRole = session?.user?.role || 'CLIENT';
 
   // Vérifier si le devis est expiré
   const isExpired = new Date(quote.validUntil) < new Date();
@@ -451,8 +471,38 @@ export default async function QuoteDetailPage({
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="flex gap-2">
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS WORKFLOW AGENT */}
+      {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle>Actions Agent</CardTitle>
+            <CardDescription>
+              Traitement et gestion du devis
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QuoteAgentActions
+              quoteId={quote.id}
+              quoteNumber={quote.quoteNumber}
+              quoteStatus={quote.status}
+              estimatedCost={quote.estimatedCost}
+              currency={quote.currency}
+              originCountry={quote.originCountry}
+              destinationCountry={quote.destinationCountry}
+              userRole={userRole}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS GÉNÉRALES */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <div className="flex gap-2 flex-wrap">
+        {/* Modifier - visible pour DRAFT et SENT */}
         {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/quotes/${quote.id}/edit`}>
@@ -462,6 +512,7 @@ export default async function QuoteDetailPage({
           </Button>
         )}
 
+        {/* Supprimer - visible pour DRAFT uniquement */}
         {quote.status === 'DRAFT' && (
           <Button variant="destructive" size="sm">
             <Trash className="mr-2 h-4 w-4" />
@@ -469,33 +520,12 @@ export default async function QuoteDetailPage({
           </Button>
         )}
 
-        {quote.status === 'SENT' && !isExpired && (
-          <>
-            <Button variant="default" size="sm">
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Accepter
-            </Button>
-            <Button variant="destructive" size="sm">
-              <XCircle className="mr-2 h-4 w-4" />
-              Rejeter
-            </Button>
-          </>
-        )}
-
-        {quote.status === 'ACCEPTED' && !quote.shipment && (
-          <Button variant="default" size="sm" asChild>
-            <Link href={`/dashboard/shipments/new?quoteId=${quote.id}`}>
-              <FileText className="mr-2 h-4 w-4" />
-              Créer une expédition
-            </Link>
-          </Button>
-        )}
-
+        {/* Voir l'expédition - visible si une expédition est liée */}
         {quote.shipment && (
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/shipments/${quote.shipment.id}`}>
               <FileText className="mr-2 h-4 w-4" />
-              Voir l'expédition
+              Voir l'expédition ({quote.shipment.trackingNumber})
             </Link>
           </Button>
         )}

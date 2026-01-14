@@ -47,6 +47,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useCountries } from '@/modules/countries';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 import {
   User,
   MapPin,
@@ -190,6 +192,32 @@ export function PickupForm({
     },
   });
 
+  /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      contactEmail: 'Email',
+      contactPhone: 'Téléphone',
+      contactName: 'Nom du contact',
+      pickupAddress: 'Adresse',
+      pickupCity: 'Ville',
+      pickupPostalCode: 'Code postal',
+      pickupCountry: 'Pays',
+      requestedDate: 'Date souhaitée',
+      timeSlot: 'Créneau horaire',
+      pickupTime: 'Heure précise',
+      cargoType: 'Type de marchandise',
+      estimatedWeight: 'Poids estimé',
+      estimatedVolume: 'Volume estimé',
+      packageCount: 'Nombre de colis',
+      description: 'Description',
+      specialInstructions: 'Instructions spéciales',
+      accessInstructions: 'Instructions d\'accès',
+    },
+  });
+
   // Surveiller le créneau horaire pour afficher/masquer le champ d'heure
   const timeSlot = form.watch('timeSlot');
 
@@ -247,12 +275,16 @@ export function PickupForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={(e) => {
-          console.log('📝 [PickupForm] Soumission du formulaire déclenchée');
-          form.handleSubmit(handleSubmit)(e);
-        }}
+        onSubmit={onSubmitWithValidation(handleSubmit)}
         className={cn('space-y-6', className)}
       >
+        {/* Bannière de résumé des erreurs */}
+        <FormErrorSummary
+          errors={errorMessages}
+          title="Veuillez corriger les erreurs suivantes"
+          className="mb-6"
+        />
+
         {/* Section Contact */}
         <Card>
           <CardHeader>

@@ -29,6 +29,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -88,6 +90,29 @@ export default function NewShipmentPage() {
       requestedPickupDate: null,
       estimatedDeliveryDate: null,
       estimatedCost: 0,
+    },
+  });
+
+  /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      companyId: 'Client',
+      originAddress: 'Adresse d\'origine',
+      originCity: 'Ville d\'origine',
+      originPostalCode: 'Code postal d\'origine',
+      originCountry: 'Pays d\'origine',
+      destinationAddress: 'Adresse de destination',
+      destinationCity: 'Ville de destination',
+      destinationPostalCode: 'Code postal de destination',
+      destinationCountry: 'Pays de destination',
+      cargoType: 'Type de marchandise',
+      weight: 'Poids',
+      packageCount: 'Nombre de colis',
+      description: 'Description',
+      transportMode: 'Mode de transport',
     },
   });
 
@@ -236,7 +261,13 @@ export default function NewShipmentPage() {
 
       {/* Formulaire */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={onSubmitWithValidation(onSubmit)} className="space-y-6">
+          {/* Bannière de résumé des erreurs */}
+          <FormErrorSummary
+            errors={errorMessages}
+            title="Veuillez corriger les erreurs suivantes"
+            className="mb-6"
+          />
           {/* Client */}
           <Card className="dashboard-card">
             <CardHeader>

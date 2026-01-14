@@ -29,6 +29,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FormErrorSummary } from '@/components/ui/form-error-summary';
+import { useFormValidation } from '@/hooks/use-form-validation';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -174,6 +176,33 @@ export function PurchaseForm({
   });
 
   /**
+   * Hook de validation améliorée (toast + scroll + focus)
+   */
+  const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
+    toastTitle: 'Formulaire incomplet',
+    fieldLabels: {
+      contactEmail: 'Email',
+      contactPhone: 'Téléphone',
+      contactName: 'Nom',
+      productName: 'Nom du produit',
+      productUrl: 'URL du produit',
+      quantity: 'Quantité',
+      estimatedPrice: 'Prix estimé',
+      maxBudget: 'Budget maximum',
+      productDescription: 'Description du produit',
+      deliveryAddress: 'Adresse de livraison',
+      deliveryCity: 'Ville de livraison',
+      deliveryPostalCode: 'Code postal',
+      deliveryCountry: 'Pays de livraison',
+      requestedDate: 'Date souhaitée',
+      deliveryMode: 'Mode de livraison',
+      specialInstructions: 'Instructions spéciales',
+      acceptedTerms: 'Conditions générales',
+      acceptedPricing: 'Conditions tarifaires',
+    },
+  });
+
+  /**
    * Handler de soumission
    */
   const handleSubmit = async (data: CreateGuestPurchaseInput | CreatePurchaseInput) => {
@@ -218,7 +247,14 @@ export function PurchaseForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className={cn('space-y-8', className)}>
+      <form onSubmit={onSubmitWithValidation(handleSubmit)} className={cn('space-y-8', className)}>
+        {/* Bannière de résumé des erreurs */}
+        <FormErrorSummary
+          errors={errorMessages}
+          title="Veuillez corriger les erreurs suivantes"
+          className="mb-6"
+        />
+
         {/* Section 1 : Contact */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">

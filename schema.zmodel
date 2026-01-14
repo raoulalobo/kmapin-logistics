@@ -82,7 +82,10 @@ model User {
 
   // Relations
   createdShipments   Shipment[] @relation("CreatedBy")
+  userShipments      Shipment[] @relation("UserShipments") // Expéditions de cet utilisateur (propriété hybride)
   createdInvoices    Invoice[]  @relation("CreatedBy")
+  userInvoices       Invoice[]  @relation("UserInvoices")  // Factures de cet utilisateur (propriété hybride)
+  userDocuments      Document[] @relation("UserDocuments")  // Documents de cet utilisateur (propriété hybride)
   uploadedDocuments  Document[] @relation("UploadedDocuments")
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
   pricingConfigs     PricingConfig[] // Configurations de prix modifiées par cet utilisateur
@@ -93,6 +96,14 @@ model User {
   createdPurchases   PurchaseRequest[] @relation("CreatedPurchases") // Demandes d'achat créées
   purchaseLogs       PurchaseLog[] @relation("PurchaseLogChangedBy") // Logs d'achat effectués
   userPurchases      PurchaseRequest[] @relation("UserPurchases") // Demandes d'achat de cet utilisateur (connecté ou rattaché)
+
+  treatedQuotes      Quote[] @relation("QuoteTreatmentAgent") // Devis traités par cet agent
+
+  performedTrackingEvents TrackingEvent[] @relation("PerformedTrackingEvents") // Événements de tracking effectués par cet agent
+
+  // Relations pour les devis (pattern création sans compte)
+  userQuotes         Quote[] @relation("UserQuotes")    // Devis rattachés à cet utilisateur
+  createdQuotes      Quote[] @relation("CreatedQuotes") // Devis créés par cet utilisateur
 
   // 🔐 Access Policies Zenstack
 
@@ -282,13 +293,29 @@ model Company {
  * - OPERATIONS_MANAGER : peut créer, lire, modifier toutes les expéditions
  * - FINANCE_MANAGER : peut lire toutes les expéditions
  * - CLIENT : peut lire uniquement les expéditions de sa company
+ * - PARTICULIER : peut lire ses propres expéditions (via userId direct)
  * - Le créateur peut modifier tant que status != DELIVERED
+ *
+ * PROPRIÉTÉ HYBRIDE :
+ * - Si companyId != null : l'expédition appartient à la company
+ * - Si companyId == null : l'expédition appartient directement au userId
  */
 model Shipment {
   id             String   @id @default(cuid())
   trackingNumber String   @unique
-  companyId      String
-  company        Company  @relation(fields: [companyId], references: [id])
+
+  // ════════════════════════════════════════════
+  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // ════════════════════════════════════════════
+
+  // Company (NULL si particulier sans entreprise)
+  companyId      String?
+  company        Company?  @relation(fields: [companyId], references: [id])
+
+  // Propriétaire direct (pour particuliers sans company)
+  // Si companyId est NULL, userId détermine le propriétaire
+  userId         String?
+  user           User?     @relation("UserShipments", fields: [userId], references: [id])
 
   // Origine & Destination
   originAddress      String
@@ -351,6 +378,7 @@ model Shipment {
   trackingEvents TrackingEvent[]
   documents      Document[]
   pickupRequests PickupRequest[]
+  fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition
 
   // 🔐 Access Policies
 
@@ -363,8 +391,13 @@ model Shipment {
   // Les finance managers peuvent lire toutes les expéditions
   @@allow('read', auth().role == FINANCE_MANAGER)
 
+  // PROPRIÉTÉ HYBRIDE - Lecture par company
   // Les clients peuvent lire les expéditions de leur company
-  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+  @@allow('read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
+
+  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
+  // Le propriétaire direct peut lire et modifier ses expéditions
+  @@allow('read,update', companyId == null && userId != null && auth().id == userId && status != DELIVERED)
 
   // Le créateur peut modifier tant que status != DELIVERED
   @@allow('read,update', auth().id == createdById && status != DELIVERED)
@@ -372,6 +405,7 @@ model Shipment {
   @@deny('all', true)
 
   @@index([companyId])
+  @@index([userId])           // Index pour propriété hybride
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
@@ -979,6 +1013,10 @@ model TrackingEvent {
   timestamp   DateTime       @default(now())
   metadata    Json?
 
+  // Agent qui a effectué l'action (optionnel pour rétrocompatibilité)
+  performedById String?
+  performedBy   User?   @relation("PerformedTrackingEvents", fields: [performedById], references: [id])
+
   // 🔐 Access Policies
 
   // Les admins peuvent tout faire
@@ -1006,13 +1044,28 @@ model TrackingEvent {
  * - ADMIN/FINANCE_MANAGER : accès complet
  * - OPERATIONS_MANAGER : peut lire toutes les factures
  * - CLIENT : peut lire les factures de sa company
+ * - PARTICULIER : peut lire ses propres factures (via userId direct)
  * - Les factures PAID ne peuvent plus être modifiées
+ *
+ * PROPRIÉTÉ HYBRIDE :
+ * - Si companyId != null : la facture appartient à la company
+ * - Si companyId == null : la facture appartient directement au userId
  */
 model Invoice {
   id            String        @id @default(cuid())
   invoiceNumber String        @unique
-  companyId     String
-  company       Company       @relation(fields: [companyId], references: [id])
+
+  // ════════════════════════════════════════════
+  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // ════════════════════════════════════════════
+
+  // Company (NULL si particulier sans entreprise)
+  companyId     String?
+  company       Company?      @relation(fields: [companyId], references: [id])
+
+  // Propriétaire direct (pour particuliers sans company)
+  userId        String?
+  user          User?         @relation("UserInvoices", fields: [userId], references: [id])
   issueDate     DateTime      @default(now())
   dueDate       DateTime
   paidDate      DateTime?
@@ -1043,8 +1096,13 @@ model Invoice {
   // Les operations managers peuvent lire
   @@allow('read', auth().role == OPERATIONS_MANAGER)
 
+  // PROPRIÉTÉ HYBRIDE - Lecture par company
   // Les clients peuvent lire les factures de leur company
-  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+  @@allow('read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
+
+  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
+  // Le propriétaire direct peut lire ses factures
+  @@allow('read', companyId == null && userId != null && auth().id == userId)
 
   // Les factures payées ne peuvent plus être modifiées (règle de sécurité)
   @@deny('update,delete', status == PAID)
@@ -1052,6 +1110,7 @@ model Invoice {
   @@deny('all', true)
 
   @@index([companyId])
+  @@index([userId])           // Index pour propriété hybride
   @@index([status])
   @@index([invoiceNumber])
 }
@@ -1082,7 +1141,13 @@ model InvoiceItem {
 
   @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
   @@allow('read', auth().role == OPERATIONS_MANAGER)
-  @@allow('read', auth().companyId == invoice.companyId)
+
+  // PROPRIÉTÉ HYBRIDE - Lecture par company
+  @@allow('read', invoice.companyId != null && auth().companyId == invoice.companyId)
+
+  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
+  @@allow('read', invoice.companyId == null && invoice.userId != null && auth().id == invoice.userId)
+
   @@deny('all', invoice.status == PAID) // Ne peut pas modifier si facture payée
   @@deny('all', true)
 
@@ -1102,8 +1167,35 @@ model InvoiceItem {
 model Quote {
   id                 String          @id @default(cuid())
   quoteNumber        String          @unique
-  companyId          String
-  company            Company         @relation(fields: [companyId], references: [id])
+
+  // ════════════════════════════════════════════
+  // CHAMPS POUR CRÉATION SANS COMPTE (Pattern PickupRequest)
+  // ════════════════════════════════════════════
+
+  // Token unique pour suivi public (validité 72h)
+  trackingToken      String          @unique @default(cuid())
+  tokenExpiresAt     DateTime                              // Expire après 72h
+
+  // Lien vers l'utilisateur (NULL si créé sans compte)
+  userId             String?
+  user               User?           @relation("UserQuotes", fields: [userId], references: [id])
+
+  // Flag indiquant si le devis a été rattaché à un compte
+  isAttachedToAccount Boolean        @default(false)
+
+  // Informations de contact pour matching lors de l'inscription
+  contactEmail       String                                // Email pour matching
+  contactPhone       String?                               // Téléphone pour matching
+  contactName        String?                               // Nom du demandeur
+
+  // Company (NULL si créé sans compte, rempli après rattachement)
+  companyId          String?
+  company            Company?        @relation(fields: [companyId], references: [id])
+
+  // ════════════════════════════════════════════
+  // CHAMPS MÉTIER DU DEVIS
+  // ════════════════════════════════════════════
+
   originCountry      String
   destinationCountry String
   transportMode      TransportMode[]
@@ -1122,6 +1214,42 @@ model Quote {
   status             QuoteStatus     @default(DRAFT)
   acceptedAt         DateTime?
   rejectedAt         DateTime?
+
+  // ════════════════════════════════════════════
+  // CHAMPS WORKFLOW AGENT (Traitement des devis)
+  // ════════════════════════════════════════════
+
+  // Méthode de paiement choisie par l'agent lors du traitement
+  // Valeurs : CASH (Comptant), ON_DELIVERY (À la livraison), BANK_TRANSFER (Virement)
+  paymentMethod        QuotePaymentMethod?
+
+  // Commentaire optionnel de l'agent lors du traitement
+  agentComment         String?
+
+  // Date de début du traitement (passage à IN_TREATMENT)
+  treatmentStartedAt   DateTime?
+
+  // Date de validation du traitement (passage à VALIDATED)
+  treatmentValidatedAt DateTime?
+
+  // ID de l'agent qui a traité le devis
+  treatmentAgentId     String?
+  treatmentAgent       User?           @relation("QuoteTreatmentAgent", fields: [treatmentAgentId], references: [id])
+
+  // Date d'annulation et raison (si statut CANCELLED)
+  cancelledAt          DateTime?
+  cancelReason         String?
+
+  // Relation vers l'expédition créée lors de la validation
+  shipmentId           String?         @unique
+  shipment             Shipment?       @relation("QuoteToShipment", fields: [shipmentId], references: [id])
+
+  // ════════════════════════════════════════════
+
+  // ID de l'utilisateur qui a créé le devis (NULL si créé sans compte)
+  createdById        String?
+  createdBy          User?           @relation("CreatedQuotes", fields: [createdById], references: [id])
+
   invoices           Invoice[]
   documents          Document[]
   convertedFromGuest GuestQuote?     @relation("ConvertedFromGuest") // Relation inverse pour conversion
@@ -1129,6 +1257,10 @@ model Quote {
   updatedAt          DateTime        @updatedAt
 
   // 🔐 Access Policies
+
+  // Création publique autorisée (formulaire sans connexion)
+  // Note: Le suivi par token est géré hors Zenstack (client prisma standard)
+  @@allow('create', true)
 
   // Les admins peuvent tout faire
   @@allow('all', auth().role == ADMIN)
@@ -1142,18 +1274,37 @@ model Quote {
   // Les clients peuvent lire et créer des quotes pour leur company
   @@allow('read,create', auth().companyId == companyId && auth().role == CLIENT)
 
+  // Le propriétaire peut lire et modifier son devis (si rattaché à un compte)
+  @@allow('read,update', userId != null && auth().id == userId)
+
   @@deny('all', true)
 
   @@index([companyId])
   @@index([status])
+  @@index([trackingToken])
+  @@index([contactEmail])
+  @@index([userId])
 }
 
 enum QuoteStatus {
-  DRAFT
-  SENT
-  ACCEPTED
-  REJECTED
-  EXPIRED
+  DRAFT          // Brouillon - devis en cours de création
+  SENT           // Envoyé - devis envoyé au client, en attente de réponse
+  ACCEPTED       // Accepté - le client a accepté le devis
+  REJECTED       // Rejeté - le client a refusé le devis
+  EXPIRED        // Expiré - date de validité dépassée
+  IN_TREATMENT   // En traitement - un agent traite le devis (après acceptation client)
+  VALIDATED      // Validé - traitement terminé par l'agent, colis créé
+  CANCELLED      // Annulé - devis annulé par l'agent
+}
+
+/**
+ * Méthode de paiement choisie lors du traitement d'un devis
+ * Utilisé par l'agent lors du workflow de traitement
+ */
+enum QuotePaymentMethod {
+  CASH           // Comptant - paiement immédiat
+  ON_DELIVERY    // À la livraison - paiement à la réception
+  BANK_TRANSFER  // Virement bancaire - envoi du RIB au client
 }
 
 enum ProspectStatus {
@@ -1366,7 +1517,12 @@ enum DocumentType {
  * - OPERATIONS_MANAGER : peut créer, lire et supprimer tous les documents
  * - FINANCE_MANAGER : peut lire tous les documents
  * - CLIENT : peut créer et lire les documents de sa company
+ * - PARTICULIER : peut créer et lire ses propres documents (via userId direct)
  * - L'uploader peut supprimer son propre document
+ *
+ * PROPRIÉTÉ HYBRIDE :
+ * - Si companyId != null : le document appartient à la company
+ * - Si companyId == null : le document appartient directement au userId
  */
 model Document {
   id          String       @id @default(cuid())
@@ -1394,9 +1550,19 @@ model Document {
   purchaseRequestId String?
   purchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
 
-  // Métadonnées
-  companyId   String
-  company     Company  @relation(fields: [companyId], references: [id])
+  // ════════════════════════════════════════════
+  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // ════════════════════════════════════════════
+
+  // Company (NULL si particulier sans entreprise)
+  companyId   String?
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  // Propriétaire direct (pour particuliers sans company)
+  userId      String?
+  user        User?     @relation("UserDocuments", fields: [userId], references: [id])
+
+  // Uploader du document (peut être différent du propriétaire)
   uploadedBy  String
   uploader    User     @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
   uploadedAt  DateTime @default(now())
@@ -1412,8 +1578,13 @@ model Document {
   // Les finance managers peuvent lire tous les documents
   @@allow('read', auth().role == FINANCE_MANAGER)
 
+  // PROPRIÉTÉ HYBRIDE - Lecture par company
   // Les clients peuvent créer et lire les documents de leur company
-  @@allow('create,read', auth().companyId == companyId && auth().role == CLIENT)
+  @@allow('create,read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
+
+  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
+  // Le propriétaire direct peut créer et lire ses documents
+  @@allow('create,read', companyId == null && userId != null && auth().id == userId)
 
   // L'uploader peut supprimer son propre document
   @@allow('delete', auth().id == uploadedBy)
@@ -1421,6 +1592,7 @@ model Document {
   @@deny('all', true)
 
   @@index([companyId])
+  @@index([userId])           // Index pour propriété hybride
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])

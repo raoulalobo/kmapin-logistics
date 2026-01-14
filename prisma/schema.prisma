@@ -105,6 +105,15 @@ enum QuoteStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+  IN_TREATMENT
+  VALIDATED
+  CANCELLED
+}
+
+enum QuotePaymentMethod {
+  CASH
+  ON_DELIVERY
+  BANK_TRANSFER
 }
 
 enum ProspectStatus {
@@ -150,31 +159,38 @@ enum TransporterType {
 }
 
 model User {
-  id                String            @id() @default(cuid())
-  email             String            @unique()
-  emailVerified     Boolean           @default(false)
-  name              String?
-  image             String?
-  phone             String?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt()
-  accounts          Account[]
-  sessions          Session[]
-  role              UserRole          @default(CLIENT)
-  companyId         String?
-  company           Company?          @relation(fields: [companyId], references: [id])
-  permissions       Json?
-  createdShipments  Shipment[]        @relation("CreatedBy")
-  createdInvoices   Invoice[]         @relation("CreatedBy")
-  uploadedDocuments Document[]        @relation("UploadedDocuments")
-  prospect          Prospect?
-  pricingConfigs    PricingConfig[]
-  createdPickups    PickupRequest[]   @relation("CreatedPickups")
-  pickupLogs        PickupLog[]       @relation("PickupLogChangedBy")
-  userPickups       PickupRequest[]   @relation("UserPickups")
-  createdPurchases  PurchaseRequest[] @relation("CreatedPurchases")
-  purchaseLogs      PurchaseLog[]     @relation("PurchaseLogChangedBy")
-  userPurchases     PurchaseRequest[] @relation("UserPurchases")
+  id                      String            @id() @default(cuid())
+  email                   String            @unique()
+  emailVerified           Boolean           @default(false)
+  name                    String?
+  image                   String?
+  phone                   String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt()
+  accounts                Account[]
+  sessions                Session[]
+  role                    UserRole          @default(CLIENT)
+  companyId               String?
+  company                 Company?          @relation(fields: [companyId], references: [id])
+  permissions             Json?
+  createdShipments        Shipment[]        @relation("CreatedBy")
+  userShipments           Shipment[]        @relation("UserShipments")
+  createdInvoices         Invoice[]         @relation("CreatedBy")
+  userInvoices            Invoice[]         @relation("UserInvoices")
+  userDocuments           Document[]        @relation("UserDocuments")
+  uploadedDocuments       Document[]        @relation("UploadedDocuments")
+  prospect                Prospect?
+  pricingConfigs          PricingConfig[]
+  createdPickups          PickupRequest[]   @relation("CreatedPickups")
+  pickupLogs              PickupLog[]       @relation("PickupLogChangedBy")
+  userPickups             PickupRequest[]   @relation("UserPickups")
+  createdPurchases        PurchaseRequest[] @relation("CreatedPurchases")
+  purchaseLogs            PurchaseLog[]     @relation("PurchaseLogChangedBy")
+  userPurchases           PurchaseRequest[] @relation("UserPurchases")
+  treatedQuotes           Quote[]           @relation("QuoteTreatmentAgent")
+  performedTrackingEvents TrackingEvent[]   @relation("PerformedTrackingEvents")
+  userQuotes              Quote[]           @relation("UserQuotes")
+  createdQuotes           Quote[]           @relation("CreatedQuotes")
 
   @@index([companyId])
   @@map("user")
@@ -265,8 +281,10 @@ model Company {
 model Shipment {
   id                    String          @id() @default(cuid())
   trackingNumber        String          @unique()
-  companyId             String
-  company               Company         @relation(fields: [companyId], references: [id])
+  companyId             String?
+  company               Company?        @relation(fields: [companyId], references: [id])
+  userId                String?
+  user                  User?           @relation("UserShipments", fields: [userId], references: [id])
   originAddress         String
   originCity            String
   originPostalCode      String
@@ -309,8 +327,10 @@ model Shipment {
   trackingEvents        TrackingEvent[]
   documents             Document[]
   pickupRequests        PickupRequest[]
+  fromQuote             Quote?          @relation("QuoteToShipment")
 
   @@index([companyId])
+  @@index([userId])
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
@@ -478,16 +498,18 @@ model PurchaseLog {
 }
 
 model TrackingEvent {
-  id          String         @id() @default(cuid())
-  shipmentId  String
-  shipment    Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  status      ShipmentStatus
-  location    String
-  latitude    Float?
-  longitude   Float?
-  description String?
-  timestamp   DateTime       @default(now())
-  metadata    Json?
+  id            String         @id() @default(cuid())
+  shipmentId    String
+  shipment      Shipment       @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status        ShipmentStatus
+  location      String
+  latitude      Float?
+  longitude     Float?
+  description   String?
+  timestamp     DateTime       @default(now())
+  metadata      Json?
+  performedById String?
+  performedBy   User?          @relation("PerformedTrackingEvents", fields: [performedById], references: [id])
 
   @@index([shipmentId])
   @@index([timestamp])
@@ -496,8 +518,10 @@ model TrackingEvent {
 model Invoice {
   id            String        @id() @default(cuid())
   invoiceNumber String        @unique()
-  companyId     String
-  company       Company       @relation(fields: [companyId], references: [id])
+  companyId     String?
+  company       Company?      @relation(fields: [companyId], references: [id])
+  userId        String?
+  user          User?         @relation("UserInvoices", fields: [userId], references: [id])
   issueDate     DateTime      @default(now())
   dueDate       DateTime
   paidDate      DateTime?
@@ -521,6 +545,7 @@ model Invoice {
   documents     Document[]
 
   @@index([companyId])
+  @@index([userId])
   @@index([status])
   @@index([invoiceNumber])
 }
@@ -538,32 +563,55 @@ model InvoiceItem {
 }
 
 model Quote {
-  id                 String          @id() @default(cuid())
-  quoteNumber        String          @unique()
-  companyId          String
-  company            Company         @relation(fields: [companyId], references: [id])
-  originCountry      String
-  destinationCountry String
-  transportMode      TransportMode[]
-  cargoType          CargoType
-  weight             Float
-  length             Float?
-  width              Float?
-  height             Float?
-  estimatedCost      Float
-  validUntil         DateTime
-  currency           String          @default("EUR")
-  status             QuoteStatus     @default(DRAFT)
-  acceptedAt         DateTime?
-  rejectedAt         DateTime?
-  invoices           Invoice[]
-  documents          Document[]
-  convertedFromGuest GuestQuote?     @relation("ConvertedFromGuest")
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt()
+  id                   String              @id() @default(cuid())
+  quoteNumber          String              @unique()
+  trackingToken        String              @unique() @default(cuid())
+  tokenExpiresAt       DateTime
+  userId               String?
+  user                 User?               @relation("UserQuotes", fields: [userId], references: [id])
+  isAttachedToAccount  Boolean             @default(false)
+  contactEmail         String
+  contactPhone         String?
+  contactName          String?
+  companyId            String?
+  company              Company?            @relation(fields: [companyId], references: [id])
+  originCountry        String
+  destinationCountry   String
+  transportMode        TransportMode[]
+  cargoType            CargoType
+  weight               Float
+  length               Float?
+  width                Float?
+  height               Float?
+  estimatedCost        Float
+  validUntil           DateTime
+  currency             String              @default("EUR")
+  status               QuoteStatus         @default(DRAFT)
+  acceptedAt           DateTime?
+  rejectedAt           DateTime?
+  paymentMethod        QuotePaymentMethod?
+  agentComment         String?
+  treatmentStartedAt   DateTime?
+  treatmentValidatedAt DateTime?
+  treatmentAgentId     String?
+  treatmentAgent       User?               @relation("QuoteTreatmentAgent", fields: [treatmentAgentId], references: [id])
+  cancelledAt          DateTime?
+  cancelReason         String?
+  shipmentId           String?             @unique()
+  shipment             Shipment?           @relation("QuoteToShipment", fields: [shipmentId], references: [id])
+  createdById          String?
+  createdBy            User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
+  invoices             Invoice[]
+  documents            Document[]
+  convertedFromGuest   GuestQuote?         @relation("ConvertedFromGuest")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt()
 
   @@index([companyId])
   @@index([status])
+  @@index([trackingToken])
+  @@index([contactEmail])
+  @@index([userId])
 }
 
 model Prospect {
@@ -645,13 +693,16 @@ model Document {
   pickupRequest     PickupRequest?   @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
   purchaseRequestId String?
   purchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
-  companyId         String
-  company           Company          @relation(fields: [companyId], references: [id])
+  companyId         String?
+  company           Company?         @relation(fields: [companyId], references: [id])
+  userId            String?
+  user              User?            @relation("UserDocuments", fields: [userId], references: [id])
   uploadedBy        String
   uploader          User             @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
   uploadedAt        DateTime         @default(now())
 
   @@index([companyId])
+  @@index([userId])
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])

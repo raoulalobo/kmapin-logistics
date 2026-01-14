@@ -344,3 +344,484 @@ export type QuoteEstimateResult = {
   };
   estimatedDeliveryDays: number;
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCHÉMAS WORKFLOW AGENT - Traitement des devis
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Méthodes de paiement disponibles pour le traitement des devis
+ * Correspond à l'enum QuotePaymentMethod dans schema.zmodel
+ */
+export const QuotePaymentMethod = {
+  CASH: 'CASH',           // Comptant - paiement immédiat
+  ON_DELIVERY: 'ON_DELIVERY', // À la livraison - paiement à la réception
+  BANK_TRANSFER: 'BANK_TRANSFER', // Virement bancaire - envoi du RIB au client
+} as const;
+
+export type QuotePaymentMethodType = keyof typeof QuotePaymentMethod;
+
+/**
+ * Schéma pour démarrer le traitement d'un devis par un agent
+ *
+ * Workflow :
+ * 1. L'agent clique sur "Traiter devis"
+ * 2. Il choisit la méthode de paiement
+ * 3. Il peut ajouter un commentaire optionnel
+ * 4. Le statut passe à IN_TREATMENT
+ * 5. Si virement → envoi email RIB au client
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ */
+export const quoteStartTreatmentSchema = z.object({
+  // Méthode de paiement choisie par l'agent
+  paymentMethod: z.enum(['CASH', 'ON_DELIVERY', 'BANK_TRANSFER'], {
+    errorMap: () => ({ message: 'Méthode de paiement invalide' }),
+  }),
+
+  // Commentaire optionnel de l'agent
+  comment: z
+    .string()
+    .max(1000, 'Le commentaire ne peut pas dépasser 1000 caractères')
+    .optional()
+    .nullable(),
+});
+
+/**
+ * Type pour démarrer le traitement
+ */
+export type QuoteStartTreatmentData = z.infer<typeof quoteStartTreatmentSchema>;
+
+/**
+ * Schéma pour valider le traitement d'un devis par un agent
+ *
+ * Workflow :
+ * 1. L'agent clique sur "Valider"
+ * 2. Le statut passe à VALIDATED
+ * 3. Une expédition (Shipment) est créée automatiquement
+ * 4. Le devis est lié à l'expédition
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ */
+export const quoteValidateTreatmentSchema = z.object({
+  // Commentaire optionnel lors de la validation
+  comment: z
+    .string()
+    .max(1000, 'Le commentaire ne peut pas dépasser 1000 caractères')
+    .optional()
+    .nullable(),
+
+  // Adresse de livraison pour la création de l'expédition
+  // Si non fournie, on utilise les infos du client
+  destinationAddress: z
+    .string()
+    .min(5, 'L\'adresse de destination doit contenir au moins 5 caractères')
+    .max(500, 'L\'adresse de destination ne peut pas dépasser 500 caractères')
+    .optional(),
+
+  destinationCity: z
+    .string()
+    .max(100, 'La ville de destination ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  destinationPostalCode: z
+    .string()
+    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  destinationContact: z
+    .string()
+    .max(100, 'Le nom du contact ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  destinationPhone: z
+    .string()
+    .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  // Informations origine (si différentes du client)
+  originAddress: z
+    .string()
+    .min(5, 'L\'adresse d\'origine doit contenir au moins 5 caractères')
+    .max(500, 'L\'adresse d\'origine ne peut pas dépasser 500 caractères')
+    .optional(),
+
+  originCity: z
+    .string()
+    .max(100, 'La ville d\'origine ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  originPostalCode: z
+    .string()
+    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  originContact: z
+    .string()
+    .max(100, 'Le nom du contact ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  originPhone: z
+    .string()
+    .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  // Description de la marchandise
+  cargoDescription: z
+    .string()
+    .min(5, 'La description doit contenir au moins 5 caractères')
+    .max(1000, 'La description ne peut pas dépasser 1000 caractères')
+    .optional(),
+
+  // Nombre de colis
+  packageCount: z
+    .number()
+    .int('Le nombre de colis doit être un entier')
+    .positive('Le nombre de colis doit être positif')
+    .default(1),
+
+  // Instructions spéciales
+  specialInstructions: z
+    .string()
+    .max(1000, 'Les instructions ne peuvent pas dépasser 1000 caractères')
+    .optional()
+    .nullable(),
+});
+
+/**
+ * Type pour valider le traitement
+ */
+export type QuoteValidateTreatmentData = z.infer<typeof quoteValidateTreatmentSchema>;
+
+/**
+ * Schéma pour annuler un devis par un agent
+ *
+ * Workflow :
+ * 1. L'agent clique sur "Annuler"
+ * 2. Il doit fournir une raison d'annulation
+ * 3. Le statut passe à CANCELLED
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ */
+export const quoteCancelSchema = z.object({
+  // Raison de l'annulation (obligatoire)
+  reason: z
+    .string()
+    .min(10, 'La raison d\'annulation doit contenir au moins 10 caractères')
+    .max(500, 'La raison d\'annulation ne peut pas dépasser 500 caractères'),
+});
+
+/**
+ * Type pour l'annulation d'un devis
+ */
+export type QuoteCancelData = z.infer<typeof quoteCancelSchema>;
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCHÉMAS CRÉATION SANS COMPTE (GUEST QUOTE)
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Messages d'erreur personnalisés pour les formulaires guest
+ */
+const GUEST_MESSAGES = {
+  required: 'Ce champ est obligatoire',
+  email: 'Adresse email invalide',
+  phone: 'Numéro de téléphone invalide (format: +33XXXXXXXXX ou 0XXXXXXXXX)',
+  minLength: (min: number) => `Minimum ${min} caractères`,
+  maxLength: (max: number) => `Maximum ${max} caractères`,
+};
+
+/**
+ * Validation d'email pour les visiteurs
+ * Normalisation : minuscules et trim
+ */
+const guestEmailSchema = z
+  .string({ required_error: GUEST_MESSAGES.required })
+  .email(GUEST_MESSAGES.email)
+  .toLowerCase()
+  .trim();
+
+/**
+ * Validation de téléphone français (optionnel pour guest quote)
+ * Accepte : +33XXXXXXXXX, 0XXXXXXXXX, +33 X XX XX XX XX, formats internationaux
+ */
+const guestPhoneSchema = z
+  .string()
+  .regex(
+    /^(?:(?:\+|00)\d{1,3}|0)\s*[1-9](?:[\s.-]*\d{2,3}){3,5}$/,
+    GUEST_MESSAGES.phone
+  )
+  .transform((val) => val.replace(/[\s.-]/g, '')) // Nettoyer espaces, points, tirets
+  .optional();
+
+/**
+ * Schéma pour créer un devis SANS compte (visiteur)
+ *
+ * User Story :
+ * En tant que visiteur, je veux demander un devis sans créer de compte
+ *
+ * Workflow :
+ * 1. Formulaire public accessible à tous (/quotes/request)
+ * 2. Génération automatique de trackingToken (72h validité)
+ * 3. Email de confirmation avec lien de suivi
+ * 4. Si inscription ultérieure → rattachement automatique par email/phone
+ *
+ * Champs requis :
+ * - contactEmail : Email pour matching lors de l'inscription
+ * - Informations de la marchandise (origine, destination, poids, type)
+ * - Mode de transport
+ *
+ * Champs optionnels :
+ * - contactName, contactPhone : Infos de contact supplémentaires
+ * - Dimensions (length, width, height)
+ * - Description additionnelle
+ */
+export const createGuestQuoteSchema = z.object({
+  // ============================================
+  // CONTACT (obligatoire pour matching futur)
+  // ============================================
+
+  /**
+   * Email du demandeur - OBLIGATOIRE
+   * Utilisé pour :
+   * - Envoi de l'email de confirmation
+   * - Matching lors de la création de compte (US-1.3)
+   * - Communications futures
+   */
+  contactEmail: guestEmailSchema,
+
+  /**
+   * Téléphone du demandeur - OPTIONNEL
+   * Utilisé comme critère de matching alternatif
+   */
+  contactPhone: guestPhoneSchema,
+
+  /**
+   * Nom du demandeur - OPTIONNEL
+   * Affiché dans le dashboard des agents
+   */
+  contactName: z
+    .string()
+    .min(2, GUEST_MESSAGES.minLength(2))
+    .max(100, GUEST_MESSAGES.maxLength(100))
+    .optional(),
+
+  // ============================================
+  // ROUTE (ORIGINE → DESTINATION)
+  // ============================================
+
+  /**
+   * Pays d'origine (code ISO 2 lettres)
+   * Exemple : "FR", "BF", "US"
+   */
+  originCountry: z
+    .string({ required_error: GUEST_MESSAGES.required })
+    .min(2, "Le pays d'origine est requis")
+    .max(100, "Le pays d'origine est trop long"),
+
+  /**
+   * Pays de destination (code ISO 2 lettres)
+   * Exemple : "FR", "BF", "US"
+   */
+  destinationCountry: z
+    .string({ required_error: GUEST_MESSAGES.required })
+    .min(2, 'Le pays de destination est requis')
+    .max(100, 'Le pays de destination est trop long'),
+
+  // ============================================
+  // INFORMATIONS MARCHANDISE
+  // ============================================
+
+  /**
+   * Type de marchandise (enum CargoType)
+   * GENERAL, FRAGILE, DANGEROUS, PERISHABLE, VALUABLE
+   */
+  cargoType: z.nativeEnum(CargoType, {
+    required_error: 'Veuillez sélectionner un type de marchandise',
+    errorMap: () => ({ message: 'Type de marchandise invalide' }),
+  }),
+
+  /**
+   * Poids total en kg
+   * Min: 0.1 kg, Max: 100 tonnes
+   */
+  weight: z
+    .number({
+      required_error: 'Le poids est requis',
+      invalid_type_error: 'Le poids doit être un nombre',
+    })
+    .positive('Le poids doit être positif')
+    .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
+
+  /**
+   * Dimensions en centimètres (optionnelles)
+   * Préprocesseur pour gérer les champs vides et NaN
+   */
+  length: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La longueur doit être positive ou nulle')
+      .max(10000, 'La longueur ne peut pas dépasser 10000 cm (100 m)')
+  ),
+
+  width: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La largeur doit être positive ou nulle')
+      .max(10000, 'La largeur ne peut pas dépasser 10000 cm (100 m)')
+  ),
+
+  height: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return 0;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La hauteur doit être positive ou nulle')
+      .max(10000, 'La hauteur ne peut pas dépasser 10000 cm (100 m)')
+  ),
+
+  // ============================================
+  // MODE DE TRANSPORT
+  // ============================================
+
+  /**
+   * Mode(s) de transport souhaité(s)
+   * ROAD, RAIL, SEA, AIR (au moins 1, max 4)
+   */
+  transportMode: z
+    .array(z.nativeEnum(TransportMode))
+    .min(1, 'Au moins un mode de transport est requis')
+    .max(4, 'Maximum 4 modes de transport'),
+
+  // ============================================
+  // OPTIONS SUPPLÉMENTAIRES
+  // ============================================
+
+  /**
+   * Priorité de livraison
+   * Affecte le coût estimé (+0%, +10%, +30%, +50%)
+   */
+  priority: z
+    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .default('STANDARD')
+    .optional(),
+
+  /**
+   * Description additionnelle de la marchandise
+   * Instructions spéciales, contraintes, etc.
+   */
+  description: z
+    .string()
+    .max(2000, GUEST_MESSAGES.maxLength(2000))
+    .optional(),
+
+  /**
+   * Instructions spéciales pour le transport
+   * Manutention, stockage, etc.
+   */
+  specialInstructions: z
+    .string()
+    .max(1000, GUEST_MESSAGES.maxLength(1000))
+    .optional(),
+});
+
+/**
+ * Type TypeScript inféré pour la création de devis guest
+ * @example
+ * const data: CreateGuestQuoteInput = {
+ *   contactEmail: 'client@example.com',
+ *   originCountry: 'FR',
+ *   destinationCountry: 'BF',
+ *   cargoType: 'GENERAL',
+ *   weight: 500,
+ *   transportMode: ['SEA', 'ROAD'],
+ * };
+ */
+export type CreateGuestQuoteInput = z.infer<typeof createGuestQuoteSchema>;
+
+// ============================================
+// SCHÉMA DE SUIVI PAR TOKEN (GUEST)
+// ============================================
+
+/**
+ * Schéma pour suivre un devis via token public
+ *
+ * User Story :
+ * En tant qu'utilisateur ayant demandé un devis sans compte,
+ * je veux suivre l'état de mon devis via le lien reçu par email
+ *
+ * URL : /quotes/track/[token]
+ * Validité : 72h après création
+ */
+export const trackQuoteByTokenSchema = z.object({
+  /**
+   * Token de suivi unique (CUID)
+   * Généré automatiquement à la création du devis
+   * Envoyé par email au demandeur
+   */
+  trackingToken: z
+    .string({ required_error: GUEST_MESSAGES.required })
+    .cuid('Token de suivi invalide'),
+});
+
+/**
+ * Type TypeScript inféré pour le suivi par token
+ */
+export type TrackQuoteByTokenInput = z.infer<typeof trackQuoteByTokenSchema>;
+
+// ============================================
+// SCHÉMA DE RATTACHEMENT AU COMPTE
+// ============================================
+
+/**
+ * Schéma pour rattacher un devis orphelin à un compte utilisateur
+ *
+ * User Story US-1.3 :
+ * En tant qu'utilisateur qui vient de créer un compte,
+ * mes devis précédents (créés sans compte) sont automatiquement
+ * rattachés à mon compte si l'email ou le téléphone correspondent
+ *
+ * Workflow :
+ * 1. Utilisateur crée un compte avec email@example.com
+ * 2. Recherche des devis où contactEmail = email@example.com ET userId = NULL
+ * 3. Pour chaque devis trouvé :
+ *    - userId = nouvel utilisateur
+ *    - isAttachedToAccount = true
+ * 4. Notification (optionnelle) des devis rattachés
+ */
+export const attachQuoteToAccountSchema = z.object({
+  /**
+   * ID du devis à rattacher
+   */
+  quoteId: z
+    .string({ required_error: 'ID du devis requis' })
+    .cuid('ID de devis invalide'),
+
+  /**
+   * ID de l'utilisateur à qui rattacher le devis
+   */
+  userId: z
+    .string({ required_error: 'ID utilisateur requis' })
+    .cuid('ID utilisateur invalide'),
+});
+
+/**
+ * Type TypeScript inféré pour le rattachement
+ */
+export type AttachQuoteToAccountInput = z.infer<typeof attachQuoteToAccountSchema>;

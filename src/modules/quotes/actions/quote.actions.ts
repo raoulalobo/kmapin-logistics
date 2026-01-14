@@ -19,10 +19,20 @@ import {
   quoteUpdateSchema,
   quoteAcceptSchema,
   quoteRejectSchema,
+  quoteStartTreatmentSchema,
+  quoteValidateTreatmentSchema,
+  quoteCancelSchema,
+  createGuestQuoteSchema,
+  trackQuoteByTokenSchema,
   type QuoteFormData,
   type QuoteUpdateData,
   type QuoteAcceptData,
   type QuoteRejectData,
+  type QuoteStartTreatmentData,
+  type QuoteValidateTreatmentData,
+  type QuoteCancelData,
+  type CreateGuestQuoteInput,
+  type TrackQuoteByTokenInput,
 } from '../schemas/quote.schema';
 
 /**
@@ -1274,5 +1284,1033 @@ export async function countPendingQuotesAction(): Promise<ActionResult<number>> 
   } catch (error) {
     console.error('Error counting pending quotes:', error);
     return { success: false, error: 'Erreur lors du comptage des devis' };
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ACTIONS WORKFLOW AGENT - Traitement des devis
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Action : Démarrer le traitement d'un devis par un agent
+ *
+ * Workflow :
+ * 1. Vérification des permissions (ADMIN ou OPERATIONS_MANAGER)
+ * 2. Validation des données (méthode de paiement, commentaire)
+ * 3. Mise à jour du statut vers IN_TREATMENT
+ * 4. Enregistrement de l'agent traitant et des dates
+ * 5. Si virement bancaire → déclenche l'envoi d'email RIB (via Inngest)
+ *
+ * @param quoteId - ID du devis à traiter
+ * @param data - Données de traitement (paymentMethod, comment)
+ * @returns Résultat avec les données du devis mis à jour ou erreur
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ *
+ * @example
+ * // Démarrer le traitement avec paiement par virement
+ * const result = await startQuoteTreatmentAction('cuid123', {
+ *   paymentMethod: 'BANK_TRANSFER',
+ *   comment: 'Client contacté par téléphone',
+ * });
+ */
+export async function startQuoteTreatmentAction(
+  quoteId: string,
+  data: QuoteStartTreatmentData
+): Promise<ActionResult<{ id: string; status: string }>> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // 2. Vérifier les permissions (ADMIN ou OPERATIONS_MANAGER)
+    const canTreatQuotes =
+      userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+
+    if (!canTreatQuotes) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions pour traiter ce devis',
+      };
+    }
+
+    // 3. Valider les données avec le schéma Zod
+    const validatedData = quoteStartTreatmentSchema.parse(data);
+
+    // 4. Récupérer le devis existant
+    const existingQuote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: {
+        company: {
+          include: {
+            users: {
+              where: { role: 'CLIENT' },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingQuote) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
+    }
+
+    // 5. Vérifier que le statut permet le traitement
+    // On peut traiter un devis SENT ou ACCEPTED
+    const allowedStatuses = ['SENT', 'ACCEPTED'];
+    if (!allowedStatuses.includes(existingQuote.status)) {
+      return {
+        success: false,
+        error: `Impossible de traiter un devis avec le statut "${existingQuote.status}". Le devis doit être SENT ou ACCEPTED.`,
+      };
+    }
+
+    // 6. Mettre à jour le devis avec le nouveau statut
+    const updatedQuote = await prisma.quote.update({
+      where: { id: quoteId },
+      data: {
+        status: 'IN_TREATMENT',
+        paymentMethod: validatedData.paymentMethod,
+        agentComment: validatedData.comment,
+        treatmentStartedAt: new Date(),
+        treatmentAgentId: session.user.id,
+      },
+    });
+
+    // 7. Si virement bancaire, déclencher l'envoi d'email RIB
+    // TODO: Intégration Inngest pour l'envoi d'email
+    if (validatedData.paymentMethod === 'BANK_TRANSFER') {
+      console.log(
+        `[QUOTE TREATMENT] Virement bancaire sélectionné pour le devis ${existingQuote.quoteNumber}. Email RIB à envoyer.`
+      );
+      // L'intégration Inngest sera ajoutée ultérieurement
+    }
+
+    // 8. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${quoteId}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedQuote.id,
+        status: updatedQuote.status,
+      },
+    };
+  } catch (error) {
+    console.error('Error starting quote treatment:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Données invalides',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors du démarrage du traitement',
+    };
+  }
+}
+
+/**
+ * Générer un numéro de suivi unique pour les expéditions
+ *
+ * Format: {PAYS_DEST}-{CODE3}-{JJAA}-{SEQUENCE5}
+ * Exemple: BF-XK7-1425-00042
+ *
+ * Composants :
+ * - PAYS_DEST : Code pays destination ISO 3166-1 alpha-2 (ex: BF, FR, US)
+ * - CODE3 : Code aléatoire de 3 caractères alphanumériques pour unicité
+ * - JJAA : Jour (2 chiffres) + Année (2 derniers chiffres)
+ * - SEQUENCE5 : Numéro séquentiel sur 5 chiffres (compteur journalier par pays)
+ *
+ * @param destinationCountry - Code pays de destination (ex: "BF", "FR")
+ * @returns Numéro de suivi unique
+ */
+async function generateTrackingNumber(destinationCountry: string): Promise<string> {
+  const date = new Date();
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = String(date.getFullYear()).slice(-2); // 2 derniers chiffres
+  const dateCode = `${day}${year}`; // Format: JJAA (ex: "1425" pour 14 janvier 2025)
+
+  // Générer un code aléatoire de 3 caractères pour garantir l'unicité
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sans I, O, 0, 1 pour éviter confusion
+  let randomCode = '';
+  for (let i = 0; i < 3; i++) {
+    randomCode += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  // Compter le nombre d'expéditions créées aujourd'hui pour ce pays
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const count = await prisma.shipment.count({
+    where: {
+      destinationCountry: destinationCountry.toUpperCase(),
+      createdAt: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+  });
+
+  // Formater le numéro séquentiel sur 5 chiffres
+  const sequence = String(count + 1).padStart(5, '0');
+
+  // Construire le numéro de tracking final
+  // Format: PAYS-CODE-JJAA-SEQUENCE (ex: BF-XK7-1425-00001)
+  const countryCode = destinationCountry.toUpperCase().slice(0, 2);
+  const trackingNumber = `${countryCode}-${randomCode}-${dateCode}-${sequence}`;
+
+  // Vérifier que le numéro n'existe pas déjà (très rare grâce au code aléatoire)
+  const existing = await prisma.shipment.findUnique({
+    where: { trackingNumber },
+  });
+
+  // Si le numéro existe déjà, régénérer avec un nouveau code aléatoire
+  if (existing) {
+    return generateTrackingNumber(destinationCountry);
+  }
+
+  return trackingNumber;
+}
+
+/**
+ * Action : Valider le traitement d'un devis et créer l'expédition
+ *
+ * Workflow :
+ * 1. Vérification des permissions (ADMIN ou OPERATIONS_MANAGER)
+ * 2. Validation des données (adresses, description, etc.)
+ * 3. Création automatique de l'expédition (Shipment)
+ * 4. Liaison devis ↔ expédition
+ * 5. Mise à jour du statut vers VALIDATED
+ *
+ * @param quoteId - ID du devis à valider
+ * @param data - Données de validation (adresses, description, etc.)
+ * @returns Résultat avec les données du devis et de l'expédition créée
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ *
+ * @example
+ * // Valider le traitement et créer l'expédition
+ * const result = await validateQuoteTreatmentAction('cuid123', {
+ *   destinationAddress: '123 Rue de Paris',
+ *   destinationCity: 'Paris',
+ *   destinationPostalCode: '75001',
+ *   packageCount: 2,
+ * });
+ */
+export async function validateQuoteTreatmentAction(
+  quoteId: string,
+  data: QuoteValidateTreatmentData
+): Promise<
+  ActionResult<{ quoteId: string; shipmentId: string; trackingNumber: string }>
+> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // 2. Vérifier les permissions (ADMIN ou OPERATIONS_MANAGER)
+    const canValidateQuotes =
+      userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+
+    if (!canValidateQuotes) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions pour valider ce devis',
+      };
+    }
+
+    // 3. Valider les données avec le schéma Zod
+    const validatedData = quoteValidateTreatmentSchema.parse(data);
+
+    // 4. Récupérer le devis existant avec les informations nécessaires
+    const existingQuote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      include: {
+        company: {
+          include: {
+            users: {
+              where: { role: 'CLIENT' },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingQuote) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
+    }
+
+    // 5. Vérifier que le statut permet la validation
+    // On ne peut valider qu'un devis IN_TREATMENT
+    if (existingQuote.status !== 'IN_TREATMENT') {
+      return {
+        success: false,
+        error: `Impossible de valider un devis avec le statut "${existingQuote.status}". Le devis doit être en cours de traitement (IN_TREATMENT).`,
+      };
+    }
+
+    // 6. Générer un numéro de suivi pour l'expédition (avec pays destination)
+    const trackingNumber = await generateTrackingNumber(existingQuote.destinationCountry);
+
+    // 7. Récupérer les informations du client pour les adresses par défaut
+    const clientUser = existingQuote.company?.users?.[0];
+    const companyName = existingQuote.company?.name || 'Client';
+
+    // 8. Créer l'expédition (transaction pour assurer l'intégrité)
+    const result = await prisma.$transaction(async (tx) => {
+      // Créer l'expédition
+      // PROPRIÉTÉ HYBRIDE : si le devis a une company, l'expédition appartient à la company
+      // Sinon, l'expédition appartient directement à l'utilisateur du devis (particulier)
+      const shipment = await tx.shipment.create({
+        data: {
+          trackingNumber,
+          companyId: existingQuote.companyId, // NULL si particulier
+          userId: existingQuote.companyId ? null : existingQuote.userId, // userId si pas de company
+
+          // Origine (depuis les données de validation ou valeurs par défaut)
+          originAddress:
+            validatedData.originAddress || 'Adresse à compléter',
+          originCity: validatedData.originCity || 'Ville à compléter',
+          originPostalCode: validatedData.originPostalCode || '00000',
+          originCountry: existingQuote.originCountry,
+          originContact: validatedData.originContact,
+          originPhone: validatedData.originPhone,
+
+          // Destination (depuis les données de validation ou valeurs par défaut)
+          destinationAddress:
+            validatedData.destinationAddress || 'Adresse à compléter',
+          destinationCity:
+            validatedData.destinationCity || 'Ville à compléter',
+          destinationPostalCode: validatedData.destinationPostalCode || '00000',
+          destinationCountry: existingQuote.destinationCountry,
+          destinationContact:
+            validatedData.destinationContact || clientUser?.name || companyName,
+          destinationPhone:
+            validatedData.destinationPhone || clientUser?.phone,
+
+          // Détails marchandise (depuis le devis)
+          cargoType: existingQuote.cargoType,
+          weight: existingQuote.weight,
+          length: existingQuote.length,
+          width: existingQuote.width,
+          height: existingQuote.height,
+          packageCount: validatedData.packageCount || 1,
+          description:
+            validatedData.cargoDescription ||
+            `Expédition issue du devis ${existingQuote.quoteNumber}`,
+          specialInstructions: validatedData.specialInstructions,
+
+          // Transport
+          transportMode: existingQuote.transportMode,
+          priority: 'STANDARD',
+
+          // Financier
+          estimatedCost: existingQuote.estimatedCost,
+          currency: existingQuote.currency,
+
+          // Statut initial : PENDING_APPROVAL = "Enregistré" dans le workflow agent
+          status: 'PENDING_APPROVAL',
+
+          // Métadonnées
+          createdById: session.user.id,
+        },
+      });
+
+      // Mettre à jour le devis avec le lien vers l'expédition
+      const updatedQuote = await tx.quote.update({
+        where: { id: quoteId },
+        data: {
+          status: 'VALIDATED',
+          treatmentValidatedAt: new Date(),
+          shipmentId: shipment.id,
+          agentComment: validatedData.comment
+            ? `${existingQuote.agentComment || ''}\n[Validation] ${validatedData.comment}`.trim()
+            : existingQuote.agentComment,
+        },
+      });
+
+      return { shipment, updatedQuote };
+    });
+
+    // 9. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${quoteId}`);
+    revalidatePath('/dashboard/shipments');
+    revalidatePath(`/dashboard/shipments/${result.shipment.id}`);
+
+    return {
+      success: true,
+      data: {
+        quoteId: result.updatedQuote.id,
+        shipmentId: result.shipment.id,
+        trackingNumber: result.shipment.trackingNumber,
+      },
+    };
+  } catch (error) {
+    console.error('Error validating quote treatment:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Données invalides',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la validation du traitement',
+    };
+  }
+}
+
+/**
+ * Action : Annuler un devis
+ *
+ * Workflow :
+ * 1. Vérification des permissions (ADMIN ou OPERATIONS_MANAGER)
+ * 2. Validation de la raison d'annulation
+ * 3. Mise à jour du statut vers CANCELLED
+ * 4. Enregistrement de la date et raison d'annulation
+ *
+ * @param quoteId - ID du devis à annuler
+ * @param data - Données d'annulation (raison obligatoire)
+ * @returns Résultat avec confirmation ou erreur
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER
+ *
+ * @example
+ * // Annuler un devis
+ * const result = await cancelQuoteAction('cuid123', {
+ *   reason: 'Client ne répond plus depuis 30 jours',
+ * });
+ */
+export async function cancelQuoteAction(
+  quoteId: string,
+  data: QuoteCancelData
+): Promise<ActionResult<{ id: string; status: string }>> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // 2. Vérifier les permissions (ADMIN ou OPERATIONS_MANAGER)
+    const canCancelQuotes =
+      userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+
+    if (!canCancelQuotes) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions pour annuler ce devis',
+      };
+    }
+
+    // 3. Valider les données avec le schéma Zod
+    const validatedData = quoteCancelSchema.parse(data);
+
+    // 4. Récupérer le devis existant
+    const existingQuote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+    });
+
+    if (!existingQuote) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
+    }
+
+    // 5. Vérifier que le statut permet l'annulation
+    // On ne peut pas annuler un devis déjà validé ou déjà annulé
+    const forbiddenStatuses = ['VALIDATED', 'CANCELLED'];
+    if (forbiddenStatuses.includes(existingQuote.status)) {
+      return {
+        success: false,
+        error: `Impossible d'annuler un devis avec le statut "${existingQuote.status}".`,
+      };
+    }
+
+    // 6. Mettre à jour le devis avec le statut CANCELLED
+    const updatedQuote = await prisma.quote.update({
+      where: { id: quoteId },
+      data: {
+        status: 'CANCELLED',
+        cancelledAt: new Date(),
+        cancelReason: validatedData.reason,
+        treatmentAgentId: existingQuote.treatmentAgentId || session.user.id,
+      },
+    });
+
+    // 7. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${quoteId}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedQuote.id,
+        status: updatedQuote.status,
+      },
+    };
+  } catch (error) {
+    console.error('Error cancelling quote:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Données invalides',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de l\'annulation du devis',
+    };
+  }
+}
+
+/**
+ * Compter les devis en attente de traitement par un agent
+ *
+ * Compte les devis avec statut SENT ou ACCEPTED qui nécessitent
+ * un traitement par un ADMIN ou OPERATIONS_MANAGER
+ *
+ * @returns Nombre de devis en attente de traitement
+ */
+export async function countQuotesAwaitingTreatmentAction(): Promise<
+  ActionResult<number>
+> {
+  try {
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Seuls les ADMIN et OPERATIONS_MANAGER peuvent voir cette notification
+    const canSeeNotifications =
+      userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+
+    if (!canSeeNotifications) {
+      return { success: true, data: 0 };
+    }
+
+    // Compter les devis SENT ou ACCEPTED (en attente de traitement)
+    const count = await prisma.quote.count({
+      where: {
+        status: {
+          in: ['SENT', 'ACCEPTED'],
+        },
+      },
+    });
+
+    return { success: true, data: count };
+  } catch (error) {
+    console.error('Error counting quotes awaiting treatment:', error);
+    return { success: false, error: 'Erreur lors du comptage des devis' };
+  }
+}
+
+/**
+ * Compter les devis en cours de traitement
+ *
+ * Compte les devis avec statut IN_TREATMENT
+ *
+ * @returns Nombre de devis en cours de traitement
+ */
+export async function countQuotesInTreatmentAction(): Promise<
+  ActionResult<number>
+> {
+  try {
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Seuls les ADMIN et OPERATIONS_MANAGER peuvent voir cette notification
+    const canSeeNotifications =
+      userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+
+    if (!canSeeNotifications) {
+      return { success: true, data: 0 };
+    }
+
+    // Compter les devis IN_TREATMENT
+    const count = await prisma.quote.count({
+      where: {
+        status: 'IN_TREATMENT',
+      },
+    });
+
+    return { success: true, data: count };
+  } catch (error) {
+    console.error('Error counting quotes in treatment:', error);
+    return { success: false, error: 'Erreur lors du comptage des devis' };
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ACTIONS CRÉATION SANS COMPTE (GUEST QUOTE)
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Génère un token de suivi unique pour les devis guest
+ *
+ * Utilise crypto.randomUUID() pour garantir l'unicité
+ * Format: UUID sans tirets (32 caractères alphanumériques)
+ *
+ * @returns Token unique pour le suivi public
+ *
+ * @example
+ * "a1b2c3d4e5f6789012345678abcdef12"
+ */
+function generateGuestTrackingToken(): string {
+  return crypto.randomUUID().replace(/-/g, '');
+}
+
+/**
+ * Calcule la date d'expiration du token (72h à partir de maintenant)
+ *
+ * Après 72h, le visiteur doit créer un compte pour continuer
+ * à suivre son devis
+ *
+ * @returns Date d'expiration du token
+ */
+function getTokenExpirationDate(): Date {
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 72); // Validité 72h
+  return expiresAt;
+}
+
+/**
+ * Action : Créer un devis SANS compte (visiteur)
+ *
+ * User Story :
+ * En tant que visiteur, je veux demander un devis sans créer de compte
+ * pour évaluer rapidement le coût d'une expédition
+ *
+ * Workflow :
+ * 1. Validation des données avec Zod (createGuestQuoteSchema)
+ * 2. Génération du numéro de devis et du token de suivi (72h)
+ * 3. Calcul automatique du coût estimé
+ * 4. Création dans la DB avec userId = null (orphelin)
+ * 5. Retour du token et numéro pour email de confirmation
+ *
+ * Après création :
+ * - Email de confirmation envoyé avec lien de suivi
+ * - Si l'utilisateur crée un compte avec le même email → rattachement auto
+ *
+ * @param data - Données du formulaire de demande de devis
+ * @returns Succès avec token et numéro de devis, ou erreur
+ *
+ * @permissions Aucune - Action publique
+ *
+ * @example
+ * const result = await createGuestQuoteAction({
+ *   contactEmail: 'client@example.com',
+ *   originCountry: 'FR',
+ *   destinationCountry: 'BF',
+ *   cargoType: 'GENERAL',
+ *   weight: 500,
+ *   transportMode: ['SEA', 'ROAD'],
+ * });
+ */
+export async function createGuestQuoteAction(
+  data: CreateGuestQuoteInput
+): Promise<ActionResult<{
+  id: string;
+  quoteNumber: string;
+  trackingToken: string;
+  estimatedCost: number;
+}>> {
+  try {
+    // 1. Validation des données avec le schéma Zod
+    const validated = createGuestQuoteSchema.parse(data);
+
+    // 2. Générer les identifiants uniques
+    const quoteNumber = await generateQuoteNumber();
+    const trackingToken = generateGuestTrackingToken();
+    const tokenExpiresAt = getTokenExpirationDate();
+
+    console.log('🔧 [createGuestQuote] Création avec:', {
+      quoteNumber,
+      trackingToken,
+      tokenExpiresAt,
+      contactEmail: validated.contactEmail,
+    });
+
+    // 3. Calculer le coût estimé automatiquement
+    const estimationResult = await calculateQuoteEstimateAction({
+      originCountry: validated.originCountry,
+      destinationCountry: validated.destinationCountry,
+      cargoType: validated.cargoType,
+      weight: validated.weight,
+      length: validated.length || 0,
+      width: validated.width || 0,
+      height: validated.height || 0,
+      transportMode: validated.transportMode,
+      priority: validated.priority,
+    });
+
+    const estimatedCost = estimationResult.success && estimationResult.data
+      ? estimationResult.data.estimatedCost
+      : 0;
+
+    // 4. Date de validité : 30 jours
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    // 5. Créer le devis (utilise prisma standard car pas de session)
+    const quote = await prisma.quote.create({
+      data: {
+        // Identifiants
+        quoteNumber,
+        trackingToken,
+        tokenExpiresAt,
+
+        // Contact (pour matching lors de l'inscription)
+        contactEmail: validated.contactEmail,
+        contactPhone: validated.contactPhone,
+        contactName: validated.contactName,
+
+        // Route
+        originCountry: validated.originCountry,
+        destinationCountry: validated.destinationCountry,
+
+        // Marchandise
+        cargoType: validated.cargoType,
+        weight: validated.weight,
+        length: validated.length || null,
+        width: validated.width || null,
+        height: validated.height || null,
+
+        // Transport
+        transportMode: validated.transportMode,
+
+        // Financier
+        estimatedCost,
+        currency: 'EUR',
+        validUntil,
+
+        // Statut initial : SENT (car demandé par un visiteur)
+        status: 'SENT',
+
+        // Métadonnées guest
+        // userId: null (pas connecté)
+        // companyId: null (pas rattaché)
+        // createdById: null (création publique)
+        isAttachedToAccount: false,
+      },
+    });
+
+    console.log('✅ [createGuestQuote] Devis créé:', {
+      id: quote.id,
+      quoteNumber: quote.quoteNumber,
+      trackingToken: quote.trackingToken,
+      estimatedCost: quote.estimatedCost,
+    });
+
+    // 6. TODO: Envoyer email de confirmation (via Inngest)
+    // L'email contiendra :
+    // - Numéro de devis
+    // - Coût estimé
+    // - Lien de suivi : /quotes/track/[token]
+    // - Invitation à créer un compte
+
+    // 7. Revalider la liste des devis (pour les agents)
+    revalidatePath('/dashboard/quotes');
+
+    return {
+      success: true,
+      data: {
+        id: quote.id,
+        quoteNumber: quote.quoteNumber,
+        trackingToken: quote.trackingToken,
+        estimatedCost: quote.estimatedCost,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors de la création du devis guest:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Données invalides. Veuillez vérifier tous les champs.',
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la création du devis.',
+    };
+  }
+}
+
+/**
+ * Action : Suivre un devis via son token public
+ *
+ * User Story :
+ * En tant qu'utilisateur ayant demandé un devis sans compte,
+ * je veux suivre l'état de mon devis via le lien reçu par email
+ *
+ * Workflow :
+ * 1. Validation du token (format CUID)
+ * 2. Recherche du devis par trackingToken
+ * 3. Vérification de l'expiration du token (72h)
+ * 4. Retour des informations du devis
+ *
+ * URL : /quotes/track/[token]
+ * Validité : 72h après création
+ *
+ * @param input - Token de suivi
+ * @returns Données du devis ou erreur
+ *
+ * @permissions Aucune - Action publique (protégée par token unique)
+ *
+ * @example
+ * const result = await trackQuoteByTokenAction({
+ *   trackingToken: 'a1b2c3d4e5f6789012345678abcdef12',
+ * });
+ */
+export async function trackQuoteByTokenAction(
+  input: TrackQuoteByTokenInput
+): Promise<ActionResult<{
+  id: string;
+  quoteNumber: string;
+  status: string;
+  originCountry: string;
+  destinationCountry: string;
+  cargoType: string;
+  weight: number;
+  transportMode: string[];
+  estimatedCost: number;
+  currency: string;
+  validUntil: Date;
+  createdAt: Date;
+  contactEmail: string;
+  contactName: string | null;
+  isExpired: boolean;
+  tokenExpired: boolean;
+}>> {
+  try {
+    // 1. Validation du token
+    const validated = trackQuoteByTokenSchema.parse(input);
+
+    // 2. Rechercher le devis par token (prisma standard, pas enhanced)
+    const quote = await prisma.quote.findUnique({
+      where: {
+        trackingToken: validated.trackingToken,
+      },
+    });
+
+    if (!quote) {
+      return {
+        success: false,
+        error: 'Devis introuvable. Vérifiez votre lien de suivi.',
+      };
+    }
+
+    // 3. Vérifier si le token a expiré
+    const tokenExpired = new Date() > quote.tokenExpiresAt;
+
+    if (tokenExpired) {
+      return {
+        success: false,
+        error: 'Votre lien de suivi a expiré (validité 72h). Créez un compte pour continuer à suivre votre devis.',
+      };
+    }
+
+    // 4. Vérifier si le devis lui-même est expiré
+    const isExpired = new Date() > quote.validUntil;
+
+    return {
+      success: true,
+      data: {
+        id: quote.id,
+        quoteNumber: quote.quoteNumber,
+        status: quote.status,
+        originCountry: quote.originCountry,
+        destinationCountry: quote.destinationCountry,
+        cargoType: quote.cargoType,
+        weight: quote.weight,
+        transportMode: quote.transportMode,
+        estimatedCost: quote.estimatedCost,
+        currency: quote.currency,
+        validUntil: quote.validUntil,
+        createdAt: quote.createdAt,
+        contactEmail: quote.contactEmail,
+        contactName: quote.contactName,
+        isExpired,
+        tokenExpired: false,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors du suivi du devis:', error);
+
+    if (error instanceof Error) {
+      if (error.name === 'ZodError') {
+        return {
+          success: false,
+          error: 'Token de suivi invalide.',
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors du suivi du devis.',
+    };
+  }
+}
+
+/**
+ * Action : Rattacher les devis orphelins à un compte utilisateur
+ *
+ * User Story US-1.3 :
+ * En tant qu'utilisateur qui vient de créer un compte,
+ * mes devis précédents (créés sans compte) sont automatiquement
+ * rattachés à mon compte si l'email ou le téléphone correspondent
+ *
+ * Workflow :
+ * 1. Récupérer l'email et téléphone de l'utilisateur
+ * 2. Rechercher les devis orphelins (userId = null) avec matching email/phone
+ * 3. Pour chaque devis trouvé :
+ *    - userId = nouvel utilisateur
+ *    - isAttachedToAccount = true
+ *    - companyId = celui de l'utilisateur (si existant)
+ * 4. Retour du nombre de devis rattachés
+ *
+ * Cette fonction est appelée automatiquement lors de :
+ * - Création de compte (callback Better Auth)
+ * - Première connexion après création de compte
+ *
+ * @param userId - ID de l'utilisateur nouvellement créé/connecté
+ * @returns Nombre de devis rattachés
+ *
+ * @permissions Appelée par le système (auth callbacks)
+ *
+ * @example
+ * // Dans le callback de création de compte (auth.ts)
+ * await attachQuotesToUserAction(newUser.id);
+ */
+export async function attachQuotesToUserAction(
+  userId: string
+): Promise<ActionResult<{ count: number; quoteNumbers: string[] }>> {
+  try {
+    // 1. Récupérer les informations de l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        companyId: true,
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        error: 'Utilisateur introuvable',
+      };
+    }
+
+    // 2. Rechercher les devis orphelins avec email ou phone matchant
+    const orphanedQuotes = await prisma.quote.findMany({
+      where: {
+        AND: [
+          { userId: null }, // Pas encore rattaché
+          {
+            OR: [
+              { contactEmail: user.email },
+              ...(user.phone ? [{ contactPhone: user.phone }] : []),
+            ],
+          },
+        ],
+      },
+    });
+
+    if (orphanedQuotes.length === 0) {
+      console.log('📭 [attachQuotes] Aucun devis orphelin trouvé pour:', user.email);
+      return {
+        success: true,
+        data: { count: 0, quoteNumbers: [] },
+      };
+    }
+
+    console.log(`📬 [attachQuotes] ${orphanedQuotes.length} devis orphelins trouvés pour:`, user.email);
+
+    // 3. Rattacher chaque devis
+    const attachedQuoteNumbers: string[] = [];
+
+    await Promise.all(
+      orphanedQuotes.map(async (quote) => {
+        // Mise à jour du devis
+        await prisma.quote.update({
+          where: { id: quote.id },
+          data: {
+            userId: user.id,
+            companyId: user.companyId,
+            isAttachedToAccount: true,
+          },
+        });
+
+        // Identifier le critère de matching pour les logs
+        const matchedBy = quote.contactEmail === user.email ? 'email' : 'phone';
+
+        console.log(`🔗 [attachQuotes] Devis ${quote.quoteNumber} rattaché via ${matchedBy}`);
+        attachedQuoteNumbers.push(quote.quoteNumber);
+      })
+    );
+
+    // 4. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+
+    return {
+      success: true,
+      data: {
+        count: attachedQuoteNumbers.length,
+        quoteNumbers: attachedQuoteNumbers,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors du rattachement des devis:', error);
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors du rattachement des devis.',
+    };
   }
 }

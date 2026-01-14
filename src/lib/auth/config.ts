@@ -213,11 +213,52 @@ export const auth = betterAuth({
   callbacks: {
     /**
      * Callback après création d'un utilisateur
-     * Utilisé pour assigner le rôle par défaut et autres données
+     *
+     * Ce callback est appelé après la création d'un nouvel utilisateur.
+     * Il est utilisé pour :
+     * 1. Rattacher automatiquement les demandes orphelines (devis, enlèvements, achats délégués)
+     *    créées avant inscription mais avec le même email/téléphone
+     *
+     * @param user - Nouvel utilisateur créé
+     * @param account - Compte lié (credentials, oauth, etc.)
      */
     async user({ user, account }) {
       // Le rôle par défaut CLIENT est déjà défini dans additionalFields
       // Pas besoin de l'assigner ici
+
+      // Rattachement automatique des demandes orphelines
+      // Cette opération est idempotente : si l'utilisateur a déjà des demandes rattachées
+      // ou s'il n'y a pas de demandes orphelines, rien ne se passe
+      try {
+        console.log(`📧 [Auth] Vérification des demandes orphelines pour: ${user.email}`);
+
+        // Import dynamique pour éviter les dépendances circulaires
+        const { attachQuotesToUserAction } = await import('@/modules/quotes/actions/quote.actions');
+        const { attachPickupToAccount } = await import('@/modules/pickups/actions/pickup.actions');
+        const { attachPurchaseToAccount } = await import('@/modules/purchases/actions/purchase.actions');
+
+        // Rattacher les devis orphelins
+        const quotesResult = await attachQuotesToUserAction(user.id);
+        if (quotesResult.success && quotesResult.data?.count > 0) {
+          console.log(`🔗 [Auth] ${quotesResult.data.count} devis rattachés:`, quotesResult.data.quoteNumbers);
+        }
+
+        // Rattacher les demandes d'enlèvement orphelines
+        const pickupsResult = await attachPickupToAccount(user.id);
+        if (pickupsResult.success && pickupsResult.data?.count > 0) {
+          console.log(`🔗 [Auth] ${pickupsResult.data.count} demandes d'enlèvement rattachées`);
+        }
+
+        // Rattacher les achats délégués orphelins
+        const purchasesResult = await attachPurchaseToAccount(user.id);
+        if (purchasesResult.success && purchasesResult.data?.count > 0) {
+          console.log(`🔗 [Auth] ${purchasesResult.data.count} achats délégués rattachés`);
+        }
+      } catch (error) {
+        // Log l'erreur mais ne bloque pas la création du compte
+        console.error('[Auth] Erreur lors du rattachement des demandes orphelines:', error);
+      }
+
       return user;
     },
 

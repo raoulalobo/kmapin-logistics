@@ -124,6 +124,8 @@ export async function uploadDocumentAction(
     );
 
     // Créer l'entrée en base de données
+    // PROPRIÉTÉ HYBRIDE : si l'utilisateur a une company, le document appartient à la company
+    // Sinon, le document appartient directement à l'utilisateur (particulier)
     const document = await prisma.document.create({
       data: {
         name: data.name,
@@ -133,7 +135,8 @@ export async function uploadDocumentAction(
         mimeType: data.mimeType,
         type: data.type,
         description: data.description,
-        companyId: session.user.companyId!,
+        companyId: session.user.companyId ?? null, // NULL si particulier
+        userId: session.user.companyId ? null : session.user.id, // userId si pas de company
         uploadedBy: session.user.id,
         shipmentId: data.shipmentId,
         invoiceId: data.invoiceId,
@@ -238,21 +241,18 @@ export async function getAllDocumentsAction(params?: {
     const { page = 1, limit = 20, type, search } = params || {};
     const skip = (page - 1) * limit;
 
-    // Si l'utilisateur n'a pas de companyId, retourner une liste vide
-    if (!session.user.companyId) {
-      return {
-        success: true,
-        data: {
-          documents: [],
-          total: 0,
-        },
-      };
-    }
+    // PROPRIÉTÉ HYBRIDE : construire les conditions selon le type de propriétaire
+    // - Si l'utilisateur a une company : filtrer par companyId
+    // - Si l'utilisateur n'a pas de company (particulier) : filtrer par userId
+    const where: any = {};
 
-    // Construire les conditions de filtrage
-    const where: any = {
-      companyId: session.user.companyId,
-    };
+    if (session.user.companyId) {
+      // Utilisateur avec company : voir les documents de sa company
+      where.companyId = session.user.companyId;
+    } else {
+      // Particulier sans company : voir uniquement ses propres documents
+      where.userId = session.user.id;
+    }
 
     if (type) {
       where.type = type;
