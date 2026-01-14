@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useCountries } from '@/modules/countries';
 import {
   User,
   MapPin,
@@ -86,18 +87,11 @@ const TIME_SLOT_OPTIONS: { value: PickupTimeSlot; label: string }[] = [
 ];
 
 /**
- * Pays supportés
+ * Pays supportés - REMPLACÉ par useCountries() hook
+ * La liste est maintenant chargée dynamiquement depuis la base de données
+ * avec cache React Query pour optimiser les performances.
  */
-const COUNTRIES = [
-  { code: 'FR', name: 'France' },
-  { code: 'BE', name: 'Belgique' },
-  { code: 'LU', name: 'Luxembourg' },
-  { code: 'CH', name: 'Suisse' },
-  { code: 'DE', name: 'Allemagne' },
-  { code: 'ES', name: 'Espagne' },
-  { code: 'IT', name: 'Italie' },
-  { code: 'GB', name: 'Royaume-Uni' },
-];
+// const COUNTRIES = [...]; // DEPRECATED - Utilisez useCountries() à la place
 
 // ============================================
 // HELPERS
@@ -162,6 +156,9 @@ export function PickupForm({
   const router = useRouter();
   const { toast } = useToast();
   const [showSpecificTime, setShowSpecificTime] = useState(false);
+
+  // Charger la liste des pays actifs depuis la base de données
+  const { data: countries, isLoading: isLoadingCountries } = useCountries();
 
   // Sélectionner le schéma selon le mode
   const schema = mode === 'guest' ? createGuestPickupSchema : createPickupSchema;
@@ -387,11 +384,21 @@ export function PickupForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {COUNTRIES.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
+                        {isLoadingCountries ? (
+                          <SelectItem value="loading" disabled>
+                            Chargement des pays...
                           </SelectItem>
-                        ))}
+                        ) : countries && countries.length > 0 ? (
+                          countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-countries" disabled>
+                            Aucun pays disponible
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
