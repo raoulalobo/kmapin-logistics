@@ -13,3 +13,12 @@ export {
 
 // Formulaires
 export { PurchaseForm } from './purchase-form';
+
+// Actions et menus
+export { PurchaseActionsMenu } from './purchase-actions-menu';
+
+// Timeline historique
+export {
+  PurchaseHistoryTimeline,
+  PurchaseHistoryTimelineCompact,
+} from './purchase-history-timeline';

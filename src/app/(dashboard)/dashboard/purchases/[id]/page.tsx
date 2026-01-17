@@ -22,12 +22,15 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
-import { PurchaseStatusBadgeWithIcon } from '@/components/purchases';
+import { ArrowLeft } from 'lucide-react';
+import {
+  PurchaseStatusBadgeWithIcon,
+  PurchaseActionsMenu,
+  PurchaseHistoryTimeline,
+} from '@/components/purchases';
 
 // ============================================
 // TYPES
@@ -103,6 +106,11 @@ export default async function PurchaseDetailsPage({ params }: PageProps) {
     session.user.role === 'OPERATIONS_MANAGER' ||
     session.user.role === 'FINANCE_MANAGER';
 
+  // Déterminer si l'utilisateur peut gérer les achats (actions de statut)
+  const canManagePurchases =
+    session.user.role === 'ADMIN' ||
+    session.user.role === 'OPERATIONS_MANAGER';
+
   return (
     <div className="space-y-6">
       {/* En-tête avec navigation */}
@@ -124,6 +132,14 @@ export default async function PurchaseDetailsPage({ params }: PageProps) {
           </div>
         </div>
 
+        {/* Actions de gestion du statut (ADMIN / OPERATIONS_MANAGER uniquement) */}
+        {canManagePurchases && (
+          <PurchaseActionsMenu
+            purchaseId={purchase.id}
+            currentStatus={purchase.status}
+            userRole={session.user.role}
+          />
+        )}
       </div>
 
       {/* Grid à 2 colonnes sur desktop */}
@@ -374,54 +390,9 @@ export default async function PurchaseDetailsPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Colonne droite : Historique */}
+        {/* Colonne droite : Historique (avec icônes et badges comme pickups) */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique</CardTitle>
-              <CardDescription>
-                Suivi chronologique des événements
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {purchase.logs.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">
-                    Aucun événement enregistré.
-                  </p>
-                ) : (
-                  <div className="relative space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-border">
-                    {purchase.logs.map((log, index) => (
-                      <div key={log.id} className="relative pl-8">
-                        <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-primary border-2 border-background" />
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">{log.eventType}</p>
-                          {log.oldStatus && log.newStatus && (
-                            <p className="text-xs text-muted-foreground">
-                              {log.oldStatus} → {log.newStatus}
-                            </p>
-                          )}
-                          {log.notes && (
-                            <p className="text-xs text-muted-foreground">
-                              {log.notes}
-                            </p>
-                          )}
-                          {log.changedBy && (
-                            <p className="text-xs text-muted-foreground">
-                              Par: {log.changedBy.name}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(log.createdAt).toLocaleString('fr-FR')}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <PurchaseHistoryTimeline logs={purchase.logs as any} />
         </div>
       </div>
     </div>
