@@ -223,7 +223,7 @@ export type CreateGuestPickupInput = z.infer<typeof createGuestPickupSchema>;
  *
  * Différences avec guest :
  * - userId automatiquement rempli depuis la session
- * - companyId déduit de la session
+ * - clientId déduit de la session
  * - isAttachedToAccount = true dès la création
  * - Pré-remplissage possible depuis le profil
  */

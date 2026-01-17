@@ -63,14 +63,9 @@ export default async function PurchaseDetailsPage({ params }: PageProps) {
           email: true,
         },
       },
-      company: {
+      client: {
         select: {
           name: true,
-        },
-      },
-      shipment: {
-        select: {
-          trackingNumber: true,
         },
       },
       logs: {
@@ -129,15 +124,6 @@ export default async function PurchaseDetailsPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Lien vers l'expédition liée (si existe) */}
-        {purchase.shipmentId && purchase.shipment && (
-          <Button variant="outline" asChild>
-            <Link href={`/dashboard/shipments/${purchase.shipmentId}`}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Voir l&apos;expédition
-            </Link>
-          </Button>
-        )}
       </div>
 
       {/* Grid à 2 colonnes sur desktop */}

@@ -144,7 +144,7 @@ export default async function PublicQuoteTrackingPage({ params }: PageProps) {
           email: true,
         },
       },
-      company: {
+      client: {
         select: {
           name: true,
         },

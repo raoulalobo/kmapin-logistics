@@ -109,7 +109,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
   const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
     toastTitle: 'Formulaire incomplet',
     fieldLabels: {
-      companyId: 'Client',
+      clientId: 'Client',
       dueDate: 'Date d\'échéance',
       currency: 'Devise',
       taxRate: 'Taux de TVA',
@@ -146,7 +146,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
 
         // Pré-remplir le formulaire
         form.reset({
-          companyId: invoice.companyId,
+          clientId: invoice.clientId,
           dueDate: new Date(invoice.dueDate).toISOString().slice(0, 16),
           currency: invoice.currency,
           taxRate: invoice.taxRate,
@@ -305,7 +305,7 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="companyId"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client *</FormLabel>

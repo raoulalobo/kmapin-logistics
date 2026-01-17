@@ -96,7 +96,7 @@ export default function NewInvoicePage() {
   const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
     toastTitle: 'Formulaire incomplet',
     fieldLabels: {
-      companyId: 'Client',
+      clientId: 'Client',
       dueDate: 'Date d\'échéance',
       issueDate: 'Date d\'émission',
       items: 'Lignes de facture',
@@ -210,7 +210,7 @@ export default function NewInvoicePage() {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="companyId"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client *</FormLabel>

@@ -58,7 +58,7 @@ export default async function UsersPage({
     search?: string;
     role?: string;
     status?: string;
-    companyId?: string;
+    clientId?: string;
   }>;
 }) {
   // Vérifier que l'utilisateur est admin
@@ -75,7 +75,7 @@ export default async function UsersPage({
     search: params.search,
     role: params.role as any,
     status: (params.status as any) || 'all',
-    companyId: params.companyId,
+    clientId: params.clientId,
   });
 
   // Gestion des erreurs
@@ -277,7 +277,7 @@ export default async function UsersPage({
                     <Buildings className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Entreprise :</span>
                     <span className="truncate">
-                      {user.company?.name || 'Aucune'}
+                      {user.client?.name || 'Aucune'}
                     </span>
                   </div>
 
@@ -342,7 +342,7 @@ export default async function UsersPage({
                   <UserCompanyAction
                     userId={user.id}
                     userName={user.name}
-                    currentCompanyId={user.companyId}
+                    currentClientId={user.clientId}
                   >
                     <Button variant="outline" size="sm" className="w-full">
                       <Buildings className="mr-2 h-3 w-3" />

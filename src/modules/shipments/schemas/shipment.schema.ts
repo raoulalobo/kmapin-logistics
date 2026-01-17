@@ -27,7 +27,7 @@ import {
  */
 export const shipmentSchema = z.object({
   // === Informations du client ===
-  companyId: z
+  clientId: z
     .string()
     .cuid('ID de compagnie invalide'),
 
@@ -268,7 +268,7 @@ export const shipmentSearchSchema = z.object({
   status: z.nativeEnum(ShipmentStatus).optional(),
 
   // Filtres par compagnie
-  companyId: z.string().cuid().optional(),
+  clientId: z.string().cuid().optional(),
 
   // Filtres par dates
   startDate: z.string().datetime().optional(),

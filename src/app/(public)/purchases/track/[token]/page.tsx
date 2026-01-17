@@ -70,7 +70,7 @@ export default async function PublicPurchaseTrackingPage({ params }: PageProps) 
           email: true,
         },
       },
-      company: {
+      client: {
         select: {
           name: true,
         },

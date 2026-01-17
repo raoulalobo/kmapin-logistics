@@ -123,7 +123,7 @@ export default async function ReportsPage() {
       {/* KPIs Opérationnels - Expéditions */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Performance Opérationnelle</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <KPICard
             title="Expéditions totales"
             value={stats.totalShipments}
@@ -138,13 +138,6 @@ export default async function ReportsPage() {
             value={stats.activeShipments}
             subtitle="En cours de traitement"
             icon={Package}
-          />
-
-          <KPICard
-            title="Taux de livraison"
-            value={`${stats.deliveryRate.toFixed(1)}%`}
-            subtitle="Livraisons réussies"
-            icon={CheckCircle}
           />
 
           <KPICard

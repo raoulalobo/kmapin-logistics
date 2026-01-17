@@ -195,8 +195,8 @@ export default async function QuoteDetailsPage({
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Client</p>
-              <p className="text-lg font-semibold">{quote.company.name}</p>
-              <p className="text-sm text-muted-foreground">{quote.company.email}</p>
+              <p className="text-lg font-semibold">{quote.client.name}</p>
+              <p className="text-sm text-muted-foreground">{quote.client.email}</p>
             </div>
           </CardContent>
         </Card>

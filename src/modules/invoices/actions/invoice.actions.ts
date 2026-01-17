@@ -96,7 +96,7 @@ export async function createInvoiceAction(
 
     // Extraire et valider les données
     const rawData = {
-      companyId: formData.get('companyId'),
+      clientId: formData.get('clientId'),
       issueDate: formData.get('issueDate') || undefined,
       dueDate: formData.get('dueDate'),
       subtotal: Number(formData.get('subtotal')),
@@ -116,15 +116,15 @@ export async function createInvoiceAction(
     const validatedData = invoiceSchema.parse(rawData);
 
     // Vérifier que la compagnie existe
-    const company = await prisma.company.findUnique({
-      where: { id: validatedData.companyId },
+    const company = await prisma.client.findUnique({
+      where: { id: validatedData.clientId },
     });
 
     if (!company) {
       return {
         success: false,
         error: 'Compagnie introuvable',
-        field: 'companyId',
+        field: 'clientId',
       };
     }
 
@@ -150,7 +150,7 @@ export async function createInvoiceAction(
     const invoice = await prisma.invoice.create({
       data: {
         invoiceNumber,
-        companyId: validatedData.companyId,
+        clientId: validatedData.clientId,
         issueDate: validatedData.issueDate ? new Date(validatedData.issueDate) : new Date(),
         dueDate: new Date(validatedData.dueDate),
         subtotal: validatedData.subtotal,
@@ -228,7 +228,7 @@ export async function createInvoiceAction(
  *
  * @param page - Numéro de page (optionnel, défaut: 1)
  * @param limit - Nombre de résultats par page (optionnel, défaut: 10)
- * @param companyId - Filtrer par compagnie (optionnel)
+ * @param clientId - Filtrer par compagnie (optionnel)
  * @param status - Filtrer par statut (optionnel)
  * @param search - Terme de recherche (numéro facture, client) (optionnel)
  * @returns Liste des factures
@@ -238,7 +238,7 @@ export async function createInvoiceAction(
 export async function getInvoicesAction(
   page = 1,
   limit = 10,
-  companyId?: string,
+  clientId?: string,
   status?: string,
   search?: string
 ) {
@@ -269,16 +269,16 @@ export async function getInvoicesAction(
 
     // Si l'utilisateur est CLIENT, il ne voit que ses propres factures
     if (canReadOwn && !canReadAll) {
-      if (!session.user.companyId) {
+      if (!session.user.clientId) {
         return {
           success: false,
           error: 'Votre compte n\'est pas associé à une compagnie',
         };
       }
-      where.companyId = session.user.companyId;
-    } else if (companyId) {
-      // Sinon, filtrer par companyId si fourni
-      where.companyId = companyId;
+      where.clientId = session.user.clientId;
+    } else if (clientId) {
+      // Sinon, filtrer par clientId si fourni
+      where.clientId = clientId;
     }
 
     // Filtrer par statut si fourni
@@ -290,7 +290,7 @@ export async function getInvoicesAction(
     if (search && search.trim()) {
       where.OR = [
         { invoiceNumber: { contains: search, mode: 'insensitive' } },
-        { company: { name: { contains: search, mode: 'insensitive' } } },
+        { client: { name: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -302,7 +302,7 @@ export async function getInvoicesAction(
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          company: {
+          client: {
             select: {
               id: true,
               name: true,
@@ -398,10 +398,11 @@ export async function getInvoiceAction(id: string) {
     }
 
     // Récupérer la facture avec toutes les relations
+    // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: {
-        company: true,
+        client: true,
         createdBy: {
           select: {
             id: true,
@@ -424,7 +425,7 @@ export async function getInvoiceAction(id: string) {
 
     // Si l'utilisateur est CLIENT, vérifier qu'il peut accéder à cette facture
     if (canReadOwn && !canReadAll) {
-      if (session.user.companyId !== invoice.companyId) {
+      if (session.user.clientId !== invoice.clientId) {
         return {
           success: false,
           error: 'Vous n\'avez pas accès à cette facture',
@@ -505,7 +506,7 @@ export async function updateInvoiceAction(
     // Extraire les données
     const rawData: any = {};
     const simpleFields = [
-      'companyId',
+      'clientId',
       'issueDate',
       'dueDate',
       'currency',

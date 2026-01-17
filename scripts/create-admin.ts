@@ -2,8 +2,8 @@
  * Script de création d'un utilisateur administrateur
  *
  * Ce script crée :
- * - Une entreprise "Faso Fret Admin"
- * - Un utilisateur avec le rôle ADMIN
+ * - Un Client de type COMPANY "Faso Fret Admin"
+ * - Un utilisateur avec le rôle ADMIN rattaché à ce client
  * - Un mot de passe hashé de manière sécurisée
  *
  * Usage:
@@ -20,7 +20,7 @@ import bcrypt from 'bcrypt';
 const DEFAULT_EMAIL = 'admin@kmapin.com';
 const DEFAULT_PASSWORD = 'Admin123!';
 const DEFAULT_NAME = 'Administrateur';
-const DEFAULT_COMPANY_NAME = 'Faso Fret Admin';
+const DEFAULT_CLIENT_NAME = 'Faso Fret Admin';  // Nom du Client (type COMPANY)
 
 // Nombre de rounds pour bcrypt (10 est le standard, plus = plus sécurisé mais plus lent)
 const BCRYPT_ROUNDS = 10;
@@ -38,7 +38,7 @@ async function createAdmin() {
     const email = process.env.EMAIL || DEFAULT_EMAIL;
     const password = process.env.PASSWORD || DEFAULT_PASSWORD;
     const name = process.env.NAME || DEFAULT_NAME;
-    const companyName = process.env.COMPANY_NAME || DEFAULT_COMPANY_NAME;
+    const clientName = process.env.CLIENT_NAME || DEFAULT_CLIENT_NAME;
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findUnique({
@@ -54,38 +54,40 @@ async function createAdmin() {
       process.exit(1);
     }
 
-    // Étape 1: Créer une entreprise pour l'admin
-    console.log(`📦 Création de l'entreprise "${companyName}"...`);
-    const company = await prisma.company.create({
+    // Étape 1: Créer un Client de type COMPANY pour l'admin
+    // Dans le nouveau modèle unifié, Company est remplacé par Client avec type = COMPANY
+    console.log(`📦 Création du client entreprise "${clientName}"...`);
+    const client = await prisma.client.create({
       data: {
-        name: companyName,
-        legalName: companyName,
+        type: 'COMPANY',            // Type discriminant : entreprise
+        name: clientName,
+        legalName: clientName,      // Raison sociale (spécifique COMPANY)
         email: email,
         phone: '+33 1 23 45 67 89',
         address: '123 Avenue de la Logistique',
         city: 'Paris',
         postalCode: '75001',
         country: 'France',
-        taxId: 'FR12345678901',
+        taxId: 'FR12345678901',     // SIRET/TVA (spécifique COMPANY)
         website: 'https://kmapin.com',
       },
     });
-    console.log(`✅ Entreprise créée avec l'ID: ${company.id}\n`);
+    console.log(`✅ Client entreprise créé avec l'ID: ${client.id}\n`);
 
     // Étape 2: Hasher le mot de passe
     console.log('🔐 Hashage du mot de passe...');
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     console.log('✅ Mot de passe hashé avec succès\n');
 
-    // Étape 3: Créer l'utilisateur admin
+    // Étape 3: Créer l'utilisateur admin rattaché au Client
     console.log(`👤 Création de l'utilisateur "${name}"...`);
     const user = await prisma.user.create({
       data: {
         email,
         name,
         role: 'ADMIN',
-        companyId: company.id,
-        emailVerified: true, // Vérifier l'email automatiquement pour l'admin
+        clientId: client.id,  // Rattachement au Client (type COMPANY)
+        emailVerified: true,  // Vérifier l'email automatiquement pour l'admin
       },
     });
     console.log(`✅ Utilisateur créé avec l'ID: ${user.id}\n`);
@@ -112,7 +114,7 @@ async function createAdmin() {
     console.log('📧 Email:        ', email);
     console.log('🔑 Mot de passe: ', password);
     console.log('👤 Nom:          ', name);
-    console.log('🏢 Entreprise:   ', companyName);
+    console.log('🏢 Client:       ', clientName, '(type: COMPANY)');
     console.log('🎭 Rôle:         ', 'ADMIN');
     console.log('');
     console.log('🌐 Connexion:    http://localhost:3000/login');

@@ -44,7 +44,7 @@ export {
  *        data: {
  *          shipmentId: shipment.id,
  *          trackingNumber: shipment.trackingNumber,
- *          companyId: shipment.companyId,
+ *          clientId: shipment.clientId,    // ID du Client (COMPANY ou INDIVIDUAL)
  *          createdById: shipment.createdById,
  *        },
  *      });

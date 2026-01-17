@@ -43,11 +43,11 @@ datasource db {
  * Le contexte est fourni via enhance(prisma, { user: context })
  */
 type Auth {
-  id        String   @id      // ID de l'utilisateur (depuis Better Auth)
-  role      UserRole          // Rôle de l'utilisateur (ADMIN, CLIENT, etc.)
-  companyId String?           // ID de la company (pour multi-tenancy)
+  id       String   @id      // ID de l'utilisateur (depuis Better Auth)
+  role     UserRole          // Rôle de l'utilisateur (ADMIN, CLIENT, etc.)
+  clientId String?           // ID du client (COMPANY ou INDIVIDUAL) pour multi-tenancy
 
-  @@auth                       // Directive Zenstack : marque ce type comme contexte auth()
+  @@auth                      // Directive Zenstack : marque ce type comme contexte auth()
 }
 
 // ============================================
@@ -77,16 +77,14 @@ model User {
 
   // Champs business
   role        UserRole @default(CLIENT)
-  companyId   String?
-  company     Company? @relation(fields: [companyId], references: [id])
+  clientId    String?  // ID du client (COMPANY ou INDIVIDUAL) - NULL uniquement pour ADMIN système
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   permissions Json?
 
   // Relations
   createdShipments   Shipment[] @relation("CreatedBy")
-  userShipments      Shipment[] @relation("UserShipments") // Expéditions de cet utilisateur (propriété hybride)
   createdInvoices    Invoice[]  @relation("CreatedBy")
-  userInvoices       Invoice[]  @relation("UserInvoices")  // Factures de cet utilisateur (propriété hybride)
-  userDocuments      Document[] @relation("UserDocuments")  // Documents de cet utilisateur (propriété hybride)
+  userDocuments      Document[] @relation("UserDocuments")   // Documents de cet utilisateur
   uploadedDocuments  Document[] @relation("UploadedDocuments")
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
   pricingConfigs     PricingConfig[] // Configurations de prix modifiées par cet utilisateur
@@ -114,14 +112,14 @@ model User {
   // Chaque user peut lire et modifier son propre profil
   @@allow('read,update', auth().id == id)
 
-  // Les managers peuvent lire les users de leur entreprise
-  @@allow('read', auth().companyId == companyId &&
+  // Les managers peuvent lire les users de leur client
+  @@allow('read', auth().clientId == clientId &&
     (auth().role == OPERATIONS_MANAGER || auth().role == FINANCE_MANAGER))
 
   // Par défaut, tout est interdit (principe de moindre privilège)
   @@deny('all', true)
 
-  @@index([companyId])
+  @@index([clientId])
   @@map("user") // Better Auth: nom de table minuscule
 }
 
@@ -131,6 +129,16 @@ enum UserRole {
   FINANCE_MANAGER
   CLIENT
   VIEWER
+}
+
+/**
+ * Type de client (discriminant pour table Client unifiée)
+ * - COMPANY : Entreprise (B2B) - avec taxId, legalName
+ * - INDIVIDUAL : Particulier (B2C) - avec firstName, lastName
+ */
+enum ClientType {
+  COMPANY     // Entreprise
+  INDIVIDUAL  // Particulier
 }
 
 /**
@@ -233,55 +241,106 @@ model Verification {
 }
 
 // ============================================
-// ENTREPRISES & CLIENTS
+// CLIENTS (Entreprises & Particuliers)
 // ============================================
 
 /**
- * Modèle Company (Entreprises/Clients)
- * - ADMIN : accès complet
- * - OPERATIONS_MANAGER/FINANCE_MANAGER : peuvent voir toutes les companies
- * - CLIENT/VIEWER : peuvent voir uniquement leur propre company
- * - Les users d'une company peuvent modifier certains champs de leur company
+ * Modèle Client unifié (Entreprises B2B + Particuliers B2C)
+ *
+ * Type discriminant : ClientType (COMPANY | INDIVIDUAL)
+ * - COMPANY : Entreprise avec taxId, legalName, website
+ * - INDIVIDUAL : Particulier avec firstName, lastName
+ *
+ * Access Control :
+ * - ADMIN : accès complet à tous les clients
+ * - OPERATIONS_MANAGER/FINANCE_MANAGER : lecture de tous les clients
+ * - CLIENT/VIEWER : lecture/modification de leur propre client uniquement
+ *
+ * Workflow création compte :
+ * - Particulier s'inscrit → Client INDIVIDUAL créé automatiquement
+ * - Admin crée user entreprise → Client COMPANY sélectionné/créé
+ * - Invité → Inscription → Rattachement demandes orphelines par email
  */
-model Company {
-  id         String   @id @default(cuid())
-  name       String
-  legalName  String?
-  taxId      String?  @unique
-  email      String
+model Client {
+  id         String     @id @default(cuid())
+
+  // ════════════════════════════════════════════
+  // TYPE DISCRIMINANT (Entreprise ou Particulier)
+  // ════════════════════════════════════════════
+
+  type       ClientType @default(INDIVIDUAL)
+
+  // ════════════════════════════════════════════
+  // CHAMPS COMMUNS (tous types de clients)
+  // ════════════════════════════════════════════
+
+  // Identité
+  name       String     // "Entreprise SARL" OU "Dupont Jean"
+  email      String     @unique
   phone      String?
+
+  // Adresse
   address    String
   city       String
   postalCode String?
-  country    String
-  website    String?
+  country    String     @default("FR")
+
+  // ════════════════════════════════════════════
+  // CHAMPS SPÉCIFIQUES AUX ENTREPRISES (type = COMPANY)
+  // NULL pour les particuliers
+  // ════════════════════════════════════════════
+
+  legalName  String?    // Raison sociale (ex: "Acme Corp SARL")
+  taxId      String?    @unique // SIRET, TVA intracommunautaire
+  website    String?    // Site web de l'entreprise
+
+  // ════════════════════════════════════════════
+  // CHAMPS SPÉCIFIQUES AUX PARTICULIERS (type = INDIVIDUAL)
+  // NULL pour les entreprises
+  // ════════════════════════════════════════════
+
+  firstName  String?    // Prénom du particulier
+  lastName   String?    // Nom de famille du particulier
+
+  // ════════════════════════════════════════════
+  // MÉTADONNÉES
+  // ════════════════════════════════════════════
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // Relations
-  users          User[]
-  shipments      Shipment[]
-  invoices       Invoice[]
-  quotes         Quote[]
-  documents       Document[]
-  transporters    Transporter[]
-  pickupRequests  PickupRequest[] // Demandes d'enlèvement de cette company
-  purchaseRequests PurchaseRequest[] // Demandes d'achat de cette company
+  // ════════════════════════════════════════════
+  // RELATIONS
+  // ════════════════════════════════════════════
 
-  // 🔐 Access Policies
+  users              User[]              // Utilisateurs rattachés à ce client
+  shipments          Shipment[]          // Expéditions du client
+  invoices           Invoice[]           // Factures du client
+  quotes             Quote[]             // Devis du client
+  documents          Document[]          // Documents du client
+  transporters       Transporter[]       // Transporteurs du client
+  pickupRequests     PickupRequest[]     // Demandes d'enlèvement
+  purchaseRequests   PurchaseRequest[]   // Demandes d'achat délégué
+
+  // ════════════════════════════════════════════
+  // ACCESS POLICIES
+  // ════════════════════════════════════════════
 
   // Les admins peuvent tout faire
   @@allow('all', auth().role == ADMIN)
 
-  // Les operations et finance managers peuvent lire toutes les companies
+  // Les operations et finance managers peuvent lire tous les clients
   @@allow('read', auth().role == OPERATIONS_MANAGER || auth().role == FINANCE_MANAGER)
 
-  // Les users d'une company peuvent lire et modifier leur company
-  @@allow('read,update', auth().companyId == id)
+  // Les users d'un client peuvent lire et modifier leur client
+  @@allow('read,update', auth().clientId == id)
 
   @@deny('all', true)
 
   @@index([taxId])
+  @@index([email])
+  @@index([type])
+  @@map("Client") // Nom de table en base de données
 }
 
 // ============================================
@@ -293,30 +352,23 @@ model Company {
  * - ADMIN : accès complet
  * - OPERATIONS_MANAGER : peut créer, lire, modifier toutes les expéditions
  * - FINANCE_MANAGER : peut lire toutes les expéditions
- * - CLIENT : peut lire uniquement les expéditions de sa company
- * - PARTICULIER : peut lire ses propres expéditions (via userId direct)
+ * - CLIENT : peut lire les expéditions de son client (COMPANY ou INDIVIDUAL)
  * - Le créateur peut modifier tant que status != DELIVERED
  *
- * PROPRIÉTÉ HYBRIDE :
- * - Si companyId != null : l'expédition appartient à la company
- * - Si companyId == null : l'expédition appartient directement au userId
+ * MODÈLE UNIFIÉ :
+ * - Toutes les expéditions appartiennent à un Client (type COMPANY ou INDIVIDUAL)
+ * - Plus de logique hybride companyId/userId
  */
 model Shipment {
   id             String   @id @default(cuid())
   trackingNumber String   @unique
 
   // ════════════════════════════════════════════
-  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // CLIENT (Entreprise ou Particulier)
   // ════════════════════════════════════════════
 
-  // Company (NULL si particulier sans entreprise)
-  companyId      String?
-  company        Company?  @relation(fields: [companyId], references: [id])
-
-  // Propriétaire direct (pour particuliers sans company)
-  // Si companyId est NULL, userId détermine le propriétaire
-  userId         String?
-  user           User?     @relation("UserShipments", fields: [userId], references: [id])
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id])
 
   // Origine & Destination
   originAddress      String
@@ -392,21 +444,15 @@ model Shipment {
   // Les finance managers peuvent lire toutes les expéditions
   @@allow('read', auth().role == FINANCE_MANAGER)
 
-  // PROPRIÉTÉ HYBRIDE - Lecture par company
-  // Les clients peuvent lire les expéditions de leur company
-  @@allow('read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
-
-  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
-  // Le propriétaire direct peut lire et modifier ses expéditions
-  @@allow('read,update', companyId == null && userId != null && auth().id == userId && status != DELIVERED)
+  // Les clients peuvent lire les expéditions de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
 
   // Le créateur peut modifier tant que status != DELIVERED
   @@allow('read,update', auth().id == createdById && status != DELIVERED)
 
   @@deny('all', true)
 
-  @@index([companyId])
-  @@index([userId])           // Index pour propriété hybride
+  @@index([clientId])
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
@@ -594,8 +640,8 @@ model PickupRequest {
   // MÉTADONNÉES
   // ============================================
 
-  companyId          String?               // Null si non rattaché, sinon company du user
-  company            Company?  @relation(fields: [companyId], references: [id])
+  clientId           String?               // Null si non rattaché, sinon client (COMPANY ou INDIVIDUAL) du user
+  client             Client?   @relation(fields: [clientId], references: [id])
 
   createdById        String?               // Null si création publique
   createdBy          User?     @relation("CreatedPickups", fields: [createdById], references: [id])
@@ -625,8 +671,8 @@ model PickupRequest {
   // En attendant, le filtrage est fait manuellement dans les Server Actions
   @@allow('read,update', userId != null && auth().id == userId && status != EFFECTUE && status != ANNULE)
 
-  // Les clients peuvent lire les demandes de leur company
-  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+  // Les clients peuvent lire les demandes de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
 
   @@deny('all', true)
 
@@ -640,7 +686,7 @@ model PickupRequest {
   @@index([contactEmail])      // Matching rattachement (US-1.3)
   @@index([contactPhone])      // Matching rattachement (US-1.3)
   @@index([status])            // Filtres back-office (US-3.1)
-  @@index([companyId])         // Multi-tenancy
+  @@index([clientId])          // Multi-tenancy (Client COMPANY ou INDIVIDUAL)
   @@index([shipmentId])        // Relations
   @@index([transporterId])     // Assignation transporteur
   @@index([createdAt])         // Tri chronologique
@@ -875,8 +921,8 @@ model PurchaseRequest {
   // MÉTADONNÉES
   // ============================================
 
-  companyId          String?               // Null si non rattaché, sinon company du user
-  company            Company?  @relation(fields: [companyId], references: [id])
+  clientId           String?               // Null si non rattaché, sinon client (COMPANY ou INDIVIDUAL) du user
+  client             Client?   @relation(fields: [clientId], references: [id])
 
   createdById        String?               // Null si création publique
   createdBy          User?     @relation("CreatedPurchases", fields: [createdById], references: [id])
@@ -901,8 +947,8 @@ model PurchaseRequest {
   // User propriétaire peut lire et modifier ses demandes (sauf si terminées)
   @@allow('read,update', userId != null && auth().id == userId && status != LIVRE && status != ANNULE)
 
-  // Les clients peuvent lire les demandes de leur company
-  @@allow('read', auth().companyId == companyId && auth().role == CLIENT)
+  // Les clients peuvent lire les demandes de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
 
   @@deny('all', true)
 
@@ -916,7 +962,7 @@ model PurchaseRequest {
   @@index([contactEmail])      // Matching rattachement
   @@index([contactPhone])      // Matching rattachement
   @@index([status])            // Filtres back-office
-  @@index([companyId])         // Multi-tenancy
+  @@index([clientId])          // Multi-tenancy (Client COMPANY ou INDIVIDUAL)
   @@index([createdAt])         // Tri chronologique
   @@index([status, createdAt]) // Composite pour filtres + tri optimisé
 
@@ -1027,8 +1073,8 @@ model TrackingEvent {
   @@allow('create,read', auth().role == OPERATIONS_MANAGER)
 
   // Lecture publique pour les tracking events (nécessaire pour tracking public)
-  // Les clients peuvent lire les events des shipments de leur company
-  @@allow('read', auth().companyId == shipment.companyId)
+  // Les clients peuvent lire les events des shipments de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read', auth().clientId == shipment.clientId)
 
   @@deny('all', true)
 
@@ -1057,16 +1103,11 @@ model Invoice {
   invoiceNumber String        @unique
 
   // ════════════════════════════════════════════
-  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // CLIENT (Entreprise ou Particulier)
   // ════════════════════════════════════════════
 
-  // Company (NULL si particulier sans entreprise)
-  companyId     String?
-  company       Company?      @relation(fields: [companyId], references: [id])
-
-  // Propriétaire direct (pour particuliers sans company)
-  userId        String?
-  user          User?         @relation("UserInvoices", fields: [userId], references: [id])
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id])
   issueDate     DateTime      @default(now())
   dueDate       DateTime
   paidDate      DateTime?
@@ -1097,21 +1138,15 @@ model Invoice {
   // Les operations managers peuvent lire
   @@allow('read', auth().role == OPERATIONS_MANAGER)
 
-  // PROPRIÉTÉ HYBRIDE - Lecture par company
-  // Les clients peuvent lire les factures de leur company
-  @@allow('read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
-
-  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
-  // Le propriétaire direct peut lire ses factures
-  @@allow('read', companyId == null && userId != null && auth().id == userId)
+  // Les clients peuvent lire les factures de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
 
   // Les factures payées ne peuvent plus être modifiées (règle de sécurité)
   @@deny('update,delete', status == PAID)
 
   @@deny('all', true)
 
-  @@index([companyId])
-  @@index([userId])           // Index pour propriété hybride
+  @@index([clientId])
   @@index([status])
   @@index([invoiceNumber])
 }
@@ -1143,11 +1178,8 @@ model InvoiceItem {
   @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
   @@allow('read', auth().role == OPERATIONS_MANAGER)
 
-  // PROPRIÉTÉ HYBRIDE - Lecture par company
-  @@allow('read', invoice.companyId != null && auth().companyId == invoice.companyId)
-
-  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
-  @@allow('read', invoice.companyId == null && invoice.userId != null && auth().id == invoice.userId)
+  // Les clients peuvent lire les items de leurs factures
+  @@allow('read', auth().clientId == invoice.clientId)
 
   @@deny('all', invoice.status == PAID) // Ne peut pas modifier si facture payée
   @@deny('all', true)
@@ -1189,9 +1221,9 @@ model Quote {
   contactPhone       String?                               // Téléphone pour matching
   contactName        String?                               // Nom du demandeur
 
-  // Company (NULL si créé sans compte, rempli après rattachement)
-  companyId          String?
-  company            Company?        @relation(fields: [companyId], references: [id])
+  // Client (NULL si créé sans compte, rempli après rattachement)
+  clientId           String?
+  client             Client?         @relation(fields: [clientId], references: [id])
 
   // ════════════════════════════════════════════
   // CHAMPS MÉTIER DU DEVIS
@@ -1272,15 +1304,15 @@ model Quote {
   // Les finance managers peuvent lire
   @@allow('read', auth().role == FINANCE_MANAGER)
 
-  // Les clients peuvent lire et créer des quotes pour leur company
-  @@allow('read,create', auth().companyId == companyId && auth().role == CLIENT)
+  // Les clients peuvent lire et créer des quotes pour leur client (COMPANY ou INDIVIDUAL)
+  @@allow('read,create', clientId != null && auth().clientId == clientId && auth().role == CLIENT)
 
   // Le propriétaire peut lire et modifier son devis (si rattaché à un compte)
   @@allow('read,update', userId != null && auth().id == userId)
 
   @@deny('all', true)
 
-  @@index([companyId])
+  @@index([clientId])
   @@index([status])
   @@index([trackingToken])
   @@index([contactEmail])
@@ -1552,14 +1584,14 @@ model Document {
   purchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
 
   // ════════════════════════════════════════════
-  // PROPRIÉTÉ HYBRIDE (Company ou User direct)
+  // CLIENT (Entreprise ou Particulier)
   // ════════════════════════════════════════════
 
-  // Company (NULL si particulier sans entreprise)
-  companyId   String?
-  company     Company?  @relation(fields: [companyId], references: [id])
+  // Client (COMPANY ou INDIVIDUAL) auquel appartient le document
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id])
 
-  // Propriétaire direct (pour particuliers sans company)
+  // Propriétaire direct (utilisateur qui possède ce document)
   userId      String?
   user        User?     @relation("UserDocuments", fields: [userId], references: [id])
 
@@ -1579,21 +1611,19 @@ model Document {
   // Les finance managers peuvent lire tous les documents
   @@allow('read', auth().role == FINANCE_MANAGER)
 
-  // PROPRIÉTÉ HYBRIDE - Lecture par company
-  // Les clients peuvent créer et lire les documents de leur company
-  @@allow('create,read', companyId != null && auth().companyId == companyId && auth().role == CLIENT)
+  // Les clients peuvent créer et lire les documents de leur client (COMPANY ou INDIVIDUAL)
+  @@allow('create,read', clientId != null && auth().clientId == clientId && auth().role == CLIENT)
 
-  // PROPRIÉTÉ HYBRIDE - Lecture par userId (particuliers sans company)
   // Le propriétaire direct peut créer et lire ses documents
-  @@allow('create,read', companyId == null && userId != null && auth().id == userId)
+  @@allow('create,read', userId != null && auth().id == userId)
 
   // L'uploader peut supprimer son propre document
   @@allow('delete', auth().id == uploadedBy)
 
   @@deny('all', true)
 
-  @@index([companyId])
-  @@index([userId])           // Index pour propriété hybride
+  @@index([clientId])
+  @@index([userId])
   @@index([shipmentId])
   @@index([invoiceId])
   @@index([quoteId])
@@ -1647,8 +1677,9 @@ model Transporter {
   rating   Float?   @default(0) // Note de 0 à 5
 
   // Relations
-  companyId      String
-  company        Company @relation(fields: [companyId], references: [id])
+  // Client auquel appartient ce transporteur (type COMPANY généralement)
+  clientId       String
+  client         Client  @relation(fields: [clientId], references: [id])
   pickupRequests PickupRequest[] // Enlèvements assignés à ce transporteur
 
   // Timestamps
@@ -1671,7 +1702,7 @@ model Transporter {
 
   @@deny('all', true)
 
-  @@index([companyId])
+  @@index([clientId])
   @@index([type])
   @@map("transporter")
 }

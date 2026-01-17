@@ -66,10 +66,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   // Déterminer si l'utilisateur est un CLIENT/VIEWER (données limitées) ou ADMIN/MANAGER (données globales)
   const userRole = session.user.role;
   const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   // Sécurité : Si CLIENT sans company, retourner des stats vides
-  if (isClient && !companyId) {
+  if (isClient && !clientId) {
     return {
       totalShipments: 0,
       activeShipments: 0,
@@ -89,7 +89,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   }
 
   // Filtre par company pour les CLIENTs uniquement
-  const whereCompany = isClient ? { companyId: companyId! } : {};
+  const whereCompany = isClient ? { clientId: clientId! } : {};
 
   // Dates pour les calculs
   const now = new Date();
@@ -162,13 +162,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }),
 
     // Clients (ADMIN/MANAGER uniquement - CLIENTs retournent 0)
-    isClient ? Promise.resolve(0) : prisma.company.count(),
-    isClient ? Promise.resolve(0) : prisma.company.count({
+    isClient ? Promise.resolve(0) : prisma.client.count(),
+    isClient ? Promise.resolve(0) : prisma.client.count({
       where: {
         shipments: { some: {} },
       },
     }),
-    isClient ? Promise.resolve(0) : prisma.company.count({
+    isClient ? Promise.resolve(0) : prisma.client.count({
       where: { createdAt: { gte: startOfMonth } },
     }),
 
@@ -270,14 +270,14 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
   // Filtrer par company pour les CLIENTs
   const userRole = session.user.role;
   const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   // Sécurité : Si CLIENT sans company, retourner tableau vide
-  if (isClient && !companyId) {
+  if (isClient && !clientId) {
     return [];
   }
 
-  const whereCompany = isClient ? { companyId: companyId! } : {};
+  const whereCompany = isClient ? { clientId: clientId! } : {};
 
   const shipments = await prisma.shipment.findMany({
     where: whereCompany,
@@ -290,7 +290,7 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
       destinationCountry: true,
       status: true,
       createdAt: true,
-      company: {
+      client: {
         select: {
           name: true,
         },
@@ -305,7 +305,7 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
     destinationCountry: shipment.destinationCountry,
     status: shipment.status,
     createdAt: shipment.createdAt,
-    companyName: shipment.company.name,
+    companyName: shipment.client.name,
   }));
 }
 
@@ -320,13 +320,13 @@ export async function getRevenueChartData() {
   // Filtrer par company pour les CLIENTs
   const userRole = session.user.role;
   const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
   // Sécurité : Si CLIENT sans company, retourner données vides
-  const whereCompany = (isClient && !companyId) ? null : (isClient ? { companyId: companyId! } : {});
+  const whereCompany = (isClient && !clientId) ? null : (isClient ? { clientId: clientId! } : {});
 
   const invoices = whereCompany === null ? [] : await prisma.invoice.findMany({
     where: {
@@ -377,13 +377,13 @@ export async function getShipmentsChartData() {
   // Filtrer par company pour les CLIENTs
   const userRole = session.user.role;
   const isClient = userRole === 'CLIENT' || userRole === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
   // Sécurité : Si CLIENT sans company, retourner données vides
-  const whereCompany = (isClient && !companyId) ? null : (isClient ? { companyId: companyId! } : {});
+  const whereCompany = (isClient && !clientId) ? null : (isClient ? { clientId: clientId! } : {});
 
   const shipments = whereCompany === null ? [] : await prisma.shipment.findMany({
     where: {

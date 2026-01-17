@@ -76,8 +76,8 @@ export async function uploadDocumentAction(
   try {
     const session = await requireAuth();
 
-    // Sécurité : Vérifier que l'utilisateur a une companyId
-    if (!session.user.companyId) {
+    // Sécurité : Vérifier que l'utilisateur a une clientId
+    if (!session.user.clientId) {
       return {
         success: false,
         error: 'Votre compte n\'est pas associé à une compagnie',
@@ -135,8 +135,8 @@ export async function uploadDocumentAction(
         mimeType: data.mimeType,
         type: data.type,
         description: data.description,
-        companyId: session.user.companyId ?? null, // NULL si particulier
-        userId: session.user.companyId ? null : session.user.id, // userId si pas de company
+        clientId: session.user.clientId ?? null, // NULL si particulier
+        userId: session.user.clientId ? null : session.user.id, // userId si pas de company
         uploadedBy: session.user.id,
         shipmentId: data.shipmentId,
         invoiceId: data.invoiceId,
@@ -194,7 +194,7 @@ export async function deleteDocumentAction(
     const isAdmin = session.user.role === 'ADMIN';
     const isOperationsManager = session.user.role === 'OPERATIONS_MANAGER';
     const isOwner = document.uploadedBy === session.user.id;
-    const isSameCompany = document.companyId === session.user.companyId;
+    const isSameCompany = document.clientId === session.user.clientId;
 
     if (!isAdmin && !isOperationsManager && (!isOwner || !isSameCompany)) {
       return {
@@ -242,13 +242,13 @@ export async function getAllDocumentsAction(params?: {
     const skip = (page - 1) * limit;
 
     // PROPRIÉTÉ HYBRIDE : construire les conditions selon le type de propriétaire
-    // - Si l'utilisateur a une company : filtrer par companyId
+    // - Si l'utilisateur a une company : filtrer par clientId
     // - Si l'utilisateur n'a pas de company (particulier) : filtrer par userId
     const where: any = {};
 
-    if (session.user.companyId) {
+    if (session.user.clientId) {
       // Utilisateur avec company : voir les documents de sa company
-      where.companyId = session.user.companyId;
+      where.clientId = session.user.clientId;
     } else {
       // Particulier sans company : voir uniquement ses propres documents
       where.userId = session.user.id;
@@ -361,7 +361,7 @@ export async function getDocumentsAction(
       const isManager =
         session.user.role === 'OPERATIONS_MANAGER' ||
         session.user.role === 'FINANCE_MANAGER';
-      const isSameCompany = doc.companyId === session.user.companyId;
+      const isSameCompany = doc.clientId === session.user.clientId;
 
       return isAdmin || isManager || isSameCompany;
     });

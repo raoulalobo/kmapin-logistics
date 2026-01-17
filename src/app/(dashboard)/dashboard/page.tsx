@@ -178,7 +178,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Cartes de statistiques (KPIs) */}
-      <div className={`grid gap-4 md:grid-cols-2 ${isClient ? 'lg:grid-cols-2' : 'lg:grid-cols-4'}`}>
+      <div className={`grid gap-4 md:grid-cols-2 ${isClient ? 'lg:grid-cols-1' : 'lg:grid-cols-3'}`}>
         <StatCard
           title={isClient ? "Mes expéditions actives" : "Expéditions actives"}
           value={stats.activeShipments}
@@ -212,14 +212,6 @@ export default async function DashboardPage() {
             trend={stats.revenueGrowth >= 0 ? 'up' : 'down'}
           />
         )}
-
-        <StatCard
-          title="Taux de livraison"
-          value={`${stats.deliveryRate.toFixed(1)}%`}
-          change={`${stats.totalShipments} expéditions totales`}
-          icon={TrendUp}
-          trend={stats.deliveryRate >= 95 ? 'up' : stats.deliveryRate >= 85 ? 'neutral' : 'down'}
-        />
       </div>
 
       {/* Graphiques d'évolution - ADMIN/MANAGER uniquement */}

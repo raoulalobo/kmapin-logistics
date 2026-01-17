@@ -48,7 +48,7 @@ interface UserCompanyActionProps {
   /** Nom de l'utilisateur (pour l'affichage) */
   userName: string;
   /** ID de l'entreprise actuelle (ou null) */
-  currentCompanyId: string | null;
+  currentClientId: string | null;
   /** Élément déclencheur (bouton) */
   children: React.ReactNode;
 }
@@ -62,7 +62,7 @@ interface UserCompanyActionProps {
 export function UserCompanyAction({
   userId,
   userName,
-  currentCompanyId,
+  currentClientId,
   children,
 }: UserCompanyActionProps) {
   const router = useRouter();
@@ -71,7 +71,7 @@ export function UserCompanyAction({
   // États du dialog et des données
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
-    currentCompanyId
+    currentClientId
   );
   const [companies, setCompanies] = useState<
     Array<{ id: string; name: string }>
@@ -112,14 +112,14 @@ export function UserCompanyAction({
    */
   function handleSubmit() {
     // Vérifier si l'entreprise a changé
-    if (selectedCompanyId === currentCompanyId) {
+    if (selectedCompanyId === currentClientId) {
       toast.info('L\'assignation est déjà définie à cette valeur');
       return;
     }
 
     startTransition(async () => {
       const result = await assignUserCompanyAction(userId, {
-        companyId: selectedCompanyId || '',
+        clientId: selectedCompanyId || '',
       });
 
       if (!result.success) {
@@ -146,7 +146,7 @@ export function UserCompanyAction({
    */
   function handleOpenChange(open: boolean) {
     if (!open) {
-      setSelectedCompanyId(currentCompanyId);
+      setSelectedCompanyId(currentClientId);
     }
     setIsDialogOpen(open);
   }
@@ -155,7 +155,7 @@ export function UserCompanyAction({
    * Obtenir le nom de l'entreprise actuelle
    */
   const currentCompanyName =
-    companies.find((c) => c.id === currentCompanyId)?.name || null;
+    companies.find((c) => c.id === currentClientId)?.name || null;
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
@@ -171,7 +171,7 @@ export function UserCompanyAction({
 
         <div className="space-y-4 py-4">
           {/* Affichage de l'entreprise actuelle */}
-          {currentCompanyId && currentCompanyName && (
+          {currentClientId && currentCompanyName && (
             <div className="space-y-2">
               <Label>Entreprise actuelle</Label>
               <Card className="bg-muted/50">
@@ -185,7 +185,7 @@ export function UserCompanyAction({
             </div>
           )}
 
-          {!currentCompanyId && (
+          {!currentClientId && (
             <div className="space-y-2">
               <Label>Entreprise actuelle</Label>
               <Card className="bg-muted/50">
@@ -228,7 +228,7 @@ export function UserCompanyAction({
           </div>
 
           {/* Message si l'entreprise n'a pas changé */}
-          {selectedCompanyId === currentCompanyId && (
+          {selectedCompanyId === currentClientId && (
             <p className="text-sm text-muted-foreground text-center py-2">
               Sélectionnez une entreprise différente de l'entreprise actuelle
             </p>
@@ -248,7 +248,7 @@ export function UserCompanyAction({
             disabled={
               isPending ||
               isLoadingCompanies ||
-              selectedCompanyId === currentCompanyId
+              selectedCompanyId === currentClientId
             }
           >
             {isPending ? (

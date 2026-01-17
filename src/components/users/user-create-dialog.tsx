@@ -94,7 +94,7 @@ export function UserCreateDialog({ children }: UserCreateDialogProps) {
       name: '',
       phone: '',
       role: 'CLIENT',
-      companyId: '',
+      clientId: '',
       sendInvitation: true,
     },
   });
@@ -289,7 +289,7 @@ export function UserCreateDialog({ children }: UserCreateDialogProps) {
               {/* Entreprise */}
               <FormField
                 control={form.control}
-                name="companyId"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Entreprise (optionnel)</FormLabel>

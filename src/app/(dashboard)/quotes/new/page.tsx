@@ -165,7 +165,7 @@ export default function NewQuotePage() {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="companyId"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client *</FormLabel>

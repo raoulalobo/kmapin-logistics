@@ -283,9 +283,9 @@ export default async function QuotesPage({
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium">{quote.company.name}</span>
+                          <span className="font-medium">{quote.client.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {quote.company.email}
+                            {quote.client.email}
                           </span>
                         </div>
                       </TableCell>

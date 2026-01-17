@@ -83,12 +83,12 @@ export async function getGuestQuoteAction(id: string) {
  * Cette action est appelée par finalizeProspectConversionAction
  *
  * @param guestQuoteId - ID du GuestQuote
- * @param companyId - ID de la Company
+ * @param clientId - ID de la Company
  * @returns Quote créé
  */
 export async function convertGuestQuoteToQuoteAction(
   guestQuoteId: string,
-  companyId: string
+  clientId: string
 ) {
   try {
     const guestQuote = await prisma.guestQuote.findUnique({
@@ -109,7 +109,7 @@ export async function convertGuestQuoteToQuoteAction(
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        companyId,
+        clientId,
         originCountry: guestQuote.originCountry,
         destinationCountry: guestQuote.destinationCountry,
         transportMode: guestQuote.transportMode,

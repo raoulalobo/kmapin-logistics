@@ -27,7 +27,7 @@ type Events = {
     data: {
       shipmentId: string;
       trackingNumber: string;
-      companyId: string;
+      clientId: string;
       createdById: string;
     };
   };
@@ -39,7 +39,7 @@ type Events = {
     data: {
       shipmentId: string;
       trackingNumber: string;
-      companyId: string;
+      clientId: string;
       deliveredAt: string;
     };
   };
@@ -63,7 +63,7 @@ type Events = {
     data: {
       invoiceId: string;
       invoiceNumber: string;
-      companyId: string;
+      clientId: string;
       total: number;
     };
   };
@@ -75,7 +75,7 @@ type Events = {
     data: {
       invoiceId: string;
       invoiceNumber: string;
-      companyId: string;
+      clientId: string;
       paidAt: string;
       amount: number;
     };
@@ -88,7 +88,7 @@ type Events = {
     data: {
       invoiceId: string;
       invoiceNumber: string;
-      companyId: string;
+      clientId: string;
       dueDate: string;
       daysOverdue: number;
     };
@@ -101,7 +101,7 @@ type Events = {
     data: {
       quoteId: string;
       quoteNumber: string;
-      companyId: string;
+      clientId: string;
     };
   };
 
@@ -166,7 +166,7 @@ type Events = {
  *   data: {
  *     shipmentId: 'ship-123',
  *     trackingNumber: 'TRK-001',
- *     companyId: 'comp-456',
+ *     clientId: 'comp-456',
  *     createdById: 'user-789'
  *   }
  * });

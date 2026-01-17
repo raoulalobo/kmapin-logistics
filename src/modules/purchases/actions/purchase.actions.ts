@@ -287,7 +287,7 @@ export async function createGuestPurchase(data: CreateGuestPurchaseInput) {
 
         // Métadonnées
         // userId: null (pas connecté)
-        // companyId: null (pas rattaché)
+        // clientId: null (pas rattaché)
         // createdById: null (création publique)
         status: PurchaseStatus.NOUVEAU,
       },
@@ -348,7 +348,7 @@ export async function createGuestPurchase(data: CreateGuestPurchaseInput) {
  *
  * Différences avec createGuestPurchase :
  * - userId rempli depuis la session
- * - companyId déduit de la session
+ * - clientId déduit de la session
  * - isAttachedToAccount = true dès la création
  * - createdById rempli
  *
@@ -380,7 +380,7 @@ export async function createPurchase(data: CreatePurchaseInput) {
 
         // Rattachement compte
         userId: session.user.id,
-        companyId: session.user.companyId,
+        clientId: session.user.clientId,
         isAttachedToAccount: true,
 
         // Contact
@@ -560,7 +560,7 @@ export async function trackPurchaseByToken(input: TrackPurchaseByTokenInput) {
  *
  * Workflow :
  * 1. Recherche des demandes avec contactEmail OU contactPhone matchant
- * 2. Mise à jour : userId, companyId, isAttachedToAccount = true
+ * 2. Mise à jour : userId, clientId, isAttachedToAccount = true
  * 3. Création d'un log ATTACHED_TO_ACCOUNT
  *
  * Cette fonction est appelée automatiquement lors de :
@@ -579,7 +579,7 @@ export async function attachPurchaseToAccount(userId: string) {
         id: true,
         email: true,
         phone: true,
-        companyId: true,
+        clientId: true,
       },
     });
 
@@ -617,7 +617,7 @@ export async function attachPurchaseToAccount(userId: string) {
           where: { id: purchase.id },
           data: {
             userId: user.id,
-            companyId: user.companyId,
+            clientId: user.clientId,
             isAttachedToAccount: true,
           },
         });
@@ -683,7 +683,7 @@ export async function attachPurchaseToAccount(userId: string) {
  */
 export async function listPurchases(filters?: {
   status?: PurchaseStatus;
-  companyId?: string;
+  clientId?: string;
   dateFrom?: Date;
   dateTo?: Date;
   search?: string;
@@ -711,8 +711,8 @@ export async function listPurchases(filters?: {
       where.status = filters.status;
     }
 
-    if (filters?.companyId) {
-      where.companyId = filters.companyId;
+    if (filters?.clientId) {
+      where.clientId = filters.clientId;
     }
 
     if (filters?.dateFrom || filters?.dateTo) {
@@ -750,7 +750,7 @@ export async function listPurchases(filters?: {
               email: true,
             },
           },
-          company: {
+          client: {
             select: {
               id: true,
               name: true,
@@ -1187,7 +1187,7 @@ export async function getPurchaseDetails(purchaseId: string) {
             email: true,
           },
         },
-        company: {
+        client: {
           select: {
             id: true,
             name: true,

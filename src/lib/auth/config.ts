@@ -55,14 +55,15 @@ export const auth = betterAuth({
         returned: true, // Inclure dans la session et les réponses API
       },
       /**
-       * ID de la compagnie à laquelle appartient l'utilisateur
+       * ID du client (COMPANY ou INDIVIDUAL) auquel appartient l'utilisateur
        * Utilisé pour le filtrage multi-tenant des données
+       * NULL uniquement pour les ADMIN système
        */
-      companyId: {
+      clientId: {
         type: 'string',
         required: false,
         defaultValue: null,
-        input: false, // Empêche les utilisateurs de choisir leur compagnie lors de l'inscription
+        input: false, // Empêche les utilisateurs de choisir leur client lors de l'inscription
         returned: true, // Inclure dans la session et les réponses API
       },
       /**
@@ -208,77 +209,129 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
 
   /**
-   * Callbacks personnalisés
+   * Database Hooks - Hooks de cycle de vie de la base de données
+   *
+   * Ces hooks sont appelés avant/après les opérations CRUD sur les entités.
+   * C'est la méthode correcte pour exécuter du code après la création d'un utilisateur.
+   *
+   * @see https://www.better-auth.com/docs/concepts/hooks
    */
-  callbacks: {
+  databaseHooks: {
     /**
-     * Callback après création d'un utilisateur
-     *
-     * Ce callback est appelé après la création d'un nouvel utilisateur.
-     * Il est utilisé pour :
-     * 1. Rattacher automatiquement les demandes orphelines (devis, enlèvements, achats délégués)
-     *    créées avant inscription mais avec le même email/téléphone
-     *
-     * @param user - Nouvel utilisateur créé
-     * @param account - Compte lié (credentials, oauth, etc.)
+     * Hooks pour le modèle User
      */
-    async user({ user, account }) {
-      // Le rôle par défaut CLIENT est déjà défini dans additionalFields
-      // Pas besoin de l'assigner ici
+    user: {
+      /**
+       * Hook après création d'un utilisateur
+       *
+       * Appelé après que l'utilisateur a été créé dans la base de données.
+       * Utilisé pour :
+       * 1. Créer automatiquement un Client INDIVIDUAL pour les nouveaux utilisateurs
+       * 2. Rattacher les demandes orphelines (devis, enlèvements, achats délégués)
+       *
+       * @param user - Utilisateur nouvellement créé
+       */
+      create: {
+        after: async (user) => {
+          console.log(`🎉 [Auth] Hook databaseHooks.user.create.after déclenché pour: ${user.email}`);
 
-      // Rattachement automatique des demandes orphelines
-      // Cette opération est idempotente : si l'utilisateur a déjà des demandes rattachées
-      // ou s'il n'y a pas de demandes orphelines, rien ne se passe
-      try {
-        console.log(`📧 [Auth] Vérification des demandes orphelines pour: ${user.email}`);
+          // ════════════════════════════════════════════════════════════════════════
+          // CRÉATION AUTOMATIQUE D'UN CLIENT POUR LES NOUVEAUX UTILISATEURS
+          // ════════════════════════════════════════════════════════════════════════
+          // Si l'utilisateur a le rôle CLIENT (défaut) et n'a pas de clientId,
+          // on crée automatiquement un Client de type INDIVIDUAL avec ses informations.
+          // L'utilisateur pourra compléter son profil plus tard (adresse, etc.)
+          // ════════════════════════════════════════════════════════════════════════
+          try {
+            // Vérifier si l'utilisateur a besoin d'un Client
+            // Note: user.role peut être undefined au moment de la création, on assume CLIENT par défaut
+            const userRole = (user as any).role || 'CLIENT';
+            const userClientId = (user as any).clientId;
 
-        // Import dynamique pour éviter les dépendances circulaires
-        const { attachQuotesToUserAction } = await import('@/modules/quotes/actions/quote.actions');
-        const { attachPickupToAccount } = await import('@/modules/pickups/actions/pickup.actions');
-        const { attachPurchaseToAccount } = await import('@/modules/purchases/actions/purchase.actions');
+            if (userRole === 'CLIENT' && !userClientId) {
+              console.log(`🏢 [Auth] Création automatique d'un Client pour: ${user.email}`);
 
-        // Rattacher les devis orphelins
-        const quotesResult = await attachQuotesToUserAction(user.id);
-        if (quotesResult.success && quotesResult.data?.count > 0) {
-          console.log(`🔗 [Auth] ${quotesResult.data.count} devis rattachés:`, quotesResult.data.quoteNumbers);
-        }
+              // Vérifier si un Client avec cet email existe déjà
+              const existingClient = await prisma.client.findUnique({
+                where: { email: user.email },
+              });
 
-        // Rattacher les demandes d'enlèvement orphelines
-        const pickupsResult = await attachPickupToAccount(user.id);
-        if (pickupsResult.success && pickupsResult.data?.count > 0) {
-          console.log(`🔗 [Auth] ${pickupsResult.data.count} demandes d'enlèvement rattachées`);
-        }
+              let clientId: string;
 
-        // Rattacher les achats délégués orphelins
-        const purchasesResult = await attachPurchaseToAccount(user.id);
-        if (purchasesResult.success && purchasesResult.data?.count > 0) {
-          console.log(`🔗 [Auth] ${purchasesResult.data.count} achats délégués rattachés`);
-        }
-      } catch (error) {
-        // Log l'erreur mais ne bloque pas la création du compte
-        console.error('[Auth] Erreur lors du rattachement des demandes orphelines:', error);
-      }
+              if (existingClient) {
+                // Utiliser le Client existant
+                clientId = existingClient.id;
+                console.log(`🔗 [Auth] Client existant trouvé: ${existingClient.name}`);
+              } else {
+                // Créer un nouveau Client INDIVIDUAL
+                const nameParts = (user.name || 'Client').split(' ');
+                const newClient = await prisma.client.create({
+                  data: {
+                    type: 'INDIVIDUAL',
+                    name: user.name || 'Client',
+                    email: user.email,
+                    phone: (user as any).phone || null,
+                    address: 'À compléter',
+                    city: 'À compléter',
+                    country: 'FR',
+                    firstName: nameParts[0] || null,
+                    lastName: nameParts.slice(1).join(' ') || null,
+                  },
+                });
+                clientId = newClient.id;
+                console.log(`✅ [Auth] Nouveau Client créé: ${newClient.name} (${newClient.id})`);
+              }
 
-      return user;
+              // Rattacher l'utilisateur au Client
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { clientId },
+              });
+              console.log(`🔗 [Auth] Utilisateur rattaché au Client: ${clientId}`);
+            }
+          } catch (error) {
+            // Log l'erreur mais ne bloque pas la création du compte
+            console.error('[Auth] Erreur lors de la création automatique du Client:', error);
+          }
+
+          // Rattachement automatique des demandes orphelines
+          // Cette opération est idempotente : si l'utilisateur a déjà des demandes rattachées
+          // ou s'il n'y a pas de demandes orphelines, rien ne se passe
+          try {
+            console.log(`📧 [Auth] Vérification des demandes orphelines pour: ${user.email}`);
+
+            // Import dynamique pour éviter les dépendances circulaires
+            const { attachQuotesToUserAction } = await import('@/modules/quotes/actions/quote.actions');
+            const { attachPickupToAccount } = await import('@/modules/pickups/actions/pickup.actions');
+            const { attachPurchaseToAccount } = await import('@/modules/purchases/actions/purchase.actions');
+
+            // Rattacher les devis orphelins
+            const quotesResult = await attachQuotesToUserAction(user.id);
+            if (quotesResult.success && quotesResult.data?.count > 0) {
+              console.log(`🔗 [Auth] ${quotesResult.data.count} devis rattachés:`, quotesResult.data.quoteNumbers);
+            }
+
+            // Rattacher les demandes d'enlèvement orphelines
+            const pickupsResult = await attachPickupToAccount(user.id);
+            if (pickupsResult.success && pickupsResult.data?.count > 0) {
+              console.log(`🔗 [Auth] ${pickupsResult.data.count} demandes d'enlèvement rattachées`);
+            }
+
+            // Rattacher les achats délégués orphelins
+            const purchasesResult = await attachPurchaseToAccount(user.id);
+            if (purchasesResult.success && purchasesResult.data?.count > 0) {
+              console.log(`🔗 [Auth] ${purchasesResult.data.count} achats délégués rattachés`);
+            }
+          } catch (error) {
+            // Log l'erreur mais ne bloque pas la création du compte
+            console.error('[Auth] Erreur lors du rattachement des demandes orphelines:', error);
+          }
+
+          // Note: Les hooks after ne modifient pas la réponse HTTP
+          // Ils sont uniquement pour les effets de bord (side effects)
+        },
+      },
     },
-
-    /**
-     * Callback lors de la connexion
-     * Utilisé pour logs ou analytics
-     */
-    async signIn({ user, account }) {
-      console.log(`User ${user.email} signed in`);
-      return true;
-    },
-
-    /**
-     * NOTA : Le callback session n'est plus nécessaire car nous utilisons
-     * additionalFields qui enrichit automatiquement la session avec les champs
-     * personnalisés (role, companyId).
-     *
-     * Better Auth inclut automatiquement les additionalFields dans la session
-     * lorsque returned: true est défini.
-     */
   },
 });
 
@@ -296,7 +349,7 @@ export interface SessionUser {
   name?: string | null;
   image?: string | null;
   role: 'ADMIN' | 'OPERATIONS_MANAGER' | 'FINANCE_MANAGER' | 'CLIENT' | 'VIEWER';
-  companyId?: string | null;
+  clientId?: string | null;  // ID du client (COMPANY ou INDIVIDUAL)
 }
 
 /**

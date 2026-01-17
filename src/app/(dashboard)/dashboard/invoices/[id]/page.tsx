@@ -156,8 +156,8 @@ export default async function InvoiceDetailsPage({
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Client</p>
-              <p className="text-lg font-semibold">{invoice.company.name}</p>
-              <p className="text-sm text-muted-foreground">{invoice.company.email}</p>
+              <p className="text-lg font-semibold">{invoice.client.name}</p>
+              <p className="text-sm text-muted-foreground">{invoice.client.email}</p>
             </div>
             <Separator />
             <div>

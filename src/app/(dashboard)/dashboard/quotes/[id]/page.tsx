@@ -215,8 +215,8 @@ export default async function QuoteDetailPage({
           <div className="flex items-center gap-3">
             <Buildings className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-semibold text-lg">{quote.company.name}</p>
-              <p className="text-sm text-muted-foreground">{quote.company.email}</p>
+              <p className="font-semibold text-lg">{quote.client?.name || quote.contactName || 'Non assigné'}</p>
+              <p className="text-sm text-muted-foreground">{quote.client?.email || quote.contactEmail}</p>
             </div>
           </div>
         </CardContent>
@@ -323,13 +323,13 @@ export default async function QuoteDetailPage({
               </div>
             </div>
 
-            {quote.volume && (
+            {quote.length && quote.width && quote.height && (
               <div className="flex items-center gap-3">
                 <Cube className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Volume</p>
+                  <p className="text-sm font-medium">Dimensions</p>
                   <p className="text-sm text-muted-foreground">
-                    {quote.volume} m³
+                    {quote.length} × {quote.width} × {quote.height} m
                   </p>
                 </div>
               </div>
@@ -387,9 +387,9 @@ export default async function QuoteDetailPage({
                   <p className="text-sm text-muted-foreground">
                     {new Date(quote.acceptedAt).toLocaleString('fr-FR')}
                   </p>
-                  {quote.acceptedBy && (
+                  {quote.user && (
                     <p className="text-xs text-muted-foreground">
-                      Par {quote.acceptedBy.name || quote.acceptedBy.email}
+                      Par {quote.user.name || quote.user.email}
                     </p>
                   )}
                 </div>
@@ -404,14 +404,14 @@ export default async function QuoteDetailPage({
                   <p className="text-sm text-muted-foreground">
                     {new Date(quote.rejectedAt).toLocaleString('fr-FR')}
                   </p>
-                  {quote.rejectedBy && (
+                  {quote.user && (
                     <p className="text-xs text-muted-foreground">
-                      Par {quote.rejectedBy.name || quote.rejectedBy.email}
+                      Par {quote.user.name || quote.user.email}
                     </p>
                   )}
-                  {quote.rejectionReason && (
+                  {quote.cancelReason && (
                     <p className="text-sm mt-1">
-                      <span className="font-medium">Raison :</span> {quote.rejectionReason}
+                      <span className="font-medium">Raison :</span> {quote.cancelReason}
                     </p>
                   )}
                 </div>
@@ -456,13 +456,13 @@ export default async function QuoteDetailPage({
               </div>
             </div>
 
-            {quote.createdBy && (
+            {quote.user && (
               <div className="flex items-center gap-3">
                 <Buildings className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Créé par</p>
                   <p className="text-sm text-muted-foreground">
-                    {quote.createdBy.name || quote.createdBy.email}
+                    {quote.user.name || quote.user.email}
                   </p>
                 </div>
               </div>

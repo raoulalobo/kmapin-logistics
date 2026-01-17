@@ -17,7 +17,7 @@ import bcrypt from 'bcrypt';
 const ADMIN_EMAIL = process.env.EMAIL || 'admin@kmapin.com';
 const ADMIN_PASSWORD = process.env.PASSWORD || 'Admin123!';
 const ADMIN_NAME = process.env.NAME || 'Administrateur';
-const COMPANY_NAME = 'Faso Fret Admin';
+const CLIENT_NAME = 'Faso Fret Admin';  // Nom du Client (type COMPANY)
 const BCRYPT_ROUNDS = 10;
 
 async function main() {
@@ -40,36 +40,38 @@ async function main() {
       process.exit(0);
     }
 
-    // Étape 1: Créer ou récupérer l'entreprise
-    console.log(`📦 Création de l'entreprise...`);
-    const company = await prisma.company.upsert({
+    // Étape 1: Créer ou récupérer le Client de type COMPANY
+    // Dans le nouveau modèle unifié, Company est remplacé par Client avec type = COMPANY
+    console.log(`📦 Création du client entreprise...`);
+    const client = await prisma.client.upsert({
       where: {
         taxId: 'ADMIN001',
       },
       create: {
-        name: COMPANY_NAME,
-        legalName: COMPANY_NAME,
+        type: 'COMPANY',          // Type discriminant : entreprise
+        name: CLIENT_NAME,
+        legalName: CLIENT_NAME,   // Raison sociale (spécifique COMPANY)
         email: ADMIN_EMAIL,
         phone: '+33 1 23 45 67 89',
         address: '1 Avenue des Champs-Élysées',
         city: 'Paris',
         postalCode: '75008',
         country: 'France',
-        taxId: 'ADMIN001',
+        taxId: 'ADMIN001',        // SIRET/TVA (spécifique COMPANY)
       },
       update: {},
     });
-    console.log(`✅ Entreprise: ${company.name} (ID: ${company.id})\n`);
+    console.log(`✅ Client: ${client.name} (ID: ${client.id}, type: COMPANY)\n`);
 
-    // Étape 2: Créer l'utilisateur
+    // Étape 2: Créer l'utilisateur rattaché au Client
     console.log(`👤 Création de l'utilisateur ${ADMIN_NAME}...`);
     const user = await prisma.user.create({
       data: {
         email: ADMIN_EMAIL,
         name: ADMIN_NAME,
         role: 'ADMIN',
-        companyId: company.id,
-        emailVerified: true, // Email vérifié automatiquement
+        clientId: client.id,   // Rattachement au Client (type COMPANY)
+        emailVerified: true,   // Email vérifié automatiquement
       },
     });
     console.log(`✅ Utilisateur créé (ID: ${user.id})\n`);
@@ -114,7 +116,7 @@ async function main() {
     console.log('📧 Email:         ', ADMIN_EMAIL);
     console.log('🔑 Mot de passe:  ', ADMIN_PASSWORD);
     console.log('👤 Nom:           ', ADMIN_NAME);
-    console.log('🏢 Entreprise:    ', COMPANY_NAME);
+    console.log('🏢 Client:        ', CLIENT_NAME, '(type: COMPANY)');
     console.log('🎭 Rôle:          ', 'ADMIN');
     console.log('');
     console.log('🌐 Connexion:     ', 'http://localhost:3000/login');

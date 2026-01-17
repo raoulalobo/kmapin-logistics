@@ -118,7 +118,7 @@ export async function createQuoteAction(
 
     // Extraire et valider les données
     const rawData = {
-      companyId: formData.get('companyId'),
+      clientId: formData.get('clientId'),
       originCountry: formData.get('originCountry'),
       destinationCountry: formData.get('destinationCountry'),
       cargoType: formData.get('cargoType'),
@@ -135,14 +135,14 @@ export async function createQuoteAction(
 
     // Si l'utilisateur est CLIENT, vérifier qu'il crée un devis pour sa propre compagnie
     if (canCreateOwn && !canCreateAll) {
-      if (!session.user.companyId) {
+      if (!session.user.clientId) {
         return {
           success: false,
           error: 'Votre compte n\'est pas associé à une compagnie',
         };
       }
 
-      if (validatedData.companyId !== session.user.companyId) {
+      if (validatedData.clientId !== session.user.clientId) {
         return {
           success: false,
           error: 'Vous ne pouvez créer des devis que pour votre propre compagnie',
@@ -151,15 +151,15 @@ export async function createQuoteAction(
     }
 
     // Vérifier que la compagnie existe
-    const company = await prisma.company.findUnique({
-      where: { id: validatedData.companyId },
+    const company = await prisma.client.findUnique({
+      where: { id: validatedData.clientId },
     });
 
     if (!company) {
       return {
         success: false,
         error: 'Compagnie introuvable',
-        field: 'companyId',
+        field: 'clientId',
       };
     }
 
@@ -170,7 +170,7 @@ export async function createQuoteAction(
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        companyId: validatedData.companyId,
+        clientId: validatedData.clientId,
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
@@ -233,7 +233,7 @@ export async function createQuoteAction(
  *
  * @param page - Numéro de page (optionnel, défaut: 1)
  * @param limit - Nombre de résultats par page (optionnel, défaut: 10)
- * @param companyId - Filtrer par compagnie (optionnel)
+ * @param clientId - Filtrer par compagnie (optionnel)
  * @param status - Filtrer par statut (optionnel)
  * @param search - Terme de recherche (numéro devis, client, destination) (optionnel)
  * @returns Liste des devis
@@ -243,7 +243,7 @@ export async function createQuoteAction(
 export async function getQuotesAction(
   page = 1,
   limit = 10,
-  companyId?: string,
+  clientId?: string,
   status?: string,
   search?: string
 ) {
@@ -274,8 +274,8 @@ export async function getQuotesAction(
 
     // Si l'utilisateur est CLIENT, il ne voit que ses propres devis
     if (canReadOwn && !canReadAll) {
-      // Si l'utilisateur n'a pas de companyId, retourner une liste vide
-      if (!session.user.companyId) {
+      // Si l'utilisateur n'a pas de clientId, retourner une liste vide
+      if (!session.user.clientId) {
         return {
           success: true,
           data: {
@@ -289,10 +289,10 @@ export async function getQuotesAction(
           },
         };
       }
-      where.companyId = session.user.companyId;
-    } else if (companyId) {
-      // Sinon, filtrer par companyId si fourni
-      where.companyId = companyId;
+      where.clientId = session.user.clientId;
+    } else if (clientId) {
+      // Sinon, filtrer par clientId si fourni
+      where.clientId = clientId;
     }
 
     // Filtrer par statut si fourni
@@ -306,7 +306,7 @@ export async function getQuotesAction(
         { quoteNumber: { contains: search, mode: 'insensitive' } },
         { originCountry: { contains: search, mode: 'insensitive' } },
         { destinationCountry: { contains: search, mode: 'insensitive' } },
-        { company: { name: { contains: search, mode: 'insensitive' } } },
+        { client: { name: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -318,7 +318,7 @@ export async function getQuotesAction(
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          company: {
+          client: {
             select: {
               id: true,
               name: true,
@@ -406,11 +406,19 @@ export async function getQuoteAction(id: string) {
     }
 
     // Récupérer le devis avec toutes les relations
+    // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
     const quote = await prisma.quote.findUnique({
       where: { id },
       include: {
-        company: true,
+        client: true,
         invoices: true,
+        user: true,
+        shipment: {
+          select: {
+            id: true,
+            trackingNumber: true,
+          },
+        },
       },
     });
 
@@ -423,7 +431,7 @@ export async function getQuoteAction(id: string) {
 
     // Si l'utilisateur est CLIENT, vérifier qu'il peut accéder à ce devis
     if (canReadOwn && !canReadAll) {
-      if (session.user.companyId !== quote.companyId) {
+      if (session.user.clientId !== quote.clientId) {
         return {
           success: false,
           error: 'Vous n\'avez pas accès à ce devis',
@@ -503,7 +511,7 @@ export async function updateQuoteAction(
     // Extraire et valider les données
     const rawData: any = {};
     const simpleFields = [
-      'companyId',
+      'clientId',
       'originCountry',
       'destinationCountry',
       'cargoType',
@@ -716,7 +724,7 @@ export async function acceptQuoteAction(
     // Vérifier les permissions
     const canUpdate = hasPermission(userRole, 'quotes:update');
     const isOwner =
-      session.user.companyId && session.user.companyId === quote.companyId;
+      session.user.clientId && session.user.clientId === quote.clientId;
 
     if (!canUpdate && !isOwner) {
       return {
@@ -828,7 +836,7 @@ export async function rejectQuoteAction(
     // Vérifier les permissions
     const canUpdate = hasPermission(userRole, 'quotes:update');
     const isOwner =
-      session.user.companyId && session.user.companyId === quote.companyId;
+      session.user.clientId && session.user.clientId === quote.clientId;
 
     if (!canUpdate && !isOwner) {
       return {
@@ -1163,7 +1171,7 @@ export async function saveQuoteFromCalculatorAction(
     const session = await requireAuth();
 
     // Vérifier que l'utilisateur a une company
-    if (!session.user.companyId) {
+    if (!session.user.clientId) {
       return {
         success: false,
         error: 'Votre compte n\'est pas associé à une compagnie',
@@ -1194,7 +1202,7 @@ export async function saveQuoteFromCalculatorAction(
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        companyId: session.user.companyId,
+        clientId: session.user.clientId,
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
@@ -1270,7 +1278,7 @@ export async function countPendingQuotesAction(): Promise<ActionResult<number>> 
       where: {
         status: 'SENT',
         // Récupérer les devis créés par des utilisateurs avec rôle CLIENT
-        company: {
+        client: {
           users: {
             some: {
               role: 'CLIENT',
@@ -1338,10 +1346,11 @@ export async function startQuoteTreatmentAction(
     const validatedData = quoteStartTreatmentSchema.parse(data);
 
     // 4. Récupérer le devis existant
+    // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
     const existingQuote = await prisma.quote.findUnique({
       where: { id: quoteId },
       include: {
-        company: {
+        client: {
           include: {
             users: {
               where: { role: 'CLIENT' },
@@ -1536,10 +1545,11 @@ export async function validateQuoteTreatmentAction(
     const validatedData = quoteValidateTreatmentSchema.parse(data);
 
     // 4. Récupérer le devis existant avec les informations nécessaires
+    // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
     const existingQuote = await prisma.quote.findUnique({
       where: { id: quoteId },
       include: {
-        company: {
+        client: {
           include: {
             users: {
               where: { role: 'CLIENT' },
@@ -1570,8 +1580,8 @@ export async function validateQuoteTreatmentAction(
     const trackingNumber = await generateTrackingNumber(existingQuote.destinationCountry);
 
     // 7. Récupérer les informations du client pour les adresses par défaut
-    const clientUser = existingQuote.company?.users?.[0];
-    const companyName = existingQuote.company?.name || 'Client';
+    const clientUser = existingQuote.client?.users?.[0];
+    const companyName = existingQuote.client?.name || 'Client';
 
     // 8. Créer l'expédition (transaction pour assurer l'intégrité)
     const result = await prisma.$transaction(async (tx) => {
@@ -1581,8 +1591,8 @@ export async function validateQuoteTreatmentAction(
       const shipment = await tx.shipment.create({
         data: {
           trackingNumber,
-          companyId: existingQuote.companyId, // NULL si particulier
-          userId: existingQuote.companyId ? null : existingQuote.userId, // userId si pas de company
+          clientId: existingQuote.clientId, // NULL si particulier
+          userId: existingQuote.clientId ? null : existingQuote.userId, // userId si pas de company
 
           // Origine (depuis les données de validation ou valeurs par défaut)
           originAddress:
@@ -2012,7 +2022,7 @@ export async function createGuestQuoteAction(
 
         // Métadonnées guest
         // userId: null (pas connecté)
-        // companyId: null (pas rattaché)
+        // clientId: null (pas rattaché)
         // createdById: null (création publique)
         isAttachedToAccount: false,
       },
@@ -2202,7 +2212,7 @@ export async function trackQuoteByTokenAction(
  * 3. Pour chaque devis trouvé :
  *    - userId = nouvel utilisateur
  *    - isAttachedToAccount = true
- *    - companyId = celui de l'utilisateur (si existant)
+ *    - clientId = celui de l'utilisateur (si existant)
  * 4. Retour du nombre de devis rattachés
  *
  * Cette fonction est appelée automatiquement lors de :
@@ -2229,7 +2239,7 @@ export async function attachQuotesToUserAction(
         id: true,
         email: true,
         phone: true,
-        companyId: true,
+        clientId: true,
       },
     });
 
@@ -2275,7 +2285,7 @@ export async function attachQuotesToUserAction(
           where: { id: quote.id },
           data: {
             userId: user.id,
-            companyId: user.companyId,
+            clientId: user.clientId,
             isAttachedToAccount: true,
           },
         });

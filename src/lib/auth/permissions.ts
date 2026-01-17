@@ -105,41 +105,51 @@ export async function requireAdmin() {
 }
 
 /**
- * Vérifier si l'utilisateur peut accéder aux données d'une company
+ * Vérifier si l'utilisateur peut accéder aux données d'un Client
  *
- * @param companyId - ID de la company à vérifier
- * @throws Error si l'utilisateur n'a pas accès à cette company
+ * Le Client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier).
+ * Cette fonction vérifie que l'utilisateur appartient au même Client ou a un rôle
+ * qui lui permet d'accéder à tous les clients.
+ *
+ * @param clientId - ID du Client (COMPANY ou INDIVIDUAL) à vérifier
+ * @throws Error si l'utilisateur n'a pas accès à ce Client
  * @returns Session utilisateur
  *
  * @example
  * ```ts
- * export async function getCompanyData(companyId: string) {
- *   const session = await requireCompanyAccess(companyId);
+ * export async function getClientData(clientId: string) {
+ *   const session = await requireClientAccess(clientId);
  *
- *   // L'utilisateur peut accéder aux données de cette company
- *   const data = await db.company.findUnique({ where: { id: companyId } });
+ *   // L'utilisateur peut accéder aux données de ce client
+ *   const data = await db.client.findUnique({ where: { id: clientId } });
  * }
  * ```
  */
-export async function requireCompanyAccess(companyId: string) {
+export async function requireClientAccess(clientId: string) {
   const session = await requireAuth();
 
   const userRole = session.user.role as UserRole;
 
-  // Admin a accès à toutes les companies
+  // Admin a accès à tous les clients
   if (userRole === 'ADMIN') {
     return session;
   }
 
-  // Operations et Finance managers ont accès à toutes les companies
+  // Operations et Finance managers ont accès à tous les clients
   if (userRole === 'OPERATIONS_MANAGER' || userRole === 'FINANCE_MANAGER') {
     return session;
   }
 
-  // Les autres rôles doivent être de la même company
-  if (session.user.companyId !== companyId) {
-    throw new Error('Forbidden: You can only access data from your own company');
+  // Les autres rôles doivent être rattachés au même client
+  if (session.user.clientId !== clientId) {
+    throw new Error('Forbidden: You can only access data from your own client');
   }
 
   return session;
 }
+
+/**
+ * @deprecated Utilisez requireClientAccess à la place
+ * Alias pour compatibilité avec l'ancien code
+ */
+export const requireCompanyAccess = requireClientAccess;

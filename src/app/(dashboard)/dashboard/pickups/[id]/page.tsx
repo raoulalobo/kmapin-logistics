@@ -26,6 +26,7 @@ import {
   PickupActionsMenu,
 } from '@/components/pickups';
 import { getPickupHistory } from '@/modules/pickups';
+import { type UserRole } from '@/lib/db/enums';
 
 // ============================================
 // TYPES
@@ -52,6 +53,7 @@ export default async function PickupDetailsPage({ params }: PageProps) {
   const { prisma } = await import('@/lib/db/client');
 
   // Charger la demande avec toutes les relations
+  // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
   const pickup = await prisma.pickupRequest.findUnique({
     where: { id },
     include: {
@@ -61,7 +63,7 @@ export default async function PickupDetailsPage({ params }: PageProps) {
           email: true,
         },
       },
-      company: {
+      client: {
         select: {
           name: true,
         },
@@ -138,7 +140,7 @@ export default async function PickupDetailsPage({ params }: PageProps) {
         <PickupActionsMenu
           pickupId={pickup.id}
           currentStatus={pickup.status}
-          userRole={session.user.role}
+          userRole={session.user.role as UserRole}
           compact={false}
         />
       )}
@@ -149,7 +151,7 @@ export default async function PickupDetailsPage({ params }: PageProps) {
         <div className="lg:col-span-2 space-y-6">
           <PickupDetailsCard
             pickup={pickup as any}
-            userRole={session.user.role}
+            userRole={session.user.role as UserRole}
             showInternalInfo={canViewInternalInfo}
           />
         </div>

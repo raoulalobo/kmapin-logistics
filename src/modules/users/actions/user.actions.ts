@@ -59,7 +59,7 @@ type ActionResult<T = void> =
  * @param params.search - Recherche par nom ou email
  * @param params.role - Filtre par rôle
  * @param params.status - Filtre par statut (all, active, inactive)
- * @param params.companyId - Filtre par entreprise
+ * @param params.clientId - Filtre par entreprise
  * @returns Liste des utilisateurs avec statistiques et pagination
  */
 export async function getUsersAction(params: Partial<UserSearchParams> = {}) {
@@ -74,10 +74,10 @@ export async function getUsersAction(params: Partial<UserSearchParams> = {}) {
       search: params.search || null,
       role: params.role || null,
       status: params.status || 'all',
-      companyId: params.companyId || null,
+      clientId: params.clientId || null,
     });
 
-    const { page, limit, search, role, status, companyId } = validatedParams;
+    const { page, limit, search, role, status, clientId } = validatedParams;
 
     // Calculer le skip pour la pagination
     const skip = (page - 1) * limit;
@@ -106,8 +106,8 @@ export async function getUsersAction(params: Partial<UserSearchParams> = {}) {
     }
 
     // Filtre par entreprise
-    if (companyId) {
-      whereClause.companyId = companyId;
+    if (clientId) {
+      whereClause.clientId = clientId;
     }
 
     // Récupérer les utilisateurs et le total en parallèle
@@ -119,7 +119,7 @@ export async function getUsersAction(params: Partial<UserSearchParams> = {}) {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          company: {
+          client: {
             select: {
               id: true,
               name: true,
@@ -246,17 +246,57 @@ export async function createUserAction(
     }
 
     // Vérifier que l'entreprise existe si fournie
-    if (validatedData.companyId) {
-      const companyExists = await prisma.company.findUnique({
-        where: { id: validatedData.companyId },
+    if (validatedData.clientId) {
+      const companyExists = await prisma.client.findUnique({
+        where: { id: validatedData.clientId },
       });
 
       if (!companyExists) {
         return {
           success: false,
           error: 'L\'entreprise spécifiée n\'existe pas',
-          field: 'companyId',
+          field: 'clientId',
         };
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // CRÉATION AUTOMATIQUE D'UN CLIENT POUR LES UTILISATEURS AVEC RÔLE CLIENT
+    // ════════════════════════════════════════════════════════════════════════
+    // Si l'utilisateur a le rôle CLIENT et qu'aucun clientId n'est fourni,
+    // on crée automatiquement un Client de type INDIVIDUAL avec ses informations.
+    // L'utilisateur pourra compléter son profil plus tard (adresse, etc.)
+    // ════════════════════════════════════════════════════════════════════════
+
+    let clientIdToUse = validatedData.clientId || null;
+
+    if (validatedData.role === 'CLIENT' && !validatedData.clientId) {
+      // Vérifier si un Client avec cet email existe déjà
+      const existingClient = await prisma.client.findUnique({
+        where: { email: validatedData.email },
+      });
+
+      if (existingClient) {
+        // Utiliser le Client existant
+        clientIdToUse = existingClient.id;
+      } else {
+        // Créer un nouveau Client INDIVIDUAL
+        // Adresse et ville sont requises mais seront à compléter par l'utilisateur
+        const newClient = await prisma.client.create({
+          data: {
+            type: 'INDIVIDUAL',
+            name: validatedData.name,
+            email: validatedData.email,
+            phone: validatedData.phone || null,
+            address: 'À compléter', // Valeur temporaire
+            city: 'À compléter',    // Valeur temporaire
+            country: 'FR',
+            // Champs spécifiques aux particuliers (extraits du nom si possible)
+            firstName: validatedData.name.split(' ')[0] || null,
+            lastName: validatedData.name.split(' ').slice(1).join(' ') || null,
+          },
+        });
+        clientIdToUse = newClient.id;
       }
     }
 
@@ -269,7 +309,7 @@ export async function createUserAction(
         name: validatedData.name,
         phone: validatedData.phone || null,
         role: validatedData.role,
-        companyId: validatedData.companyId || null,
+        clientId: clientIdToUse,
         emailVerified: false, // Sera vérifié via email
         // Le password sera défini lors de la première connexion via Better Auth
       },
@@ -627,7 +667,7 @@ export async function toggleUserStatusAction(
 /**
  * Action : Assigner un utilisateur à une entreprise
  *
- * Associe ou dissocie un utilisateur d'une entreprise (modification du companyId).
+ * Associe ou dissocie un utilisateur d'une entreprise (modification du clientId).
  *
  * Sécurité :
  * - Réservé aux administrateurs
@@ -661,16 +701,16 @@ export async function assignUserCompanyAction(
     }
 
     // Si une entreprise est fournie, vérifier qu'elle existe
-    if (validatedData.companyId) {
-      const companyExists = await prisma.company.findUnique({
-        where: { id: validatedData.companyId },
+    if (validatedData.clientId) {
+      const companyExists = await prisma.client.findUnique({
+        where: { id: validatedData.clientId },
       });
 
       if (!companyExists) {
         return {
           success: false,
           error: 'L\'entreprise spécifiée n\'existe pas',
-          field: 'companyId',
+          field: 'clientId',
         };
       }
     }
@@ -679,7 +719,7 @@ export async function assignUserCompanyAction(
     await prisma.user.update({
       where: { id: userId },
       data: {
-        companyId: validatedData.companyId || null,
+        clientId: validatedData.clientId || null,
       },
     });
 
@@ -739,7 +779,7 @@ export async function getCompaniesForSelectAction(): Promise<
     await requireAdmin();
 
     // Récupérer les entreprises triées par nom
-    const companies = await prisma.company.findMany({
+    const companies = await prisma.client.findMany({
       select: {
         id: true,
         name: true,

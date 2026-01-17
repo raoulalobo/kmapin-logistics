@@ -59,7 +59,7 @@ export default function NewShipmentPage() {
   const form = useForm<ShipmentFormData>({
     resolver: zodResolver(shipmentSchema),
     defaultValues: {
-      companyId: '',
+      clientId: '',
       originAddress: '',
       originCity: '',
       originPostalCode: '',
@@ -99,7 +99,7 @@ export default function NewShipmentPage() {
   const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
     toastTitle: 'Formulaire incomplet',
     fieldLabels: {
-      companyId: 'Client',
+      clientId: 'Client',
       originAddress: 'Adresse d\'origine',
       originCity: 'Ville d\'origine',
       originPostalCode: 'Code postal d\'origine',
@@ -189,7 +189,7 @@ export default function NewShipmentPage() {
       const formData = new FormData();
 
       // Ajouter tous les champs requis
-      formData.append('companyId', data.companyId);
+      formData.append('clientId', data.clientId);
       formData.append('originAddress', data.originAddress);
       formData.append('originCity', data.originCity);
       formData.append('originPostalCode', data.originPostalCode);
@@ -279,7 +279,7 @@ export default function NewShipmentPage() {
             <CardContent>
               <FormField
                 control={form.control}
-                name="companyId"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client *</FormLabel>

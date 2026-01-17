@@ -325,7 +325,7 @@ export async function completeRegistrationAction(
     }
 
     // 4. Créer une Company par défaut
-    const company = await prisma.company.create({
+    const company = await prisma.client.create({
       data: {
         name: prospect.company || `${validated.name} - Entreprise`,
         legalName: prospect.company,
@@ -342,7 +342,7 @@ export async function completeRegistrationAction(
       success: true,
       data: {
         prospectId: prospect.id,
-        companyId: company.id,
+        clientId: company.id,
         email: prospect.email,
         name: validated.name,
         phone: validated.phone,
@@ -392,10 +392,10 @@ export async function finalizeProspectConversionAction(
     // 2. Récupérer le user et sa company
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { companyId: true },
+      select: { clientId: true },
     });
 
-    if (!user || !user.companyId) {
+    if (!user || !user.clientId) {
       return {
         success: false,
         error: 'Utilisateur ou entreprise introuvable',
@@ -413,7 +413,7 @@ export async function finalizeProspectConversionAction(
       const quote = await prisma.quote.create({
         data: {
           quoteNumber,
-          companyId: user.companyId,
+          clientId: user.clientId,
           originCountry: guestQuote.originCountry,
           destinationCountry: guestQuote.destinationCountry,
           transportMode: guestQuote.transportMode,
@@ -444,7 +444,7 @@ export async function finalizeProspectConversionAction(
       const pickup = await prisma.pickupRequest.create({
         data: {
           // Lien company et user
-          companyId: user.companyId,
+          clientId: user.clientId,
           createdById: userId,
 
           // Adresse
@@ -583,7 +583,7 @@ export async function attachProspectToExistingUserAction(
     // 3. Vérifier que le User existe
     const user = await prisma.user.findUnique({
       where: { email: prospect.email },
-      select: { id: true, companyId: true },
+      select: { id: true, clientId: true },
     });
 
     if (!user) {
@@ -594,8 +594,8 @@ export async function attachProspectToExistingUserAction(
     }
 
     // 4. Si le user n'a pas de company, en créer une
-    if (!user.companyId) {
-      const company = await prisma.company.create({
+    if (!user.clientId) {
+      const company = await prisma.client.create({
         data: {
           name: prospect.company || `${prospect.name || 'Entreprise'}`,
           email: prospect.email,
@@ -609,7 +609,7 @@ export async function attachProspectToExistingUserAction(
       // Lier le user à la company
       await prisma.user.update({
         where: { id: user.id },
-        data: { companyId: company.id },
+        data: { clientId: company.id },
       });
     }
 

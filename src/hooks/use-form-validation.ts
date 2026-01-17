@@ -163,7 +163,8 @@ const DEFAULT_FIELD_LABELS: Record<string, string> = {
   quantity: 'Quantité',
 
   // Divers
-  companyId: 'Entreprise',
+  clientId: 'Client',      // ID du Client (entreprise ou particulier)
+  companyId: 'Entreprise', // Legacy - à supprimer après migration
   items: 'Lignes',
   notes: 'Notes',
   specialInstructions: 'Instructions spéciales',

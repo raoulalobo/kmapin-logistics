@@ -58,7 +58,7 @@ export type InvoiceItemData = z.infer<typeof invoiceItemSchema>;
  */
 export const invoiceSchema = z.object({
   // === Informations du client ===
-  companyId: z
+  clientId: z
     .string()
     .cuid('ID de compagnie invalide'),
 
@@ -186,7 +186,7 @@ export const invoiceSearchSchema = z.object({
   status: z.nativeEnum(InvoiceStatus).optional(),
 
   // Filtres par compagnie
-  companyId: z.string().cuid().optional(),
+  clientId: z.string().cuid().optional(),
 
   // Filtres par dates
   startDate: z.string().datetime().optional(),

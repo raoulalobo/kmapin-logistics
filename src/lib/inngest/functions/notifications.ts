@@ -22,16 +22,17 @@ export const notifyShipmentCreated = inngest.createFunction(
   },
   { event: 'shipment/created' },
   async ({ event, step }) => {
-    const { shipmentId, trackingNumber, companyId, createdById } = event.data;
+    const { shipmentId, trackingNumber, clientId, createdById } = event.data;
 
     /**
      * Step 1 : Récupérer les détails de l'expédition
+     * Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
      */
     const shipment = await step.run('get-shipment-details', async () => {
       return prisma.shipment.findUnique({
         where: { id: shipmentId },
         include: {
-          company: true,
+          client: true,   // Client (COMPANY ou INDIVIDUAL)
           createdBy: true,
         },
       });
@@ -71,8 +72,8 @@ export const notifyShipmentCreated = inngest.createFunction(
         userId: manager.id,
         type: 'SHIPMENT_CREATED' as const,
         title: 'Nouvelle expédition',
-        message: `Nouvelle expédition ${trackingNumber} pour ${shipment.company.name}`,
-        data: { shipmentId, trackingNumber, companyId },
+        message: `Nouvelle expédition ${trackingNumber} pour ${shipment.client.name}`,
+        data: { shipmentId, trackingNumber, clientId },  // clientId du Client (COMPANY ou INDIVIDUAL)
       }));
 
       await prisma.notification.createMany({
@@ -85,12 +86,12 @@ export const notifyShipmentCreated = inngest.createFunction(
      */
     // await step.run('send-client-email', async () => {
     //   await sendEmail({
-    //     to: shipment.company.email,
+    //     to: shipment.client.email,
     //     subject: `Nouvelle expédition créée - ${trackingNumber}`,
     //     template: 'shipment-created',
     //     data: {
     //       trackingNumber,
-    //       company: shipment.company.name,
+    //       clientName: shipment.client.name,  // Nom du client (COMPANY ou INDIVIDUAL)
     //       origin: `${shipment.originCity}, ${shipment.originCountry}`,
     //       destination: `${shipment.destinationCity}, ${shipment.destinationCountry}`,
     //     },
@@ -113,16 +114,17 @@ export const notifyShipmentDelivered = inngest.createFunction(
   },
   { event: 'shipment/delivered' },
   async ({ event, step }) => {
-    const { shipmentId, trackingNumber, companyId } = event.data;
+    const { shipmentId, trackingNumber, clientId } = event.data;
 
     /**
      * Step 1 : Récupérer les détails
+     * Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
      */
     const shipment = await step.run('get-shipment', async () => {
       return prisma.shipment.findUnique({
         where: { id: shipmentId },
         include: {
-          company: true,
+          client: true,   // Client (COMPANY ou INDIVIDUAL)
           createdBy: true,
         },
       });
@@ -147,12 +149,12 @@ export const notifyShipmentDelivered = inngest.createFunction(
         },
       });
 
-      // Notifier tous les users de la company
-      const companyUsers = await prisma.user.findMany({
-        where: { companyId: shipment.companyId },
+      // Notifier tous les users du client (COMPANY ou INDIVIDUAL)
+      const clientUsers = await prisma.user.findMany({
+        where: { clientId: shipment.clientId },
       });
 
-      const notifications = companyUsers
+      const notifications = clientUsers
         .filter((user) => user.id !== shipment.createdById) // Éviter les doublons
         .map((user) => ({
           userId: user.id,
@@ -183,15 +185,16 @@ export const sendOverdueInvoiceReminder = inngest.createFunction(
   },
   { event: 'invoice/overdue' },
   async ({ event, step }) => {
-    const { invoiceId, invoiceNumber, companyId, daysOverdue } = event.data;
+    const { invoiceId, invoiceNumber, clientId, daysOverdue } = event.data;
 
     /**
      * Step 1 : Récupérer la facture
+     * Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
      */
     const invoice = await step.run('get-invoice', async () => {
       return prisma.invoice.findUnique({
         where: { id: invoiceId },
-        include: { company: true },
+        include: { client: true },  // Client (COMPANY ou INDIVIDUAL)
       });
     });
 
@@ -226,7 +229,7 @@ export const sendOverdueInvoiceReminder = inngest.createFunction(
         type: 'INVOICE_PAID' as const, // Réutiliser le type existant
         title: 'Facture en retard',
         message: `La facture ${invoiceNumber} est en retard de ${daysOverdue} jours`,
-        data: { invoiceId, invoiceNumber, companyId, daysOverdue },
+        data: { invoiceId, invoiceNumber, clientId, daysOverdue },  // clientId du Client (COMPANY ou INDIVIDUAL)
       }));
 
       await prisma.notification.createMany({ data: notifications });
@@ -237,12 +240,12 @@ export const sendOverdueInvoiceReminder = inngest.createFunction(
      */
     // await step.run('send-reminder-email', async () => {
     //   await sendEmail({
-    //     to: invoice.company.email,
+    //     to: invoice.client.email,
     //     subject: `Rappel - Facture en retard ${invoiceNumber}`,
     //     template: 'invoice-overdue-reminder',
     //     data: {
     //       invoiceNumber,
-    //       company: invoice.company.name,
+    //       clientName: invoice.client.name,  // Nom du client (COMPANY ou INDIVIDUAL)
     //       total: invoice.total,
     //       dueDate: invoice.dueDate,
     //       daysOverdue,

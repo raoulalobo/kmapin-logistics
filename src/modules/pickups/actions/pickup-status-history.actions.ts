@@ -83,10 +83,10 @@ export async function recordStatusChange(params: {
 
     const db = getEnhancedPrismaFromSession(session);
 
-    // Récupérer la demande d'enlèvement pour obtenir le companyId
+    // Récupérer la demande d'enlèvement pour obtenir le clientId
     const pickupRequest = await db.pickupRequest.findUnique({
       where: { id: params.pickupRequestId },
-      select: { companyId: true },
+      select: { clientId: true },
     });
 
     if (!pickupRequest) {
@@ -104,7 +104,7 @@ export async function recordStatusChange(params: {
         newStatus: params.newStatus,
         changedById: session.user.id,
         notes: params.notes || null,
-        companyId: pickupRequest.companyId,
+        clientId: pickupRequest.clientId,
       },
       include: {
         changedBy: {

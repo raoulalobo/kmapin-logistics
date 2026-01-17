@@ -194,8 +194,8 @@ export default async function ShipmentDetailPage({
           <div className="flex items-center gap-3">
             <Buildings className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-semibold text-lg">{shipment.company.name}</p>
-              <p className="text-sm text-muted-foreground">{shipment.company.email}</p>
+              <p className="font-semibold text-lg">{shipment.client.name}</p>
+              <p className="text-sm text-muted-foreground">{shipment.client.email}</p>
             </div>
           </div>
         </CardContent>

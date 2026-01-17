@@ -78,10 +78,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  */
 async function generateInvoicePDFRoute(invoiceId: string, session: any) {
   // Récupérer la facture avec toutes les relations nécessaires
+  // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
   const invoice = await prisma.invoice.findUnique({
     where: { id: invoiceId },
     include: {
-      company: true,
+      client: true,   // Client (COMPANY ou INDIVIDUAL)
       items: true,
       createdBy: true,
     },
@@ -92,10 +93,11 @@ async function generateInvoicePDFRoute(invoiceId: string, session: any) {
   }
 
   // Vérifier les permissions RBAC
+  // L'utilisateur doit être admin ou appartenir au même client (COMPANY ou INDIVIDUAL)
   const isAdmin = session.user.role === 'ADMIN';
-  const isSameCompany = session.user.companyId === invoice.companyId;
+  const isSameClient = session.user.clientId === invoice.clientId;
 
-  if (!isAdmin && !isSameCompany) {
+  if (!isAdmin && !isSameClient) {
     return NextResponse.json(
       { error: 'Accès non autorisé à cette facture' },
       { status: 403 }
@@ -103,20 +105,21 @@ async function generateInvoicePDFRoute(invoiceId: string, session: any) {
   }
 
   // Préparer les données pour le PDF
+  // Les informations du client (COMPANY ou INDIVIDUAL) sont utilisées pour l'en-tête
   const pdfData = {
     invoiceNumber: invoice.invoiceNumber,
     issueDate: invoice.issueDate,
     dueDate: invoice.dueDate,
-    company: {
-      name: invoice.company.name,
-      legalName: invoice.company.legalName,
-      address: invoice.company.address,
-      city: invoice.company.city,
-      postalCode: invoice.company.postalCode,
-      country: invoice.company.country,
-      taxId: invoice.company.taxId,
-      email: invoice.company.email,
-      phone: invoice.company.phone,
+    company: {  // Garder "company" pour compatibilité avec le template PDF
+      name: invoice.client.name,
+      legalName: invoice.client.legalName,
+      address: invoice.client.address,
+      city: invoice.client.city,
+      postalCode: invoice.client.postalCode,
+      country: invoice.client.country,
+      taxId: invoice.client.taxId,
+      email: invoice.client.email,
+      phone: invoice.client.phone,
     },
     items: invoice.items.map((item) => ({
       description: item.description,
@@ -155,10 +158,11 @@ async function generateInvoicePDFRoute(invoiceId: string, session: any) {
  */
 async function generateQuotePDFRoute(quoteId: string, session: any) {
   // Récupérer le devis avec toutes les relations nécessaires
+  // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
-      company: true,
+      client: true,   // Client (COMPANY ou INDIVIDUAL)
       items: true,
       createdBy: true,
     },
@@ -169,10 +173,11 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
   }
 
   // Vérifier les permissions RBAC
+  // L'utilisateur doit être admin ou appartenir au même client (COMPANY ou INDIVIDUAL)
   const isAdmin = session.user.role === 'ADMIN';
-  const isSameCompany = session.user.companyId === quote.companyId;
+  const isSameClient = session.user.clientId === quote.clientId;
 
-  if (!isAdmin && !isSameCompany) {
+  if (!isAdmin && !isSameClient) {
     return NextResponse.json(
       { error: 'Accès non autorisé à ce devis' },
       { status: 403 }
@@ -180,20 +185,21 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
   }
 
   // Préparer les données pour le PDF
+  // Les informations du client (COMPANY ou INDIVIDUAL) sont utilisées pour l'en-tête
   const pdfData = {
     quoteNumber: quote.quoteNumber,
     issueDate: quote.issueDate,
     validUntil: quote.validUntil,
-    company: {
-      name: quote.company.name,
-      legalName: quote.company.legalName,
-      address: quote.company.address,
-      city: quote.company.city,
-      postalCode: quote.company.postalCode,
-      country: quote.company.country,
-      taxId: quote.company.taxId,
-      email: quote.company.email,
-      phone: quote.company.phone,
+    company: {  // Garder "company" pour compatibilité avec le template PDF
+      name: quote.client?.name || quote.contactName || 'N/A',
+      legalName: quote.client?.legalName,
+      address: quote.client?.address || '',
+      city: quote.client?.city || '',
+      postalCode: quote.client?.postalCode,
+      country: quote.client?.country || '',
+      taxId: quote.client?.taxId,
+      email: quote.client?.email || quote.contactEmail || '',
+      phone: quote.client?.phone || quote.contactPhone,
     },
     items: quote.items.map((item) => ({
       description: item.description,

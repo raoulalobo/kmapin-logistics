@@ -39,7 +39,7 @@ const mockSession: Session = {
     email: 'admin@test.com',
     name: 'Test Admin',
     role: 'ADMIN',
-    companyId: 'company-123',
+    clientId: 'company-123',
     emailVerified: true,
     image: null,
     createdAt: new Date(),
@@ -104,7 +104,7 @@ describe('Pickup Actions - createPickupRequestAction', () => {
     const mockShipment = {
       id: 'shipment-123',
       trackingNumber: 'SHP-20260109-A1B2C',
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     const mockPickupRequest = {
@@ -119,7 +119,7 @@ describe('Pickup Actions - createPickupRequestAction', () => {
       requestedDate: new Date('2026-01-15'),
       timeSlot: 'MORNING',
       status: PickupStatus.REQUESTED,
-      companyId: 'company-123',
+      clientId: 'company-123',
       createdById: 'user-admin-123',
       cargoType: 'Electronics',
       estimatedWeight: 50,
@@ -205,7 +205,7 @@ describe('Pickup Actions - updatePickupStatusAction', () => {
     const mockExistingPickup = {
       id: 'pickup-123',
       status: PickupStatus.REQUESTED,
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     const mockUpdatedPickup = {
@@ -240,7 +240,7 @@ describe('Pickup Actions - updatePickupStatusAction', () => {
     const mockExistingPickup = {
       id: 'pickup-123',
       status: PickupStatus.REQUESTED,
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockExistingPickup);
@@ -277,7 +277,7 @@ describe('Pickup Actions - cancelPickupRequestAction', () => {
     const mockExistingPickup = {
       id: 'pickup-123',
       status: PickupStatus.REQUESTED,
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockExistingPickup);
@@ -305,7 +305,7 @@ describe('Pickup Actions - cancelPickupRequestAction', () => {
     const mockCompletedPickup = {
       id: 'pickup-123',
       status: PickupStatus.COMPLETED,
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockCompletedPickup);

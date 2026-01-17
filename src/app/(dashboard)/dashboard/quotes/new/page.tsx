@@ -65,15 +65,15 @@ export default function NewQuotePage() {
     return date.toISOString(); // Format ISO 8601 complet
   };
 
-  // Vérifier si l'utilisateur est un CLIENT (ne peut créer des devis que pour sa propre company)
+  // Vérifier si l'utilisateur est un CLIENT (ne peut créer des devis que pour son propre client)
   const isClient = session?.user?.role === 'CLIENT';
-  const userCompanyId = session?.user?.companyId || '';
+  const userClientId = session?.user?.clientId || '';
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
-      // Si CLIENT : pré-remplir automatiquement avec son companyId, sinon laisser vide
-      companyId: isClient ? userCompanyId : '',
+      // Si CLIENT : pré-remplir automatiquement avec son clientId, sinon laisser vide
+      clientId: isClient ? userClientId : '',
       originCountry: 'FR',
       destinationCountry: '',
       cargoType: 'GENERAL' as CargoType,
@@ -95,7 +95,7 @@ export default function NewQuotePage() {
   const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
     toastTitle: 'Formulaire incomplet',
     fieldLabels: {
-      companyId: 'Client',
+      clientId: 'Client',
       originCountry: 'Pays d\'origine',
       destinationCountry: 'Pays de destination',
       cargoType: 'Type de marchandise',
@@ -238,7 +238,7 @@ export default function NewQuotePage() {
       const formData = new FormData();
 
       // Ajouter tous les champs requis
-      formData.append('companyId', data.companyId);
+      formData.append('clientId', data.clientId);
       formData.append('originCountry', data.originCountry);
       formData.append('destinationCountry', data.destinationCountry);
       formData.append('cargoType', data.cargoType);
@@ -312,7 +312,7 @@ export default function NewQuotePage() {
               <CardContent>
                 <FormField
                   control={form.control}
-                  name="companyId"
+                  name="clientId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Client *</FormLabel>

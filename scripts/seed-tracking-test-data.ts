@@ -39,19 +39,19 @@ async function main() {
   console.log('='.repeat(60));
 
   // =========================================================================
-  // ÉTAPE 1 : Vérifier/Créer une company de test
+  // ÉTAPE 1 : Vérifier/Créer une client de test
   // =========================================================================
-  console.log('\n📦 ÉTAPE 1 : Vérification de la company de test...\n');
+  console.log('\n📦 ÉTAPE 1 : Vérification de la client de test...\n');
 
-  let testCompany = await prisma.company.findFirst({
+  let testCompany = await prisma.client.findFirst({
     where: {
       email: 'test@fasofret.com',
     },
   });
 
   if (!testCompany) {
-    console.log('   Création d\'une company de test...');
-    testCompany = await prisma.company.create({
+    console.log('   Création d\'une client de test...');
+    testCompany = await prisma.client.create({
       data: {
         name: 'Faso Fret Test Company',
         email: 'test@fasofret.com',
@@ -85,7 +85,7 @@ async function main() {
         name: 'Test User',
         email: 'test@fasofret.com',
         role: 'OPERATIONS_MANAGER',
-        companyId: testCompany.id,
+        clientId: testCompany.id,
         emailVerified: true,
       },
     });
@@ -309,7 +309,7 @@ async function main() {
       data: {
         trackingNumber,
         status: data.status,
-        companyId: testCompany.id,
+        clientId: testCompany.id,
         createdById: testUser.id,
 
         // Origine/Destination

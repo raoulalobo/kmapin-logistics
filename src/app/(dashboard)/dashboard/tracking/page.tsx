@@ -212,7 +212,7 @@ export default async function TrackingPage() {
                       <span>•</span>
                       <span>{shipment.weight} kg</span>
                       <span>•</span>
-                      <span className="capitalize">{shipment.company.name}</span>
+                      <span className="capitalize">{shipment.client.name}</span>
                       {shipment.estimatedDeliveryDate && (
                         <>
                           <span>•</span>

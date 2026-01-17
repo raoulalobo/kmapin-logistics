@@ -2,7 +2,10 @@
  * Déclarations de types pour Better Auth
  *
  * Ce fichier étend les types de Better Auth pour inclure les champs personnalisés
- * de notre application (role, companyId) dans la session utilisateur.
+ * de notre application (role, clientId) dans la session utilisateur.
+ *
+ * Le clientId représente l'ID du Client unifié (type COMPANY ou INDIVIDUAL)
+ * auquel l'utilisateur est rattaché.
  *
  * Better Auth utilise module augmentation pour permettre l'extension de ses types.
  * @see https://www.better-auth.com/docs/customization/typescript
@@ -13,7 +16,7 @@ import type { UserRole } from '@/generated/prisma';
 /**
  * Extension du module Better Auth pour ajouter les champs custom à la session
  *
- * Cette déclaration permet à TypeScript de reconnaître les champs 'role' et 'companyId'
+ * Cette déclaration permet à TypeScript de reconnaître les champs 'role' et 'clientId'
  * dans session.user, qui sont ajoutés par le callback session dans auth/config.ts
  */
 declare module 'better-auth/types' {
@@ -29,11 +32,11 @@ declare module 'better-auth/types' {
     role: UserRole;
 
     /**
-     * ID de la compagnie à laquelle appartient l'utilisateur
-     * Utilisé pour filtrer les données selon l'entreprise (multi-tenant)
-     * Null pour les utilisateurs sans compagnie (ex: ADMIN système)
+     * ID du Client (COMPANY ou INDIVIDUAL) auquel appartient l'utilisateur
+     * Utilisé pour filtrer les données selon le client (multi-tenant)
+     * Null uniquement pour les ADMIN système
      */
-    companyId: string | null;
+    clientId: string | null;
   }
 
   /**
@@ -54,9 +57,9 @@ declare module 'better-auth/types' {
  * import { requireAuth } from '@/lib/auth/config';
  *
  * const session = await requireAuth();
- * // TypeScript connaît maintenant session.user.role et session.user.companyId
+ * // TypeScript connaît maintenant session.user.role et session.user.clientId
  * console.log(session.user.role); // UserRole
- * console.log(session.user.companyId); // string | null
+ * console.log(session.user.clientId); // string | null (ID du Client COMPANY ou INDIVIDUAL)
  * ```
  */
 export type SessionUser = {
@@ -65,5 +68,5 @@ export type SessionUser = {
   name?: string | null;
   image?: string | null;
   role: UserRole;
-  companyId: string | null;
+  clientId: string | null;  // ID du Client (COMPANY ou INDIVIDUAL)
 };

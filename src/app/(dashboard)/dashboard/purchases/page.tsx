@@ -258,7 +258,7 @@ async function PurchasesList({
             email: true,
           },
         },
-        company: {
+        client: {
           select: {
             name: true,
           },

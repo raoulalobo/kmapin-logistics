@@ -36,7 +36,7 @@ const mockSession: Session = {
     email: 'operations@test.com',
     name: 'Operations Manager',
     role: 'OPERATIONS_MANAGER',
-    companyId: 'company-123',
+    clientId: 'company-123',
     emailVerified: true,
     image: null,
     createdAt: new Date(),
@@ -86,7 +86,7 @@ describe('Pickup Status History - recordStatusChange', () => {
     // Arrange
     const mockPickupRequest = {
       id: 'pickup-123',
-      companyId: 'company-123',
+      clientId: 'company-123',
       status: PickupStatus.REQUESTED,
     };
 
@@ -99,7 +99,7 @@ describe('Pickup Status History - recordStatusChange', () => {
       newStatus: PickupStatus.SCHEDULED,
       changedAt: new Date(),
       changedById: 'user-operations-123',
-      companyId: 'company-123',
+      clientId: 'company-123',
       notes: 'Planifié pour demain',
     };
 
@@ -122,7 +122,7 @@ describe('Pickup Status History - recordStatusChange', () => {
         oldStatus: PickupStatus.REQUESTED,
         newStatus: PickupStatus.SCHEDULED,
         changedById: 'user-operations-123',
-        companyId: 'company-123',
+        clientId: 'company-123',
         notes: 'Planifié pour demain',
       },
     });
@@ -132,7 +132,7 @@ describe('Pickup Status History - recordStatusChange', () => {
     // Arrange : Première entrée (création de la demande)
     const mockPickupRequest = {
       id: 'pickup-new-123',
-      companyId: 'company-123',
+      clientId: 'company-123',
       status: PickupStatus.REQUESTED,
     };
 
@@ -145,7 +145,7 @@ describe('Pickup Status History - recordStatusChange', () => {
       newStatus: PickupStatus.REQUESTED,
       changedAt: new Date(),
       changedById: 'user-operations-123',
-      companyId: 'company-123',
+      clientId: 'company-123',
       notes: 'Demande d\'enlèvement créée',
     };
 
@@ -188,18 +188,18 @@ describe('Pickup Status History - recordStatusChange', () => {
     expect(result.error).toContain('introuvable');
   });
 
-  it('devrait inclure companyId automatiquement', async () => {
-    // Arrange : Vérifier que companyId est récupéré depuis le pickup
+  it('devrait inclure clientId automatiquement', async () => {
+    // Arrange : Vérifier que clientId est récupéré depuis le pickup
     const mockPickupRequest = {
       id: 'pickup-456',
-      companyId: 'company-different-456',
+      clientId: 'company-different-456',
       status: PickupStatus.SCHEDULED,
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockPickupRequest);
     mockEnhancedPrisma.pickupStatusHistory.create.mockResolvedValue({
       id: 'history-456',
-      companyId: 'company-different-456',
+      clientId: 'company-different-456',
     } as any);
 
     // Act
@@ -209,11 +209,11 @@ describe('Pickup Status History - recordStatusChange', () => {
       newStatus: PickupStatus.IN_PROGRESS,
     });
 
-    // Assert : companyId doit être celui du pickup, pas de la session
+    // Assert : clientId doit être celui du pickup, pas de la session
     expect(mockEnhancedPrisma.pickupStatusHistory.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          companyId: 'company-different-456',
+          clientId: 'company-different-456',
         }),
       })
     );
@@ -440,7 +440,7 @@ describe('Pickup Status History - Access Control (RBAC)', () => {
 
     const mockPickupRequest = {
       id: 'pickup-admin-test',
-      companyId: 'company-123',
+      clientId: 'company-123',
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockPickupRequest);

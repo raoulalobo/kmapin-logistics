@@ -119,7 +119,7 @@ export async function createShipmentAction(
 
     // Extraire et valider les données
     const rawData = {
-      companyId: formData.get('companyId'),
+      clientId: formData.get('clientId'),
       originAddress: formData.get('originAddress'),
       originCity: formData.get('originCity'),
       originPostalCode: formData.get('originPostalCode'),
@@ -154,15 +154,15 @@ export async function createShipmentAction(
     const validatedData = shipmentSchema.parse(rawData);
 
     // Vérifier que la compagnie existe
-    const company = await prisma.company.findUnique({
-      where: { id: validatedData.companyId },
+    const company = await prisma.client.findUnique({
+      where: { id: validatedData.clientId },
     });
 
     if (!company) {
       return {
         success: false,
         error: 'Compagnie introuvable',
-        field: 'companyId',
+        field: 'clientId',
       };
     }
 
@@ -173,7 +173,7 @@ export async function createShipmentAction(
     const shipment = await prisma.shipment.create({
       data: {
         trackingNumber,
-        companyId: validatedData.companyId,
+        clientId: validatedData.clientId,
         originAddress: validatedData.originAddress,
         originCity: validatedData.originCity,
         originPostalCode: validatedData.originPostalCode,
@@ -308,7 +308,7 @@ async function retryOnConnectionError<T>(
  *
  * @param page - Numéro de page (optionnel, défaut: 1)
  * @param limit - Nombre de résultats par page (optionnel, défaut: 10)
- * @param companyId - Filtrer par compagnie (optionnel)
+ * @param clientId - Filtrer par compagnie (optionnel)
  * @param status - Filtrer par statut (optionnel)
  * @param search - Terme de recherche (tracking number, origine, destination) (optionnel)
  * @returns Liste des expéditions
@@ -318,7 +318,7 @@ async function retryOnConnectionError<T>(
 export async function getShipmentsAction(
   page = 1,
   limit = 10,
-  companyId?: string,
+  clientId?: string,
   status?: string,
   search?: string
 ) {
@@ -354,16 +354,16 @@ export async function getShipmentsAction(
 
     // Si l'utilisateur est CLIENT, il ne voit que ses propres expéditions
     if (canReadOwn && !canReadAll) {
-      if (!session.user.companyId) {
+      if (!session.user.clientId) {
         return {
           success: false,
           error: 'Votre compte n\'est pas associé à une compagnie',
         };
       }
-      where.companyId = session.user.companyId;
-    } else if (companyId) {
-      // Sinon, filtrer par companyId si fourni
-      where.companyId = companyId;
+      where.clientId = session.user.clientId;
+    } else if (clientId) {
+      // Sinon, filtrer par clientId si fourni
+      where.clientId = clientId;
     }
 
     // Filtrer par statut si fourni
@@ -379,7 +379,7 @@ export async function getShipmentsAction(
         { originCountry: { contains: search, mode: 'insensitive' } },
         { destinationCity: { contains: search, mode: 'insensitive' } },
         { destinationCountry: { contains: search, mode: 'insensitive' } },
-        { company: { name: { contains: search, mode: 'insensitive' } } },
+        { client: { name: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -395,7 +395,7 @@ export async function getShipmentsAction(
           take: limit,
           orderBy: { createdAt: 'desc' },
           include: {
-            company: {
+            client: {
               select: {
                 id: true,
                 name: true,
@@ -491,10 +491,11 @@ export async function getShipmentAction(id: string) {
     }
 
     // Récupérer l'expédition avec toutes les relations
+    // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
     const shipment = await prisma.shipment.findUnique({
       where: { id },
       include: {
-        company: true,
+        client: true,
         createdBy: {
           select: {
             id: true,
@@ -528,7 +529,7 @@ export async function getShipmentAction(id: string) {
 
     // Si l'utilisateur est CLIENT, vérifier qu'il peut accéder à cette expédition
     if (canReadOwn && !canReadAll) {
-      if (session.user.companyId !== shipment.companyId) {
+      if (session.user.clientId !== shipment.clientId) {
         return {
           success: false,
           error: 'Vous n\'avez pas accès à cette expédition',
@@ -601,7 +602,7 @@ export async function updateShipmentAction(
 
     // Parcourir tous les champs possibles
     const fields = [
-      'companyId',
+      'clientId',
       'originAddress',
       'originCity',
       'originPostalCode',

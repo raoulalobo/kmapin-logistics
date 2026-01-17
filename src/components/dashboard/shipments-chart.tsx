@@ -79,7 +79,7 @@ export function ShipmentsChart({ data }: ShipmentsChartProps) {
           </div>
         </CardTitle>
         <CardDescription>
-          Expéditions des 6 derniers mois • Taux de livraison : {overallRate}%
+          Expéditions des 6 derniers mois
         </CardDescription>
       </CardHeader>
       <CardContent>

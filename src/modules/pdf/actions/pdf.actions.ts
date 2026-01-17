@@ -32,7 +32,7 @@ export async function generateInvoicePDFAction(
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
       include: {
-        company: true,
+        client: true,
         items: true,
         createdBy: true,
       },
@@ -48,7 +48,7 @@ export async function generateInvoicePDFAction(
     // Vérifier les permissions RBAC
     // L'utilisateur doit être admin ou appartenir à la même compagnie
     const isAdmin = session.user.role === 'ADMIN';
-    const isSameCompany = session.user.companyId === invoice.companyId;
+    const isSameCompany = session.user.clientId === invoice.clientId;
 
     if (!isAdmin && !isSameCompany) {
       return {
@@ -63,15 +63,15 @@ export async function generateInvoicePDFAction(
       issueDate: invoice.issueDate,
       dueDate: invoice.dueDate,
       company: {
-        name: invoice.company.name,
-        legalName: invoice.company.legalName,
-        address: invoice.company.address,
-        city: invoice.company.city,
-        postalCode: invoice.company.postalCode,
-        country: invoice.company.country,
-        taxId: invoice.company.taxId,
-        email: invoice.company.email,
-        phone: invoice.company.phone,
+        name: invoice.client.name,
+        legalName: invoice.client.legalName,
+        address: invoice.client.address,
+        city: invoice.client.city,
+        postalCode: invoice.client.postalCode,
+        country: invoice.client.country,
+        taxId: invoice.client.taxId,
+        email: invoice.client.email,
+        phone: invoice.client.phone,
       },
       items: invoice.items.map((item) => ({
         description: item.description,
@@ -127,7 +127,7 @@ export async function generateQuotePDFAction(
     const quote = await prisma.quote.findUnique({
       where: { id: quoteId },
       include: {
-        company: true,
+        client: true,
       },
     });
 
@@ -140,7 +140,7 @@ export async function generateQuotePDFAction(
 
     // Vérifier les permissions RBAC
     const isAdmin = session.user.role === 'ADMIN';
-    const isSameCompany = session.user.companyId === quote.companyId;
+    const isSameCompany = session.user.clientId === quote.clientId;
 
     if (!isAdmin && !isSameCompany) {
       return {
@@ -155,14 +155,14 @@ export async function generateQuotePDFAction(
       createdAt: quote.createdAt,
       validUntil: quote.validUntil,
       company: {
-        name: quote.company.name,
-        legalName: quote.company.legalName,
-        address: quote.company.address,
-        city: quote.company.city,
-        postalCode: quote.company.postalCode,
-        country: quote.company.country,
-        email: quote.company.email,
-        phone: quote.company.phone,
+        name: quote.client.name,
+        legalName: quote.client.legalName,
+        address: quote.client.address,
+        city: quote.client.city,
+        postalCode: quote.client.postalCode,
+        country: quote.client.country,
+        email: quote.client.email,
+        phone: quote.client.phone,
       },
       originCountry: quote.originCountry,
       destinationCountry: quote.destinationCountry,

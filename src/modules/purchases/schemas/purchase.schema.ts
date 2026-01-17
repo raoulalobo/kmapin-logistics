@@ -218,7 +218,7 @@ export type CreateGuestPurchaseInput = z.infer<typeof createGuestPurchaseSchema>
  *
  * Différences avec createGuestPurchaseSchema :
  * - userId rempli depuis la session
- * - companyId déduit de la session
+ * - clientId déduit de la session
  * - isAttachedToAccount = true dès la création
  */
 export const createPurchaseSchema = createGuestPurchaseSchema.extend({

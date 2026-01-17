@@ -318,7 +318,7 @@ export default async function QuotesPage({
                           {quote.quoteNumber}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {quote.company.name}
+                          {quote.client?.name}
                         </p>
                       </div>
                     </div>

@@ -70,7 +70,7 @@ export async function createClientAction(
     }
 
     // Vérifier si un client avec le même email existe déjà
-    const existingClient = await prisma.company.findFirst({
+    const existingClient = await prisma.client.findFirst({
       where: { email: validatedData.email },
     });
 
@@ -83,7 +83,7 @@ export async function createClientAction(
     }
 
     // Créer le client
-    const client = await prisma.company.create({
+    const client = await prisma.client.create({
       data: {
         name: validatedData.name,
         legalName: validatedData.legalName,
@@ -186,7 +186,7 @@ export async function getClientsAction(params: GetClientsParams = {}) {
 
     // Récupérer les clients avec le filtre de recherche
     const [clients, total] = await Promise.all([
-      prisma.company.findMany({
+      prisma.client.findMany({
         where: whereClause,
         skip,
         take: limit,
@@ -200,7 +200,7 @@ export async function getClientsAction(params: GetClientsParams = {}) {
           },
         },
       }),
-      prisma.company.count({ where: whereClause }),
+      prisma.client.count({ where: whereClause }),
     ]);
 
     return {
@@ -259,7 +259,7 @@ export async function getClientAction(id: string) {
     await requirePermission('clients:read');
 
     // Récupérer le client avec statistiques
-    const client = await prisma.company.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id },
       include: {
         shipments: {
@@ -339,7 +339,7 @@ export async function updateClientAction(
     await requirePermission('clients:update');
 
     // Vérifier que le client existe
-    const existingClient = await prisma.company.findUnique({
+    const existingClient = await prisma.client.findUnique({
       where: { id },
     });
 
@@ -365,7 +365,7 @@ export async function updateClientAction(
 
     // Vérifier si l'email est déjà utilisé par un autre client
     if (validatedData.email && validatedData.email !== existingClient.email) {
-      const emailExists = await prisma.company.findFirst({
+      const emailExists = await prisma.client.findFirst({
         where: {
           email: validatedData.email,
           id: { not: id },
@@ -382,7 +382,7 @@ export async function updateClientAction(
     }
 
     // Mettre à jour le client
-    await prisma.company.update({
+    await prisma.client.update({
       where: { id },
       data: validatedData,
     });
@@ -450,7 +450,7 @@ export async function deleteClientAction(
     await requirePermission('clients:delete');
 
     // Vérifier que le client existe
-    const client = await prisma.company.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id },
       include: {
         _count: {
@@ -476,7 +476,7 @@ export async function deleteClientAction(
     }
 
     // Supprimer le client
-    await prisma.company.delete({
+    await prisma.client.delete({
       where: { id },
     });
 

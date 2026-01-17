@@ -23,6 +23,11 @@ enum UserRole {
   VIEWER
 }
 
+enum ClientType {
+  COMPANY
+  INDIVIDUAL
+}
+
 enum CargoType {
   GENERAL
   DANGEROUS
@@ -171,13 +176,11 @@ model User {
   accounts                Account[]
   sessions                Session[]
   role                    UserRole          @default(CLIENT)
-  companyId               String?
-  company                 Company?          @relation(fields: [companyId], references: [id])
+  clientId                String?
+  client                  Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   permissions             Json?
   createdShipments        Shipment[]        @relation("CreatedBy")
-  userShipments           Shipment[]        @relation("UserShipments")
   createdInvoices         Invoice[]         @relation("CreatedBy")
-  userInvoices            Invoice[]         @relation("UserInvoices")
   userDocuments           Document[]        @relation("UserDocuments")
   uploadedDocuments       Document[]        @relation("UploadedDocuments")
   prospect                Prospect?
@@ -193,7 +196,7 @@ model User {
   userQuotes              Quote[]           @relation("UserQuotes")
   createdQuotes           Quote[]           @relation("CreatedQuotes")
 
-  @@index([companyId])
+  @@index([clientId])
   @@map("user")
 }
 
@@ -253,18 +256,21 @@ model Verification {
   @@map("verification")
 }
 
-model Company {
+model Client {
   id               String            @id() @default(cuid())
+  type             ClientType        @default(INDIVIDUAL)
   name             String
-  legalName        String?
-  taxId            String?           @unique()
-  email            String
+  email            String            @unique()
   phone            String?
   address          String
   city             String
   postalCode       String?
-  country          String
+  country          String            @default("FR")
+  legalName        String?
+  taxId            String?           @unique()
   website          String?
+  firstName        String?
+  lastName         String?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt()
   users            User[]
@@ -277,15 +283,16 @@ model Company {
   purchaseRequests PurchaseRequest[]
 
   @@index([taxId])
+  @@index([email])
+  @@index([type])
+  @@map("Client")
 }
 
 model Shipment {
   id                    String          @id() @default(cuid())
   trackingNumber        String          @unique()
-  companyId             String?
-  company               Company?        @relation(fields: [companyId], references: [id])
-  userId                String?
-  user                  User?           @relation("UserShipments", fields: [userId], references: [id])
+  clientId              String
+  client                Client          @relation(fields: [clientId], references: [id])
   originAddress         String
   originCity            String
   originPostalCode      String
@@ -330,8 +337,7 @@ model Shipment {
   pickupRequests        PickupRequest[]
   fromQuote             Quote?          @relation("QuoteToShipment")
 
-  @@index([companyId])
-  @@index([userId])
+  @@index([clientId])
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
@@ -377,8 +383,8 @@ model PickupRequest {
   shipment            Shipment?      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
   documents           Document[]
   logs                PickupLog[]
-  companyId           String?
-  company             Company?       @relation(fields: [companyId], references: [id])
+  clientId            String?
+  client              Client?        @relation(fields: [clientId], references: [id])
   createdById         String?
   createdBy           User?          @relation("CreatedPickups", fields: [createdById], references: [id])
   createdAt           DateTime       @default(now())
@@ -390,7 +396,7 @@ model PickupRequest {
   @@index([contactEmail])
   @@index([contactPhone])
   @@index([status])
-  @@index([companyId])
+  @@index([clientId])
   @@index([shipmentId])
   @@index([transporterId])
   @@index([createdAt])
@@ -458,8 +464,8 @@ model PurchaseRequest {
   acceptedPricing     Boolean        @default(false)
   documents           Document[]
   logs                PurchaseLog[]
-  companyId           String?
-  company             Company?       @relation(fields: [companyId], references: [id])
+  clientId            String?
+  client              Client?        @relation(fields: [clientId], references: [id])
   createdById         String?
   createdBy           User?          @relation("CreatedPurchases", fields: [createdById], references: [id])
   createdAt           DateTime       @default(now())
@@ -471,7 +477,7 @@ model PurchaseRequest {
   @@index([contactEmail])
   @@index([contactPhone])
   @@index([status])
-  @@index([companyId])
+  @@index([clientId])
   @@index([createdAt])
   @@index([status, createdAt])
   @@map("purchase_request")
@@ -519,10 +525,8 @@ model TrackingEvent {
 model Invoice {
   id            String        @id() @default(cuid())
   invoiceNumber String        @unique()
-  companyId     String?
-  company       Company?      @relation(fields: [companyId], references: [id])
-  userId        String?
-  user          User?         @relation("UserInvoices", fields: [userId], references: [id])
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id])
   issueDate     DateTime      @default(now())
   dueDate       DateTime
   paidDate      DateTime?
@@ -545,8 +549,7 @@ model Invoice {
   items         InvoiceItem[]
   documents     Document[]
 
-  @@index([companyId])
-  @@index([userId])
+  @@index([clientId])
   @@index([status])
   @@index([invoiceNumber])
 }
@@ -574,8 +577,8 @@ model Quote {
   contactEmail         String
   contactPhone         String?
   contactName          String?
-  companyId            String?
-  company              Company?            @relation(fields: [companyId], references: [id])
+  clientId             String?
+  client               Client?             @relation(fields: [clientId], references: [id])
   originCountry        String
   destinationCountry   String
   transportMode        TransportMode[]
@@ -608,7 +611,7 @@ model Quote {
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt()
 
-  @@index([companyId])
+  @@index([clientId])
   @@index([status])
   @@index([trackingToken])
   @@index([contactEmail])
@@ -694,15 +697,15 @@ model Document {
   pickupRequest     PickupRequest?   @relation(fields: [pickupRequestId], references: [id], onDelete: Cascade)
   purchaseRequestId String?
   purchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
-  companyId         String?
-  company           Company?         @relation(fields: [companyId], references: [id])
+  clientId          String?
+  client            Client?          @relation(fields: [clientId], references: [id])
   userId            String?
   user              User?            @relation("UserDocuments", fields: [userId], references: [id])
   uploadedBy        String
   uploader          User             @relation("UploadedDocuments", fields: [uploadedBy], references: [id])
   uploadedAt        DateTime         @default(now())
 
-  @@index([companyId])
+  @@index([clientId])
   @@index([userId])
   @@index([shipmentId])
   @@index([invoiceId])
@@ -729,13 +732,13 @@ model Transporter {
   notes          String?
   isActive       Boolean         @default(true)
   rating         Float?          @default(0)
-  companyId      String
-  company        Company         @relation(fields: [companyId], references: [id])
+  clientId       String
+  client         Client          @relation(fields: [clientId], references: [id])
   pickupRequests PickupRequest[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt()
 
-  @@index([companyId])
+  @@index([clientId])
   @@index([type])
   @@map("transporter")
 }

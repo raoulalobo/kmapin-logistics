@@ -273,9 +273,9 @@ export default async function InvoicesPage({
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium">{invoice.company.name}</span>
+                        <span className="font-medium">{invoice.client.name}</span>
                         <span className="text-xs text-muted-foreground">
-                          {invoice.company.email}
+                          {invoice.client.email}
                         </span>
                       </div>
                     </TableCell>
@@ -357,7 +357,7 @@ export default async function InvoicesPage({
       {invoices.length > 0 && (
         <Pagination
           currentPage={currentPage}
-          totalPages={pagination.pages}
+          totalPages={pagination.totalPages}
           baseUrl="/dashboard/invoices"
         />
       )}

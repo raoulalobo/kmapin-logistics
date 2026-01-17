@@ -126,7 +126,7 @@ export async function getPublicTracking(
     const shipment = await prisma.shipment.findUnique({
       where: { trackingNumber },
       include: {
-        company: {
+        client: {
           select: {
             name: true, // Nom uniquement (pas d'email, taxId, etc.)
           },
@@ -191,7 +191,7 @@ export async function getPublicTracking(
       transportMode: shipment.transportMode as string[],
 
       // Company (nom uniquement)
-      companyName: shipment.company.name,
+      companyName: shipment.client.name,
 
       // Events filtrés
       trackingEvents: publicEvents,

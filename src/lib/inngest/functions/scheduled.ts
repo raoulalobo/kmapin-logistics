@@ -35,7 +35,7 @@ export const checkOverdueInvoices = inngest.createFunction(
           dueDate: { lt: now }, // Date d'échéance dépassée
         },
         include: {
-          company: true,
+          client: true,  // Client (COMPANY ou INDIVIDUAL)
         },
       });
     });
@@ -74,7 +74,7 @@ export const checkOverdueInvoices = inngest.createFunction(
           data: {
             invoiceId: invoice.id,
             invoiceNumber: invoice.invoiceNumber,
-            companyId: invoice.companyId,
+            clientId: invoice.clientId,  // ID du Client (COMPANY ou INDIVIDUAL)
             dueDate: invoice.dueDate.toISOString(),
             daysOverdue,
           },

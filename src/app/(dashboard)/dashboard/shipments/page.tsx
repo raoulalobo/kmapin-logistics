@@ -207,7 +207,7 @@ export default async function ShipmentsPage({
                           {shipment.trackingNumber}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {shipment.company.name}
+                          {shipment.client.name}
                         </p>
                       </div>
                     </div>

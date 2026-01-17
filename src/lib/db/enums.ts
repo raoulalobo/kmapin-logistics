@@ -25,6 +25,7 @@ export {
   NotificationType,
   DocumentType,
   UserRole,
+  ClientType,
   PurchaseStatus,
   DeliveryMode,
 } from '@/generated/prisma';

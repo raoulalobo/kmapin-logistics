@@ -32,7 +32,7 @@ export interface ShipmentWithTracking {
   actualPickupDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  company: {
+  client: {
     id: string;
     name: string;
   };
@@ -73,10 +73,10 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
 
   // Les clients ne voient que les expéditions de leur company
   const isClient = session.user.role === 'CLIENT' || session.user.role === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   // Sécurité : Si CLIENT sans company, retourner tableau vide
-  if (isClient && !companyId) {
+  if (isClient && !clientId) {
     return [];
   }
 
@@ -88,7 +88,7 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
   };
 
   if (isClient) {
-    where.companyId = companyId;
+    where.clientId = clientId;
   }
 
   // Récupérer les expéditions avec tracking
@@ -98,7 +98,7 @@ export async function getActiveShipmentsWithTracking(): Promise<ShipmentWithTrac
       trackingEvents: {
         orderBy: { timestamp: 'desc' },
       },
-      company: {
+      client: {
         select: {
           id: true,
           name: true,
@@ -125,7 +125,7 @@ export async function getShipmentTracking(shipmentId: string): Promise<ShipmentW
       trackingEvents: {
         orderBy: { timestamp: 'asc' },
       },
-      company: {
+      client: {
         select: {
           id: true,
           name: true,
@@ -143,7 +143,7 @@ export async function getShipmentTracking(shipmentId: string): Promise<ShipmentW
   const isManager =
     session.user.role === 'OPERATIONS_MANAGER' ||
     session.user.role === 'FINANCE_MANAGER';
-  const isSameCompany = shipment.companyId === session.user.companyId;
+  const isSameCompany = shipment.clientId === session.user.clientId;
 
   if (!isAdmin && !isManager && !isSameCompany) {
     throw new Error('Accès non autorisé à cette expédition');
@@ -216,12 +216,12 @@ export async function addTrackingEvent(data: {
 export async function getTrackingStats() {
   const session = await requireAuth();
 
-  // Déterminer si l'utilisateur est CLIENT/VIEWER et récupérer le companyId
+  // Déterminer si l'utilisateur est CLIENT/VIEWER et récupérer le clientId
   const isClient = session.user.role === 'CLIENT' || session.user.role === 'VIEWER';
-  const companyId = session.user.companyId;
+  const clientId = session.user.clientId;
 
   // Sécurité : Si CLIENT sans company, retourner des statistiques vides
-  if (isClient && !companyId) {
+  if (isClient && !clientId) {
     return {
       pickedUp: 0,
       readyForPickup: 0,
@@ -236,7 +236,7 @@ export async function getTrackingStats() {
   // Construire le filtre selon le rôle
   const where: any = {};
   if (isClient) {
-    where.companyId = companyId!; // TypeScript assertion - garanti non-null ici
+    where.clientId = clientId!; // TypeScript assertion - garanti non-null ici
   }
 
   // Compter les expéditions par statut

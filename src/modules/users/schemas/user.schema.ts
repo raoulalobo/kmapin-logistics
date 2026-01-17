@@ -36,7 +36,7 @@ export type UserRole = z.infer<typeof UserRoleEnum>;
  * - name* : Nom complet (2-100 caractères)
  * - phone : Téléphone optionnel (format international)
  * - role* : Rôle de l'utilisateur (défaut: CLIENT)
- * - companyId : ID de l'entreprise associée (optionnel)
+ * - clientId : ID de l'entreprise associée (optionnel)
  * - sendInvitation : Envoyer email d'invitation (défaut: true)
  */
 export const userCreateSchema = z.object({
@@ -68,7 +68,7 @@ export const userCreateSchema = z.object({
 
   role: UserRoleEnum.default('CLIENT'),
 
-  companyId: z
+  clientId: z
     .string()
     .cuid('ID d\'entreprise invalide')
     .optional()
@@ -159,7 +159,7 @@ export type UserStatusData = z.infer<typeof userStatusSchema>;
  * ou dissocier un utilisateur d'une entreprise
  */
 export const userCompanySchema = z.object({
-  companyId: z
+  clientId: z
     .string()
     .cuid('ID d\'entreprise invalide')
     .nullable()
@@ -183,7 +183,7 @@ export type UserCompanyData = z.infer<typeof userCompanySchema>;
  * - search : Terme de recherche (nom ou email)
  * - role : Filtre par rôle
  * - status : Filtre par statut (all, active, inactive)
- * - companyId : Filtre par entreprise
+ * - clientId : Filtre par entreprise
  */
 export const userSearchSchema = z.object({
   page: z
@@ -205,7 +205,7 @@ export const userSearchSchema = z.object({
 
   status: z.enum(['all', 'active', 'inactive']).default('all'),
 
-  companyId: z.string().cuid().optional().nullable(),
+  clientId: z.string().cuid().optional().nullable(),
 });
 
 /**

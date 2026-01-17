@@ -33,11 +33,16 @@ import { UserRole } from '@/lib/db/enums';
 /**
  * Interface pour le contexte utilisateur
  * Correspond aux champs utilisés dans les access policies (@@allow, @@deny)
+ *
+ * Le champ clientId représente :
+ * - Pour une entreprise (B2B) : l'ID du Client de type COMPANY
+ * - Pour un particulier (B2C) : l'ID du Client de type INDIVIDUAL
+ * - NULL : uniquement pour les ADMIN système
  */
 export interface AuthContext {
   id: string;
   role: UserRole;
-  companyId?: string | null;
+  clientId?: string | null;  // ID du client (COMPANY ou INDIVIDUAL)
 }
 
 /**
@@ -51,11 +56,11 @@ export interface AuthContext {
  *
  * @example
  * ```ts
- * // Avec un utilisateur connecté
+ * // Avec un utilisateur connecté (entreprise ou particulier)
  * const db = await getEnhancedPrisma({
  *   id: 'user-123',
  *   role: 'CLIENT',
- *   companyId: 'company-456'
+ *   clientId: 'client-456'  // ID du Client (type COMPANY ou INDIVIDUAL)
  * });
  *
  * // Sans utilisateur (accès public limité)
@@ -71,10 +76,11 @@ export function getEnhancedPrisma(user?: AuthContext | null) {
   }
 
   // Préparer le contexte pour Zenstack
+  // Le contexte correspond au type Auth défini dans schema.zmodel
   const context = {
     id: user.id,
     role: user.role,
-    companyId: user.companyId,
+    clientId: user.clientId,  // ID du client (COMPANY ou INDIVIDUAL)
   };
 
   // Appliquer les access policies avec le contexte utilisateur
@@ -84,7 +90,7 @@ export function getEnhancedPrisma(user?: AuthContext | null) {
 /**
  * Obtenir un client Prisma enhanced à partir d'une session Better Auth
  *
- * @param session - Session Better Auth avec user.id, user.role, user.companyId
+ * @param session - Session Better Auth avec user.id, user.role, user.clientId
  * @returns Client Prisma enhanced
  *
  * @example
@@ -119,7 +125,7 @@ export function getEnhancedPrismaFromSession(session: any) {
   return getEnhancedPrisma({
     id: session.user.id,
     role: roleEnum,
-    companyId: session.user.companyId,
+    clientId: session.user.clientId,  // ID du client (COMPANY ou INDIVIDUAL)
   });
 }
 

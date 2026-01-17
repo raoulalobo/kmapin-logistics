@@ -74,7 +74,7 @@ export default async function PublicPickupTrackingPage({ params }: PageProps) {
           email: true,
         },
       },
-      company: {
+      client: {
         select: {
           name: true,
         },
