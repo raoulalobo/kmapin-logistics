@@ -171,7 +171,7 @@ export default async function PublicQuoteTrackingPage({ params }: PageProps) {
 
             <div className="pt-4 space-y-2">
               <Button asChild variant="outline" className="w-full">
-                <Link href="/quotes/request">
+                <Link href="/#calculateur">
                   <FileText className="h-4 w-4 mr-2" />
                   Demander un nouveau devis
                 </Link>
@@ -415,7 +415,7 @@ export default async function PublicQuoteTrackingPage({ params }: PageProps) {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="flex-1">
-                <Link href="/quotes/request">
+                <Link href="/#calculateur">
                   <FileText className="h-4 w-4 mr-2" />
                   Demander un autre devis
                 </Link>
@@ -434,7 +434,7 @@ export default async function PublicQuoteTrackingPage({ params }: PageProps) {
               Accueil
             </Link>
             <span>•</span>
-            <Link href="/quotes/request" className="hover:underline">
+            <Link href="/#calculateur" className="hover:underline">
               Nouveau devis
             </Link>
             <span>•</span>

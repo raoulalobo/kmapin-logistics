@@ -99,15 +99,6 @@ export function HomepageHeader() {
                   </div>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/quotes/request" className="flex items-center gap-3 cursor-pointer">
-                  <FileText className="h-5 w-5 text-[#003D82]" />
-                  <div>
-                    <div className="font-medium">Demande de devis</div>
-                    <div className="text-xs text-gray-500">Devis personnalisé par email</div>
-                  </div>
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/tracking" className="flex items-center gap-3 cursor-pointer">

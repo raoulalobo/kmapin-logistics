@@ -561,7 +561,7 @@ const guestPhoneSchema = z
  * En tant que visiteur, je veux demander un devis sans créer de compte
  *
  * Workflow :
- * 1. Formulaire public accessible à tous (/quotes/request)
+ * 1. Calculateur public sur la homepage (/#calculateur) + envoi par email
  * 2. Génération automatique de trackingToken (72h validité)
  * 3. Email de confirmation avec lien de suivi
  * 4. Si inscription ultérieure → rattachement automatique par email/phone
