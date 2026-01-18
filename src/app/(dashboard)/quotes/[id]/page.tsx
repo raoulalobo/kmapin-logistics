@@ -387,41 +387,6 @@ export default async function QuoteDetailsPage({
         isExpired={isExpired}
       />
 
-      {/* Factures associées */}
-      {quote.invoices && quote.invoices.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Factures associées</CardTitle>
-            <CardDescription>
-              {quote.invoices.length} facture{quote.invoices.length > 1 ? 's' : ''} générée{quote.invoices.length > 1 ? 's' : ''} à partir de ce devis
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {quote.invoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex items-center justify-between p-3 bg-gray-50 border rounded-md"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium font-mono">{invoice.invoiceNumber}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {invoice.total.toFixed(2)} {invoice.currency} - {translateStatus(invoice.status)}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/dashboard/invoices/${invoice.id}`}>
-                    Voir la facture
-                  </Link>
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Gestion documentaire */}
       <DocumentsSection entityId={id} entityType="quote" />
     </div>

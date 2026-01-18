@@ -11,12 +11,13 @@ export { inngest, type EventData, type EventName } from './client';
 export {
   notifyShipmentCreated,
   notifyShipmentDelivered,
-  sendOverdueInvoiceReminder,
+  notifyPaymentReceivedOnQuote,
+  notifyPaymentReceivedOnShipment,
 } from './functions/notifications';
 
 // Fonctions scheduled
 export {
-  checkOverdueInvoices,
+  checkPendingPayments,
   cleanupTempFiles,
   generateWeeklyReport,
 } from './functions/scheduled';

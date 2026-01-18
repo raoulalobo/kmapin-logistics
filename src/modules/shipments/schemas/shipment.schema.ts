@@ -233,7 +233,10 @@ export type ShipmentFormData = z.infer<typeof shipmentSchema>;
 
 /**
  * Schéma pour la mise à jour d'une expédition
+ *
  * Tous les champs sont optionnels sauf ceux requis pour l'intégrité
+ * Note: La facture n'est plus stockée en base de données - elle est générée
+ * à la volée depuis les données du devis quand le paiement est confirmé
  */
 export const shipmentUpdateSchema = shipmentSchema
   .partial()
@@ -247,9 +250,6 @@ export const shipmentUpdateSchema = shipmentSchema
 
     // Coût réel (peut être défini lors de la mise à jour)
     actualCost: z.number().nonnegative().optional().nullable(),
-
-    // Facture associée (peut être liée lors de la mise à jour)
-    invoiceId: z.string().cuid().optional().nullable(),
   });
 
 /**

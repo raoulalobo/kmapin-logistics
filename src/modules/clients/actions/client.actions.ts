@@ -195,7 +195,6 @@ export async function getClientsAction(params: GetClientsParams = {}) {
           _count: {
             select: {
               shipments: true,
-              invoices: true,
             },
           },
         },
@@ -266,14 +265,9 @@ export async function getClientAction(id: string) {
           take: 5,
           orderBy: { createdAt: 'desc' },
         },
-        invoices: {
-          take: 5,
-          orderBy: { createdAt: 'desc' },
-        },
         _count: {
           select: {
             shipments: true,
-            invoices: true,
             users: true,
             quotes: true,
             documents: true,
@@ -456,7 +450,7 @@ export async function deleteClientAction(
         _count: {
           select: {
             shipments: true,
-            invoices: true,
+            quotes: true,
           },
         },
       },
@@ -466,12 +460,12 @@ export async function deleteClientAction(
       return { success: false, error: 'Client introuvable' };
     }
 
-    // Empêcher la suppression si le client a des expéditions ou factures
-    if (client._count.shipments > 0 || client._count.invoices > 0) {
+    // Empêcher la suppression si le client a des expéditions ou des devis
+    if (client._count.shipments > 0 || client._count.quotes > 0) {
       return {
         success: false,
         error:
-          'Impossible de supprimer ce client car il a des expéditions ou des factures associées',
+          'Impossible de supprimer ce client car il a des expéditions ou des devis associés',
       };
     }
 

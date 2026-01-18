@@ -83,7 +83,6 @@ model User {
 
   // Relations
   createdShipments   Shipment[] @relation("CreatedBy")
-  createdInvoices    Invoice[]  @relation("CreatedBy")
   userDocuments      Document[] @relation("UserDocuments")   // Documents de cet utilisateur
   uploadedDocuments  Document[] @relation("UploadedDocuments")
   prospect           Prospect?  // Relation 1:1 avec Prospect (si converti)
@@ -103,6 +102,10 @@ model User {
   // Relations pour les devis (pattern création sans compte)
   userQuotes         Quote[] @relation("UserQuotes")    // Devis rattachés à cet utilisateur
   createdQuotes      Quote[] @relation("CreatedQuotes") // Devis créés par cet utilisateur
+
+  // Relations pour confirmation de paiement (génération facture PDF à la volée)
+  confirmedQuotePayments    Quote[]    @relation("QuotePaymentReceiver")    // Paiements confirmés sur devis
+  confirmedShipmentPayments Shipment[] @relation("ShipmentPaymentReceiver") // Paiements confirmés sur colis
 
   // 🔐 Access Policies Zenstack
 
@@ -314,8 +317,7 @@ model Client {
   // ════════════════════════════════════════════
 
   users              User[]              // Utilisateurs rattachés à ce client
-  shipments          Shipment[]          // Expéditions du client
-  invoices           Invoice[]           // Factures du client
+  shipments          Shipment[]          // Expéditions du client (colis)
   quotes             Quote[]             // Devis du client
   documents          Document[]          // Documents du client
   transporters       Transporter[]       // Transporteurs du client
@@ -418,8 +420,17 @@ model Shipment {
   // Financier
   estimatedCost Float?
   actualCost    Float?
-  invoiceId     String?  @unique
-  invoice       Invoice? @relation(fields: [invoiceId], references: [id])
+
+  // ════════════════════════════════════════════
+  // PAIEMENT (confirmé par agent)
+  // ════════════════════════════════════════════
+
+  // Date de réception du paiement (NULL = pas encore payé)
+  // Quand rempli, permet de générer la facture PDF à la volée
+  // Le paiement peut être confirmé à tout moment sur le colis
+  paymentReceivedAt    DateTime?
+  paymentReceivedById  String?
+  paymentReceivedBy    User?    @relation("ShipmentPaymentReceiver", fields: [paymentReceivedById], references: [id])
 
   // Métadonnées
   createdById String
@@ -431,7 +442,7 @@ model Shipment {
   trackingEvents TrackingEvent[]
   documents      Document[]
   pickupRequests PickupRequest[]
-  fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition
+  fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition (colis)
 
   // 🔐 Access Policies
 
@@ -1083,112 +1094,12 @@ model TrackingEvent {
 }
 
 // ============================================
-// FACTURATION
-// ============================================
-
-/**
- * Modèle Invoice (Factures)
- * - ADMIN/FINANCE_MANAGER : accès complet
- * - OPERATIONS_MANAGER : peut lire toutes les factures
- * - CLIENT : peut lire les factures de sa company
- * - PARTICULIER : peut lire ses propres factures (via userId direct)
- * - Les factures PAID ne peuvent plus être modifiées
- *
- * PROPRIÉTÉ HYBRIDE :
- * - Si companyId != null : la facture appartient à la company
- * - Si companyId == null : la facture appartient directement au userId
- */
-model Invoice {
-  id            String        @id @default(cuid())
-  invoiceNumber String        @unique
-
-  // ════════════════════════════════════════════
-  // CLIENT (Entreprise ou Particulier)
-  // ════════════════════════════════════════════
-
-  clientId      String
-  client        Client        @relation(fields: [clientId], references: [id])
-  issueDate     DateTime      @default(now())
-  dueDate       DateTime
-  paidDate      DateTime?
-  subtotal      Float
-  taxRate       Float         @default(0)
-  taxAmount     Float
-  discount      Float         @default(0)
-  total         Float
-  currency      String        @default("EUR")
-  status        InvoiceStatus @default(DRAFT)
-  paymentMethod String?
-  shipment      Shipment?
-  quoteId       String?
-  quote         Quote?        @relation(fields: [quoteId], references: [id])
-  notes         String?
-  createdById   String
-  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  items         InvoiceItem[]
-  documents     Document[]
-
-  // 🔐 Access Policies
-
-  // Les admins et finance managers peuvent tout faire
-  @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
-
-  // Les operations managers peuvent lire
-  @@allow('read', auth().role == OPERATIONS_MANAGER)
-
-  // Les clients peuvent lire les factures de leur client (COMPANY ou INDIVIDUAL)
-  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
-
-  // Les factures payées ne peuvent plus être modifiées (règle de sécurité)
-  @@deny('update,delete', status == PAID)
-
-  @@deny('all', true)
-
-  @@index([clientId])
-  @@index([status])
-  @@index([invoiceNumber])
-}
-
-enum InvoiceStatus {
-  DRAFT
-  SENT
-  VIEWED
-  PAID
-  OVERDUE
-  CANCELLED
-}
-
-/**
- * Modèle InvoiceItem (Lignes de facture)
- * - Hérite des permissions de l'Invoice parent
- */
-model InvoiceItem {
-  id          String  @id @default(cuid())
-  invoiceId   String
-  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  description String
-  quantity    Float
-  unitPrice   Float
-  amount      Float
-
-  // 🔐 Access Policies (hérite de Invoice)
-
-  @@allow('all', auth().role == ADMIN || auth().role == FINANCE_MANAGER)
-  @@allow('read', auth().role == OPERATIONS_MANAGER)
-
-  // Les clients peuvent lire les items de leurs factures
-  @@allow('read', auth().clientId == invoice.clientId)
-
-  @@deny('all', invoice.status == PAID) // Ne peut pas modifier si facture payée
-  @@deny('all', true)
-
-  @@index([invoiceId])
-}
-
-// ============================================
 // DEVIS
+// ============================================
+//
+// NOTE: Les factures sont générées à la volée en PDF depuis le devis (Quote)
+// lorsque le paiement est confirmé (paymentReceivedAt != null).
+// Pas de table Invoice stockée en base de données.
 // ============================================
 
 /**
@@ -1278,12 +1189,21 @@ model Quote {
   shipment             Shipment?       @relation("QuoteToShipment", fields: [shipmentId], references: [id])
 
   // ════════════════════════════════════════════
+  // PAIEMENT (confirmé par agent)
+  // ════════════════════════════════════════════
+
+  // Date de réception du paiement (NULL = pas encore payé)
+  // Quand rempli, permet de générer la facture PDF à la volée
+  paymentReceivedAt    DateTime?
+  paymentReceivedById  String?
+  paymentReceivedBy    User?           @relation("QuotePaymentReceiver", fields: [paymentReceivedById], references: [id])
+
+  // ════════════════════════════════════════════
 
   // ID de l'utilisateur qui a créé le devis (NULL si créé sans compte)
   createdById        String?
   createdBy          User?           @relation("CreatedQuotes", fields: [createdById], references: [id])
 
-  invoices           Invoice[]
   documents          Document[]
   convertedFromGuest GuestQuote?     @relation("ConvertedFromGuest") // Relation inverse pour conversion
   createdAt          DateTime        @default(now())
@@ -1571,9 +1491,6 @@ model Document {
   shipmentId String?
   shipment   Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 
-  invoiceId String?
-  invoice   Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-
   quoteId String?
   quote   Quote?    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 
@@ -1625,7 +1542,6 @@ model Document {
   @@index([clientId])
   @@index([userId])
   @@index([shipmentId])
-  @@index([invoiceId])
   @@index([quoteId])
   @@index([pickupRequestId])
   @@index([purchaseRequestId])

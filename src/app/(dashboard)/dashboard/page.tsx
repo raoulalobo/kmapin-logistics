@@ -269,43 +269,6 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Factures en retard (critique) */}
-              {stats.overdueInvoices > 0 && (
-                <Link href="/dashboard/invoices?status=OVERDUE">
-                  <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 hover:bg-red-100 transition-colors cursor-pointer">
-                    <WarningCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">
-                        {stats.overdueInvoices} facture{stats.overdueInvoices > 1 ? 's' : ''} en retard
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Paiement urgent requis
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              )}
-
-              {/* Factures en attente */}
-              {stats.pendingInvoices > 0 && (
-                <Link href="/dashboard/invoices?status=SENT">
-                  <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-3 hover:bg-orange-100 transition-colors cursor-pointer">
-                    <CurrencyDollar className="h-5 w-5 text-orange-600 mt-0.5" />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">
-                        {stats.pendingInvoices} facture{stats.pendingInvoices > 1 ? 's' : ''} en attente
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Total: {stats.pendingRevenue.toLocaleString('fr-FR', {
-                          style: 'currency',
-                          currency: 'EUR',
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              )}
-
               {/* Devis en attente de réponse */}
               {stats.pendingQuotes > 0 && (
                 <Link href="/dashboard/quotes?status=SENT">
@@ -339,7 +302,7 @@ export default async function DashboardPage() {
               )}
 
               {/* Message si aucune alerte */}
-              {stats.overdueInvoices === 0 && stats.pendingInvoices === 0 && stats.pendingQuotes === 0 && stats.deliveredToday === 0 && (
+              {stats.pendingQuotes === 0 && stats.deliveredToday === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Aucune alerte pour le moment
                 </p>

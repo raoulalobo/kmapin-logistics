@@ -96,15 +96,6 @@ enum DeliveryMode {
   URGENT
 }
 
-enum InvoiceStatus {
-  DRAFT
-  SENT
-  VIEWED
-  PAID
-  OVERDUE
-  CANCELLED
-}
-
 enum QuoteStatus {
   DRAFT
   SENT
@@ -165,36 +156,37 @@ enum TransporterType {
 }
 
 model User {
-  id                      String            @id() @default(cuid())
-  email                   String            @unique()
-  emailVerified           Boolean           @default(false)
-  name                    String?
-  image                   String?
-  phone                   String?
-  createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt()
-  accounts                Account[]
-  sessions                Session[]
-  role                    UserRole          @default(CLIENT)
-  clientId                String?
-  client                  Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  permissions             Json?
-  createdShipments        Shipment[]        @relation("CreatedBy")
-  createdInvoices         Invoice[]         @relation("CreatedBy")
-  userDocuments           Document[]        @relation("UserDocuments")
-  uploadedDocuments       Document[]        @relation("UploadedDocuments")
-  prospect                Prospect?
-  pricingConfigs          PricingConfig[]
-  createdPickups          PickupRequest[]   @relation("CreatedPickups")
-  pickupLogs              PickupLog[]       @relation("PickupLogChangedBy")
-  userPickups             PickupRequest[]   @relation("UserPickups")
-  createdPurchases        PurchaseRequest[] @relation("CreatedPurchases")
-  purchaseLogs            PurchaseLog[]     @relation("PurchaseLogChangedBy")
-  userPurchases           PurchaseRequest[] @relation("UserPurchases")
-  treatedQuotes           Quote[]           @relation("QuoteTreatmentAgent")
-  performedTrackingEvents TrackingEvent[]   @relation("PerformedTrackingEvents")
-  userQuotes              Quote[]           @relation("UserQuotes")
-  createdQuotes           Quote[]           @relation("CreatedQuotes")
+  id                        String            @id() @default(cuid())
+  email                     String            @unique()
+  emailVerified             Boolean           @default(false)
+  name                      String?
+  image                     String?
+  phone                     String?
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt()
+  accounts                  Account[]
+  sessions                  Session[]
+  role                      UserRole          @default(CLIENT)
+  clientId                  String?
+  client                    Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  permissions               Json?
+  createdShipments          Shipment[]        @relation("CreatedBy")
+  userDocuments             Document[]        @relation("UserDocuments")
+  uploadedDocuments         Document[]        @relation("UploadedDocuments")
+  prospect                  Prospect?
+  pricingConfigs            PricingConfig[]
+  createdPickups            PickupRequest[]   @relation("CreatedPickups")
+  pickupLogs                PickupLog[]       @relation("PickupLogChangedBy")
+  userPickups               PickupRequest[]   @relation("UserPickups")
+  createdPurchases          PurchaseRequest[] @relation("CreatedPurchases")
+  purchaseLogs              PurchaseLog[]     @relation("PurchaseLogChangedBy")
+  userPurchases             PurchaseRequest[] @relation("UserPurchases")
+  treatedQuotes             Quote[]           @relation("QuoteTreatmentAgent")
+  performedTrackingEvents   TrackingEvent[]   @relation("PerformedTrackingEvents")
+  userQuotes                Quote[]           @relation("UserQuotes")
+  createdQuotes             Quote[]           @relation("CreatedQuotes")
+  confirmedQuotePayments    Quote[]           @relation("QuotePaymentReceiver")
+  confirmedShipmentPayments Shipment[]        @relation("ShipmentPaymentReceiver")
 
   @@index([clientId])
   @@map("user")
@@ -275,7 +267,6 @@ model Client {
   updatedAt        DateTime          @updatedAt()
   users            User[]
   shipments        Shipment[]
-  invoices         Invoice[]
   quotes           Quote[]
   documents        Document[]
   transporters     Transporter[]
@@ -326,8 +317,9 @@ model Shipment {
   status                ShipmentStatus  @default(DRAFT)
   estimatedCost         Float?
   actualCost            Float?
-  invoiceId             String?         @unique()
-  invoice               Invoice?        @relation(fields: [invoiceId], references: [id])
+  paymentReceivedAt     DateTime?
+  paymentReceivedById   String?
+  paymentReceivedBy     User?           @relation("ShipmentPaymentReceiver", fields: [paymentReceivedById], references: [id])
   createdById           String
   createdBy             User            @relation("CreatedBy", fields: [createdById], references: [id])
   createdAt             DateTime        @default(now())
@@ -522,50 +514,6 @@ model TrackingEvent {
   @@index([timestamp])
 }
 
-model Invoice {
-  id            String        @id() @default(cuid())
-  invoiceNumber String        @unique()
-  clientId      String
-  client        Client        @relation(fields: [clientId], references: [id])
-  issueDate     DateTime      @default(now())
-  dueDate       DateTime
-  paidDate      DateTime?
-  subtotal      Float
-  taxRate       Float         @default(0)
-  taxAmount     Float
-  discount      Float         @default(0)
-  total         Float
-  currency      String        @default("EUR")
-  status        InvoiceStatus @default(DRAFT)
-  paymentMethod String?
-  shipment      Shipment?
-  quoteId       String?
-  quote         Quote?        @relation(fields: [quoteId], references: [id])
-  notes         String?
-  createdById   String
-  createdBy     User          @relation("CreatedBy", fields: [createdById], references: [id])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt()
-  items         InvoiceItem[]
-  documents     Document[]
-
-  @@index([clientId])
-  @@index([status])
-  @@index([invoiceNumber])
-}
-
-model InvoiceItem {
-  id          String  @id() @default(cuid())
-  invoiceId   String
-  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  description String
-  quantity    Float
-  unitPrice   Float
-  amount      Float
-
-  @@index([invoiceId])
-}
-
 model Quote {
   id                   String              @id() @default(cuid())
   quoteNumber          String              @unique()
@@ -603,9 +551,11 @@ model Quote {
   cancelReason         String?
   shipmentId           String?             @unique()
   shipment             Shipment?           @relation("QuoteToShipment", fields: [shipmentId], references: [id])
+  paymentReceivedAt    DateTime?
+  paymentReceivedById  String?
+  paymentReceivedBy    User?               @relation("QuotePaymentReceiver", fields: [paymentReceivedById], references: [id])
   createdById          String?
   createdBy            User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
-  invoices             Invoice[]
   documents            Document[]
   convertedFromGuest   GuestQuote?         @relation("ConvertedFromGuest")
   createdAt            DateTime            @default(now())
@@ -689,8 +639,6 @@ model Document {
   description       String?
   shipmentId        String?
   shipment          Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  invoiceId         String?
-  invoice           Invoice?         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   quoteId           String?
   quote             Quote?           @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   pickupRequestId   String?
@@ -708,7 +656,6 @@ model Document {
   @@index([clientId])
   @@index([userId])
   @@index([shipmentId])
-  @@index([invoiceId])
   @@index([quoteId])
   @@index([pickupRequestId])
   @@index([purchaseRequestId])

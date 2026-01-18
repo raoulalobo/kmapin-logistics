@@ -1,12 +1,27 @@
 /**
  * API Route : Génération et téléchargement de PDF
  *
- * Gère la génération de PDFs pour les factures et devis
- * en évitant les problèmes de bundling client avec Better Auth
+ * Gère la génération de PDFs pour les devis et factures.
+ * Les factures sont générées à la volée depuis le devis (pas de table Invoice).
+ *
+ * Types de documents supportés :
+ * - 'quote' : PDF du devis
+ * - 'quote-invoice' : Facture générée depuis le devis (si paiement confirmé)
+ * - 'shipment-invoice' : Facture générée depuis le colis (si paiement confirmé)
  *
  * @route GET /api/pdf/[type]/[id]
- * @param type - 'invoice' ou 'quote'
- * @param id - ID du document
+ * @param type - Type de document ('quote', 'quote-invoice', 'shipment-invoice')
+ * @param id - ID du document (Quote ou Shipment selon le type)
+ *
+ * @example
+ * // Télécharger un devis
+ * GET /api/pdf/quote/cm123...
+ *
+ * // Télécharger une facture depuis un devis payé
+ * GET /api/pdf/quote-invoice/cm123...
+ *
+ * // Télécharger une facture depuis un colis payé
+ * GET /api/pdf/shipment-invoice/cm456...
  *
  * @module app/api/pdf
  */
@@ -14,7 +29,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
-import { generateInvoicePDF } from '@/lib/pdf/invoice-pdf';
+import { generateInvoiceFromQuotePDF, type QuoteInvoicePDFData } from '@/lib/pdf/invoice-pdf';
 import { generateQuotePDF } from '@/lib/pdf/quote-pdf';
 
 /**
@@ -45,18 +60,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { type, id } = await params;
 
     // Valider le type
-    if (type !== 'invoice' && type !== 'quote') {
+    const validTypes = ['quote', 'shipment-invoice', 'quote-invoice'];
+    if (!validTypes.includes(type)) {
       return NextResponse.json(
-        { error: 'Type de document invalide. Utilisez "invoice" ou "quote".' },
+        { error: `Type de document invalide. Types supportés: ${validTypes.join(', ')}` },
         { status: 400 }
       );
     }
 
     // Générer le PDF selon le type
-    if (type === 'invoice') {
-      return await generateInvoicePDFRoute(id, session);
-    } else {
-      return await generateQuotePDFRoute(id, session);
+    switch (type) {
+      case 'quote':
+        return await generateQuotePDFRoute(id, session);
+      case 'shipment-invoice':
+        return await generateShipmentInvoicePDFRoute(id, session);
+      case 'quote-invoice':
+        return await generateQuoteInvoicePDFRoute(id, session);
+      default:
+        return NextResponse.json({ error: 'Type non supporté' }, { status: 400 });
     }
   } catch (error) {
     console.error('Erreur lors de la génération du PDF:', error);
@@ -74,73 +95,195 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * Générer le PDF d'une facture
+ * Générer le PDF d'une facture depuis un Shipment
+ *
+ * Cette fonction génère une facture à la volée à partir du colis (Shipment)
+ * en utilisant les données du devis source (Quote).
+ * Le paiement doit avoir été confirmé (paymentReceivedAt != null).
+ *
+ * @param shipmentId - ID du colis
+ * @param session - Session de l'utilisateur authentifié
+ * @returns Response avec le PDF ou une erreur
  */
-async function generateInvoicePDFRoute(invoiceId: string, session: any) {
-  // Récupérer la facture avec toutes les relations nécessaires
-  // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
-  const invoice = await prisma.invoice.findUnique({
-    where: { id: invoiceId },
+async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any) {
+  // Récupérer le colis avec son devis source et le client
+  const shipment = await prisma.shipment.findUnique({
+    where: { id: shipmentId },
     include: {
-      client: true,   // Client (COMPANY ou INDIVIDUAL)
-      items: true,
-      createdBy: true,
+      fromQuote: {
+        include: {
+          client: true,
+          items: true,
+        },
+      },
+      client: true,
     },
   });
 
-  if (!invoice) {
-    return NextResponse.json({ error: 'Facture introuvable' }, { status: 404 });
+  if (!shipment) {
+    return NextResponse.json({ error: 'Colis introuvable' }, { status: 404 });
+  }
+
+  // Vérifier que le colis provient d'un devis
+  if (!shipment.fromQuote) {
+    return NextResponse.json(
+      { error: 'Ce colis n\'a pas de devis source associé' },
+      { status: 400 }
+    );
+  }
+
+  // Vérifier que le paiement a été reçu
+  if (!shipment.paymentReceivedAt) {
+    return NextResponse.json(
+      { error: 'Le paiement n\'a pas encore été confirmé pour ce colis' },
+      { status: 400 }
+    );
   }
 
   // Vérifier les permissions RBAC
-  // L'utilisateur doit être admin ou appartenir au même client (COMPANY ou INDIVIDUAL)
+  // L'utilisateur doit être admin ou appartenir au même client
   const isAdmin = session.user.role === 'ADMIN';
-  const isSameClient = session.user.clientId === invoice.clientId;
+  const isSameClient = session.user.clientId === shipment.clientId;
 
   if (!isAdmin && !isSameClient) {
     return NextResponse.json(
-      { error: 'Accès non autorisé à cette facture' },
+      { error: 'Accès non autorisé à ce colis' },
+      { status: 403 }
+    );
+  }
+
+  const quote = shipment.fromQuote;
+  const client = quote.client || shipment.client;
+
+  // Préparer les données pour le PDF
+  const pdfData: QuoteInvoicePDFData = {
+    quoteNumber: quote.quoteNumber,
+    trackingNumber: shipment.trackingNumber,
+    paymentReceivedAt: shipment.paymentReceivedAt,
+    quoteDate: quote.createdAt,
+    client: {
+      name: client?.name || quote.contactName || 'N/A',
+      legalName: client?.legalName,
+      address: client?.address || '',
+      city: client?.city || '',
+      postalCode: client?.postalCode,
+      country: client?.country || '',
+      taxId: client?.taxId,
+      email: client?.email || quote.contactEmail || '',
+      phone: client?.phone || quote.contactPhone,
+    },
+    expedition: {
+      originCountry: quote.originCountry,
+      destinationCountry: quote.destinationCountry,
+      weight: Number(quote.weight),
+      cargoType: quote.cargoType,
+      transportModes: quote.transportModes,
+      dimensions: quote.dimensions as QuoteInvoicePDFData['expedition']['dimensions'],
+    },
+    estimatedCost: Number(quote.estimatedCost || 0),
+    currency: quote.currency,
+    paymentMethod: quote.paymentMethod,
+    agentComment: quote.agentComment,
+  };
+
+  // Générer le PDF
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
+
+  // Nom du fichier avec le numéro de suivi
+  const filename = `facture-${shipment.trackingNumber}.pdf`;
+
+  // Retourner le PDF avec les bons headers
+  return new NextResponse(pdfBuffer, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store, must-revalidate',
+    },
+  });
+}
+
+/**
+ * Générer le PDF d'une facture depuis un Quote
+ *
+ * Cette fonction génère une facture à la volée à partir du devis (Quote).
+ * Le paiement doit avoir été confirmé (paymentReceivedAt != null).
+ *
+ * @param quoteId - ID du devis
+ * @param session - Session de l'utilisateur authentifié
+ * @returns Response avec le PDF ou une erreur
+ */
+async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
+  // Récupérer le devis avec le client et le colis éventuel
+  const quote = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    include: {
+      client: true,
+      items: true,
+      shipment: true, // Pour récupérer le numéro de suivi si disponible
+    },
+  });
+
+  if (!quote) {
+    return NextResponse.json({ error: 'Devis introuvable' }, { status: 404 });
+  }
+
+  // Vérifier que le paiement a été reçu
+  if (!quote.paymentReceivedAt) {
+    return NextResponse.json(
+      { error: 'Le paiement n\'a pas encore été confirmé pour ce devis' },
+      { status: 400 }
+    );
+  }
+
+  // Vérifier les permissions RBAC
+  // L'utilisateur doit être admin ou appartenir au même client
+  const isAdmin = session.user.role === 'ADMIN';
+  const isSameClient = session.user.clientId === quote.clientId;
+
+  if (!isAdmin && !isSameClient) {
+    return NextResponse.json(
+      { error: 'Accès non autorisé à ce devis' },
       { status: 403 }
     );
   }
 
   // Préparer les données pour le PDF
-  // Les informations du client (COMPANY ou INDIVIDUAL) sont utilisées pour l'en-tête
-  const pdfData = {
-    invoiceNumber: invoice.invoiceNumber,
-    issueDate: invoice.issueDate,
-    dueDate: invoice.dueDate,
-    company: {  // Garder "company" pour compatibilité avec le template PDF
-      name: invoice.client.name,
-      legalName: invoice.client.legalName,
-      address: invoice.client.address,
-      city: invoice.client.city,
-      postalCode: invoice.client.postalCode,
-      country: invoice.client.country,
-      taxId: invoice.client.taxId,
-      email: invoice.client.email,
-      phone: invoice.client.phone,
+  const pdfData: QuoteInvoicePDFData = {
+    quoteNumber: quote.quoteNumber,
+    trackingNumber: quote.shipment?.trackingNumber, // Numéro de suivi si colis créé
+    paymentReceivedAt: quote.paymentReceivedAt,
+    quoteDate: quote.createdAt,
+    client: {
+      name: quote.client?.name || quote.contactName || 'N/A',
+      legalName: quote.client?.legalName,
+      address: quote.client?.address || '',
+      city: quote.client?.city || '',
+      postalCode: quote.client?.postalCode,
+      country: quote.client?.country || '',
+      taxId: quote.client?.taxId,
+      email: quote.client?.email || quote.contactEmail || '',
+      phone: quote.client?.phone || quote.contactPhone,
     },
-    items: invoice.items.map((item) => ({
-      description: item.description,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      amount: item.amount,
-    })),
-    subtotal: invoice.subtotal,
-    taxRate: invoice.taxRate,
-    taxAmount: invoice.taxAmount,
-    discount: invoice.discount,
-    total: invoice.total,
-    currency: invoice.currency,
-    notes: invoice.notes,
+    expedition: {
+      originCountry: quote.originCountry,
+      destinationCountry: quote.destinationCountry,
+      weight: Number(quote.weight),
+      cargoType: quote.cargoType,
+      transportModes: quote.transportModes,
+      dimensions: quote.dimensions as QuoteInvoicePDFData['expedition']['dimensions'],
+    },
+    estimatedCost: Number(quote.estimatedCost || 0),
+    currency: quote.currency,
+    paymentMethod: quote.paymentMethod,
+    agentComment: quote.agentComment,
   };
 
   // Générer le PDF
-  const pdfBuffer = generateInvoicePDF(pdfData);
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
 
   // Nom du fichier
-  const filename = `facture-${invoice.invoiceNumber}.pdf`;
+  const filename = `facture-${quote.quoteNumber}.pdf`;
 
   // Retourner le PDF avec les bons headers
   return new NextResponse(pdfBuffer, {

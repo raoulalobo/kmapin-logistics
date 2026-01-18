@@ -128,7 +128,6 @@ export async function getUsersAction(params: Partial<UserSearchParams> = {}) {
           _count: {
             select: {
               createdShipments: true,
-              createdInvoices: true,
             },
           },
         },

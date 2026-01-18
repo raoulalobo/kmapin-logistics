@@ -107,19 +107,6 @@ export default async function ClientDetailPage({
 
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Factures</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{client._count?.invoices || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total émises
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="dashboard-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Devis</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -314,57 +301,6 @@ export default async function ClientDetailPage({
         </CardContent>
       </Card>
 
-      {/* Factures récentes */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Factures récentes</CardTitle>
-              <CardDescription>
-                Les 5 dernières factures de ce client
-              </CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/dashboard/invoices?clientId=${id}`}>
-                Voir toutes
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {client.invoices && client.invoices.length > 0 ? (
-            <div className="space-y-3">
-              {client.invoices.slice(0, 5).map((invoice: any) => (
-                <Link
-                  key={invoice.id}
-                  href={`/dashboard/invoices/${invoice.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-8 w-8 text-primary" />
-                    <div>
-                      <p className="font-medium">{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(invoice.issueDate).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{invoice.total.toFixed(2)} €</p>
-                    <Badge variant={invoice.status === 'PAID' ? 'default' : 'secondary'}>
-                      {invoice.status}
-                    </Badge>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Aucune facture pour ce client
-            </p>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

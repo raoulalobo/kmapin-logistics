@@ -8,84 +8,76 @@ import { inngest } from '../client';
 import { prisma } from '@/lib/db/client';
 
 /**
- * Job quotidien : Vérifier les factures en retard
+ * Job quotidien : Vérifier les devis en attente de paiement
  *
  * S'exécute tous les jours à 9h00
- * - Identifie les factures dont la date d'échéance est dépassée
- * - Met à jour leur statut à OVERDUE
- * - Déclenche des événements pour envoyer des rappels
+ * - Identifie les devis validés (VALIDATED) sans paiement reçu
+ * - Vérifie si la date de validité est dépassée
+ * - Déclenche des notifications de rappel
+ *
+ * Note: Les factures ne sont plus stockées en base de données.
+ * Elles sont générées à la volée depuis les données du devis
+ * quand le paiement est confirmé (paymentReceivedAt != null)
  */
-export const checkOverdueInvoices = inngest.createFunction(
+export const checkPendingPayments = inngest.createFunction(
   {
-    id: 'check-overdue-invoices',
-    name: 'Vérifier les factures en retard',
+    id: 'check-pending-payments',
+    name: 'Vérifier les devis en attente de paiement',
   },
   // Cron : Tous les jours à 9h00 (heure UTC)
   { cron: '0 9 * * *' },
   async ({ step }) => {
     /**
-     * Step 1 : Trouver toutes les factures en retard
+     * Step 1 : Trouver tous les devis validés sans paiement
      */
-    const overdueInvoices = await step.run('find-overdue-invoices', async () => {
-      const now = new Date();
-
-      return prisma.invoice.findMany({
+    const pendingQuotes = await step.run('find-pending-quotes', async () => {
+      return prisma.quote.findMany({
         where: {
-          status: { in: ['SENT', 'VIEWED'] }, // Seulement les factures non payées
-          dueDate: { lt: now }, // Date d'échéance dépassée
+          status: 'VALIDATED',
+          paymentReceivedAt: null,
         },
         include: {
-          client: true,  // Client (COMPANY ou INDIVIDUAL)
+          client: true,
         },
       });
     });
 
-    if (overdueInvoices.length === 0) {
-      return { message: 'No overdue invoices found', count: 0 };
+    if (pendingQuotes.length === 0) {
+      return { message: 'No pending payments found', count: 0 };
     }
 
     /**
-     * Step 2 : Mettre à jour le statut des factures
+     * Step 2 : Identifier les devis expirés (validité dépassée)
      */
-    await step.run('update-invoice-statuses', async () => {
-      const invoiceIds = overdueInvoices.map((inv) => inv.id);
-
-      await prisma.invoice.updateMany({
-        where: { id: { in: invoiceIds } },
-        data: { status: 'OVERDUE' },
-      });
-    });
+    const now = new Date();
+    const expiredQuotes = pendingQuotes.filter(
+      (quote) => quote.validUntil && quote.validUntil < now
+    );
 
     /**
-     * Step 3 : Envoyer des événements pour chaque facture
+     * Step 3 : Envoyer des notifications pour les devis expirés
      */
-    await step.run('send-overdue-events', async () => {
-      const now = new Date();
+    await step.run('notify-expired-quotes', async () => {
+      for (const quote of expiredQuotes) {
+        // Calculer le nombre de jours depuis expiration
+        const daysExpired = quote.validUntil
+          ? Math.floor(
+              (now.getTime() - quote.validUntil.getTime()) / (1000 * 60 * 60 * 24)
+            )
+          : 0;
 
-      for (const invoice of overdueInvoices) {
-        // Calculer le nombre de jours de retard
-        const daysOverdue = Math.floor(
-          (now.getTime() - invoice.dueDate.getTime()) / (1000 * 60 * 60 * 24)
+        // TODO: Envoyer une notification/email au client
+        console.log(
+          `[Inngest] Devis ${quote.quoteNumber} expiré depuis ${daysExpired} jours`
         );
-
-        // Envoyer un événement pour déclencher les notifications
-        await inngest.send({
-          name: 'invoice/overdue',
-          data: {
-            invoiceId: invoice.id,
-            invoiceNumber: invoice.invoiceNumber,
-            clientId: invoice.clientId,  // ID du Client (COMPANY ou INDIVIDUAL)
-            dueDate: invoice.dueDate.toISOString(),
-            daysOverdue,
-          },
-        });
       }
     });
 
     return {
       success: true,
-      count: overdueInvoices.length,
-      invoices: overdueInvoices.map((inv) => inv.invoiceNumber),
+      pendingCount: pendingQuotes.length,
+      expiredCount: expiredQuotes.length,
+      expiredQuotes: expiredQuotes.map((q) => q.quoteNumber),
     };
   }
 );
@@ -182,6 +174,9 @@ export const generateWeeklyReport = inngest.createFunction(
 
     /**
      * Step 2 : Récupérer les statistiques
+     *
+     * Note: Les factures ne sont plus stockées en base de données.
+     * On utilise maintenant paymentReceivedAt sur les devis pour suivre les revenus.
      */
     const stats = await step.run('get-statistics', async () => {
       // Nombre d'expéditions créées
@@ -205,23 +200,29 @@ export const generateWeeklyReport = inngest.createFunction(
         },
       });
 
-      // Revenu total (factures payées)
-      const invoicesPaid = await prisma.invoice.findMany({
+      // Revenu total (devis dont le paiement a été reçu durant la période)
+      const quotesWithPayment = await prisma.quote.findMany({
         where: {
-          status: 'PAID',
-          paidDate: {
+          paymentReceivedAt: {
             gte: dates.start,
             lte: dates.end,
           },
         },
+        select: {
+          estimatedCost: true,
+        },
       });
 
-      const totalRevenue = invoicesPaid.reduce((sum, inv) => sum + inv.total, 0);
+      // Calculer le revenu total à partir des coûts estimés des devis payés
+      const totalRevenue = quotesWithPayment.reduce(
+        (sum, quote) => sum + Number(quote.estimatedCost || 0),
+        0
+      );
 
       return {
         shipmentsCreated,
         shipmentsDelivered,
-        invoicesPaid: invoicesPaid.length,
+        paymentsReceived: quotesWithPayment.length,
         totalRevenue,
       };
     });
@@ -240,7 +241,7 @@ export const generateWeeklyReport = inngest.createFunction(
         userId: manager.id,
         type: 'SHIPMENT_CREATED' as const, // Réutiliser un type existant
         title: 'Rapport hebdomadaire disponible',
-        message: `${stats.shipmentsCreated} expéditions créées, ${stats.shipmentsDelivered} livrées, ${stats.totalRevenue}€ de revenu`,
+        message: `${stats.shipmentsCreated} expéditions créées, ${stats.shipmentsDelivered} livrées, ${stats.paymentsReceived} paiements reçus (${stats.totalRevenue}€)`,
         data: { ...stats, period: 'weekly' },
       }));
 

@@ -14,10 +14,14 @@
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 // Import des enums depuis le client Prisma généré (valeurs runtime, pas seulement types)
-import { ShipmentStatus, InvoiceStatus, QuoteStatus } from '@/lib/db/enums';
+// Note: InvoiceStatus n'existe plus - les factures sont générées à la volée depuis les devis payés
+import { ShipmentStatus, QuoteStatus } from '@/lib/db/enums';
 
 /**
  * Type pour les statistiques du dashboard
+ *
+ * Note: Les factures ne sont plus stockées en base de données.
+ * Les revenus sont calculés depuis les devis ayant reçu un paiement (paymentReceivedAt != null).
  */
 export interface DashboardStats {
   // KPIs principaux
@@ -31,14 +35,14 @@ export interface DashboardStats {
 
   totalRevenue: number;
   revenueGrowth: number;
-  pendingRevenue: number;
+  pendingRevenue: number; // Devis validés mais pas encore payés
 
   deliveryRate: number; // Pourcentage de livraisons réussies
 
   // Alertes
-  pendingInvoices: number;
-  overdueInvoices: number;
-  pendingQuotes: number;
+  quotesAwaitingPayment: number; // Devis validés en attente de paiement
+  expiredQuotes: number; // Devis dont la date de validité est dépassée
+  pendingQuotes: number; // Devis envoyés en attente de réponse client
   deliveredToday: number;
 }
 
@@ -81,8 +85,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       revenueGrowth: 0,
       pendingRevenue: 0,
       deliveryRate: 0,
-      pendingInvoices: 0,
-      overdueInvoices: 0,
+      quotesAwaitingPayment: 0,
+      expiredQuotes: 0,
       pendingQuotes: 0,
       deliveredToday: 0,
     };
@@ -99,6 +103,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // Récupérer les statistiques en parallèle pour optimiser les performances
+  // Note: Les revenus sont calculés depuis les devis avec paymentReceivedAt (plus de table Invoice)
   const [
     // Expéditions
     totalShipments,
@@ -112,11 +117,11 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     activeClientsCount,
     newClientsThisMonth,
 
-    // Revenus (factures payées)
-    paidInvoices,
-    paidInvoicesLastMonth,
-    pendingInvoicesData,
-    overdueInvoicesCount,
+    // Revenus (devis payés - basé sur paymentReceivedAt)
+    paidQuotesThisMonth,
+    paidQuotesLastMonth,
+    quotesAwaitingPaymentData,
+    expiredQuotesCount,
 
     // Alertes
     pendingQuotesCount,
@@ -172,40 +177,44 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       where: { createdAt: { gte: startOfMonth } },
     }),
 
-    // Revenus (filtrés par company pour les CLIENTs)
-    prisma.invoice.findMany({
+    // Revenus depuis les devis payés (paymentReceivedAt != null)
+    // Devis payés ce mois-ci
+    prisma.quote.findMany({
       where: {
         ...whereCompany,
-        status: InvoiceStatus.PAID,
-        paidDate: { gte: startOfMonth },
+        paymentReceivedAt: { gte: startOfMonth },
       },
-      select: { total: true },
+      select: { estimatedCost: true },
     }),
-    prisma.invoice.findMany({
+    // Devis payés le mois dernier
+    prisma.quote.findMany({
       where: {
         ...whereCompany,
-        status: InvoiceStatus.PAID,
-        paidDate: { gte: startOfLastMonth, lt: startOfMonth },
+        paymentReceivedAt: { gte: startOfLastMonth, lt: startOfMonth },
       },
-      select: { total: true },
+      select: { estimatedCost: true },
     }),
-    prisma.invoice.findMany({
+    // Devis validés mais pas encore payés (en attente de paiement)
+    prisma.quote.findMany({
       where: {
         ...whereCompany,
-        status: {
-          in: [InvoiceStatus.SENT, InvoiceStatus.VIEWED],
-        },
+        status: QuoteStatus.VALIDATED,
+        paymentReceivedAt: null,
       },
-      select: { total: true },
+      select: { estimatedCost: true },
     }),
-    prisma.invoice.count({
+    // Devis expirés (validité dépassée et non payés)
+    prisma.quote.count({
       where: {
         ...whereCompany,
-        status: InvoiceStatus.OVERDUE
+        status: QuoteStatus.VALIDATED,
+        paymentReceivedAt: null,
+        validUntil: { lt: now },
       },
     }),
 
     // Alertes (filtrées par company pour les CLIENTs)
+    // Devis envoyés en attente de réponse client
     prisma.quote.count({
       where: {
         ...whereCompany,
@@ -221,10 +230,20 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }),
   ]);
 
-  // Calculs dérivés
-  const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.total, 0);
-  const lastMonthRevenue = paidInvoicesLastMonth.reduce((sum, inv) => sum + inv.total, 0);
-  const pendingRevenue = pendingInvoicesData.reduce((sum, inv) => sum + inv.total, 0);
+  // Calculs dérivés basés sur les devis payés
+  // Note: estimatedCost est un Decimal, on le convertit en number
+  const totalRevenue = paidQuotesThisMonth.reduce(
+    (sum, quote) => sum + Number(quote.estimatedCost || 0),
+    0
+  );
+  const lastMonthRevenue = paidQuotesLastMonth.reduce(
+    (sum, quote) => sum + Number(quote.estimatedCost || 0),
+    0
+  );
+  const pendingRevenue = quotesAwaitingPaymentData.reduce(
+    (sum, quote) => sum + Number(quote.estimatedCost || 0),
+    0
+  );
 
   const revenueGrowth = lastMonthRevenue > 0
     ? ((totalRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
@@ -253,8 +272,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
     deliveryRate,
 
-    pendingInvoices: pendingInvoicesData.length,
-    overdueInvoices: overdueInvoicesCount,
+    quotesAwaitingPayment: quotesAwaitingPaymentData.length,
+    expiredQuotes: expiredQuotesCount,
     pendingQuotes: pendingQuotesCount,
     deliveredToday: deliveredTodayCount,
   };
@@ -312,7 +331,11 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
 /**
  * Récupérer les données pour le graphique d'évolution des revenus
  * (derniers 6 mois)
- * Les CLIENTs ne voient QUE les factures de leur company
+ *
+ * Note: Les revenus sont maintenant calculés depuis les devis payés
+ * (paymentReceivedAt != null) au lieu de la table Invoice supprimée.
+ *
+ * Les CLIENTs ne voient QUE les revenus de leur company
  */
 export async function getRevenueChartData() {
   const session = await requireAuth();
@@ -328,26 +351,26 @@ export async function getRevenueChartData() {
   // Sécurité : Si CLIENT sans company, retourner données vides
   const whereCompany = (isClient && !clientId) ? null : (isClient ? { clientId: clientId! } : {});
 
-  const invoices = whereCompany === null ? [] : await prisma.invoice.findMany({
+  // Récupérer les devis payés depuis les 6 derniers mois
+  const paidQuotes = whereCompany === null ? [] : await prisma.quote.findMany({
     where: {
       ...whereCompany,
-      status: InvoiceStatus.PAID,
-      paidDate: { gte: sixMonthsAgo },
+      paymentReceivedAt: { gte: sixMonthsAgo },
     },
     select: {
-      total: true,
-      paidDate: true,
+      estimatedCost: true,
+      paymentReceivedAt: true,
     },
   });
 
-  // Grouper par mois
+  // Grouper par mois basé sur la date de réception du paiement
   const monthlyData: Record<string, number> = {};
 
-  invoices.forEach((invoice) => {
-    if (!invoice.paidDate) return;
+  paidQuotes.forEach((quote) => {
+    if (!quote.paymentReceivedAt) return;
 
-    const monthKey = `${invoice.paidDate.getFullYear()}-${String(invoice.paidDate.getMonth() + 1).padStart(2, '0')}`;
-    monthlyData[monthKey] = (monthlyData[monthKey] || 0) + invoice.total;
+    const monthKey = `${quote.paymentReceivedAt.getFullYear()}-${String(quote.paymentReceivedAt.getMonth() + 1).padStart(2, '0')}`;
+    monthlyData[monthKey] = (monthlyData[monthKey] || 0) + Number(quote.estimatedCost || 0);
   });
 
   // Créer un tableau avec tous les 6 derniers mois (même ceux à 0)

@@ -230,17 +230,6 @@ export default async function DocumentsPage({
                           </Link>
                         </>
                       )}
-                      {(doc as any).invoice && (
-                        <>
-                          <span>•</span>
-                          <Link
-                            href={`/dashboard/invoices/${(doc as any).invoice.id}`}
-                            className="text-primary hover:underline"
-                          >
-                            {(doc as any).invoice.invoiceNumber}
-                          </Link>
-                        </>
-                      )}
                       {(doc as any).quote && (
                         <>
                           <span>•</span>

@@ -124,12 +124,6 @@ const navigation: NavSection[] = [
         icon: Table,
         permission: 'quotes:read',
       },
-      {
-        label: 'Factures',
-        href: '/dashboard/invoices',
-        icon: CreditCard,
-        permission: 'invoices:read',
-      },
     ],
   },
   {

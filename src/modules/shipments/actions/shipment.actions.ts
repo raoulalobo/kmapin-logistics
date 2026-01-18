@@ -503,7 +503,23 @@ export async function getShipmentAction(id: string) {
             email: true,
           },
         },
-        invoice: true,
+        // Récupérer la personne ayant confirmé le paiement (si applicable)
+        paymentReceivedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        // Récupérer le devis source pour la facturation
+        fromQuote: {
+          select: {
+            id: true,
+            quoteNumber: true,
+            estimatedCost: true,
+            currency: true,
+          },
+        },
         trackingEvents: {
           orderBy: { timestamp: 'desc' },
           include: {
@@ -744,7 +760,6 @@ export async function deleteShipmentAction(id: string): Promise<ActionResult> {
     const shipment = await prisma.shipment.findUnique({
       where: { id },
       include: {
-        invoice: true,
         _count: {
           select: {
             trackingEvents: true,
@@ -765,11 +780,12 @@ export async function deleteShipmentAction(id: string): Promise<ActionResult> {
       };
     }
 
-    // Empêcher la suppression si une facture est associée
-    if (shipment.invoice) {
+    // Empêcher la suppression si le paiement a été confirmé
+    // (une facture peut être générée à partir de cette expédition)
+    if (shipment.paymentReceivedAt) {
       return {
         success: false,
-        error: 'Impossible de supprimer une expédition associée à une facture',
+        error: 'Impossible de supprimer une expédition dont le paiement a été confirmé',
       };
     }
 
@@ -913,6 +929,142 @@ export async function updateShipmentStatusAction(
     return {
       success: false,
       error: 'Une erreur est survenue lors de la mise à jour du statut',
+    };
+  }
+}
+
+// ============================================
+// PAIEMENT
+// ============================================
+
+/**
+ * Action : Marquer le paiement d'un colis comme reçu
+ *
+ * Permet à un agent de confirmer la réception du paiement pour un colis.
+ * Le paiement peut être confirmé à tout moment sur le colis.
+ * Une fois confirmé, le client peut télécharger la facture PDF.
+ *
+ * La facture est générée à la volée depuis le devis source (Quote).
+ *
+ * Workflow :
+ * 1. Vérification des permissions (ADMIN, OPERATIONS_MANAGER ou FINANCE_MANAGER)
+ * 2. Mise à jour du champ paymentReceivedAt
+ *
+ * @param shipmentId - ID du colis (Shipment)
+ * @returns Résultat avec confirmation ou erreur
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER
+ *
+ * @example
+ * // Confirmer le paiement d'un colis
+ * const result = await markShipmentPaymentReceivedAction('cuid123');
+ * if (result.success) {
+ *   // Afficher le bouton "Télécharger facture"
+ * }
+ */
+export async function markShipmentPaymentReceivedAction(
+  shipmentId: string
+): Promise<ActionResult<{ id: string; paymentReceivedAt: Date }>> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // 2. Vérifier les permissions
+    // ADMIN, OPERATIONS_MANAGER et FINANCE_MANAGER peuvent confirmer les paiements
+    const canConfirmPayment =
+      userRole === 'ADMIN' ||
+      userRole === 'OPERATIONS_MANAGER' ||
+      userRole === 'FINANCE_MANAGER';
+
+    if (!canConfirmPayment) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions pour confirmer ce paiement',
+      };
+    }
+
+    // 3. Récupérer le colis existant avec son devis source
+    const existingShipment = await prisma.shipment.findUnique({
+      where: { id: shipmentId },
+      select: {
+        id: true,
+        trackingNumber: true,
+        paymentReceivedAt: true,
+        fromQuote: {
+          select: {
+            id: true,
+            quoteNumber: true,
+          },
+        },
+      },
+    });
+
+    if (!existingShipment) {
+      return {
+        success: false,
+        error: 'Colis introuvable',
+      };
+    }
+
+    // 4. Vérifier que le paiement n'a pas déjà été confirmé
+    if (existingShipment.paymentReceivedAt) {
+      return {
+        success: false,
+        error: `Le paiement de ce colis a déjà été confirmé le ${existingShipment.paymentReceivedAt.toLocaleDateString('fr-FR')}`,
+      };
+    }
+
+    // 5. Vérifier que le colis a un devis source (pour la génération de facture)
+    if (!existingShipment.fromQuote) {
+      return {
+        success: false,
+        error: 'Ce colis n\'a pas de devis source. Impossible de générer une facture.',
+      };
+    }
+
+    // 6. Mettre à jour le colis avec la date de paiement
+    const now = new Date();
+    const updatedShipment = await prisma.shipment.update({
+      where: { id: shipmentId },
+      data: {
+        paymentReceivedAt: now,
+        paymentReceivedById: session.user.id,
+      },
+    });
+
+    // 7. Mettre aussi à jour le devis source pour synchronisation
+    await prisma.quote.update({
+      where: { id: existingShipment.fromQuote.id },
+      data: {
+        paymentReceivedAt: now,
+        paymentReceivedById: session.user.id,
+      },
+    });
+
+    console.log(
+      `💰 [Shipment] Paiement confirmé pour le colis ${existingShipment.trackingNumber} par ${session.user.email}`
+    );
+
+    // 8. Revalider les caches
+    revalidatePath('/dashboard/shipments');
+    revalidatePath(`/dashboard/shipments/${shipmentId}`);
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${existingShipment.fromQuote.id}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedShipment.id,
+        paymentReceivedAt: now,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors de la confirmation du paiement:', error);
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la confirmation du paiement',
     };
   }
 }

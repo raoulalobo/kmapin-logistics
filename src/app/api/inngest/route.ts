@@ -17,26 +17,32 @@ import { inngest } from '@/lib/inngest/client';
 import {
   notifyShipmentCreated,
   notifyShipmentDelivered,
-  sendOverdueInvoiceReminder,
+  notifyPaymentReceivedOnQuote,
+  notifyPaymentReceivedOnShipment,
 } from '@/lib/inngest/functions/notifications';
 
 import {
-  checkOverdueInvoices,
+  checkPendingPayments,
   cleanupTempFiles,
   generateWeeklyReport,
 } from '@/lib/inngest/functions/scheduled';
 
 /**
  * Liste de toutes les fonctions Inngest enregistrées
+ *
+ * Note: Les factures ne sont plus stockées en base de données.
+ * Les fonctions de paiement notifient la réception des paiements
+ * et permettent ensuite de générer les factures à la volée en PDF.
  */
 const functions = [
   // Notifications
   notifyShipmentCreated,
   notifyShipmentDelivered,
-  sendOverdueInvoiceReminder,
+  notifyPaymentReceivedOnQuote,
+  notifyPaymentReceivedOnShipment,
 
   // Scheduled jobs
-  checkOverdueInvoices,
+  checkPendingPayments,
   cleanupTempFiles,
   generateWeeklyReport,
 ];

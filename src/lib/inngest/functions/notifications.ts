@@ -174,48 +174,39 @@ export const notifyShipmentDelivered = inngest.createFunction(
 );
 
 /**
- * Fonction : Envoyer un rappel pour facture en retard
+ * Fonction : Notifier la réception d'un paiement sur un devis
  *
- * Déclenchée par l'événement 'invoice/overdue'
+ * Déclenchée par l'événement 'payment/received-quote'
+ *
+ * Note: Les factures ne sont plus stockées en base de données.
+ * Cette notification confirme la réception du paiement et permet
+ * de générer la facture à la volée en PDF.
  */
-export const sendOverdueInvoiceReminder = inngest.createFunction(
+export const notifyPaymentReceivedOnQuote = inngest.createFunction(
   {
-    id: 'send-overdue-invoice-reminder',
-    name: 'Envoyer rappel facture en retard',
+    id: 'notify-payment-received-quote',
+    name: 'Notifier paiement reçu sur devis',
   },
-  { event: 'invoice/overdue' },
+  { event: 'payment/received-quote' },
   async ({ event, step }) => {
-    const { invoiceId, invoiceNumber, clientId, daysOverdue } = event.data;
+    const { quoteId, quoteNumber, clientId, receivedById, amount } = event.data;
 
     /**
-     * Step 1 : Récupérer la facture
-     * Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
+     * Step 1 : Récupérer le devis avec les détails client
      */
-    const invoice = await step.run('get-invoice', async () => {
-      return prisma.invoice.findUnique({
-        where: { id: invoiceId },
-        include: { client: true },  // Client (COMPANY ou INDIVIDUAL)
+    const quote = await step.run('get-quote', async () => {
+      return prisma.quote.findUnique({
+        where: { id: quoteId },
+        include: { client: true },
       });
     });
 
-    if (!invoice) {
-      throw new Error(`Invoice ${invoiceId} not found`);
+    if (!quote) {
+      throw new Error(`Quote ${quoteId} not found`);
     }
 
     /**
-     * Step 2 : Mettre à jour le statut si nécessaire
-     */
-    await step.run('update-invoice-status', async () => {
-      if (invoice.status !== 'OVERDUE') {
-        await prisma.invoice.update({
-          where: { id: invoiceId },
-          data: { status: 'OVERDUE' },
-        });
-      }
-    });
-
-    /**
-     * Step 3 : Créer des notifications pour les finance managers
+     * Step 2 : Notifier les finance managers
      */
     await step.run('notify-finance-managers', async () => {
       const managers = await prisma.user.findMany({
@@ -226,32 +217,82 @@ export const sendOverdueInvoiceReminder = inngest.createFunction(
 
       const notifications = managers.map((manager) => ({
         userId: manager.id,
-        type: 'INVOICE_PAID' as const, // Réutiliser le type existant
-        title: 'Facture en retard',
-        message: `La facture ${invoiceNumber} est en retard de ${daysOverdue} jours`,
-        data: { invoiceId, invoiceNumber, clientId, daysOverdue },  // clientId du Client (COMPANY ou INDIVIDUAL)
+        type: 'INVOICE_PAID' as const, // Réutiliser le type existant pour les paiements
+        title: 'Paiement reçu',
+        message: `Paiement de ${amount}€ reçu pour le devis ${quoteNumber} (${quote.client?.name || 'Client'})`,
+        data: { quoteId, quoteNumber, clientId, amount },
       }));
 
       await prisma.notification.createMany({ data: notifications });
     });
 
     /**
-     * Step 4 : Envoyer un email de rappel au client
+     * Step 3 : Notifier l'agent qui a confirmé le paiement
      */
-    // await step.run('send-reminder-email', async () => {
-    //   await sendEmail({
-    //     to: invoice.client.email,
-    //     subject: `Rappel - Facture en retard ${invoiceNumber}`,
-    //     template: 'invoice-overdue-reminder',
-    //     data: {
-    //       invoiceNumber,
-    //       clientName: invoice.client.name,  // Nom du client (COMPANY ou INDIVIDUAL)
-    //       total: invoice.total,
-    //       dueDate: invoice.dueDate,
-    //       daysOverdue,
-    //     },
-    //   });
-    // });
+    await step.run('notify-agent', async () => {
+      await prisma.notification.create({
+        data: {
+          userId: receivedById,
+          type: 'INVOICE_PAID' as const,
+          title: 'Confirmation de paiement',
+          message: `Vous avez confirmé le paiement de ${amount}€ pour le devis ${quoteNumber}`,
+          data: { quoteId, quoteNumber, amount },
+        },
+      });
+    });
+
+    return { success: true };
+  }
+);
+
+/**
+ * Fonction : Notifier la réception d'un paiement sur un colis
+ *
+ * Déclenchée par l'événement 'payment/received-shipment'
+ */
+export const notifyPaymentReceivedOnShipment = inngest.createFunction(
+  {
+    id: 'notify-payment-received-shipment',
+    name: 'Notifier paiement reçu sur colis',
+  },
+  { event: 'payment/received-shipment' },
+  async ({ event, step }) => {
+    const { shipmentId, trackingNumber, clientId, receivedById, amount } = event.data;
+
+    /**
+     * Step 1 : Récupérer le colis avec les détails client
+     */
+    const shipment = await step.run('get-shipment', async () => {
+      return prisma.shipment.findUnique({
+        where: { id: shipmentId },
+        include: { client: true },
+      });
+    });
+
+    if (!shipment) {
+      throw new Error(`Shipment ${shipmentId} not found`);
+    }
+
+    /**
+     * Step 2 : Notifier les finance managers
+     */
+    await step.run('notify-finance-managers', async () => {
+      const managers = await prisma.user.findMany({
+        where: {
+          role: { in: ['ADMIN', 'FINANCE_MANAGER'] },
+        },
+      });
+
+      const notifications = managers.map((manager) => ({
+        userId: manager.id,
+        type: 'INVOICE_PAID' as const,
+        title: 'Paiement reçu',
+        message: `Paiement de ${amount}€ reçu pour le colis ${trackingNumber} (${shipment.client?.name || 'Client'})`,
+        data: { shipmentId, trackingNumber, clientId, amount },
+      }));
+
+      await prisma.notification.createMany({ data: notifications });
+    });
 
     return { success: true };
   }

@@ -39,6 +39,7 @@ import { getShipmentAction } from '@/modules/shipments';
 import { ShipmentStatus } from '@/lib/db/enums';
 import { getSession } from '@/lib/auth/config';
 import { ShipmentAgentActions } from '@/components/shipments/shipment-agent-actions';
+import { ShipmentPaymentActions } from '@/components/shipments/shipment-payment-actions';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -500,24 +501,37 @@ export default async function ShipmentDetailPage({
                 </div>
               </div>
             )}
-
-            {shipment.invoice && (
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Facture</p>
-                  <Link
-                    href={`/dashboard/invoices/${shipment.invoice.id}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {shipment.invoice.invoiceNumber}
-                  </Link>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* PAIEMENT ET FACTURATION */}
+      {/* Visible si le colis a un devis source (fromQuote) */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <Card className="dashboard-card border-green-100">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CurrencyEur className="h-5 w-5 text-green-600" />
+            Paiement et Facturation
+          </CardTitle>
+          <CardDescription>
+            Confirmation du paiement et génération de facture
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ShipmentPaymentActions
+            shipmentId={shipment.id}
+            trackingNumber={shipment.trackingNumber}
+            paymentReceivedAt={shipment.paymentReceivedAt}
+            paymentReceivedByName={shipment.paymentReceivedBy?.name}
+            estimatedCost={Number(shipment.fromQuote?.estimatedCost || shipment.estimatedCost || 0)}
+            currency={shipment.fromQuote?.currency || shipment.currency}
+            userRole={userRole}
+            hasSourceQuote={!!shipment.fromQuote}
+          />
+        </CardContent>
+      </Card>
 
       {/* Historique de tracking */}
       <Card className="dashboard-card">

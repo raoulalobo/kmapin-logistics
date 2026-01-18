@@ -37,6 +37,7 @@ import { getQuoteAction } from '@/modules/quotes';
 import { QuoteStatus } from '@/lib/db/enums';
 import { getSession } from '@/lib/auth/config';
 import { QuoteAgentActions } from '@/components/quotes/quote-agent-actions';
+import { QuotePaymentActions } from '@/components/quotes/quote-payment-actions';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -492,6 +493,36 @@ export default async function QuoteDetailPage({
               currency={quote.currency}
               originCountry={quote.originCountry}
               destinationCountry={quote.destinationCountry}
+              userRole={userRole}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ACTIONS PAIEMENT ET FACTURATION */}
+      {/* Visible quand le devis est VALIDATED */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {(quote.status === 'VALIDATED' || quote.paymentReceivedAt) && (
+        <Card className="dashboard-card border-green-100">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CurrencyEur className="h-5 w-5 text-green-600" />
+              Paiement et Facturation
+            </CardTitle>
+            <CardDescription>
+              Confirmation du paiement et génération de facture
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QuotePaymentActions
+              quoteId={quote.id}
+              quoteNumber={quote.quoteNumber}
+              quoteStatus={quote.status}
+              paymentReceivedAt={quote.paymentReceivedAt}
+              paymentReceivedByName={quote.paymentReceivedBy?.name}
+              estimatedCost={Number(quote.estimatedCost)}
+              currency={quote.currency}
               userRole={userRole}
             />
           </CardContent>

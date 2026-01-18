@@ -31,6 +31,9 @@ export type DocumentType =
 
 /**
  * Données d'upload de document
+ *
+ * Un document doit être associé à une expédition (shipmentId) ou un devis (quoteId)
+ * Note: Les factures ne sont plus stockées en base - elles sont générées à la volée depuis les devis
  */
 interface UploadDocumentData {
   name: string;
@@ -40,7 +43,6 @@ interface UploadDocumentData {
   type: DocumentType;
   description?: string;
   shipmentId?: string;
-  invoiceId?: string;
   quoteId?: string;
 }
 
@@ -84,11 +86,11 @@ export async function uploadDocumentAction(
       };
     }
 
-    // Validation
-    if (!data.shipmentId && !data.invoiceId && !data.quoteId) {
+    // Validation : le document doit être lié à une expédition ou un devis
+    if (!data.shipmentId && !data.quoteId) {
       return {
         success: false,
-        error: 'Le document doit être associé à une expédition, facture ou devis',
+        error: 'Le document doit être associé à une expédition ou un devis',
       };
     }
 
@@ -106,10 +108,9 @@ export async function uploadDocumentAction(
       };
     }
 
-    // Déterminer le dossier de stockage
+    // Déterminer le dossier de stockage selon le type d'entité parente
     let folder = 'documents';
     if (data.shipmentId) folder = 'documents/shipments';
-    else if (data.invoiceId) folder = 'documents/invoices';
     else if (data.quoteId) folder = 'documents/quotes';
 
     // Convertir base64 en Buffer
@@ -139,7 +140,6 @@ export async function uploadDocumentAction(
         userId: session.user.clientId ? null : session.user.id, // userId si pas de company
         uploadedBy: session.user.id,
         shipmentId: data.shipmentId,
-        invoiceId: data.invoiceId,
         quoteId: data.quoteId,
       },
       include: {
@@ -285,12 +285,6 @@ export async function getAllDocumentsAction(params?: {
               trackingNumber: true,
             },
           },
-          invoice: {
-            select: {
-              id: true,
-              invoiceNumber: true,
-            },
-          },
           quote: {
             select: {
               id: true,
@@ -321,21 +315,27 @@ export async function getAllDocumentsAction(params?: {
 /**
  * Récupère les documents d'une entité
  *
- * @param entityId - ID de l'entité (shipment, invoice ou quote)
- * @param entityType - Type d'entité
- * @returns Liste des documents
+ * @param entityId - ID de l'entité (shipment ou quote)
+ * @param entityType - Type d'entité : 'shipment' pour une expédition, 'quote' pour un devis
+ * @returns Liste des documents associés à l'entité
+ *
+ * @example
+ * // Récupérer les documents d'un colis
+ * const result = await getDocumentsAction('cm123...', 'shipment');
+ *
+ * // Récupérer les documents d'un devis
+ * const result = await getDocumentsAction('cm456...', 'quote');
  */
 export async function getDocumentsAction(
   entityId: string,
-  entityType: 'shipment' | 'invoice' | 'quote'
+  entityType: 'shipment' | 'quote'
 ): Promise<ActionResponse<DocumentData[]>> {
   try {
     const session = await requireAuth();
 
-    // Construire la condition where selon le type
-    const whereCondition: any = {};
+    // Construire la condition where selon le type d'entité
+    const whereCondition: Record<string, string> = {};
     if (entityType === 'shipment') whereCondition.shipmentId = entityId;
-    else if (entityType === 'invoice') whereCondition.invoiceId = entityId;
     else if (entityType === 'quote') whereCondition.quoteId = entityId;
 
     // Récupérer les documents

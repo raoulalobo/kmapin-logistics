@@ -325,11 +325,6 @@ export async function getQuotesAction(
               email: true,
             },
           },
-          _count: {
-            select: {
-              invoices: true,
-            },
-          },
         },
       }),
       prisma.quote.count({ where }),
@@ -411,8 +406,15 @@ export async function getQuoteAction(id: string) {
       where: { id },
       include: {
         client: true,
-        invoices: true,
         user: true,
+        // Récupérer la personne ayant confirmé le paiement (si applicable)
+        paymentReceivedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         shipment: {
           select: {
             id: true,
@@ -623,13 +625,6 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
     // Vérifier que le devis existe
     const quote = await prisma.quote.findUnique({
       where: { id },
-      include: {
-        _count: {
-          select: {
-            invoices: true,
-          },
-        },
-      },
     });
 
     if (!quote) {
@@ -644,11 +639,12 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
       };
     }
 
-    // Empêcher la suppression si des factures sont associées
-    if (quote._count.invoices > 0) {
+    // Empêcher la suppression si le paiement a été confirmé
+    // (une facture peut être générée à partir de ce devis)
+    if (quote.paymentReceivedAt) {
       return {
         success: false,
-        error: 'Impossible de supprimer un devis associé à des factures',
+        error: 'Impossible de supprimer un devis dont le paiement a été confirmé',
       };
     }
 
@@ -2321,6 +2317,125 @@ export async function attachQuotesToUserAction(
     return {
       success: false,
       error: 'Une erreur est survenue lors du rattachement des devis.',
+    };
+  }
+}
+
+// ============================================
+// PAIEMENT
+// ============================================
+
+/**
+ * Action : Marquer le paiement d'un devis comme reçu
+ *
+ * Permet à un agent de confirmer la réception du paiement pour un devis validé.
+ * Une fois le paiement confirmé, le client peut télécharger la facture PDF.
+ *
+ * Workflow :
+ * 1. Vérification des permissions (ADMIN, OPERATIONS_MANAGER ou FINANCE_MANAGER)
+ * 2. Vérification que le devis est VALIDATED
+ * 3. Mise à jour du champ paymentReceivedAt
+ *
+ * @param quoteId - ID du devis
+ * @returns Résultat avec confirmation ou erreur
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER
+ *
+ * @example
+ * // Confirmer le paiement d'un devis
+ * const result = await markQuotePaymentReceivedAction('cuid123');
+ * if (result.success) {
+ *   // Afficher le bouton "Télécharger facture"
+ * }
+ */
+export async function markQuotePaymentReceivedAction(
+  quoteId: string
+): Promise<ActionResult<{ id: string; paymentReceivedAt: Date }>> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // 2. Vérifier les permissions
+    // ADMIN, OPERATIONS_MANAGER et FINANCE_MANAGER peuvent confirmer les paiements
+    const canConfirmPayment =
+      userRole === 'ADMIN' ||
+      userRole === 'OPERATIONS_MANAGER' ||
+      userRole === 'FINANCE_MANAGER';
+
+    if (!canConfirmPayment) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions pour confirmer ce paiement',
+      };
+    }
+
+    // 3. Récupérer le devis existant
+    const existingQuote = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      select: {
+        id: true,
+        quoteNumber: true,
+        status: true,
+        paymentReceivedAt: true,
+      },
+    });
+
+    if (!existingQuote) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
+    }
+
+    // 4. Vérifier que le paiement n'a pas déjà été confirmé
+    if (existingQuote.paymentReceivedAt) {
+      return {
+        success: false,
+        error: `Le paiement de ce devis a déjà été confirmé le ${existingQuote.paymentReceivedAt.toLocaleDateString('fr-FR')}`,
+      };
+    }
+
+    // 5. Vérifier que le devis est validé (status VALIDATED)
+    // Le paiement ne peut être confirmé que sur un devis validé (colis créé)
+    if (existingQuote.status !== 'VALIDATED') {
+      return {
+        success: false,
+        error: `Impossible de confirmer le paiement d'un devis avec le statut "${existingQuote.status}". Le devis doit être VALIDATED.`,
+      };
+    }
+
+    // 6. Mettre à jour le devis avec la date de paiement
+    const now = new Date();
+    const updatedQuote = await prisma.quote.update({
+      where: { id: quoteId },
+      data: {
+        paymentReceivedAt: now,
+        paymentReceivedById: session.user.id,
+      },
+    });
+
+    console.log(
+      `💰 [Quote] Paiement confirmé pour le devis ${existingQuote.quoteNumber} par ${session.user.email}`
+    );
+
+    // 7. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${quoteId}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedQuote.id,
+        paymentReceivedAt: now,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors de la confirmation du paiement:', error);
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la confirmation du paiement',
     };
   }
 }

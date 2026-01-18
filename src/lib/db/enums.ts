@@ -7,6 +7,9 @@
  * Les enums Prisma sont à la fois des valeurs et des types en TypeScript,
  * donc un seul export suffit pour les deux usages.
  *
+ * Note: InvoiceStatus a été supprimé car les factures ne sont plus stockées
+ * en base de données. Elles sont générées à la volée depuis les devis payés.
+ *
  * @module lib/db/enums
  */
 
@@ -20,7 +23,6 @@ export {
   Priority,
   PickupStatus,
   PickupTimeSlot,
-  InvoiceStatus,
   ProspectStatus,
   NotificationType,
   DocumentType,

@@ -105,14 +105,14 @@ export default async function ReportsPage() {
           <KPICard
             title="Revenus en attente"
             value={`${stats.pendingRevenue.toLocaleString('fr-FR')} €`}
-            subtitle={`${stats.pendingInvoices} facture(s) en attente`}
+            subtitle={`${stats.quotesAwaitingPayment} devis en attente de paiement`}
             icon={Clock}
           />
 
           <KPICard
-            title="Factures en retard"
-            value={stats.overdueInvoices}
-            subtitle="À relancer"
+            title="Devis expirés"
+            value={stats.expiredQuotes}
+            subtitle="Validité dépassée, non payés"
             icon={WarningCircle}
           />
         </div>
@@ -188,13 +188,13 @@ export default async function ReportsPage() {
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Devis en attente
+                Devis envoyés
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.pendingQuotes}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                À traiter ou envoyer
+                En attente de réponse client
               </p>
             </CardContent>
           </Card>
@@ -203,13 +203,13 @@ export default async function ReportsPage() {
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <WarningCircle className="h-4 w-4 text-orange-500" />
-                Factures impayées
+                Devis en attente de paiement
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingInvoices}</div>
+              <div className="text-2xl font-bold">{stats.quotesAwaitingPayment}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                En attente de paiement
+                Validés mais non payés
               </p>
             </CardContent>
           </Card>
@@ -218,13 +218,13 @@ export default async function ReportsPage() {
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <WarningCircle className="h-4 w-4 text-red-500" />
-                Factures en retard
+                Devis expirés
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.overdueInvoices}</div>
+              <div className="text-2xl font-bold">{stats.expiredQuotes}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                Échues et impayées
+                Validité dépassée
               </p>
             </CardContent>
           </Card>

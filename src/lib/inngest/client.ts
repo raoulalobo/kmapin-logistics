@@ -57,40 +57,37 @@ type Events = {
   };
 
   /**
-   * Événement : Nouvelle facture créée
+   * Événement : Paiement reçu sur un devis
+   *
+   * Déclenché quand un agent marque un devis comme payé
+   * La facture peut ensuite être générée à la volée en PDF
    */
-  'invoice/created': {
+  'payment/received-quote': {
     data: {
-      invoiceId: string;
-      invoiceNumber: string;
+      quoteId: string;
+      quoteNumber: string;
       clientId: string;
-      total: number;
-    };
-  };
-
-  /**
-   * Événement : Facture payée
-   */
-  'invoice/paid': {
-    data: {
-      invoiceId: string;
-      invoiceNumber: string;
-      clientId: string;
-      paidAt: string;
+      receivedAt: string;
+      receivedById: string;
       amount: number;
     };
   };
 
   /**
-   * Événement : Facture en retard
+   * Événement : Paiement reçu sur un colis
+   *
+   * Déclenché quand un agent marque un colis comme payé
+   * La facture peut ensuite être générée à la volée en PDF
    */
-  'invoice/overdue': {
+  'payment/received-shipment': {
     data: {
-      invoiceId: string;
-      invoiceNumber: string;
+      shipmentId: string;
+      trackingNumber: string;
+      quoteId?: string;
       clientId: string;
-      dueDate: string;
-      daysOverdue: number;
+      receivedAt: string;
+      receivedById: string;
+      amount: number;
     };
   };
 
@@ -107,12 +104,15 @@ type Events = {
 
   /**
    * Événement : Document uploadé
+   *
+   * Déclenché quand un document est uploadé vers Backblaze B2
+   * Le document peut être lié à un colis ou un devis
    */
   'document/uploaded': {
     data: {
       documentId: string;
       shipmentId?: string;
-      invoiceId?: string;
+      quoteId?: string;
       type: string;
       fileUrl: string;
     };
