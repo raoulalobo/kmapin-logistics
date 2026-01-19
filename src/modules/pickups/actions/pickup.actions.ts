@@ -631,12 +631,6 @@ export async function listPickups(filters?: {
               name: true,
             },
           },
-          transporter: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
         },
       }),
       prisma.pickupRequest.count({ where }),
@@ -906,11 +900,14 @@ export async function cancelPickup(input: CancelPickupInput) {
 // ============================================
 
 /**
- * Assigne un transporteur/chauffeur à une demande
+ * Assigne un chauffeur à une demande d'enlèvement
  *
  * IMPORTANT : Utilise le client Prisma standard car Zenstack bloque l'accès
  *
- * @param input - Données du transporteur
+ * Note : On ne gère plus les transporteurs (entité supprimée), seulement
+ * les informations directes du chauffeur (nom, téléphone, plaque).
+ *
+ * @param input - Données du chauffeur
  * @returns Demande mise à jour
  */
 export async function assignDriver(input: AssignDriverInput) {
@@ -924,7 +921,7 @@ export async function assignDriver(input: AssignDriverInput) {
     ) {
       return {
         success: false,
-        error: 'Vous n\'avez pas les permissions pour assigner un transporteur.',
+        error: 'Vous n\'avez pas les permissions pour assigner un chauffeur.',
       };
     }
 
@@ -935,7 +932,6 @@ export async function assignDriver(input: AssignDriverInput) {
     const currentPickup = await prisma.pickupRequest.findUnique({
       where: { id: validated.pickupId },
       select: {
-        transporterId: true,
         driverName: true,
       },
     });
@@ -947,32 +943,22 @@ export async function assignDriver(input: AssignDriverInput) {
       };
     }
 
-    // Mise à jour
+    // Mise à jour des informations chauffeur
     const updatedPickup = await prisma.pickupRequest.update({
       where: { id: validated.pickupId },
       data: {
-        transporterId: validated.transporterId,
         driverName: validated.driverName,
         driverPhone: validated.driverPhone,
         vehiclePlate: validated.vehiclePlate,
       },
-      include: {
-        transporter: {
-          select: {
-            name: true,
-          },
-        },
-      },
     });
 
     // Log de l'assignation (première fois) ou changement
-    const isFirstAssignment = !currentPickup.transporterId;
+    const isFirstAssignment = !currentPickup.driverName;
 
     if (isFirstAssignment) {
       await logDriverAssigned({
         pickupId: validated.pickupId,
-        transporterId: validated.transporterId,
-        transporterName: updatedPickup.transporter?.name,
         driverName: validated.driverName,
         driverPhone: validated.driverPhone,
         changedById: session.user.id,
@@ -980,12 +966,10 @@ export async function assignDriver(input: AssignDriverInput) {
     } else {
       await logDriverChanged({
         pickupId: validated.pickupId,
-        oldTransporterId: currentPickup.transporterId ?? undefined,
-        newTransporterId: validated.transporterId,
         oldDriverName: currentPickup.driverName ?? undefined,
         newDriverName: validated.driverName,
         changedById: session.user.id,
-        notes: 'Transporteur modifié',
+        notes: 'Chauffeur modifié',
       });
     }
 
@@ -996,11 +980,11 @@ export async function assignDriver(input: AssignDriverInput) {
       success: true,
       data: updatedPickup,
       message: isFirstAssignment
-        ? 'Transporteur assigné avec succès.'
-        : 'Transporteur modifié avec succès.',
+        ? 'Chauffeur assigné avec succès.'
+        : 'Chauffeur modifié avec succès.',
     };
   } catch (error) {
-    console.error('Erreur lors de l\'assignation du transporteur:', error);
+    console.error('Erreur lors de l\'assignation du chauffeur:', error);
 
     if (error instanceof Error) {
       return {
@@ -1145,7 +1129,6 @@ export async function getPickupDetails(pickupId: string) {
             phone: true,
           },
         },
-        transporter: true,
         shipment: {
           select: {
             id: true,

@@ -346,21 +346,19 @@ export const trackPickupByTokenSchema = z.object({
 export type TrackPickupByTokenInput = z.infer<typeof trackPickupByTokenSchema>;
 
 // ============================================
-// SCHÉMA D'ASSIGNATION DE TRANSPORTEUR
+// SCHÉMA D'ASSIGNATION DE CHAUFFEUR
 // ============================================
 
 /**
- * Schéma pour assigner un transporteur à une demande
+ * Schéma pour assigner un chauffeur à une demande
+ *
+ * Note : La gestion des transporteurs (entité) a été supprimée.
+ * On stocke directement les informations du chauffeur sur le pickup.
  */
 export const assignDriverSchema = z.object({
   pickupId: z
     .string({ required_error: MESSAGES.required })
     .cuid('ID de demande invalide'),
-
-  transporterId: z
-    .string()
-    .cuid('ID de transporteur invalide')
-    .optional(),
 
   driverName: z
     .string()

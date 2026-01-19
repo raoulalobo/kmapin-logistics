@@ -53,7 +53,7 @@ interface PageProps {
     dateFrom?: string;
     dateTo?: string;
     onlyUnattached?: string;
-    onlyWithTransporter?: string;
+    onlyWithDriver?: string; // Filtre sur les pickups avec chauffeur assigné
     timeSlot?: string;
     sortBy?: string;
     sortOrder?: string;
@@ -77,7 +77,7 @@ function parseFilters(searchParams: Awaited<PageProps['searchParams']>): PickupF
     dateFrom: searchParams.dateFrom || undefined,
     dateTo: searchParams.dateTo || undefined,
     onlyUnattached: searchParams.onlyUnattached === 'true',
-    onlyWithTransporter: searchParams.onlyWithTransporter === 'true',
+    onlyWithDriver: searchParams.onlyWithDriver === 'true',
     timeSlot: searchParams.timeSlot as any,
     sortBy: (searchParams.sortBy as any) || 'createdAt',
     sortOrder: (searchParams.sortOrder as 'asc' | 'desc') || 'desc',
@@ -242,8 +242,9 @@ async function PickupsList({
     where.isAttachedToAccount = false;
   }
 
-  if (filters.onlyWithTransporter) {
-    where.transporterId = { not: null };
+  // Filtre sur les pickups avec chauffeur assigné
+  if (filters.onlyWithDriver) {
+    where.driverName = { not: null };
   }
 
   // Créneau horaire
@@ -260,11 +261,6 @@ async function PickupsList({
           select: {
             name: true,
             email: true,
-          },
-        },
-        transporter: {
-          select: {
-            name: true,
           },
         },
         shipment: {

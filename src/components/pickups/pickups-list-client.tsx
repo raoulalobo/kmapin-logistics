@@ -48,7 +48,7 @@ function buildFilterUrl(filters: PickupFiltersType, page?: number): string {
   if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
   if (filters.dateTo) params.set('dateTo', filters.dateTo);
   if (filters.onlyUnattached) params.set('onlyUnattached', 'true');
-  if (filters.onlyWithTransporter) params.set('onlyWithTransporter', 'true');
+  if (filters.onlyWithDriver) params.set('onlyWithDriver', 'true');
   if (filters.timeSlot) params.set('timeSlot', filters.timeSlot);
   if (filters.sortBy) params.set('sortBy', filters.sortBy);
   if (filters.sortOrder) params.set('sortOrder', filters.sortOrder);

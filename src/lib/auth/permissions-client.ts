@@ -38,10 +38,6 @@ export const PERMISSIONS = {
     'clients:create',
     'clients:update',
 
-    // Transporteurs
-    'transporters:read',
-    'transporters:manage',
-
     // Tracking
     'tracking:read',
     'tracking:create',

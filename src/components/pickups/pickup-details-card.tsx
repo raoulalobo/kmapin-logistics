@@ -86,8 +86,7 @@ interface PickupRequestWithRelations {
   status: PickupStatus;
   cancellationReason: string | null;
 
-  transporterId: string | null;
-  transporter: { name: string } | null;
+  // Informations chauffeur (on ne gère plus les transporteurs comme entité)
   driverName: string | null;
   driverPhone: string | null;
   vehiclePlate: string | null;
@@ -442,20 +441,15 @@ export function PickupDetailsCard({
           )}
         </DetailSection>
 
-        {/* Transporteur (si assigné) */}
-        {pickup.transporterId && (
+        {/* Chauffeur (si assigné) */}
+        {pickup.driverName && (
           <>
             <Separator />
-            <DetailSection icon={Truck} title="Transporteur">
-              {pickup.transporter && (
-                <DetailRow label="Société" value={pickup.transporter.name} />
-              )}
-              {pickup.driverName && (
-                <DetailRow label="Chauffeur" value={pickup.driverName} />
-              )}
+            <DetailSection icon={Truck} title="Chauffeur">
+              <DetailRow label="Nom" value={pickup.driverName} />
               {pickup.driverPhone && (
                 <DetailRow
-                  label="Téléphone chauffeur"
+                  label="Téléphone"
                   badge={
                     <a
                       href={`tel:${pickup.driverPhone}`}

@@ -414,7 +414,7 @@ describe('Pickup Actions - getPickupRequestByIdAction', () => {
         id: 'shipment-123',
         trackingNumber: 'SHP-20260109-A1B2C',
       },
-      transporter: null,
+      driverName: null,
     };
 
     mockEnhancedPrisma.pickupRequest.findUnique.mockResolvedValue(mockPickup);
@@ -430,7 +430,6 @@ describe('Pickup Actions - getPickupRequestByIdAction', () => {
         where: { id: 'pickup-123' },
         include: expect.objectContaining({
           shipment: true,
-          transporter: true,
         }),
       })
     );

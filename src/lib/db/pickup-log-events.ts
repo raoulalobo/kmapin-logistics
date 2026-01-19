@@ -50,22 +50,20 @@ export const PickupLogEventType = {
   ATTACHED_TO_ACCOUNT: 'ATTACHED_TO_ACCOUNT',
 
   // ============================================
-  // TRANSPORTEUR
+  // CHAUFFEUR
   // ============================================
 
   /**
-   * Chauffeur/Transporteur assigné à la demande
-   * - Première assignation d'un transporteur
-   * - metadata: { transporterId: string, transporterName: string, driverName?: string }
+   * Chauffeur assigné à la demande
+   * - Première assignation d'un chauffeur
+   * - metadata: { driverName: string, driverPhone?: string }
    */
   DRIVER_ASSIGNED: 'DRIVER_ASSIGNED',
 
   /**
-   * Chauffeur/Transporteur modifié
-   * - Changement de transporteur ou de chauffeur
+   * Chauffeur modifié
+   * - Changement de chauffeur
    * - metadata: {
-   *     oldTransporterId?: string,
-   *     newTransporterId?: string,
    *     oldDriverName?: string,
    *     newDriverName?: string
    *   }

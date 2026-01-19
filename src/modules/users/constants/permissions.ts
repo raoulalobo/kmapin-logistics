@@ -218,24 +218,6 @@ export const PERMISSION_CATEGORIES: Record<string, PermissionItem[]> = {
   ],
 
   /**
-   * Catégorie : Transporteurs
-   * Gestion des partenaires de transport
-   */
-  Transporteurs: [
-    {
-      id: 'transporters:read',
-      label: 'Consulter les transporteurs',
-      description: 'Permet de visualiser la liste des transporteurs',
-    },
-    {
-      id: 'transporters:manage',
-      label: 'Gérer les transporteurs',
-      description:
-        'Permet d\'ajouter, modifier et supprimer des transporteurs',
-    },
-  ],
-
-  /**
    * Catégorie : Douanes
    * Gestion des documents et formalités douanières
    */

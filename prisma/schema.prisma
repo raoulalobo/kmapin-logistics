@@ -147,14 +147,6 @@ enum DocumentType {
   OTHER
 }
 
-enum TransporterType {
-  ROAD
-  SEA
-  AIR
-  RAIL
-  MULTIMODAL
-}
-
 model User {
   id                        String            @id() @default(cuid())
   email                     String            @unique()
@@ -270,7 +262,6 @@ model Client {
   shipments        Shipment[]
   quotes           Quote[]
   documents        Document[]
-  transporters     Transporter[]
   pickupRequests   PickupRequest[]
   purchaseRequests PurchaseRequest[]
 
@@ -366,8 +357,6 @@ model PickupRequest {
   internalNotes       String?        @db.Text()
   status              PickupStatus   @default(NOUVEAU)
   cancellationReason  String?        @db.Text()
-  transporterId       String?
-  transporter         Transporter?   @relation(fields: [transporterId], references: [id])
   driverName          String?
   driverPhone         String?
   vehiclePlate        String?
@@ -391,7 +380,6 @@ model PickupRequest {
   @@index([status])
   @@index([clientId])
   @@index([shipmentId])
-  @@index([transporterId])
   @@index([createdAt])
   @@index([status, createdAt])
   @@map("pickup_request")
@@ -658,34 +646,6 @@ model Document {
   @@index([pickupRequestId])
   @@index([purchaseRequestId])
   @@index([uploadedBy])
-}
-
-model Transporter {
-  id             String          @id() @default(cuid())
-  name           String
-  type           TransporterType
-  email          String          @unique()
-  phone          String
-  address        String?
-  city           String?
-  postalCode     String?
-  country        String?
-  website        String?
-  contactPerson  String?
-  taxId          String?
-  iban           String?
-  notes          String?
-  isActive       Boolean         @default(true)
-  rating         Float?          @default(0)
-  clientId       String
-  client         Client          @relation(fields: [clientId], references: [id])
-  pickupRequests PickupRequest[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt()
-
-  @@index([clientId])
-  @@index([type])
-  @@map("transporter")
 }
 
 model PricingConfig {

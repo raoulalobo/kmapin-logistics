@@ -71,8 +71,8 @@ interface PickupListItem {
   isAttachedToAccount: boolean;
   userId: string | null;
 
-  transporterId: string | null;
-  transporter: { name: string } | null;
+  // Informations chauffeur (on ne gère plus les transporteurs comme entité)
+  driverName: string | null;
 
   shipmentId: string | null;
 
@@ -416,11 +416,11 @@ export function PickupListTable({
                         </div>
                       )}
 
-                      {pickup.transporterId && pickup.transporter && (
+                      {pickup.driverName && (
                         <div className="flex items-center text-xs text-blue-600">
                           <Package className="h-3 w-3 mr-1" />
                           <span className="truncate max-w-[100px]">
-                            {pickup.transporter.name}
+                            {pickup.driverName}
                           </span>
                         </div>
                       )}

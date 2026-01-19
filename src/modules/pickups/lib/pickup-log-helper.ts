@@ -44,11 +44,12 @@ interface AttachedToAccountLogParams extends BaseLogParams {
 }
 
 /**
- * Paramètres pour les logs de transporteur
+ * Paramètres pour les logs de chauffeur
+ *
+ * Note : La gestion des transporteurs (entité) a été supprimée.
+ * On ne stocke plus que les informations directes du chauffeur.
  */
 interface DriverLogParams extends BaseLogParams {
-  transporterId?: string;
-  transporterName?: string;
   driverName?: string;
   driverPhone?: string;
 }
@@ -212,8 +213,6 @@ export async function logAttachedToAccount(params: AttachedToAccountLogParams) {
  * ```ts
  * await logDriverAssigned({
  *   pickupId: 'clxxx',
- *   transporterId: 'clyyy',
- *   transporterName: 'Transports Dupont',
  *   driverName: 'Jean Martin',
  *   driverPhone: '+33612345678',
  *   changedById: agentId,
@@ -227,8 +226,6 @@ export async function logDriverAssigned(params: DriverLogParams) {
     changedById: params.changedById,
     notes: params.notes,
     metadata: {
-      transporterId: params.transporterId,
-      transporterName: params.transporterName,
       driverName: params.driverName,
       driverPhone: params.driverPhone,
     },
@@ -238,23 +235,22 @@ export async function logDriverAssigned(params: DriverLogParams) {
 /**
  * Crée un log de changement de chauffeur
  *
- * @param params - Paramètres du log avec ancien et nouveau transporteur
+ * @param params - Paramètres du log avec ancien et nouveau chauffeur
  * @returns Le log créé
  *
  * @example
  * ```ts
  * await logDriverChanged({
  *   pickupId: 'clxxx',
+ *   oldDriverName: 'Jean Martin',
+ *   newDriverName: 'Pierre Dupont',
  *   changedById: agentId,
- *   notes: 'Changement de transporteur',
- *   // Metadata enrichi avec oldXXX et newXXX
+ *   notes: 'Changement de chauffeur',
  * });
  * ```
  */
 export async function logDriverChanged(
   params: DriverLogParams & {
-    oldTransporterId?: string;
-    newTransporterId?: string;
     oldDriverName?: string;
     newDriverName?: string;
   }
@@ -265,8 +261,6 @@ export async function logDriverChanged(
     changedById: params.changedById,
     notes: params.notes,
     metadata: {
-      oldTransporterId: params.oldTransporterId,
-      newTransporterId: params.newTransporterId,
       oldDriverName: params.oldDriverName,
       newDriverName: params.newDriverName,
     },

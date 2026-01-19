@@ -68,11 +68,6 @@ export default async function PickupDetailsPage({ params }: PageProps) {
           name: true,
         },
       },
-      transporter: {
-        select: {
-          name: true,
-        },
-      },
       shipment: {
         select: {
           trackingNumber: true,

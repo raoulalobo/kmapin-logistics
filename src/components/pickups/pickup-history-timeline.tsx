@@ -211,9 +211,8 @@ function renderMetadata(
       return (
         <div className="text-sm text-muted-foreground">
           <p>
-            Transporteur : <strong>{metadata.transporterName as string}</strong>
+            Chauffeur : <strong>{metadata.driverName as string}</strong>
           </p>
-          <p>Chauffeur : {metadata.driverName as string}</p>
           {metadata.driverPhone && <p>Tél : {metadata.driverPhone as string}</p>}
         </div>
       );

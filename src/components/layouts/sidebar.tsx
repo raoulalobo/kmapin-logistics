@@ -101,12 +101,6 @@ const navigation: NavSection[] = [
         icon: MapPin,
         permission: 'tracking:read',
       },
-      {
-        label: 'Transporteurs',
-        href: '/dashboard/transporters',
-        icon: Truck,
-        permission: 'transporters:read',
-      },
     ],
   },
   {

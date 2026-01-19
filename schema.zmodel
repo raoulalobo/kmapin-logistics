@@ -321,7 +321,6 @@ model Client {
   shipments          Shipment[]          // Expéditions du client (colis)
   quotes             Quote[]             // Devis du client
   documents          Document[]          // Documents du client
-  transporters       Transporter[]       // Transporteurs du client
   pickupRequests     PickupRequest[]     // Demandes d'enlèvement
   purchaseRequests   PurchaseRequest[]   // Demandes d'achat délégué
 
@@ -628,11 +627,9 @@ model PickupRequest {
   cancellationReason String?   @db.Text   // Obligatoire si status = ANNULE (validation applicative)
 
   // ============================================
-  // TRANSPORTEUR (optionnel, assigné par agent)
+  // CHAUFFEUR (optionnel, assigné par agent)
   // ============================================
 
-  transporterId      String?
-  transporter        Transporter? @relation(fields: [transporterId], references: [id])
   driverName         String?              // Nom du chauffeur
   driverPhone        String?              // Téléphone du chauffeur
   vehiclePlate       String?              // Plaque d'immatriculation
@@ -700,7 +697,6 @@ model PickupRequest {
   @@index([status])            // Filtres back-office (US-3.1)
   @@index([clientId])          // Multi-tenancy (Client COMPANY ou INDIVIDUAL)
   @@index([shipmentId])        // Relations
-  @@index([transporterId])     // Assignation transporteur
   @@index([createdAt])         // Tri chronologique
   @@index([status, createdAt]) // Composite pour filtres + tri optimisé
 
@@ -1601,77 +1597,6 @@ model Document {
 // ============================================
 // TRANSPORTEURS
 // ============================================
-
-/**
- * Type de transporteur
- */
-enum TransporterType {
-  ROAD        // Routier
-  SEA         // Maritime
-  AIR         // Aérien
-  RAIL        // Ferroviaire
-  MULTIMODAL  // Multimodal
-}
-
-/**
- * Modèle Transporter (Transporteurs/Partenaires de transport)
- * - ADMIN : accès complet
- * - OPERATIONS_MANAGER : peut créer, lire et modifier tous les transporteurs
- * - FINANCE_MANAGER : peut lire tous les transporteurs
- * - CLIENT/VIEWER : peuvent voir les transporteurs actifs
- */
-model Transporter {
-  id            String          @id @default(cuid())
-  name          String          // Nom du transporteur
-  type          TransporterType // Type de transport
-  email         String          @unique
-  phone         String
-  address       String?
-  city          String?
-  postalCode    String?
-  country       String?
-  website       String?
-
-  // Informations commerciales
-  contactPerson String? // Nom du contact principal
-  taxId         String? // Numéro de TVA
-  iban          String? // IBAN pour les paiements
-
-  // Métadonnées
-  notes    String?  // Notes internes
-  isActive Boolean  @default(true) // Transporteur actif ou non
-  rating   Float?   @default(0) // Note de 0 à 5
-
-  // Relations
-  // Client auquel appartient ce transporteur (type COMPANY généralement)
-  clientId       String
-  client         Client  @relation(fields: [clientId], references: [id])
-  pickupRequests PickupRequest[] // Enlèvements assignés à ce transporteur
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 🔐 Access Policies
-
-  // Les admins peuvent tout faire
-  @@allow('all', auth().role == ADMIN)
-
-  // Les operations managers peuvent créer, lire et modifier
-  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
-
-  // Les finance managers peuvent lire
-  @@allow('read', auth().role == FINANCE_MANAGER)
-
-  // Les clients peuvent voir les transporteurs actifs
-  @@allow('read', isActive == true && (auth().role == CLIENT || auth().role == VIEWER))
-
-  @@deny('all', true)
-
-  @@index([clientId])
-  @@index([type])
-  @@map("transporter")
-}
 
 // ============================================
 // CONFIGURATION DES PRIX

@@ -61,7 +61,7 @@ const pickupFiltersSchema = z.object({
 
   // Filtres binaires
   onlyUnattached: z.boolean().optional(), // Seulement les non rattachés
-  onlyWithTransporter: z.boolean().optional(), // Seulement avec transporteur
+  onlyWithDriver: z.boolean().optional(), // Seulement avec chauffeur assigné
 
   // Créneau horaire
   timeSlot: z.nativeEnum(PickupTimeSlot).optional(),
@@ -155,7 +155,7 @@ export function PickupFilters({
       dateFrom: initialValues?.dateFrom || '',
       dateTo: initialValues?.dateTo || '',
       onlyUnattached: initialValues?.onlyUnattached || false,
-      onlyWithTransporter: initialValues?.onlyWithTransporter || false,
+      onlyWithDriver: initialValues?.onlyWithDriver || false,
       timeSlot: initialValues?.timeSlot,
       sortBy: initialValues?.sortBy || 'createdAt',
       sortOrder: initialValues?.sortOrder || 'desc',
@@ -175,7 +175,7 @@ export function PickupFilters({
       dateFrom: '',
       dateTo: '',
       onlyUnattached: false,
-      onlyWithTransporter: false,
+      onlyWithDriver: false,
       timeSlot: undefined,
       sortBy: 'createdAt',
       sortOrder: 'desc',
@@ -203,7 +203,7 @@ export function PickupFilters({
     if (values.statuses && values.statuses.length > 0) count++;
     if (values.dateFrom || values.dateTo) count++;
     if (values.onlyUnattached) count++;
-    if (values.onlyWithTransporter) count++;
+    if (values.onlyWithDriver) count++;
     if (values.timeSlot) count++;
 
     return count;
@@ -431,7 +431,7 @@ export function PickupFilters({
 
               <FormField
                 control={form.control}
-                name="onlyWithTransporter"
+                name="onlyWithDriver"
                 render={({ field }) => (
                   <FormItem className="flex items-center space-x-2 space-y-0">
                     <FormControl>
@@ -441,7 +441,7 @@ export function PickupFilters({
                       />
                     </FormControl>
                     <Label className="font-normal cursor-pointer">
-                      Uniquement les demandes avec transporteur assigné
+                      Uniquement les demandes avec chauffeur assigné
                     </Label>
                   </FormItem>
                 )}
