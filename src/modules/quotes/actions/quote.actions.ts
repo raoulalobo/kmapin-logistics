@@ -176,6 +176,7 @@ export async function createQuoteAction(
       data: {
         quoteNumber,
         clientId: validatedData.clientId,
+        contactEmail: session.user.email, // Email de l'utilisateur connecté (requis par le schéma)
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
@@ -1225,6 +1226,7 @@ export async function saveQuoteFromCalculatorAction(
       data: {
         quoteNumber,
         clientId: session.user.clientId,
+        contactEmail: session.user.email, // Email de l'utilisateur connecté
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
