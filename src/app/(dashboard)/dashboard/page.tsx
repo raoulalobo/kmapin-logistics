@@ -353,12 +353,12 @@ export default async function DashboardPage() {
               /* ADMIN/MANAGER : toutes les actions */
               <>
                 <Button asChild variant="outline" className="h-auto flex-col gap-2 py-6">
-                  <Link href="/dashboard/shipments/new">
+                  <Link href="/dashboard/shipments">
                     <Package className="h-6 w-6" />
                     <div className="text-center">
-                      <div className="font-medium">Nouvelle expédition</div>
+                      <div className="font-medium">Expéditions</div>
                       <div className="text-xs text-muted-foreground">
-                        Créer une expédition
+                        Gérer les expéditions
                       </div>
                     </div>
                   </Link>

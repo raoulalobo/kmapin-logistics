@@ -163,12 +163,12 @@ export default async function TrackingPage() {
             <Package className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucune expédition active</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Il n&apos;y a actuellement aucune expédition en cours de traitement
+              Les expéditions sont créées automatiquement lors de la validation d&apos;un devis
             </p>
             <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Link href="/dashboard/shipments/new">
+              <Link href="/dashboard/quotes">
                 <Plus className="h-5 w-5" weight="fill" />
-                Créer une expédition
+                Voir les devis
               </Link>
             </Button>
           </div>

@@ -105,12 +105,7 @@ export default async function ShipmentsPage({
             Gérez vos expéditions et suivez leur statut
           </p>
         </div>
-        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-          <Link href="/dashboard/shipments/new">
-            <Plus className="h-5 w-5" weight="fill" />
-            Nouvelle expédition
-          </Link>
-        </Button>
+        {/* Note: Les expéditions sont créées depuis les devis validés */}
       </div>
 
       <Separator />
@@ -179,12 +174,12 @@ export default async function ShipmentsPage({
             <p className="text-sm text-muted-foreground mb-4">
               {params.search
                 ? 'Essayez de modifier vos critères de recherche'
-                : 'Commencez par créer votre première expédition'}
+                : 'Les expéditions sont créées automatiquement lors de la validation d\'un devis'}
             </p>
             <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-              <Link href="/dashboard/shipments/new">
+              <Link href="/dashboard/quotes">
                 <Plus className="h-5 w-5" weight="fill" />
-                Créer une expédition
+                Voir les devis
               </Link>
             </Button>
           </div>
