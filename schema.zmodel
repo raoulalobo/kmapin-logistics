@@ -94,6 +94,7 @@ model User {
   createdPurchases   PurchaseRequest[] @relation("CreatedPurchases") // Demandes d'achat créées
   purchaseLogs       PurchaseLog[] @relation("PurchaseLogChangedBy") // Logs d'achat effectués
   userPurchases      PurchaseRequest[] @relation("UserPurchases") // Demandes d'achat de cet utilisateur (connecté ou rattaché)
+  quoteLogs          QuoteLog[] @relation("QuoteLogChangedBy") // Logs de devis effectués
 
   treatedQuotes      Quote[] @relation("QuoteTreatmentAgent") // Devis traités par cet agent
 
@@ -1210,6 +1211,7 @@ model Quote {
   createdBy          User?           @relation("CreatedQuotes", fields: [createdById], references: [id])
 
   documents          Document[]
+  logs               QuoteLog[]      // Historique complet des événements (changements de statut, etc.)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -1263,6 +1265,114 @@ enum QuotePaymentMethod {
   CASH           // Comptant - paiement immédiat
   ON_DELIVERY    // À la livraison - paiement à la réception
   BANK_TRANSFER  // Virement bancaire - envoi du RIB au client
+}
+
+/**
+ * Journal des événements sur les devis
+ *
+ * Trace l'historique complet des changements de statut et événements
+ * sur les devis : création, envoi, acceptation, traitement, validation, etc.
+ *
+ * Pattern identique à PickupLog et PurchaseLog pour cohérence.
+ *
+ * Types d'événements (eventType) :
+ * - CREATED : Création initiale du devis
+ * - STATUS_CHANGED : Changement de statut (DRAFT → SENT → ACCEPTED, etc.)
+ * - ATTACHED_TO_ACCOUNT : Rattachement à un compte utilisateur
+ * - TREATMENT_STARTED : Début du traitement par un agent
+ * - TREATMENT_VALIDATED : Validation du traitement (création expédition)
+ * - PAYMENT_RECEIVED : Paiement reçu
+ * - CANCELLED : Annulation du devis
+ * - COMMENT_ADDED : Ajout d'un commentaire
+ */
+model QuoteLog {
+  id        String   @id @default(cuid())
+
+  // ════════════════════════════════════════════
+  // RELATION AVEC LE DEVIS
+  // ════════════════════════════════════════════
+
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  // ════════════════════════════════════════════
+  // CHANGEMENT DE STATUT
+  // ════════════════════════════════════════════
+
+  // Statut avant le changement (NULL pour le premier log - création)
+  oldStatus QuoteStatus?
+
+  // Statut après le changement (NULL si pas de changement de statut)
+  newStatus QuoteStatus?
+
+  // ════════════════════════════════════════════
+  // TYPE D'ÉVÉNEMENT
+  // ════════════════════════════════════════════
+
+  // Type d'événement pour différencier les logs
+  // Valeurs : "CREATED", "STATUS_CHANGED", "ATTACHED_TO_ACCOUNT",
+  //           "TREATMENT_STARTED", "TREATMENT_VALIDATED", "PAYMENT_RECEIVED",
+  //           "CANCELLED", "COMMENT_ADDED"
+  eventType String
+
+  // ════════════════════════════════════════════
+  // AUTEUR DU CHANGEMENT
+  // ════════════════════════════════════════════
+
+  // ID de l'utilisateur ayant effectué le changement
+  // NULL si changement automatique (système, expiration, etc.)
+  changedById String?
+  changedBy   User?   @relation("QuoteLogChangedBy", fields: [changedById], references: [id])
+
+  // ════════════════════════════════════════════
+  // DÉTAILS DU CHANGEMENT
+  // ════════════════════════════════════════════
+
+  // Notes ou raison du changement (raison d'annulation, commentaire agent, etc.)
+  notes       String? @db.Text
+
+  // Métadonnées flexibles en JSON pour données additionnelles
+  // Ex: { "paymentMethod": "CASH", "shipmentId": "xxx" }
+  metadata    Json?
+
+  // ════════════════════════════════════════════
+  // HORODATAGE
+  // ════════════════════════════════════════════
+
+  createdAt   DateTime @default(now())
+
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
+
+  // Admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Operations managers peuvent tout faire (ils gèrent les devis)
+  @@allow('all', auth().role == OPERATIONS_MANAGER)
+
+  // Finance managers peuvent lire (pour audit)
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Le propriétaire du devis peut lire les logs de ses devis
+  @@allow('read', auth().id == quote.userId)
+
+  // Clients peuvent lire les logs des devis de leur entreprise
+  @@allow('read', quote.clientId != null && auth().clientId == quote.clientId && auth().role == CLIENT)
+
+  // Note: La lecture publique via token est gérée par Server Action
+  // dédiée qui utilise le client Prisma standard (non enhanced)
+
+  @@deny('all', true)
+
+  // ════════════════════════════════════════════
+  // INDEXES POUR PERFORMANCE
+  // ════════════════════════════════════════════
+
+  @@index([quoteId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([changedById])
 }
 
 enum ProspectStatus {

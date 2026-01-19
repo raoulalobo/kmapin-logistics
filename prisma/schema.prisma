@@ -181,6 +181,7 @@ model User {
   createdPurchases          PurchaseRequest[] @relation("CreatedPurchases")
   purchaseLogs              PurchaseLog[]     @relation("PurchaseLogChangedBy")
   userPurchases             PurchaseRequest[] @relation("UserPurchases")
+  quoteLogs                 QuoteLog[]        @relation("QuoteLogChangedBy")
   treatedQuotes             Quote[]           @relation("QuoteTreatmentAgent")
   performedTrackingEvents   TrackingEvent[]   @relation("PerformedTrackingEvents")
   userQuotes                Quote[]           @relation("UserQuotes")
@@ -559,6 +560,7 @@ model Quote {
   createdById          String?
   createdBy            User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
   documents            Document[]
+  logs                 QuoteLog[]
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt()
 
@@ -568,6 +570,25 @@ model Quote {
   @@index([trackingToken])
   @@index([contactEmail])
   @@index([userId])
+}
+
+model QuoteLog {
+  id          String       @id() @default(cuid())
+  quoteId     String
+  quote       Quote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  oldStatus   QuoteStatus?
+  newStatus   QuoteStatus?
+  eventType   String
+  changedById String?
+  changedBy   User?        @relation("QuoteLogChangedBy", fields: [changedById], references: [id])
+  notes       String?      @db.Text()
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+
+  @@index([quoteId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([changedById])
 }
 
 model Prospect {

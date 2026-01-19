@@ -12,3 +12,6 @@ export * from './schemas/quote.schema';
 
 // Exports des actions
 export * from './actions/quote.actions';
+
+// Exports des helpers (QuoteLog)
+export * from './lib/quote-log-helper';
