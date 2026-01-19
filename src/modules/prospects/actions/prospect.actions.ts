@@ -4,6 +4,11 @@
  * IMPORTANT : Ces actions utilisent le client Prisma STANDARD (pas enhanced)
  * car elles sont publiques et n'ont pas de session utilisateur.
  *
+ * Architecture unifiée Quote/Prospect :
+ * - Les visiteurs (prospects) créent des Quote avec prospectId renseigné
+ * - Les Quote de prospects ont status DRAFT et userId/clientId NULL
+ * - Lors de la conversion, on met à jour les Quote existants (userId, clientId)
+ *
  * @module modules/prospects/actions
  */
 
@@ -21,65 +26,22 @@ import {
   type ContactFormData,
 } from '../schemas/prospect.schema';
 import { sendEmail } from '@/lib/email/resend';
-import { generateGuestQuotePDF } from '@/lib/pdf/guest-quote-pdf';
+import { generateQuotePDF, type QuotePDFData } from '@/lib/pdf/quote-pdf';
 import { generateQuoteEmailTemplate } from '@/lib/email/templates/quote-pdf';
 import { inngest } from '@/lib/inngest/client';
 
 /**
- * Générer un numéro de GuestQuote unique
- * Format : GQTE-YYYYMMDD-XXXXX
- *
- * @returns Numéro unique de GuestQuote
- */
-async function generateGuestQuoteNumber(): Promise<string> {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const datePrefix = `${year}${month}${day}`;
-
-  // Compter les GuestQuotes créés aujourd'hui
-  const startOfDay = new Date(date.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(date.setHours(23, 59, 59, 999));
-
-  const count = await prisma.guestQuote.count({
-    where: {
-      createdAt: {
-        gte: startOfDay,
-        lte: endOfDay,
-      },
-    },
-  });
-
-  const sequence = String(count + 1).padStart(5, '0');
-  const quoteNumber = `GQTE-${datePrefix}-${sequence}`;
-
-  // Vérifier l'unicité (rare mais possible en cas de race condition)
-  const existing = await prisma.guestQuote.findUnique({
-    where: { quoteNumber },
-  });
-
-  if (existing) {
-    // Fallback : utiliser timestamp
-    const timestamp = Date.now().toString().slice(-5);
-    return `GQTE-${datePrefix}-${timestamp}`;
-  }
-
-  return quoteNumber;
-}
-
-/**
  * Créer un prospect et envoyer le devis par email
  *
- * Workflow :
+ * Workflow unifié (modèle Quote unique) :
  * 1. Valider les données
  * 2. Créer ou réutiliser le prospect (si EXPIRED)
- * 3. Créer le GuestQuote avec numéro unique
+ * 3. Créer le Quote avec prospectId (status DRAFT, userId/clientId NULL)
  * 4. Générer le PDF du devis
  * 5. Envoyer l'email avec PDF + lien d'invitation
  *
  * @param data - Données du formulaire (email, phone, name?, company?, quoteData)
- * @returns Résultat avec prospectId, guestQuoteId, quoteNumber
+ * @returns Résultat avec prospectId, quoteId, quoteNumber
  */
 export async function createProspectAndSendQuoteAction(data: unknown) {
   try {
@@ -125,65 +87,108 @@ export async function createProspectAndSendQuoteAction(data: unknown) {
       });
     }
 
-    // 3. Créer le GuestQuote
-    const quoteNumber = await generateGuestQuoteNumber();
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + 30); // Devis valide 30 jours
+    // 3. Créer le Quote (modèle unifié avec prospectId)
+    // Note : Utilise le format standard QTE-YYYYMMDD-XXXXX
+    const quoteNumber = await generateStandardQuoteNumber();
 
-    const guestQuote = await prisma.guestQuote.create({
+    // Date de validité : 30 jours
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    // Date d'expiration du token de suivi : 72h
+    const tokenExpiresAt = new Date();
+    tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
+
+    // Créer le Quote avec prospectId (userId et clientId sont NULL car visiteur)
+    const quote = await prisma.quote.create({
       data: {
+        // Identifiant
         quoteNumber,
+
+        // Token de suivi (obligatoire dans le schéma)
+        // trackingToken est généré automatiquement par @default(cuid())
+        tokenExpiresAt,
+
+        // Contact (données du prospect pour matching futur)
+        contactEmail: prospect.email,
+        contactPhone: prospect.phone,
+        contactName: prospect.name,
+
+        // Lien avec le prospect (NOUVEAU : modèle unifié)
         prospectId: prospect.id,
+
+        // userId et clientId restent NULL (visiteur sans compte)
+        // Seront remplis lors de la conversion prospect → utilisateur
+
+        // Route (pays origine/destination)
         originCountry: validated.quoteData.originCountry,
         destinationCountry: validated.quoteData.destinationCountry,
-        transportMode: validated.quoteData.transportMode,
+
+        // Marchandise
         cargoType: validated.quoteData.cargoType,
         weight: validated.quoteData.weight,
-        volume: validated.quoteData.volume,
+        // volume n'existe plus dans Quote, on utilise length/width/height si fournis
+
+        // Transport
+        transportMode: validated.quoteData.transportMode,
+
+        // Financier
         estimatedCost: validated.quoteData.estimatedCost,
         currency: validated.quoteData.currency || 'EUR',
         validUntil,
+
+        // Statut : DRAFT car créé depuis le calculateur public
+        status: 'DRAFT',
       },
     });
 
     // 4. Générer le PDF
-    const pdfBuffer = generateGuestQuotePDF({
-      quoteNumber: guestQuote.quoteNumber,
-      createdAt: guestQuote.createdAt,
-      validUntil: guestQuote.validUntil,
-      prospect: {
+    // Adapter les données prospect vers le format company attendu par le PDF
+    const pdfData: QuotePDFData = {
+      quoteNumber: quote.quoteNumber,
+      createdAt: quote.createdAt,
+      validUntil: quote.validUntil,
+      company: {
+        // Utiliser les données du prospect comme "pseudo-company"
+        name: prospect.company || prospect.name || 'Demandeur',
+        legalName: prospect.company,
+        address: 'À compléter',
+        city: 'À compléter',
+        postalCode: '',
+        country: 'France',
         email: prospect.email,
         phone: prospect.phone,
-        name: prospect.name,
-        company: prospect.company,
       },
-      originCountry: guestQuote.originCountry,
-      destinationCountry: guestQuote.destinationCountry,
-      transportMode: guestQuote.transportMode,
-      cargoType: guestQuote.cargoType,
-      weight: guestQuote.weight,
-      volume: guestQuote.volume,
-      estimatedCost: guestQuote.estimatedCost,
-      currency: guestQuote.currency,
-    });
+      originCountry: quote.originCountry,
+      destinationCountry: quote.destinationCountry,
+      transportMode: quote.transportMode,
+      cargoType: quote.cargoType,
+      weight: quote.weight,
+      volume: null, // Volume calculé à partir de length/width/height si fournis
+      estimatedCost: quote.estimatedCost,
+      currency: quote.currency,
+      status: quote.status,
+    };
+
+    const pdfBuffer = generateQuotePDF(pdfData);
 
     // 5. Envoyer l'email
     const emailHtml = generateQuoteEmailTemplate({
       prospectName: prospect.name,
-      quoteNumber: guestQuote.quoteNumber,
-      estimatedCost: guestQuote.estimatedCost,
-      currency: guestQuote.currency,
+      quoteNumber: quote.quoteNumber,
+      estimatedCost: quote.estimatedCost,
+      currency: quote.currency,
       invitationToken: prospect.invitationToken,
       invitationExpiresAt: prospect.invitationExpiresAt,
     });
 
     const emailResult = await sendEmail({
       to: prospect.email,
-      subject: `Votre devis Faso Fret Logistics - ${guestQuote.quoteNumber}`,
+      subject: `Votre devis Faso Fret Logistics - ${quote.quoteNumber}`,
       html: emailHtml,
       attachments: [
         {
-          filename: `devis-${guestQuote.quoteNumber}.pdf`,
+          filename: `devis-${quote.quoteNumber}.pdf`,
           content: pdfBuffer,
         },
       ],
@@ -198,8 +203,8 @@ export async function createProspectAndSendQuoteAction(data: unknown) {
       success: true,
       data: {
         prospectId: prospect.id,
-        guestQuoteId: guestQuote.id,
-        quoteNumber: guestQuote.quoteNumber,
+        quoteId: quote.id,
+        quoteNumber: quote.quoteNumber,
       },
     };
   } catch (error: any) {
@@ -214,15 +219,18 @@ export async function createProspectAndSendQuoteAction(data: unknown) {
 /**
  * Récupérer un prospect par son token d'invitation
  *
+ * Modèle unifié : inclut les Quote liés au prospect (au lieu de GuestQuotes)
+ *
  * @param token - Token d'invitation unique
- * @returns Prospect avec ses GuestQuotes ou null si non trouvé/expiré
+ * @returns Prospect avec ses quotes ou null si non trouvé/expiré
  */
 export async function getProspectByTokenAction(token: string) {
   try {
+    // Modèle unifié : utiliser `quotes` au lieu de `guestQuotes`
     const prospect = await prisma.prospect.findUnique({
       where: { invitationToken: token },
       include: {
-        guestQuotes: true,
+        quotes: true, // CHANGEMENT : quotes au lieu de guestQuotes
       },
     });
 
@@ -361,8 +369,15 @@ export async function completeRegistrationAction(
 /**
  * Finaliser la conversion d'un prospect en utilisateur
  *
- * Convertit tous les GuestQuotes en Quotes et met à jour le statut du Prospect.
- * Déclenche l'événement Inngest prospect/converted.
+ * MODÈLE UNIFIÉ : Au lieu de convertir GuestQuotes → Quotes, on met simplement
+ * à jour les Quote existants avec clientId et userId.
+ *
+ * Workflow simplifié :
+ * 1. Récupérer le prospect avec ses quotes (modèle unifié)
+ * 2. Mettre à jour les quotes existants (clientId, userId, isAttachedToAccount)
+ * 3. Convertir les GuestPickupRequests (inchangé)
+ * 4. Mettre à jour le statut du Prospect
+ * 5. Déclencher l'événement Inngest
  *
  * @param prospectId - ID du prospect
  * @param userId - ID de l'utilisateur créé
@@ -373,11 +388,11 @@ export async function finalizeProspectConversionAction(
   userId: string
 ) {
   try {
-    // 1. Récupérer le prospect avec ses guest quotes et guest pickups
+    // 1. Récupérer le prospect avec ses quotes (modèle unifié) et guest pickups
     const prospect = await prisma.prospect.findUnique({
       where: { id: prospectId },
       include: {
-        guestQuotes: true,
+        quotes: true, // CHANGEMENT : quotes au lieu de guestQuotes
         guestPickupRequests: true,
       },
     });
@@ -402,41 +417,28 @@ export async function finalizeProspectConversionAction(
       };
     }
 
-    // 3. Convertir les GuestQuotes en Quotes
-    const convertedQuotes = [];
+    // 3. SIMPLIFIÉ : Mettre à jour les Quote existants (au lieu de créer de nouveaux)
+    // Les quotes ont déjà été créés lors de la demande de devis, on les rattache au compte
+    const attachedQuotes = [];
 
-    for (const guestQuote of prospect.guestQuotes) {
-      // Générer un numéro de Quote standard
-      const quoteNumber = await generateStandardQuoteNumber();
-
-      // Créer le Quote
-      const quote = await prisma.quote.create({
+    for (const quote of prospect.quotes) {
+      // Mettre à jour le quote avec les infos du nouveau compte
+      const updatedQuote = await prisma.quote.update({
+        where: { id: quote.id },
         data: {
-          quoteNumber,
+          // Rattacher au client et à l'utilisateur
           clientId: user.clientId,
-          originCountry: guestQuote.originCountry,
-          destinationCountry: guestQuote.destinationCountry,
-          transportMode: guestQuote.transportMode,
-          cargoType: guestQuote.cargoType,
-          weight: guestQuote.weight,
-          volume: guestQuote.volume,
-          estimatedCost: guestQuote.estimatedCost,
-          currency: guestQuote.currency,
-          validUntil: guestQuote.validUntil,
-          status: 'DRAFT',
+          userId: userId,
+
+          // Marquer comme rattaché à un compte
+          isAttachedToAccount: true,
         },
       });
 
-      // Marquer le GuestQuote comme converti
-      await prisma.guestQuote.update({
-        where: { id: guestQuote.id },
-        data: { convertedToQuoteId: quote.id },
-      });
-
-      convertedQuotes.push(quote);
+      attachedQuotes.push(updatedQuote);
     }
 
-    // 4. Convertir les GuestPickupRequests en PickupRequests
+    // 4. Convertir les GuestPickupRequests en PickupRequests (inchangé)
     const convertedPickups = [];
 
     for (const guestPickup of prospect.guestPickupRequests) {
@@ -513,8 +515,9 @@ ${guestPickup.specialInstructions || ''}`.trim(),
     return {
       success: true,
       data: {
-        convertedQuotesCount: convertedQuotes.length,
-        quoteIds: convertedQuotes.map(q => q.id),
+        // CHANGEMENT : "attached" au lieu de "converted" car les quotes existaient déjà
+        attachedQuotesCount: attachedQuotes.length,
+        quoteIds: attachedQuotes.map(q => q.id),
         convertedPickupsCount: convertedPickups.length,
         pickupIds: convertedPickups.map(p => p.id),
       },

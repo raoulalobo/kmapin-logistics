@@ -527,6 +527,8 @@ model Quote {
   contactName          String?
   clientId             String?
   client               Client?             @relation(fields: [clientId], references: [id])
+  prospectId           String?
+  prospect             Prospect?           @relation(fields: [prospectId], references: [id])
   originCountry        String
   destinationCountry   String
   transportMode        TransportMode[]
@@ -557,11 +559,11 @@ model Quote {
   createdById          String?
   createdBy            User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
   documents            Document[]
-  convertedFromGuest   GuestQuote?         @relation("ConvertedFromGuest")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt()
 
   @@index([clientId])
+  @@index([prospectId])
   @@index([status])
   @@index([trackingToken])
   @@index([contactEmail])
@@ -580,38 +582,13 @@ model Prospect {
   status              ProspectStatus @default(PENDING)
   userId              String?        @unique()
   user                User?          @relation(fields: [userId], references: [id])
-  guestQuotes         GuestQuote[]
+  quotes              Quote[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt()
 
   @@index([email])
   @@index([invitationToken])
   @@index([status])
-}
-
-model GuestQuote {
-  id                 String          @id() @default(cuid())
-  quoteNumber        String          @unique()
-  prospectId         String
-  prospect           Prospect        @relation(fields: [prospectId], references: [id], onDelete: Cascade)
-  originCountry      String
-  destinationCountry String
-  transportMode      TransportMode[]
-  cargoType          CargoType
-  weight             Float
-  length             Float?
-  width              Float?
-  height             Float?
-  estimatedCost      Float
-  validUntil         DateTime
-  currency           String          @default("EUR")
-  convertedToQuoteId String?         @unique()
-  convertedToQuote   Quote?          @relation("ConvertedFromGuest", fields: [convertedToQuoteId], references: [id])
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt()
-
-  @@index([prospectId])
-  @@index([quoteNumber])
 }
 
 model Notification {

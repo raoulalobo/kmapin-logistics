@@ -14,7 +14,7 @@
  * - Validation du token (expiration)
  * - Pré-remplissage avec les données du prospect
  * - Création du compte via Better Auth
- * - Conversion des GuestQuotes en Quotes
+ * - Rattachement des Quote existants au nouveau compte (modèle unifié)
  * - Redirection vers le dashboard
  *
  * @module components/registration
@@ -144,13 +144,14 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
       }
 
       // 3. Stocker les données du prospect
+      // Note: Modèle unifié - utilise `quotes` au lieu de `guestQuotes`
       setProspectData({
         id: prospect.id,
         email: prospect.email,
         phone: prospect.phone,
         name: prospect.name,
         company: prospect.company,
-        quoteCount: prospect.guestQuotes?.length || 0,
+        quoteCount: prospect.quotes?.length || 0,
       });
 
       // 4. Pré-remplir le formulaire
@@ -197,7 +198,7 @@ export function CompleteRegistrationForm({ token }: CompleteRegistrationFormProp
           return;
         }
 
-        // 3. Finaliser la conversion (GuestQuotes → Quotes)
+        // 3. Finaliser la conversion (rattacher les Quote existants au compte)
         const userId = signUpResult.data?.user?.id;
         if (!userId) {
           toast.error('Erreur: ID utilisateur manquant');

@@ -31,6 +31,7 @@ import { QuoteRequestModal } from '@/components/quote-request/quote-request-moda
 import type { QuoteDataFormData } from '@/modules/prospects';
 import { useSafeSession } from '@/lib/auth/hooks';
 import { CountrySelect } from '@/components/countries';
+import { usePendingQuotes } from '@/hooks';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -215,6 +216,13 @@ export function QuoteCalculator() {
   const { data: session } = useSafeSession();
 
   /**
+   * Hook pour gérer les devis en attente dans localStorage
+   * Permet de sauvegarder les devis des visiteurs non connectés
+   * pour les rattacher plus tard à leur compte
+   */
+  const { addPendingQuote } = usePendingQuotes();
+
+  /**
    * Lire les query params pour pré-remplissage depuis /tarifs
    */
   const searchParams = useSearchParams();
@@ -326,6 +334,26 @@ export function QuoteCalculator() {
 
       if (response.success && response.data) {
         setResult(response.data);
+
+        // Sauvegarder dans localStorage si l'utilisateur n'est pas connecté
+        // Permet de rattacher le devis plus tard lors de la création de compte
+        if (!session?.user) {
+          addPendingQuote(
+            {
+              originCountry: data.originCountry,
+              destinationCountry: data.destinationCountry,
+              cargoType: data.cargoType,
+              weight: data.weight,
+              length: data.length,
+              width: data.width,
+              height: data.height,
+              transportMode: data.transportMode,
+              priority: data.priority,
+            },
+            response.data
+          );
+        }
+
         setIsResultModalOpen(true); // Ouvrir le modal automatiquement
       } else {
         setError(response.error || 'Une erreur est survenue');

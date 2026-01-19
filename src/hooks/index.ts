@@ -11,3 +11,9 @@ export {
   type UseFormValidationOptions,
   type UseFormValidationReturn,
 } from './use-form-validation';
+export {
+  usePendingQuotes,
+  type PendingQuote,
+  type PendingQuoteFormData,
+  type PendingQuoteResult,
+} from './use-pending-quotes';

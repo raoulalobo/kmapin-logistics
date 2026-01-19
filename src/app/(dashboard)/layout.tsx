@@ -12,6 +12,7 @@ import { getSession } from '@/lib/auth/config';
 import { Sidebar } from '@/components/layouts/sidebar';
 import { Header } from '@/components/layouts/header';
 import { DashboardOverflowFix } from '@/components/layouts/dashboard-overflow-fix';
+import { PendingQuoteDetector } from '@/components/pending-quotes';
 
 /**
  * Metadata pour les pages du dashboard
@@ -58,6 +59,9 @@ export default async function DashboardLayout({
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           {/* Header avec menu mobile et infos utilisateur */}
           <Header user={session.user} userRole={session.user.role} />
+
+          {/* Détecteur de devis en attente (localStorage → modal de rattachement) */}
+          <PendingQuoteDetector />
 
           {/* Zone de contenu scrollable */}
           <main className="flex-1 overflow-y-auto overflow-x-hidden bg-muted/10">

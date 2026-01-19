@@ -7,7 +7,7 @@
  * Workflow:
  * 1. Afficher un formulaire de connexion (email pré-rempli + password)
  * 2. Authentification via Better Auth
- * 3. Rattachement des GuestQuotes du prospect au compte
+ * 3. Rattachement des Quote existants du prospect au compte (modèle unifié)
  * 4. Redirection vers le dashboard
  *
  * @module components/registration
@@ -112,7 +112,7 @@ export function AttachToAccountForm({
           return;
         }
 
-        // 3. Finaliser la conversion (rattacher les GuestQuotes)
+        // 3. Finaliser la conversion (rattacher les Quote existants au compte)
         const conversionResult = await finalizeProspectConversionAction(
           prospectId,
           userId

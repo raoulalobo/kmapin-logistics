@@ -1136,6 +1136,11 @@ model Quote {
   clientId           String?
   client             Client?         @relation(fields: [clientId], references: [id])
 
+  // Prospect (visiteur sans compte qui a demandé le devis)
+  // NULL si créé par un utilisateur connecté, rempli si créé via calculateur public
+  prospectId         String?
+  prospect           Prospect?       @relation(fields: [prospectId], references: [id])
+
   // ════════════════════════════════════════════
   // CHAMPS MÉTIER DU DEVIS
   // ════════════════════════════════════════════
@@ -1205,7 +1210,6 @@ model Quote {
   createdBy          User?           @relation("CreatedQuotes", fields: [createdById], references: [id])
 
   documents          Document[]
-  convertedFromGuest GuestQuote?     @relation("ConvertedFromGuest") // Relation inverse pour conversion
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -1233,6 +1237,7 @@ model Quote {
   @@deny('all', true)
 
   @@index([clientId])
+  @@index([prospectId])
   @@index([status])
   @@index([trackingToken])
   @@index([contactEmail])
@@ -1267,7 +1272,7 @@ enum ProspectStatus {
 }
 
 // ============================================
-// PROSPECTS ET GUEST QUOTES
+// PROSPECTS (visiteurs sans compte)
 // ============================================
 
 /**
@@ -1275,10 +1280,10 @@ enum ProspectStatus {
  * Représente une personne qui a demandé un devis sans créer de compte complet
  *
  * Workflow :
- * 1. Utilisateur non-connecté demande un devis → Création Prospect + GuestQuote
+ * 1. Utilisateur non-connecté demande un devis → Création Prospect + Quote (avec prospectId)
  * 2. Email envoyé avec PDF + lien invitation (token valide 7 jours)
  * 3. Prospect clique sur le lien → Finalise inscription → Conversion en User
- * 4. GuestQuotes convertis en Quotes liés à la Company du User
+ * 4. Quotes rattachés au Client du User (clientId rempli, isAttachedToAccount = true)
  *
  * Access policies :
  * - Lecture publique (pour vérification du token)
@@ -1303,8 +1308,8 @@ model Prospect {
   userId                String?        @unique
   user                  User?          @relation(fields: [userId], references: [id])
 
-  // Relations
-  guestQuotes           GuestQuote[]
+  // Devis créés par ce prospect (avant création de compte)
+  quotes                Quote[]
 
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
@@ -1327,71 +1332,6 @@ model Prospect {
   @@index([invitationToken])
   @@index([status])
 }
-
-/**
- * Modèle GuestQuote (Devis Prospect)
- * Représente un devis pour un prospect (utilisateur non-connecté)
- *
- * Différences avec Quote :
- * - Pas de companyId (lié à prospectId)
- * - Numéro format GQTE-YYYYMMDD-XXXXX (au lieu de QTE-)
- * - Peut être converti en Quote lors de la création du compte
- *
- * Access policies :
- * - Lecture publique (pour afficher dans les emails)
- * - Création publique (calculateur)
- * - ADMIN ont accès complet
- */
-model GuestQuote {
-  id                 String          @id @default(cuid())
-  quoteNumber        String          @unique // Format: GQTE-YYYYMMDD-XXXXX
-
-  // Lié au Prospect (au lieu de Company)
-  prospectId         String
-  prospect           Prospect        @relation(fields: [prospectId], references: [id], onDelete: Cascade)
-
-  // Champs du devis (identiques à Quote)
-  originCountry      String
-  destinationCountry String
-  transportMode      TransportMode[]
-  cargoType          CargoType
-  weight             Float
-
-  // Dimensions (optionnelles) - Volume calculé = L × W × H
-  // Champs nullable car optionnels dans le formulaire
-  length             Float?           // Longueur en mètres
-  width              Float?           // Largeur en mètres
-  height             Float?           // Hauteur en mètres
-
-  estimatedCost      Float
-  validUntil         DateTime
-  currency           String          @default("EUR")
-
-  // Conversion tracking
-  convertedToQuoteId String?         @unique
-  convertedToQuote   Quote?          @relation("ConvertedFromGuest", fields: [convertedToQuoteId], references: [id])
-
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-
-  // 🔐 Access Policies
-
-  // Lecture publique (affichage dans emails)
-  @@allow('read', true)
-
-  // Création publique (calculateur)
-  @@allow('create', true)
-
-  // Les admins ont accès complet
-  @@allow('all', auth().role == ADMIN)
-
-  // Par défaut, tout est interdit
-  @@deny('all', true)
-
-  @@index([prospectId])
-  @@index([quoteNumber])
-}
-
 
 // ============================================
 // NOTIFICATIONS

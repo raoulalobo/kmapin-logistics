@@ -80,6 +80,7 @@ export const sendProspectReminders = inngest.createFunction(
       const now = new Date();
       const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
+      // Note: Modèle unifié - utilise `quotes` au lieu de `guestQuotes`
       return prisma.prospect.findMany({
         where: {
           status: 'PENDING',
@@ -88,7 +89,7 @@ export const sendProspectReminders = inngest.createFunction(
             lte: threeDaysLater,
           },
         },
-        include: { guestQuotes: true },
+        include: { quotes: true },
       });
     });
 
@@ -106,7 +107,7 @@ export const sendProspectReminders = inngest.createFunction(
           prospectName: prospect.name,
           invitationToken: prospect.invitationToken,
           daysRemaining,
-          quoteCount: prospect.guestQuotes.length,
+          quoteCount: prospect.quotes.length, // Modèle unifié
         };
 
         const html = generateInvitationReminderTemplate(params);
@@ -141,11 +142,12 @@ export const onProspectConverted = inngest.createFunction(
   async ({ event, step }) => {
     const { prospectId, userId } = event.data;
 
+    // Note: Modèle unifié - utilise `quotes` au lieu de `guestQuotes`
     const [prospect, user] = await step.run('get-prospect-and-user', async () => {
       return Promise.all([
         prisma.prospect.findUnique({
           where: { id: prospectId },
-          include: { guestQuotes: true },
+          include: { quotes: true },
         }),
         prisma.user.findUnique({
           where: { id: userId },
@@ -160,7 +162,7 @@ export const onProspectConverted = inngest.createFunction(
     await step.run('send-welcome-email', async () => {
       const params: WelcomeEmailParams = {
         userName: user.name,
-        quoteCount: prospect.guestQuotes.length,
+        quoteCount: prospect.quotes.length, // Modèle unifié
       };
 
       const html = generateWelcomeTemplate(params);
