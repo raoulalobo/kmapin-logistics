@@ -36,8 +36,11 @@ import { Separator } from '@/components/ui/separator';
 import { getQuoteAction } from '@/modules/quotes';
 import { QuoteStatus } from '@/lib/db/enums';
 import { getSession } from '@/lib/auth/config';
-import { QuoteAgentActions } from '@/components/quotes/quote-agent-actions';
-import { QuotePaymentActions } from '@/components/quotes/quote-payment-actions';
+import {
+  QuoteAgentActions,
+  QuotePaymentActions,
+  QuoteHistoryTimeline,
+} from '@/components/quotes';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -373,54 +376,11 @@ export default async function QuoteDetailPage({
         </CardContent>
       </Card>
 
-      {/* Historique des modifications */}
-      {(quote.acceptedAt || quote.rejectedAt) && (
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Historique</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {quote.acceptedAt && (
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium">Accepté le</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(quote.acceptedAt).toLocaleString('fr-FR')}
-                  </p>
-                  {quote.user && (
-                    <p className="text-xs text-muted-foreground">
-                      Par {quote.user.name || quote.user.email}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {quote.rejectedAt && (
-              <div className="flex items-center gap-3">
-                <XCircle className="h-5 w-5 text-red-600" />
-                <div>
-                  <p className="text-sm font-medium">Rejeté le</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(quote.rejectedAt).toLocaleString('fr-FR')}
-                  </p>
-                  {quote.user && (
-                    <p className="text-xs text-muted-foreground">
-                      Par {quote.user.name || quote.user.email}
-                    </p>
-                  )}
-                  {quote.cancelReason && (
-                    <p className="text-sm mt-1">
-                      <span className="font-medium">Raison :</span> {quote.cancelReason}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HISTORIQUE COMPLET DES ÉVÉNEMENTS (QuoteLog) */}
+      {/* Timeline des événements du devis comme sur les pages Pickup/Purchase */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <QuoteHistoryTimeline logs={quote.logs || []} />
 
       {/* Métadonnées */}
       <Card className="dashboard-card">

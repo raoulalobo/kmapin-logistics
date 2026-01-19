@@ -421,6 +421,22 @@ export async function getQuoteAction(id: string) {
             trackingNumber: true,
           },
         },
+        // Récupérer l'historique complet des événements (QuoteLog)
+        logs: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          include: {
+            changedBy: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
     });
 
