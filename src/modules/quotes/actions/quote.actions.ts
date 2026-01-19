@@ -166,6 +166,11 @@ export async function createQuoteAction(
     // Générer un numéro de devis unique
     const quoteNumber = await generateQuoteNumber();
 
+    // Date d'expiration du token de suivi : 72h
+    // Ce token permet aux visiteurs de suivre leur devis sans compte
+    const tokenExpiresAt = new Date();
+    tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
+
     // Créer le devis
     const quote = await prisma.quote.create({
       data: {
@@ -181,6 +186,7 @@ export async function createQuoteAction(
         currency: validatedData.currency,
         validUntil: new Date(validatedData.validUntil),
         status: validatedData.status || 'DRAFT',
+        tokenExpiresAt, // Date d'expiration du token de suivi (requis par le schéma)
       },
     });
 
@@ -1210,6 +1216,10 @@ export async function saveQuoteFromCalculatorAction(
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + 30);
 
+    // Date d'expiration du token de suivi : 72h
+    const tokenExpiresAt = new Date();
+    tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
+
     // Créer le devis en DRAFT
     const quote = await prisma.quote.create({
       data: {
@@ -1224,6 +1234,7 @@ export async function saveQuoteFromCalculatorAction(
         estimatedCost: estimation.data.estimatedCost,
         currency: 'EUR',
         validUntil,
+        tokenExpiresAt,
         status: 'DRAFT',
       },
     });
