@@ -151,13 +151,55 @@ export async function createQuotesFromPendingAction(
     // 1. Vérifier l'authentification
     const session = await requireAuth();
 
-    // 2. Vérifier que l'utilisateur a un clientId associé
-    // Le clientId est requis pour créer des devis
-    if (!session.user.clientId) {
-      return {
-        success: false,
-        error: 'Votre compte n\'est pas associé à une compagnie. Veuillez contacter le support.',
-      };
+    // 2. Vérifier ou créer un Client pour l'utilisateur
+    // Si l'utilisateur n'a pas de clientId, on crée automatiquement un Client INDIVIDUAL
+    let clientId = session.user.clientId;
+
+    if (!clientId) {
+      console.log(`🏢 [createQuotesFromPending] Création automatique d'un Client pour: ${session.user.email}`);
+
+      try {
+        // Vérifier si un Client avec cet email existe déjà
+        const existingClient = await prisma.client.findUnique({
+          where: { email: session.user.email },
+        });
+
+        if (existingClient) {
+          // Utiliser le Client existant
+          clientId = existingClient.id;
+          console.log(`🔗 [createQuotesFromPending] Client existant trouvé: ${existingClient.name}`);
+        } else {
+          // Créer un nouveau Client INDIVIDUAL
+          const nameParts = (session.user.name || 'Client').split(' ');
+          const newClient = await prisma.client.create({
+            data: {
+              type: 'INDIVIDUAL',
+              name: session.user.name || 'Client',
+              email: session.user.email,
+              address: 'À compléter',
+              city: 'À compléter',
+              country: 'FR',
+              firstName: nameParts[0] || null,
+              lastName: nameParts.slice(1).join(' ') || null,
+            },
+          });
+          clientId = newClient.id;
+          console.log(`✅ [createQuotesFromPending] Nouveau Client créé: ${newClient.name} (${newClient.id})`);
+        }
+
+        // Rattacher l'utilisateur au Client
+        await prisma.user.update({
+          where: { id: session.user.id },
+          data: { clientId },
+        });
+        console.log(`🔗 [createQuotesFromPending] Utilisateur ${session.user.email} rattaché au Client: ${clientId}`);
+      } catch (clientError) {
+        console.error('❌ [createQuotesFromPending] Erreur création Client:', clientError);
+        return {
+          success: false,
+          error: 'Impossible de créer votre profil client. Veuillez contacter le support.',
+        };
+      }
     }
 
     // 3. Validation des données
@@ -202,7 +244,7 @@ export async function createQuotesFromPendingAction(
             tokenExpiresAt,
 
             // Rattachement au client de l'utilisateur
-            clientId: session.user.clientId,
+            clientId,
             userId: session.user.id,
 
             // Contact (utiliser l'email de l'utilisateur connecté)
