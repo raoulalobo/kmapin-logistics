@@ -3,9 +3,20 @@
  *
  * Définition des schémas Zod pour valider les données
  * des clients (création, modification)
+ *
+ * Note : Les validations téléphone et code postal sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
  */
 
 import { z } from 'zod';
+import {
+  emailSchema,
+  phoneSchemaOptional,
+  postalCodeSchemaOptional,
+  countryCodeSchema,
+  VALIDATION_MESSAGES,
+} from '@/lib/validators';
 
 /**
  * Schéma de validation pour la création/modification d'un client
@@ -36,24 +47,17 @@ export const clientSchema = z.object({
     .optional()
     .nullable(),
 
-  // Coordonnées
-  email: z
-    .string()
-    .email('Email invalide')
-    .max(100, "L'email ne peut pas dépasser 100 caractères"),
+  // ============================================
+  // COORDONNÉES
+  // ============================================
+  email: emailSchema
+    .pipe(z.string().max(100, VALIDATION_MESSAGES.maxLength(100))),
 
-  phone: z
-    .string()
-    .regex(
-      /^[\d\s\+\-\(\)]+$/,
-      'Le numéro de téléphone contient des caractères invalides'
-    )
-    .min(10, 'Le numéro de téléphone doit contenir au moins 10 chiffres')
-    .max(20, 'Le numéro de téléphone ne peut pas dépasser 20 caractères')
-    .optional()
-    .nullable(),
+  phone: phoneSchemaOptional.nullable(),
 
-  // Adresse
+  // ============================================
+  // ADRESSE
+  // ============================================
   address: z
     .string()
     .min(5, "L'adresse doit contenir au moins 5 caractères")
@@ -64,18 +68,9 @@ export const clientSchema = z.object({
     .min(2, 'La ville doit contenir au moins 2 caractères')
     .max(100, 'La ville ne peut pas dépasser 100 caractères'),
 
-  postalCode: z
-    .string()
-    .regex(/^[\d\w\s\-]+$/, 'Code postal invalide')
-    .min(2, 'Le code postal doit contenir au moins 2 caractères')
-    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
-    .optional()
-    .nullable(),
+  postalCode: postalCodeSchemaOptional.nullable(),
 
-  country: z
-    .string()
-    .length(2, 'Le code pays doit être au format ISO (2 lettres)')
-    .regex(/^[A-Z]{2}$/, 'Le code pays doit être en majuscules (ex: FR, US)'),
+  country: countryCodeSchema,
 
   // Informations complémentaires
   website: z

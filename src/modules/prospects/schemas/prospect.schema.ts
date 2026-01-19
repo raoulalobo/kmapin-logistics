@@ -1,11 +1,16 @@
 /**
  * Schémas de validation Zod pour le module Prospects
  *
+ * Note : Les validations téléphone sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
+ *
  * @module modules/prospects/schemas
  */
 
 import { z } from 'zod';
 import { CargoType, TransportMode } from '@/lib/db/enums';
+import { emailSchema, phoneSchema } from '@/lib/validators';
 
 /**
  * Schéma pour les données de devis dans la création de prospect
@@ -40,13 +45,19 @@ export const quoteDataSchema = z.object({
 
 /**
  * Schéma pour la création d'un prospect avec devis
+ *
+ * Les validations téléphone supportent les formats internationaux :
+ * - France : +33 6 12 34 56 78, 06 12 34 56 78
+ * - Burkina Faso : +226 70 12 34 56
+ * - Côte d'Ivoire : +225 07 12 34 56 78
+ * - Sénégal : +221 77 123 45 67
  */
 export const prospectSchema = z.object({
-  /** Email du prospect (obligatoire) */
-  email: z.string().email('Email invalide').max(100, 'Email trop long'),
+  /** Email du prospect (obligatoire, normalisé en minuscules) */
+  email: emailSchema,
 
-  /** Téléphone du prospect (obligatoire) */
-  phone: z.string().min(10, 'Numéro de téléphone invalide').max(20, 'Numéro trop long'),
+  /** Téléphone du prospect (obligatoire, format international) */
+  phone: phoneSchema,
 
   /** Nom du prospect (optionnel) */
   name: z.string().min(2, 'Nom trop court').max(100, 'Nom trop long').optional().nullable(),
@@ -60,6 +71,8 @@ export const prospectSchema = z.object({
 
 /**
  * Schéma pour la finalisation d'inscription d'un prospect
+ *
+ * Validation téléphone internationale supportée.
  */
 export const completeRegistrationSchema = z.object({
   /** Mot de passe (min 8 caractères avec majuscule, minuscule et chiffre) */
@@ -74,8 +87,8 @@ export const completeRegistrationSchema = z.object({
   /** Nom complet */
   name: z.string().min(2, 'Nom trop court').max(100, 'Nom trop long'),
 
-  /** Téléphone */
-  phone: z.string().min(10, 'Numéro de téléphone invalide').max(20, 'Numéro trop long'),
+  /** Téléphone (format international) */
+  phone: phoneSchema,
 
   /** Pays de résidence */
   country: z.string().min(2, 'Pays requis').max(100, 'Nom de pays trop long'),
@@ -91,16 +104,18 @@ export const attachToAccountSchema = z.object({
 
 /**
  * Schéma pour le formulaire de contact simple (modal)
+ *
+ * Validations internationales pour email et téléphone.
  */
 export const contactFormSchema = z.object({
   /** Nom du contact (obligatoire) */
   name: z.string().min(2, 'Nom trop court').max(100, 'Nom trop long'),
 
-  /** Email du contact (obligatoire) */
-  email: z.string().email('Email invalide').max(100, 'Email trop long'),
+  /** Email du contact (obligatoire, normalisé) */
+  email: emailSchema,
 
-  /** Téléphone du contact (obligatoire) */
-  phone: z.string().min(10, 'Numéro de téléphone invalide').max(20, 'Numéro trop long'),
+  /** Téléphone du contact (obligatoire, format international) */
+  phone: phoneSchema,
 
   /** Objet de la demande (obligatoire) */
   subject: z.string().min(5, 'Objet trop court').max(200, 'Objet trop long'),

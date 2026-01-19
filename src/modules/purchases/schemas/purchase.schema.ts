@@ -2,81 +2,45 @@
  * Schémas Zod pour la validation des données de demandes d'achat délégué
  *
  * Organisation :
- * - Schémas de base : Validation des champs individuels
+ * - Schémas de base : Importés depuis @/lib/validators (internationaux)
  * - Schémas de création : Guest (sans compte) et connecté
  * - Schémas de mise à jour : Changement de statut et annulation
  * - Schémas de suivi : Tracking par token
+ *
+ * Note : Les validations téléphone et code postal sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
  */
 
 import { z } from 'zod';
 import { PurchaseStatus, DeliveryMode } from '@/lib/db/enums';
+import {
+  emailSchema,
+  phoneSchema,
+  postalCodeSchema,
+  countryCodeSchema,
+  futureDateSchema,
+  VALIDATION_MESSAGES,
+} from '@/lib/validators';
 
 // ============================================
-// CONSTANTES DE VALIDATION
+// CONSTANTES LOCALES
 // ============================================
 
 /**
- * Messages d'erreur personnalisés en français
+ * Messages d'erreur spécifiques aux purchases
  */
 const MESSAGES = {
-  required: 'Ce champ est obligatoire',
-  email: 'Email invalide',
-  phone: 'Numéro de téléphone invalide (format: +33XXXXXXXXX ou 0XXXXXXXXX)',
-  postalCode: 'Code postal invalide',
-  positiveNumber: 'Le nombre doit être positif',
-  minDate: 'La date doit être dans le futur',
+  ...VALIDATION_MESSAGES,
   minPrice: 'Le prix doit être supérieur à 0',
   minBudget: 'Le budget doit être supérieur à 0',
   minQuantity: 'La quantité doit être au moins 1',
-  maxLength: (max: number) => `Maximum ${max} caractères`,
   url: 'URL invalide',
 };
 
 // ============================================
-// SCHÉMAS DE BASE
+// SCHÉMAS LOCAUX
 // ============================================
-
-/**
- * Validation d'email français
- */
-const emailSchema = z
-  .string({ required_error: MESSAGES.required })
-  .email(MESSAGES.email)
-  .toLowerCase()
-  .trim();
-
-/**
- * Validation de téléphone français
- * Accepte : +33XXXXXXXXX, 0XXXXXXXXX, +33 X XX XX XX XX
- */
-const phoneSchema = z
-  .string({ required_error: MESSAGES.required })
-  .regex(
-    /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/,
-    MESSAGES.phone
-  )
-  .transform((val) => val.replace(/[\s.-]/g, '')); // Nettoyer les espaces et tirets
-
-/**
- * Validation de code postal français
- * Format: 5 chiffres
- */
-const postalCodeSchema = z
-  .string({ required_error: MESSAGES.required })
-  .regex(/^\d{5}$/, MESSAGES.postalCode);
-
-/**
- * Validation de date future (pour requestedDate)
- */
-const futureDateSchema = z
-  .string({ required_error: MESSAGES.required })
-  .or(z.date())
-  .pipe(
-    z.coerce.date().refine(
-      (date) => date > new Date(),
-      { message: MESSAGES.minDate }
-    )
-  );
 
 /**
  * Validation d'URL de produit
@@ -161,11 +125,7 @@ export const createGuestPurchaseSchema = z.object({
 
   deliveryPostalCode: postalCodeSchema,
 
-  deliveryCountry: z
-    .string()
-    .length(2, 'Code pays ISO à 2 lettres (ex: FR)')
-    .toUpperCase()
-    .default('FR'),
+  deliveryCountry: countryCodeSchema.default('FR'),
 
   // ============================================
   // PLANIFICATION (obligatoire)

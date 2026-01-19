@@ -4,6 +4,10 @@
  * Définition des schémas Zod pour valider les données
  * des expéditions (création, modification, recherche)
  *
+ * Note : Les validations téléphone et code postal sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
+ *
  * @module modules/shipments/schemas
  */
 
@@ -14,6 +18,11 @@ import {
   Priority,
   ShipmentStatus,
 } from '@/lib/db/enums';
+import {
+  phoneSchemaOptional,
+  postalCodeSchema,
+  countryCodeSchema,
+} from '@/lib/validators';
 
 /**
  * Schéma de validation pour la création d'une expédition
@@ -42,16 +51,9 @@ export const shipmentSchema = z.object({
     .min(2, "La ville d'origine doit contenir au moins 2 caractères")
     .max(100, "La ville d'origine ne peut pas dépasser 100 caractères"),
 
-  originPostalCode: z
-    .string()
-    .regex(/^[\d\w\s\-]+$/, "Code postal d'origine invalide")
-    .min(2, "Le code postal d'origine doit contenir au moins 2 caractères")
-    .max(20, "Le code postal d'origine ne peut pas dépasser 20 caractères"),
+  originPostalCode: postalCodeSchema,
 
-  originCountry: z
-    .string()
-    .length(2, "Le code pays d'origine doit être au format ISO (2 lettres)")
-    .regex(/^[A-Z]{2}$/, "Le code pays d'origine doit être en majuscules (ex: FR, US)"),
+  originCountry: countryCodeSchema,
 
   originContact: z
     .string()
@@ -60,16 +62,7 @@ export const shipmentSchema = z.object({
     .optional()
     .nullable(),
 
-  originPhone: z
-    .string()
-    .regex(
-      /^[\d\s\+\-\(\)]+$/,
-      'Le numéro de téléphone contient des caractères invalides'
-    )
-    .min(10, 'Le numéro de téléphone doit contenir au moins 10 chiffres')
-    .max(20, 'Le numéro de téléphone ne peut pas dépasser 20 caractères')
-    .optional()
-    .nullable(),
+  originPhone: phoneSchemaOptional.nullable(),
 
   // === Destination ===
   destinationAddress: z
@@ -82,16 +75,9 @@ export const shipmentSchema = z.object({
     .min(2, 'La ville de destination doit contenir au moins 2 caractères')
     .max(100, 'La ville de destination ne peut pas dépasser 100 caractères'),
 
-  destinationPostalCode: z
-    .string()
-    .regex(/^[\d\w\s\-]+$/, 'Code postal de destination invalide')
-    .min(2, 'Le code postal de destination doit contenir au moins 2 caractères')
-    .max(20, 'Le code postal de destination ne peut pas dépasser 20 caractères'),
+  destinationPostalCode: postalCodeSchema,
 
-  destinationCountry: z
-    .string()
-    .length(2, 'Le code pays de destination doit être au format ISO (2 lettres)')
-    .regex(/^[A-Z]{2}$/, 'Le code pays de destination doit être en majuscules (ex: FR, US)'),
+  destinationCountry: countryCodeSchema,
 
   destinationContact: z
     .string()
@@ -100,16 +86,7 @@ export const shipmentSchema = z.object({
     .optional()
     .nullable(),
 
-  destinationPhone: z
-    .string()
-    .regex(
-      /^[\d\s\+\-\(\)]+$/,
-      'Le numéro de téléphone contient des caractères invalides'
-    )
-    .min(10, 'Le numéro de téléphone doit contenir au moins 10 chiffres')
-    .max(20, 'Le numéro de téléphone ne peut pas dépasser 20 caractères')
-    .optional()
-    .nullable(),
+  destinationPhone: phoneSchemaOptional.nullable(),
 
   // === Informations de la marchandise ===
   cargoType: z.nativeEnum(CargoType, {

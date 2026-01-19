@@ -4,11 +4,20 @@
  * Définition des schémas Zod pour valider les données
  * des devis (création, modification, recherche, acceptation/rejet)
  *
+ * Note : Les validations téléphone sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
+ *
  * @module modules/quotes/schemas
  */
 
 import { z } from 'zod';
 import { QuoteStatus, CargoType, TransportMode } from '@/lib/db/enums';
+import {
+  emailSchema,
+  phoneSchemaOptional,
+  VALIDATION_MESSAGES,
+} from '@/lib/validators';
 
 /**
  * Schéma de validation pour la création d'un devis
@@ -521,40 +530,6 @@ export type QuoteCancelData = z.infer<typeof quoteCancelSchema>;
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Messages d'erreur personnalisés pour les formulaires guest
- */
-const GUEST_MESSAGES = {
-  required: 'Ce champ est obligatoire',
-  email: 'Adresse email invalide',
-  phone: 'Numéro de téléphone invalide (format: +33XXXXXXXXX ou 0XXXXXXXXX)',
-  minLength: (min: number) => `Minimum ${min} caractères`,
-  maxLength: (max: number) => `Maximum ${max} caractères`,
-};
-
-/**
- * Validation d'email pour les visiteurs
- * Normalisation : minuscules et trim
- */
-const guestEmailSchema = z
-  .string({ required_error: GUEST_MESSAGES.required })
-  .email(GUEST_MESSAGES.email)
-  .toLowerCase()
-  .trim();
-
-/**
- * Validation de téléphone français (optionnel pour guest quote)
- * Accepte : +33XXXXXXXXX, 0XXXXXXXXX, +33 X XX XX XX XX, formats internationaux
- */
-const guestPhoneSchema = z
-  .string()
-  .regex(
-    /^(?:(?:\+|00)\d{1,3}|0)\s*[1-9](?:[\s.-]*\d{2,3}){3,5}$/,
-    GUEST_MESSAGES.phone
-  )
-  .transform((val) => val.replace(/[\s.-]/g, '')) // Nettoyer espaces, points, tirets
-  .optional();
-
-/**
  * Schéma pour créer un devis SANS compte (visiteur)
  *
  * User Story :
@@ -575,6 +550,9 @@ const guestPhoneSchema = z
  * - contactName, contactPhone : Infos de contact supplémentaires
  * - Dimensions (length, width, height)
  * - Description additionnelle
+ *
+ * Note : Les validations téléphone supportent les formats internationaux
+ * (France, Burkina Faso, Côte d'Ivoire, Sénégal, Mali, etc.)
  */
 export const createGuestQuoteSchema = z.object({
   // ============================================
@@ -588,13 +566,14 @@ export const createGuestQuoteSchema = z.object({
    * - Matching lors de la création de compte (US-1.3)
    * - Communications futures
    */
-  contactEmail: guestEmailSchema,
+  contactEmail: emailSchema,
 
   /**
    * Téléphone du demandeur - OPTIONNEL
    * Utilisé comme critère de matching alternatif
+   * Format international accepté (8-15 chiffres)
    */
-  contactPhone: guestPhoneSchema,
+  contactPhone: phoneSchemaOptional,
 
   /**
    * Nom du demandeur - OPTIONNEL
@@ -602,8 +581,8 @@ export const createGuestQuoteSchema = z.object({
    */
   contactName: z
     .string()
-    .min(2, GUEST_MESSAGES.minLength(2))
-    .max(100, GUEST_MESSAGES.maxLength(100))
+    .min(2, VALIDATION_MESSAGES.minLength(2))
+    .max(100, VALIDATION_MESSAGES.maxLength(100))
     .optional(),
 
   // ============================================
@@ -615,7 +594,7 @@ export const createGuestQuoteSchema = z.object({
    * Exemple : "FR", "BF", "US"
    */
   originCountry: z
-    .string({ required_error: GUEST_MESSAGES.required })
+    .string({ required_error: VALIDATION_MESSAGES.required })
     .min(2, "Le pays d'origine est requis")
     .max(100, "Le pays d'origine est trop long"),
 
@@ -624,7 +603,7 @@ export const createGuestQuoteSchema = z.object({
    * Exemple : "FR", "BF", "US"
    */
   destinationCountry: z
-    .string({ required_error: GUEST_MESSAGES.required })
+    .string({ required_error: VALIDATION_MESSAGES.required })
     .min(2, 'Le pays de destination est requis')
     .max(100, 'Le pays de destination est trop long'),
 
@@ -728,7 +707,7 @@ export const createGuestQuoteSchema = z.object({
    */
   description: z
     .string()
-    .max(2000, GUEST_MESSAGES.maxLength(2000))
+    .max(2000, VALIDATION_MESSAGES.maxLength(2000))
     .optional(),
 
   /**
@@ -737,7 +716,7 @@ export const createGuestQuoteSchema = z.object({
    */
   specialInstructions: z
     .string()
-    .max(1000, GUEST_MESSAGES.maxLength(1000))
+    .max(1000, VALIDATION_MESSAGES.maxLength(1000))
     .optional(),
 });
 
@@ -776,7 +755,7 @@ export const trackQuoteByTokenSchema = z.object({
    * Envoyé par email au demandeur
    */
   trackingToken: z
-    .string({ required_error: GUEST_MESSAGES.required })
+    .string({ required_error: VALIDATION_MESSAGES.required })
     .cuid('Token de suivi invalide'),
 });
 

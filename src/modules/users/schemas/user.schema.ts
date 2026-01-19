@@ -4,10 +4,15 @@
  * Schémas Zod pour la validation des données utilisateurs
  * dans toutes les opérations CRUD (création, modification, recherche)
  *
+ * Note : Les validations téléphone sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
+ *
  * @module modules/users/schemas
  */
 
 import { z } from 'zod';
+import { phoneSchemaOptional, emailSchema } from '@/lib/validators';
 
 /**
  * Enum des rôles utilisateur (synchronisé avec Prisma)
@@ -40,13 +45,7 @@ export type UserRole = z.infer<typeof UserRoleEnum>;
  * - sendInvitation : Envoyer email d'invitation (défaut: true)
  */
 export const userCreateSchema = z.object({
-  email: z
-    .string({ required_error: 'L\'email est requis' })
-    .email('Email invalide')
-    .min(5, 'L\'email doit contenir au moins 5 caractères')
-    .max(100, 'L\'email ne peut pas dépasser 100 caractères')
-    .toLowerCase()
-    .trim(),
+  email: emailSchema,
 
   name: z
     .string({ required_error: 'Le nom est requis' })
@@ -54,17 +53,7 @@ export const userCreateSchema = z.object({
     .max(100, 'Le nom ne peut pas dépasser 100 caractères')
     .trim(),
 
-  phone: z
-    .string()
-    .regex(
-      /^[\d\s\+\-\(\)]+$/,
-      'Le téléphone ne peut contenir que des chiffres et symboles (+, -, (, ), espaces)'
-    )
-    .min(10, 'Le téléphone doit contenir au moins 10 caractères')
-    .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
-    .optional()
-    .nullable()
-    .or(z.literal('')),
+  phone: phoneSchemaOptional.nullable().or(z.literal('')),
 
   role: UserRoleEnum.default('CLIENT'),
 

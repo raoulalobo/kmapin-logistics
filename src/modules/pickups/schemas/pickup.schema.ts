@@ -2,80 +2,41 @@
  * Schémas Zod pour la validation des données de demandes d'enlèvement
  *
  * Organisation :
- * - Schémas de base : Validation des champs individuels
+ * - Schémas de base : Importés depuis @/lib/validators (internationaux)
  * - Schémas de création : US-1.1 (guest) et US-1.4 (connecté)
  * - Schémas de mise à jour : US-3.2 (statut) et US-3.3 (annulation)
  * - Schémas de suivi : US-1.2 (tracking par token)
+ *
+ * Note : Les validations téléphone et code postal sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
  */
 
 import { z } from 'zod';
 import { PickupStatus, PickupTimeSlot } from '@/lib/db/enums';
+import {
+  emailSchema,
+  phoneSchema,
+  phoneSchemaOptional,
+  postalCodeSchema,
+  countryCodeSchema,
+  futureDateSchema,
+  VALIDATION_MESSAGES,
+} from '@/lib/validators';
 
 // ============================================
-// CONSTANTES DE VALIDATION
+// CONSTANTES LOCALES
 // ============================================
 
 /**
- * Messages d'erreur personnalisés en français
+ * Messages d'erreur spécifiques aux pickups
  */
 const MESSAGES = {
-  required: 'Ce champ est obligatoire',
-  email: 'Email invalide',
-  phone: 'Numéro de téléphone invalide (format: +33XXXXXXXXX ou 0XXXXXXXXX)',
-  postalCode: 'Code postal invalide',
-  positiveNumber: 'Le nombre doit être positif',
-  minDate: 'La date doit être dans le futur',
+  ...VALIDATION_MESSAGES,
   minWeight: 'Le poids doit être supérieur à 0',
   minVolume: 'Le volume doit être supérieur à 0',
   minPackages: 'Le nombre de colis doit être au moins 1',
-  maxLength: (max: number) => `Maximum ${max} caractères`,
 };
-
-// ============================================
-// SCHÉMAS DE BASE
-// ============================================
-
-/**
- * Validation d'email français
- */
-const emailSchema = z
-  .string({ required_error: MESSAGES.required })
-  .email(MESSAGES.email)
-  .toLowerCase()
-  .trim();
-
-/**
- * Validation de téléphone français
- * Accepte : +33XXXXXXXXX, 0XXXXXXXXX, +33 X XX XX XX XX
- */
-const phoneSchema = z
-  .string({ required_error: MESSAGES.required })
-  .regex(
-    /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/,
-    MESSAGES.phone
-  )
-  .transform((val) => val.replace(/[\s.-]/g, '')); // Nettoyer les espaces et tirets
-
-/**
- * Validation de code postal français
- * Format: 5 chiffres
- */
-const postalCodeSchema = z
-  .string({ required_error: MESSAGES.required })
-  .regex(/^\d{5}$/, MESSAGES.postalCode);
-
-/**
- * Validation de date future (pour requestedDate)
- */
-const futureDateSchema = z
-  .string({ required_error: MESSAGES.required })
-  .or(z.date())
-  .pipe(
-    z.coerce.date().refine(
-      (date) => date > new Date(),
-      { message: MESSAGES.minDate }
-    )
-  );
 
 // ============================================
 // SCHÉMA DE CRÉATION SANS COMPTE (US-1.1)
@@ -121,11 +82,7 @@ export const createGuestPickupSchema = z.object({
 
   pickupPostalCode: postalCodeSchema,
 
-  pickupCountry: z
-    .string()
-    .length(2, 'Code pays ISO à 2 lettres (ex: FR)')
-    .toUpperCase()
-    .default('FR'),
+  pickupCountry: countryCodeSchema.default('FR'),
 
   // ============================================
   // PLANIFICATION (obligatoire)
@@ -366,7 +323,7 @@ export const assignDriverSchema = z.object({
     .max(100, MESSAGES.maxLength(100))
     .optional(),
 
-  driverPhone: phoneSchema.optional(),
+  driverPhone: phoneSchemaOptional,
 
   vehiclePlate: z
     .string()

@@ -8,10 +8,21 @@
  * - Le formulaire collecte les coordonnées du prospect (email, téléphone, nom)
  * - Les données d'enlèvement sont stockées dans GuestPickupRequest
  * - Lors de l'inscription, les données sont converties en PickupRequest authentifié
+ *
+ * Note : Les validations téléphone et code postal sont internationales
+ * et supportent les formats de plusieurs pays (France, Burkina Faso,
+ * Côte d'Ivoire, Sénégal, Mali, etc.).
  */
 
 import { z } from 'zod';
 import { PickupTimeSlot } from '@/lib/db/enums';
+import {
+  emailSchema,
+  phoneSchema,
+  phoneSchemaOptional,
+  postalCodeSchema,
+  countryCodeSchema,
+} from '@/lib/validators';
 
 /**
  * Schéma pour création de GuestPickupRequest
@@ -25,20 +36,26 @@ import { PickupTimeSlot } from '@/lib/db/enums';
  * - Type de marchandise requis
  */
 export const guestPickupRequestSchema = z.object({
-  // Informations prospect
-  prospectEmail: z.string().email('Email invalide'),
-  prospectPhone: z.string().min(10, 'Téléphone requis (min 10 caractères)'),
+  // ============================================
+  // INFORMATIONS PROSPECT
+  // ============================================
+  prospectEmail: emailSchema,
+  prospectPhone: phoneSchema,
   prospectName: z.string().min(2, 'Nom requis').optional(),
 
-  // Adresse d'enlèvement (4 champs obligatoires)
+  // ============================================
+  // ADRESSE D'ENLÈVEMENT
+  // ============================================
   pickupAddress: z.string().min(5, 'Adresse complète requise'),
   pickupCity: z.string().min(2, 'Ville requise'),
-  pickupPostalCode: z.string().min(2, 'Code postal requis'),
-  pickupCountry: z.string().length(2, 'Code pays requis (ex: FR)').default('FR'),
+  pickupPostalCode: postalCodeSchema,
+  pickupCountry: countryCodeSchema.default('FR'),
 
-  // Contact (optionnel)
+  // ============================================
+  // CONTACT SUR PLACE (optionnel)
+  // ============================================
   pickupContact: z.string().optional().nullable(),
-  pickupPhone: z.string().optional().nullable(),
+  pickupPhone: phoneSchemaOptional.nullable(),
 
   // Planification
   requestedDate: z.string().datetime('Date invalide'),
