@@ -842,9 +842,15 @@ export async function acceptQuoteAction(
     }
 
     // Vérifier les permissions
+    // Un utilisateur peut accepter un devis s'il a la permission 'quotes:update' OU s'il est propriétaire
+    // La propriété peut être via :
+    // - clientId : l'utilisateur appartient à la même entreprise cliente que le devis (devis B2B)
+    // - userId : l'utilisateur est le propriétaire direct du devis (devis personnels/guest)
     const canUpdate = hasPermission(userRole, 'quotes:update');
-    const isOwner =
+    const isOwnerByClient =
       session.user.clientId && session.user.clientId === quote.clientId;
+    const isOwnerByUser = session.user.id && session.user.id === quote.userId;
+    const isOwner = isOwnerByClient || isOwnerByUser;
 
     if (!canUpdate && !isOwner) {
       return {
@@ -958,9 +964,15 @@ export async function rejectQuoteAction(
     }
 
     // Vérifier les permissions
+    // Un utilisateur peut rejeter un devis s'il a la permission 'quotes:update' OU s'il est propriétaire
+    // La propriété peut être via :
+    // - clientId : l'utilisateur appartient à la même entreprise cliente que le devis (devis B2B)
+    // - userId : l'utilisateur est le propriétaire direct du devis (devis personnels/guest)
     const canUpdate = hasPermission(userRole, 'quotes:update');
-    const isOwner =
+    const isOwnerByClient =
       session.user.clientId && session.user.clientId === quote.clientId;
+    const isOwnerByUser = session.user.id && session.user.id === quote.userId;
+    const isOwner = isOwnerByClient || isOwnerByUser;
 
     if (!canUpdate && !isOwner) {
       return {
@@ -1499,12 +1511,13 @@ export async function startQuoteTreatmentAction(
     }
 
     // 5. Vérifier que le statut permet le traitement
-    // On peut traiter un devis SENT ou ACCEPTED
-    const allowedStatuses = ['SENT', 'ACCEPTED'];
-    if (!allowedStatuses.includes(existingQuote.status)) {
+    // L'agent ne peut traiter un devis que si le client l'a accepté (statut ACCEPTED)
+    // Cela garantit que le client a donné son consentement et choisi sa méthode de paiement
+    // Workflow : DRAFT → SENT → ACCEPTED → IN_TREATMENT → VALIDATED
+    if (existingQuote.status !== 'ACCEPTED') {
       return {
         success: false,
-        error: `Impossible de traiter un devis avec le statut "${existingQuote.status}". Le devis doit être SENT ou ACCEPTED.`,
+        error: 'Impossible de traiter ce devis. Le client doit d\'abord accepter le devis avant qu\'un agent puisse le traiter.',
       };
     }
 

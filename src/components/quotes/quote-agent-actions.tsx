@@ -7,8 +7,10 @@
  * - Bouton "Annuler" → Dialog raison → Statut CANCELLED
  *
  * Workflow complet :
- * [SENT/ACCEPTED] → [Traiter] → [IN_TREATMENT] → [Valider] → [VALIDATED] + Expédition créée
- *                               [IN_TREATMENT] → [Annuler] → [CANCELLED]
+ * [DRAFT] → [Envoyer] → [SENT] → (Client accepte) → [ACCEPTED] → [Traiter] → [IN_TREATMENT] → [Valider] → [VALIDATED]
+ *
+ * IMPORTANT : L'agent ne peut traiter un devis que si le client l'a accepté (statut ACCEPTED)
+ * Cela garantit que le client a donné son consentement et choisi sa méthode de paiement
  *
  * @module components/quotes
  * @permissions ADMIN, OPERATIONS_MANAGER
@@ -120,9 +122,13 @@ const PAYMENT_METHODS = [
  * Composant d'actions agent sur un devis
  *
  * Affiche les boutons d'action appropriés selon le statut du devis :
- * - SENT/ACCEPTED : Boutons "Traiter devis" et "Annuler"
+ * - DRAFT : Bouton "Envoyer" (envoie le devis au client)
+ * - SENT : Aucun bouton d'action (en attente de la réponse du client)
+ * - ACCEPTED : Boutons "Traiter devis" et "Annuler" (le client a accepté)
  * - IN_TREATMENT : Boutons "Valider" et "Annuler"
  * - VALIDATED/CANCELLED : Aucun bouton (lecture seule)
+ *
+ * IMPORTANT : L'agent ne peut traiter que les devis acceptés par le client
  */
 export function QuoteAgentActions({
   quoteId,
@@ -176,7 +182,8 @@ export function QuoteAgentActions({
 
   /**
    * Démarrer le traitement du devis
-   * Statut : SENT/ACCEPTED → IN_TREATMENT
+   * Statut : ACCEPTED → IN_TREATMENT
+   * IMPORTANT : Le client doit avoir accepté le devis avant que l'agent puisse le traiter
    */
   function handleStartTreatment() {
     if (!paymentMethod) {
@@ -388,8 +395,8 @@ export function QuoteAgentActions({
         </Dialog>
       )}
 
-        {/* Bouton "Traiter devis" - visible si SENT ou ACCEPTED */}
-        {(quoteStatus === 'SENT' || quoteStatus === 'ACCEPTED') && (
+        {/* Bouton "Traiter devis" - visible uniquement si le client a ACCEPTÉ le devis */}
+        {quoteStatus === 'ACCEPTED' && (
           <Dialog open={isTreatDialogOpen} onOpenChange={setIsTreatDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="default" className="flex-1" disabled={isPending}>
