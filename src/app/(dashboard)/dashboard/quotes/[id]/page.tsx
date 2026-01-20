@@ -7,6 +7,19 @@
  * - Détails de la route et de la marchandise
  * - Tarification et validité
  * - Boutons d'actions (modifier, supprimer, accepter, rejeter)
+ * - Historique sur le côté (même layout que Purchase et Pickup)
+ *
+ * Layout :
+ * ┌────────────────────────────────────────────────────────────┐
+ * │ En-tête (titre, badges, navigation)                        │
+ * ├─────────────────────────────────┬──────────────────────────┤
+ * │ Colonne gauche (2/3)            │ Colonne droite (1/3)     │
+ * │ - Client                        │ - Historique Timeline    │
+ * │ - Itinéraire / Validité         │                          │
+ * │ - Marchandise                   │                          │
+ * │ - Tarification                  │                          │
+ * │ - Actions (Agent/Client)        │                          │
+ * └─────────────────────────────────┴──────────────────────────┘
  */
 
 import Link from 'next/link';
@@ -40,10 +53,15 @@ import {
   QuoteAgentActions,
   QuotePaymentActions,
   QuoteHistoryTimeline,
+  QuoteActions,
 } from '@/components/quotes';
 
+// ════════════════════════════════════════════════════════════════════════════
+// FONCTIONS UTILITAIRES
+// ════════════════════════════════════════════════════════════════════════════
+
 /**
- * Fonction utilitaire pour formater le statut en français
+ * Formate le statut en français
  * Inclut les nouveaux statuts du workflow agent
  */
 function formatStatus(status: QuoteStatus): string {
@@ -62,19 +80,18 @@ function formatStatus(status: QuoteStatus): string {
 }
 
 /**
- * Fonction utilitaire pour obtenir la variante du badge selon le statut
- * Inclut les nouveaux statuts du workflow agent
+ * Obtient la variante du badge selon le statut
  */
 function getStatusVariant(status: QuoteStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (status === 'ACCEPTED' || status === 'VALIDATED') return 'default';
   if (status === 'REJECTED' || status === 'CANCELLED') return 'destructive';
   if (status === 'DRAFT' || status === 'EXPIRED') return 'secondary';
-  if (status === 'IN_TREATMENT') return 'outline'; // Bleu/outline pour "en cours"
+  if (status === 'IN_TREATMENT') return 'outline';
   return 'outline';
 }
 
 /**
- * Fonction utilitaire pour formater le type de cargo en français
+ * Formate le type de cargo en français
  */
 function formatCargoType(type: string): string {
   const cargoMap: Record<string, string> = {
@@ -95,7 +112,7 @@ function formatCargoType(type: string): string {
 }
 
 /**
- * Fonction utilitaire pour formater le mode de transport en français
+ * Formate le mode de transport en français
  */
 function formatTransportMode(mode: string): string {
   const modeMap: Record<string, string> = {
@@ -109,8 +126,7 @@ function formatTransportMode(mode: string): string {
 }
 
 /**
- * Fonction utilitaire pour obtenir l'icône selon le statut
- * Inclut les nouveaux statuts du workflow agent
+ * Obtient l'icône selon le statut
  */
 function getStatusIcon(status: QuoteStatus) {
   switch (status) {
@@ -132,6 +148,10 @@ function getStatusIcon(status: QuoteStatus) {
       return <FileText className="h-5 w-5 text-muted-foreground" />;
   }
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// PAGE PRINCIPALE
+// ════════════════════════════════════════════════════════════════════════════
 
 export default async function QuoteDetailPage({
   params,
@@ -158,7 +178,9 @@ export default async function QuoteDetailPage({
 
   return (
     <div className="space-y-6">
-      {/* En-tête */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* EN-TÊTE */}
+      {/* ════════════════════════════════════════════════════════════════ */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
           <Link href="/dashboard/quotes">
@@ -171,7 +193,7 @@ export default async function QuoteDetailPage({
           <div className="flex items-center gap-4">
             {getStatusIcon(quote.status)}
             <div>
-              <h1 className="text-4xl font-bold tracking-tight">{quote.quoteNumber}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">{quote.quoteNumber}</h1>
               <p className="text-muted-foreground mt-1">
                 {quote.originCountry} → {quote.destinationCountry}
               </p>
@@ -193,7 +215,7 @@ export default async function QuoteDetailPage({
 
       <Separator />
 
-      {/* Alertes */}
+      {/* Alerte si expiré */}
       {isExpired && quote.status === 'SENT' && (
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">
@@ -210,316 +232,341 @@ export default async function QuoteDetailPage({
         </Card>
       )}
 
-      {/* Client */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Client</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <Buildings className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="font-semibold text-lg">{quote.client?.name || quote.contactName || 'Non assigné'}</p>
-              <p className="text-sm text-muted-foreground">{quote.client?.email || quote.contactEmail}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Informations détaillées */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Itinéraire */}
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Itinéraire</CardTitle>
-            <CardDescription>
-              Route de transport
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Origine</p>
-                <p className="text-sm text-muted-foreground">{quote.originCountry}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Destination</p>
-                <p className="text-sm text-muted-foreground">{quote.destinationCountry}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Validité */}
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Validité</CardTitle>
-            <CardDescription>
-              Période de validité du devis
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Créé le</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(quote.createdAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Valide jusqu'au</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(quote.validUntil).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Détails de la marchandise */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Détails de la marchandise</CardTitle>
-          <CardDescription>
-            Informations sur le contenu à transporter
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="flex items-center gap-3">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Type</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatCargoType(quote.cargoType)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Scales className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Poids</p>
-                <p className="text-sm text-muted-foreground">
-                  {quote.weight} kg
-                </p>
-              </div>
-            </div>
-
-            {quote.length && quote.width && quote.height && (
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* GRID À 3 COLONNES - Layout similaire à Purchase et Pickup */}
+      {/* Colonne gauche (2/3) : Détails */}
+      {/* Colonne droite (1/3) : Historique */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ──────────────────────────────────────────────────────────────── */}
+        {/* COLONNE GAUCHE : Détails du devis */}
+        {/* ──────────────────────────────────────────────────────────────── */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Client */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Client</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="flex items-center gap-3">
-                <Cube className="h-5 w-5 text-muted-foreground" />
+                <Buildings className="h-8 w-8 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Dimensions</p>
-                  <p className="text-sm text-muted-foreground">
-                    {quote.length} × {quote.width} × {quote.height} m
+                  <p className="font-semibold text-lg">{quote.client?.name || quote.contactName || 'Non assigné'}</p>
+                  <p className="text-sm text-muted-foreground">{quote.client?.email || quote.contactEmail}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Itinéraire et Validité (grid 2 colonnes) */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Itinéraire */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle>Itinéraire</CardTitle>
+                <CardDescription>Route de transport</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Origine</p>
+                    <p className="text-sm text-muted-foreground">{quote.originCountry}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Destination</p>
+                    <p className="text-sm text-muted-foreground">{quote.destinationCountry}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Validité */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle>Validité</CardTitle>
+                <CardDescription>Période de validité du devis</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Créé le</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(quote.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Valide jusqu'au</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(quote.validUntil).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Détails de la marchandise */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Détails de la marchandise</CardTitle>
+              <CardDescription>Informations sur le contenu à transporter</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-3">
+                  <Package className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Type</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatCargoType(quote.cargoType)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Scales className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Poids</p>
+                    <p className="text-sm text-muted-foreground">{quote.weight} kg</p>
+                  </div>
+                </div>
+
+                {quote.length && quote.width && quote.height && (
+                  <div className="flex items-center gap-3">
+                    <Cube className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Dimensions</p>
+                      <p className="text-sm text-muted-foreground">
+                        {quote.length} × {quote.width} × {quote.height} m
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {quote.transportMode && quote.transportMode.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-2">Modes de transport</p>
+                  <div className="flex gap-2">
+                    {quote.transportMode.map((mode) => (
+                      <Badge key={mode} variant="secondary">
+                        {formatTransportMode(mode)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Tarification */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Tarification</CardTitle>
+              <CardDescription>Montant du devis</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <CurrencyEur className="h-8 w-8 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Coût estimé</p>
+                  <p className="text-4xl font-bold">
+                    {quote.estimatedCost.toFixed(2)} {quote.currency}
                   </p>
                 </div>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
 
-          {quote.transportMode && quote.transportMode.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium mb-2">Modes de transport</p>
-              <div className="flex gap-2">
-                {quote.transportMode.map((mode) => (
-                  <Badge key={mode} variant="secondary">
-                    {formatTransportMode(mode)}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* ACTIONS WORKFLOW AGENT */}
+          {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle>Actions Agent</CardTitle>
+                <CardDescription>Traitement et gestion du devis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QuoteAgentActions
+                  quoteId={quote.id}
+                  quoteNumber={quote.quoteNumber}
+                  quoteStatus={quote.status}
+                  estimatedCost={quote.estimatedCost}
+                  currency={quote.currency}
+                  originCountry={quote.originCountry}
+                  destinationCountry={quote.destinationCountry}
+                  userRole={userRole}
+                />
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Tarification */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Tarification</CardTitle>
-          <CardDescription>
-            Montant du devis
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <CurrencyEur className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Coût estimé</p>
-              <p className="text-4xl font-bold">
-                {quote.estimatedCost.toFixed(2)} {quote.currency}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* ACTIONS CLIENT */}
+          {/* Visible pour les clients quand le devis est SENT */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {userRole === 'CLIENT' && quote.status === 'SENT' && !isExpired && (
+            <Card className="dashboard-card border-blue-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                  Votre décision
+                </CardTitle>
+                <CardDescription>
+                  Ce devis attend votre réponse. Acceptez-le pour lancer l'expédition ou rejetez-le si les conditions ne vous conviennent pas.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QuoteActions
+                  quoteId={quote.id}
+                  quoteStatus={quote.status}
+                  isExpired={isExpired}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HISTORIQUE COMPLET DES ÉVÉNEMENTS (QuoteLog) */}
-      {/* Timeline des événements du devis comme sur les pages Pickup/Purchase */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <QuoteHistoryTimeline logs={quote.logs || []} />
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* ACTIONS PAIEMENT ET FACTURATION */}
+          {/* Visible quand le devis est VALIDATED */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {(quote.status === 'VALIDATED' || quote.paymentReceivedAt) && (
+            <Card className="dashboard-card border-green-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CurrencyEur className="h-5 w-5 text-green-600" />
+                  Paiement et Facturation
+                </CardTitle>
+                <CardDescription>
+                  Confirmation du paiement et génération de facture
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <QuotePaymentActions
+                  quoteId={quote.id}
+                  quoteNumber={quote.quoteNumber}
+                  quoteStatus={quote.status}
+                  paymentReceivedAt={quote.paymentReceivedAt}
+                  paymentReceivedByName={quote.paymentReceivedBy?.name}
+                  estimatedCost={Number(quote.estimatedCost)}
+                  currency={quote.currency}
+                  userRole={userRole}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Métadonnées */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Informations système</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Date de création</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(quote.createdAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Dernière modification</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(quote.updatedAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-
-            {quote.user && (
-              <div className="flex items-center gap-3">
-                <Buildings className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Créé par</p>
-                  <p className="text-sm text-muted-foreground">
-                    {quote.user.name || quote.user.email}
-                  </p>
+          {/* Informations système */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Informations système</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Date de création</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(quote.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
                 </div>
+
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Dernière modification</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(quote.updatedAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {quote.user && (
+                  <div className="flex items-center gap-3">
+                    <Buildings className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Créé par</p>
+                      <p className="text-sm text-muted-foreground">
+                        {quote.user.name || quote.user.email}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Actions générales */}
+          <div className="flex gap-2 flex-wrap">
+            {/* Modifier - visible pour DRAFT et SENT */}
+            {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/quotes/${quote.id}/edit`}>
+                  <PencilSimple className="mr-2 h-4 w-4" />
+                  Modifier
+                </Link>
+              </Button>
+            )}
+
+            {/* Supprimer - visible pour DRAFT uniquement */}
+            {quote.status === 'DRAFT' && (
+              <Button variant="destructive" size="sm">
+                <Trash className="mr-2 h-4 w-4" />
+                Supprimer
+              </Button>
+            )}
+
+            {/* Voir l'expédition - visible si une expédition est liée */}
+            {quote.shipment && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/shipments/${quote.shipment.id}`}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Voir l'expédition ({quote.shipment.trackingNumber})
+                </Link>
+              </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS WORKFLOW AGENT */}
-      {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Actions Agent</CardTitle>
-            <CardDescription>
-              Traitement et gestion du devis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <QuoteAgentActions
-              quoteId={quote.id}
-              quoteNumber={quote.quoteNumber}
-              quoteStatus={quote.status}
-              estimatedCost={quote.estimatedCost}
-              currency={quote.currency}
-              originCountry={quote.originCountry}
-              destinationCountry={quote.destinationCountry}
-              userRole={userRole}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS PAIEMENT ET FACTURATION */}
-      {/* Visible quand le devis est VALIDATED */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {(quote.status === 'VALIDATED' || quote.paymentReceivedAt) && (
-        <Card className="dashboard-card border-green-100">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CurrencyEur className="h-5 w-5 text-green-600" />
-              Paiement et Facturation
-            </CardTitle>
-            <CardDescription>
-              Confirmation du paiement et génération de facture
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <QuotePaymentActions
-              quoteId={quote.id}
-              quoteNumber={quote.quoteNumber}
-              quoteStatus={quote.status}
-              paymentReceivedAt={quote.paymentReceivedAt}
-              paymentReceivedByName={quote.paymentReceivedBy?.name}
-              estimatedCost={Number(quote.estimatedCost)}
-              currency={quote.currency}
-              userRole={userRole}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS GÉNÉRALES */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <div className="flex gap-2 flex-wrap">
-        {/* Modifier - visible pour DRAFT et SENT */}
-        {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/quotes/${quote.id}/edit`}>
-              <PencilSimple className="mr-2 h-4 w-4" />
-              Modifier
-            </Link>
-          </Button>
-        )}
-
-        {/* Supprimer - visible pour DRAFT uniquement */}
-        {quote.status === 'DRAFT' && (
-          <Button variant="destructive" size="sm">
-            <Trash className="mr-2 h-4 w-4" />
-            Supprimer
-          </Button>
-        )}
-
-        {/* Voir l'expédition - visible si une expédition est liée */}
-        {quote.shipment && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/shipments/${quote.shipment.id}`}>
-              <FileText className="mr-2 h-4 w-4" />
-              Voir l'expédition ({quote.shipment.trackingNumber})
-            </Link>
-          </Button>
-        )}
+        {/* ──────────────────────────────────────────────────────────────── */}
+        {/* COLONNE DROITE : Historique */}
+        {/* Timeline identique à Purchase et Pickup (icônes Lucide, badges) */}
+        {/* ──────────────────────────────────────────────────────────────── */}
+        <div className="lg:col-span-1">
+          <QuoteHistoryTimeline logs={quote.logs || []} />
+        </div>
       </div>
     </div>
   );

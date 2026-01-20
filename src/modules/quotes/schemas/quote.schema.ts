@@ -163,8 +163,20 @@ export type QuoteSearchParams = z.infer<typeof quoteSearchSchema>;
 
 /**
  * Schéma pour accepter un devis
+ *
+ * Le client doit choisir sa méthode de paiement préférée lors de l'acceptation.
+ * Cette information sera utilisée par l'agent lors du traitement.
  */
 export const quoteAcceptSchema = z.object({
+  /**
+   * Méthode de paiement choisie par le client
+   * - CASH : Paiement comptant
+   * - ON_DELIVERY : Paiement à la livraison
+   * - BANK_TRANSFER : Virement bancaire
+   */
+  paymentMethod: z.enum(['CASH', 'ON_DELIVERY', 'BANK_TRANSFER'], {
+    errorMap: () => ({ message: 'Veuillez sélectionner une méthode de paiement' }),
+  }),
   notes: z
     .string()
     .max(500, 'Les notes ne peuvent pas dépasser 500 caractères')

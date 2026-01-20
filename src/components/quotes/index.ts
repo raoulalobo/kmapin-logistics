@@ -28,3 +28,6 @@ export {
 // Actions agent (existants)
 export { QuoteAgentActions } from './quote-agent-actions';
 export { QuotePaymentActions } from './quote-payment-actions';
+
+// Actions client (accepter/rejeter)
+export { QuoteActions } from './quote-actions';

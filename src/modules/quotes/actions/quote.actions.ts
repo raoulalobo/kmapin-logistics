@@ -708,6 +708,107 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
 }
 
 /**
+ * Action : Envoyer un devis au client
+ *
+ * Passe le devis de DRAFT à SENT, le rendant visible et actionnable par le client
+ * Le client pourra ensuite accepter ou rejeter le devis depuis son dashboard
+ *
+ * @param id - ID du devis à envoyer
+ * @returns Résultat de l'envoi
+ *
+ * @permissions 'quotes:update' (ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER)
+ *
+ * @example
+ * // Envoyer un devis au client
+ * const result = await sendQuoteAction('clx1234...');
+ * if (result.success) {
+ *   toast.success('Devis envoyé au client');
+ * }
+ */
+export async function sendQuoteAction(
+  id: string
+): Promise<ActionResult<{ id: string; quoteNumber: string }>> {
+  try {
+    // Vérifier l'authentification et les permissions
+    const session = await requirePermission('quotes:update');
+
+    // Récupérer le devis
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        client: { select: { name: true, email: true } },
+      },
+    });
+
+    if (!quote) {
+      return { success: false, error: 'Devis introuvable' };
+    }
+
+    // Vérifier que le devis est en DRAFT
+    if (quote.status !== 'DRAFT') {
+      return {
+        success: false,
+        error: 'Seuls les devis en brouillon peuvent être envoyés',
+      };
+    }
+
+    // Vérifier que le devis a un client associé
+    if (!quote.clientId) {
+      return {
+        success: false,
+        error: 'Le devis doit être associé à un client avant d\'être envoyé',
+      };
+    }
+
+    // Mettre à jour le statut du devis
+    const updatedQuote = await prisma.quote.update({
+      where: { id },
+      data: {
+        status: 'SENT',
+        // Note: L'envoi d'email sera implémenté plus tard via Inngest
+      },
+    });
+
+    console.log(
+      `📧 [sendQuote] Devis ${quote.quoteNumber} envoyé au client ${quote.client?.name} par ${session.user.email}`
+    );
+
+    // Revalider les pages
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${id}`);
+
+    return {
+      success: true,
+      data: { id: updatedQuote.id, quoteNumber: updatedQuote.quoteNumber },
+    };
+  } catch (error) {
+    console.error('Error sending quote:', error);
+
+    // Gestion des erreurs de permissions
+    if (error instanceof Error) {
+      if (error.message.includes('Forbidden') || error.message.includes('permission')) {
+        return {
+          success: false,
+          error: 'Vous n\'avez pas les permissions nécessaires pour envoyer ce devis',
+        };
+      }
+
+      if (error.message.includes('Unauthorized')) {
+        return {
+          success: false,
+          error: 'Vous devez être connecté pour effectuer cette action',
+        };
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de l\'envoi du devis',
+    };
+  }
+}
+
+/**
  * Action : Accepter un devis
  *
  * Marque un devis comme accepté par le client
@@ -771,12 +872,16 @@ export async function acceptQuoteAction(
     // Valider les données
     const validatedData = quoteAcceptSchema.parse(acceptData);
 
-    // Mettre à jour le devis
+    // Mettre à jour le devis avec la méthode de paiement choisie par le client
+    // La méthode de paiement sera utilisée par les agents lors du traitement
     await prisma.quote.update({
       where: { id },
       data: {
         status: 'ACCEPTED',
         acceptedAt: new Date(),
+        // Sauvegarder la méthode de paiement choisie par le client
+        // Options : CASH (comptant), ON_DELIVERY (à la livraison), BANK_TRANSFER (virement)
+        paymentMethod: validatedData.paymentMethod,
       },
     });
 

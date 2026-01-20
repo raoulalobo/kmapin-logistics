@@ -27,6 +27,7 @@ import {
   Truck,
   Bank,
   Package,
+  PaperPlaneTilt,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
@@ -57,6 +58,7 @@ import {
   startQuoteTreatmentAction,
   validateQuoteTreatmentAction,
   cancelQuoteAction,
+  sendQuoteAction,
 } from '@/modules/quotes';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -153,6 +155,9 @@ export function QuoteAgentActions({
   // Dialog "Annuler"
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+
+  // Dialog "Envoyer"
+  const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // VÉRIFICATION DES PERMISSIONS
@@ -253,6 +258,24 @@ export function QuoteAgentActions({
     });
   }
 
+  /**
+   * Envoyer le devis au client
+   * Statut : DRAFT → SENT
+   */
+  function handleSendQuote() {
+    startTransition(async () => {
+      const result = await sendQuoteAction(quoteId);
+
+      if (!result.success) {
+        toast.error(result.error || 'Erreur lors de l\'envoi du devis');
+      } else {
+        toast.success(`Devis ${result.data.quoteNumber} envoyé au client !`);
+        setIsSendDialogOpen(false);
+        router.refresh();
+      }
+    });
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // HELPERS
   // ═══════════════════════════════════════════════════════════════════════════
@@ -290,6 +313,79 @@ export function QuoteAgentActions({
 
   return (
     <div className="space-y-4">
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* BOUTON ENVOYER - visible si DRAFT */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {quoteStatus === 'DRAFT' && (
+        <Dialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="default" className="w-full" disabled={isPending}>
+              <PaperPlaneTilt className="mr-2 h-4 w-4" />
+              Envoyer au client
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PaperPlaneTilt className="h-5 w-5 text-primary" />
+                Envoyer le devis {quoteNumber} ?
+              </DialogTitle>
+              <DialogDescription>
+                Le devis sera visible par le client qui pourra l'accepter ou le rejeter depuis son espace.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {/* Résumé du devis */}
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Montant</span>
+                  <span className="font-semibold">
+                    {estimatedCost.toLocaleString('fr-FR', {
+                      minimumFractionDigits: 2,
+                    })}{' '}
+                    {currency}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Route</span>
+                  <span className="font-medium">
+                    {originCountry} → {destinationCountry}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Une fois envoyé, le client recevra une notification et pourra consulter ce devis depuis son tableau de bord.
+              </p>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsSendDialogOpen(false)}
+                disabled={isPending}
+              >
+                Annuler
+              </Button>
+              <Button onClick={handleSendQuote} disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
+                    Envoi...
+                  </>
+                ) : (
+                  <>
+                    <PaperPlaneTilt className="mr-2 h-4 w-4" />
+                    Envoyer le devis
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* BOUTONS PRINCIPAUX */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
