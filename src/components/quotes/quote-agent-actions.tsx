@@ -25,9 +25,6 @@ import {
   CheckCircle,
   XCircle,
   CircleNotch,
-  CurrencyDollar,
-  Truck,
-  Bank,
   Package,
   PaperPlaneTilt,
 } from '@phosphor-icons/react';
@@ -46,14 +43,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 import {
@@ -89,34 +78,12 @@ interface QuoteAgentActionsProps {
   userRole: string;
 }
 
-/**
- * Méthodes de paiement disponibles pour le traitement
- * Correspond à l'enum QuotePaymentMethod dans schema.zmodel
- */
-const PAYMENT_METHODS = [
-  {
-    value: 'CASH',
-    label: 'Comptant',
-    description: 'Paiement immédiat à la commande',
-    icon: CurrencyDollar,
-  },
-  {
-    value: 'ON_DELIVERY',
-    label: 'À la livraison',
-    description: 'Paiement à la réception de la marchandise',
-    icon: Truck,
-  },
-  {
-    value: 'BANK_TRANSFER',
-    label: 'Virement bancaire',
-    description: 'Le RIB sera envoyé par email au client',
-    icon: Bank,
-  },
-] as const;
-
 // ════════════════════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ════════════════════════════════════════════════════════════════════════════
+// NOTE : La méthode de paiement est définie par le client lors de l'acceptation
+// et ne peut être modifiée que par le client (owner) ou un ADMIN
+// L'agent ne peut pas modifier la méthode de paiement lors du traitement
 
 /**
  * Composant d'actions agent sur un devis
@@ -148,8 +115,9 @@ export function QuoteAgentActions({
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Dialog "Traiter devis"
+  // NOTE : La méthode de paiement n'est plus modifiable par l'agent
+  // Elle est définie par le client lors de l'acceptation
   const [isTreatDialogOpen, setIsTreatDialogOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<string>('CASH');
   const [treatmentComment, setTreatmentComment] = useState('');
 
   // Dialog "Valider"
@@ -184,30 +152,20 @@ export function QuoteAgentActions({
    * Démarrer le traitement du devis
    * Statut : ACCEPTED → IN_TREATMENT
    * IMPORTANT : Le client doit avoir accepté le devis avant que l'agent puisse le traiter
+   * NOTE : La méthode de paiement a été définie par le client lors de l'acceptation
    */
   function handleStartTreatment() {
-    if (!paymentMethod) {
-      toast.error('Veuillez sélectionner une méthode de paiement');
-      return;
-    }
-
     startTransition(async () => {
       const result = await startQuoteTreatmentAction(quoteId, {
-        paymentMethod: paymentMethod as 'CASH' | 'ON_DELIVERY' | 'BANK_TRANSFER',
         comment: treatmentComment || null,
       });
 
       if (!result.success) {
         toast.error(result.error || 'Erreur lors du démarrage du traitement');
       } else {
-        // Message spécifique si virement bancaire
-        if (paymentMethod === 'BANK_TRANSFER') {
-          toast.success('Traitement démarré ! Un email avec le RIB sera envoyé au client.');
-        } else {
-          toast.success('Traitement démarré avec succès !');
-        }
+        toast.success('Traitement démarré avec succès !');
         setIsTreatDialogOpen(false);
-        resetTreatmentForm();
+        setTreatmentComment('');
         router.refresh();
       }
     });
@@ -286,12 +244,6 @@ export function QuoteAgentActions({
   // ═══════════════════════════════════════════════════════════════════════════
   // HELPERS
   // ═══════════════════════════════════════════════════════════════════════════
-
-  /** Réinitialiser le formulaire de traitement */
-  function resetTreatmentForm() {
-    setPaymentMethod('CASH');
-    setTreatmentComment('');
-  }
 
   /** Réinitialiser le formulaire de validation */
   function resetValidateForm() {
@@ -437,44 +389,12 @@ export function QuoteAgentActions({
 
                 <Separator />
 
-                {/* Sélection de la méthode de paiement */}
-                <div className="space-y-3">
-                  <Label className="text-base font-medium">
-                    Méthode de paiement *
-                  </Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez une méthode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map((method) => {
-                        const Icon = method.icon;
-                        return (
-                          <SelectItem key={method.value} value={method.value}>
-                            <div className="flex items-center gap-2">
-                              <Icon className="h-4 w-4" />
-                              <span>{method.label}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Description de la méthode sélectionnée */}
-                  {paymentMethod && (
-                    <p className="text-sm text-muted-foreground">
-                      {PAYMENT_METHODS.find((m) => m.value === paymentMethod)?.description}
-                    </p>
-                  )}
-
-                  {/* Avertissement pour virement bancaire */}
-                  {paymentMethod === 'BANK_TRANSFER' && (
-                    <Badge variant="secondary" className="mt-2">
-                      <Bank className="mr-1 h-3 w-3" />
-                      Un email avec le RIB sera automatiquement envoyé au client
-                    </Badge>
-                  )}
+                {/* Information : la méthode de paiement a été choisie par le client */}
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>Note :</strong> La méthode de paiement a été définie par le client
+                    lors de l'acceptation du devis. Seul le client ou un administrateur peut la modifier.
+                  </p>
                 </div>
 
                 {/* Commentaire optionnel */}
@@ -496,7 +416,7 @@ export function QuoteAgentActions({
                   variant="outline"
                   onClick={() => {
                     setIsTreatDialogOpen(false);
-                    resetTreatmentForm();
+                    setTreatmentComment('');
                   }}
                   disabled={isPending}
                 >
@@ -575,9 +495,9 @@ export function QuoteAgentActions({
                   />
                 </div>
 
-                {/* Description de la marchandise */}
+                {/* Description de la marchandise (optionnelle mais min 5 caractères si renseignée) */}
                 <div className="space-y-2">
-                  <Label htmlFor="cargo-description">Description de la marchandise</Label>
+                  <Label htmlFor="cargo-description">Description de la marchandise (optionnel)</Label>
                   <Textarea
                     id="cargo-description"
                     placeholder="Ex: Palettes de marchandises générales..."
@@ -586,6 +506,13 @@ export function QuoteAgentActions({
                     disabled={isPending}
                     className="h-20"
                   />
+                  {/* Indicateur de caractères : affiche un avertissement si l'utilisateur
+                      a commencé à taper mais n'a pas atteint le minimum de 5 caractères */}
+                  {cargoDescription.length > 0 && cargoDescription.length < 5 && (
+                    <p className="text-xs text-amber-600">
+                      Minimum 5 caractères requis ({cargoDescription.length}/5) - ou laissez le champ vide
+                    </p>
+                  )}
                 </div>
 
                 {/* Commentaire optionnel */}

@@ -395,12 +395,9 @@ export type QuotePaymentMethodType = keyof typeof QuotePaymentMethod;
  * @permissions ADMIN, OPERATIONS_MANAGER
  */
 export const quoteStartTreatmentSchema = z.object({
-  // Méthode de paiement choisie par l'agent
-  paymentMethod: z.enum(['CASH', 'ON_DELIVERY', 'BANK_TRANSFER'], {
-    errorMap: () => ({ message: 'Méthode de paiement invalide' }),
-  }),
-
-  // Commentaire optionnel de l'agent
+  // Commentaire optionnel de l'agent lors du démarrage du traitement
+  // NOTE : La méthode de paiement est définie par le client lors de l'acceptation
+  // et ne peut être modifiée que par le client (owner) ou un ADMIN
   comment: z
     .string()
     .max(1000, 'Le commentaire ne peut pas dépasser 1000 caractères')
@@ -488,9 +485,10 @@ export const quoteValidateTreatmentSchema = z.object({
     .optional(),
 
   // Description de la marchandise
+  // Validation : minimum 5 caractères si renseigné, maximum 1000 caractères
   cargoDescription: z
     .string()
-    .min(5, 'La description doit contenir au moins 5 caractères')
+    .min(5, 'Veuillez saisir une description de la marchandise (minimum 5 caractères) ou laisser le champ vide')
     .max(1000, 'La description ne peut pas dépasser 1000 caractères')
     .optional(),
 
