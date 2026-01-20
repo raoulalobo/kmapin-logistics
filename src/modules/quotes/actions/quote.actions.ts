@@ -13,8 +13,17 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 import { requirePermission, hasPermission } from '@/lib/auth/permissions';
-import { UserRole, ShipmentStatus } from '@/lib/db/enums';
+import { UserRole, ShipmentStatus, QuoteStatus } from '@/lib/db/enums';
 import { logShipmentCreated } from '@/modules/shipments';
+import {
+  logQuoteCreated,
+  logQuoteSentToClient,
+  logQuoteAcceptedByClient,
+  logQuoteRejectedByClient,
+  logQuoteTreatmentStarted,
+  logQuoteTreatmentValidated,
+  logQuoteCancelled,
+} from '../lib/quote-log-helper';
 import {
   quoteSchema,
   quoteUpdateSchema,
@@ -190,6 +199,14 @@ export async function createQuoteAction(
         status: validatedData.status || 'DRAFT',
         tokenExpiresAt, // Date d'expiration du token de suivi (requis par le schéma)
       },
+    });
+
+    // Enregistrer l'événement de création dans l'historique (QuoteLog)
+    await logQuoteCreated({
+      quoteId: quote.id,
+      changedById: session.user.id,
+      notes: `Devis ${quote.quoteNumber} créé`,
+      source: 'dashboard',
     });
 
     // Revalider la liste des devis
@@ -774,6 +791,14 @@ export async function sendQuoteAction(
       `📧 [sendQuote] Devis ${quote.quoteNumber} envoyé au client ${quote.client?.name} par ${session.user.email}`
     );
 
+    // Enregistrer l'événement d'envoi dans l'historique (QuoteLog)
+    await logQuoteSentToClient({
+      quoteId: quote.id,
+      changedById: session.user.id,
+      sentTo: quote.client?.email || quote.contactEmail,
+      notes: `Devis envoyé au client ${quote.client?.name}`,
+    });
+
     // Revalider les pages
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${id}`);
@@ -892,6 +917,13 @@ export async function acceptQuoteAction(
       },
     });
 
+    // Enregistrer l'événement d'acceptation dans l'historique (QuoteLog)
+    await logQuoteAcceptedByClient({
+      quoteId: quote.id,
+      changedById: session.user.id,
+      notes: `Devis accepté par le client avec méthode de paiement: ${validatedData.paymentMethod}`,
+    });
+
     // Revalider les pages
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${id}`);
@@ -1000,6 +1032,15 @@ export async function rejectQuoteAction(
         status: 'REJECTED',
         rejectedAt: new Date(),
       },
+    });
+
+    // Enregistrer l'événement de rejet dans l'historique (QuoteLog)
+    // Permet de tracer le rejet du devis par le client
+    await logQuoteRejectedByClient({
+      quoteId: id,
+      changedById: session.user.id,
+      reason: validatedData.reason,
+      notes: validatedData.reason || 'Devis rejeté par le client',
     });
 
     // Revalider les pages
@@ -1544,7 +1585,15 @@ export async function startQuoteTreatmentAction(
       // L'intégration Inngest sera ajoutée ultérieurement
     }
 
-    // 8. Revalider les caches
+    // 8. Enregistrer l'événement de prise en charge dans l'historique (QuoteLog)
+    // Permet de tracer quel agent a pris en charge le devis et quand
+    await logQuoteTreatmentStarted({
+      quoteId: quoteId,
+      changedById: session.user.id,
+      notes: validatedData.comment || `Devis pris en charge par l'agent`,
+    });
+
+    // 9. Revalider les caches
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${quoteId}`);
 
@@ -1825,7 +1874,16 @@ export async function validateQuoteTreatmentAction(
       },
     });
 
-    // 11. Revalider les caches
+    // 11. Enregistrer l'événement de validation dans l'historique (QuoteLog)
+    // Permet de tracer la validation du devis et la création de l'expédition associée
+    await logQuoteTreatmentValidated({
+      quoteId: quoteId,
+      changedById: session.user.id,
+      shipmentId: result.shipment.id,
+      notes: validatedData.comment || `Devis validé - Expédition ${result.shipment.trackingNumber} créée`,
+    });
+
+    // 12. Revalider les caches
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${quoteId}`);
     revalidatePath('/dashboard/shipments');
@@ -1935,7 +1993,16 @@ export async function cancelQuoteAction(
       },
     });
 
-    // 7. Revalider les caches
+    // 7. Enregistrer l'événement d'annulation dans l'historique (QuoteLog)
+    // Permet de tracer qui a annulé le devis et pour quelle raison
+    await logQuoteCancelled({
+      quoteId: quoteId,
+      changedById: session.user.id,
+      reason: validatedData.reason,
+      notes: `Devis annulé: ${validatedData.reason}`,
+    });
+
+    // 8. Revalider les caches
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${quoteId}`);
 
