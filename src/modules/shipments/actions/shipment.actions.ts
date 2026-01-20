@@ -22,6 +22,13 @@ import {
   type ShipmentUpdateData,
   type ShipmentStatusUpdate,
 } from '../schemas/shipment.schema';
+import {
+  logShipmentCreated,
+  logStatusChanged,
+  logPaymentReceived,
+  logTrackingEventAdded,
+} from '../lib/shipment-log-helper';
+import { ShipmentStatus } from '@/lib/db/enums';
 
 /**
  * Type pour les résultats d'actions avec erreur ou succès
@@ -208,6 +215,15 @@ export async function createShipmentAction(
         status: 'DRAFT',
         createdById: session.user.id,
       },
+    });
+
+    // Enregistrer l'événement de création dans l'historique
+    await logShipmentCreated({
+      shipmentId: shipment.id,
+      changedById: session.user.id,
+      initialStatus: ShipmentStatus.DRAFT,
+      notes: 'Expédition créée depuis le dashboard',
+      metadata: { source: 'dashboard' },
     });
 
     // Revalider la liste des expéditions
@@ -874,8 +890,11 @@ export async function updateShipmentStatusAction(
     // Valider les données
     const validatedData = shipmentStatusUpdateSchema.parse(statusData);
 
+    // Sauvegarder l'ancien statut pour l'historique
+    const oldStatus = shipment.status as ShipmentStatus;
+
     // Mettre à jour le statut et créer un événement de tracking
-    await prisma.$transaction(async (tx) => {
+    const trackingEvent = await prisma.$transaction(async (tx) => {
       // Mettre à jour le statut de l'expédition
       await tx.shipment.update({
         where: { id },
@@ -883,7 +902,7 @@ export async function updateShipmentStatusAction(
       });
 
       // Créer un événement de tracking avec l'ID de l'agent
-      await tx.trackingEvent.create({
+      const event = await tx.trackingEvent.create({
         data: {
           shipmentId: id,
           status: validatedData.status,
@@ -892,6 +911,26 @@ export async function updateShipmentStatusAction(
           performedById: agentId, // Enregistrer l'agent qui a effectué l'action
         },
       });
+
+      return event;
+    });
+
+    // Enregistrer le changement de statut dans l'historique (ShipmentLog)
+    await logStatusChanged({
+      shipmentId: id,
+      oldStatus: oldStatus,
+      newStatus: validatedData.status as ShipmentStatus,
+      changedById: agentId,
+      notes: validatedData.notes,
+    });
+
+    // Enregistrer également l'événement de tracking ajouté
+    await logTrackingEventAdded({
+      shipmentId: id,
+      trackingEventId: trackingEvent.id,
+      location: 'Mise à jour manuelle',
+      status: validatedData.status,
+      changedById: agentId,
     });
 
     // Revalider les pages pour mettre à jour l'affichage
@@ -1042,11 +1081,18 @@ export async function markShipmentPaymentReceivedAction(
       },
     });
 
+    // 8. Enregistrer l'événement de paiement dans l'historique (ShipmentLog)
+    await logPaymentReceived({
+      shipmentId: shipmentId,
+      changedById: session.user.id,
+      notes: `Paiement confirmé par ${session.user.name || session.user.email}`,
+    });
+
     console.log(
       `💰 [Shipment] Paiement confirmé pour le colis ${existingShipment.trackingNumber} par ${session.user.email}`
     );
 
-    // 8. Revalider les caches
+    // 9. Revalider les caches
     revalidatePath('/dashboard/shipments');
     revalidatePath(`/dashboard/shipments/${shipmentId}`);
     revalidatePath('/dashboard/quotes');

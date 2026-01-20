@@ -35,11 +35,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { getShipmentAction } from '@/modules/shipments';
+import { getShipmentAction, getShipmentHistory } from '@/modules/shipments';
 import { ShipmentStatus } from '@/lib/db/enums';
 import { getSession } from '@/lib/auth/config';
 import { ShipmentAgentActions } from '@/components/shipments/shipment-agent-actions';
 import { ShipmentPaymentActions } from '@/components/shipments/shipment-payment-actions';
+import { ShipmentHistoryTimeline } from '@/components/shipments';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -140,10 +141,11 @@ export default async function ShipmentDetailPage({
 }) {
   const { id } = await params;
 
-  // Récupérer l'expédition et la session en parallèle
-  const [result, session] = await Promise.all([
+  // Récupérer l'expédition, la session et l'historique en parallèle
+  const [result, session, shipmentLogs] = await Promise.all([
     getShipmentAction(id),
     getSession(),
+    getShipmentHistory(id),
   ]);
 
   if (!result.success || !result.data) {
@@ -533,12 +535,21 @@ export default async function ShipmentDetailPage({
         </CardContent>
       </Card>
 
-      {/* Historique de tracking */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HISTORIQUE DES ACTIONS (AUDIT LOG) */}
+      {/* Timeline des événements système : création, paiements, etc. */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <ShipmentHistoryTimeline logs={shipmentLogs} />
+
+      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* HISTORIQUE DE TRACKING (GÉOGRAPHIQUE) */}
+      {/* Événements de localisation du colis */}
+      {/* ════════════════════════════════════════════════════════════════ */}
       <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Historique de tracking</CardTitle>
           <CardDescription>
-            Événements et mises à jour de statut
+            Événements de localisation et transit
           </CardDescription>
         </CardHeader>
         <CardContent>

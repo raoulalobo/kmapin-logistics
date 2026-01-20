@@ -95,6 +95,7 @@ model User {
   purchaseLogs       PurchaseLog[] @relation("PurchaseLogChangedBy") // Logs d'achat effectués
   userPurchases      PurchaseRequest[] @relation("UserPurchases") // Demandes d'achat de cet utilisateur (connecté ou rattaché)
   quoteLogs          QuoteLog[] @relation("QuoteLogChangedBy") // Logs de devis effectués
+  shipmentLogs       ShipmentLog[] @relation("ShipmentLogChangedBy") // Logs d'expédition effectués
 
   treatedQuotes      Quote[] @relation("QuoteTreatmentAgent") // Devis traités par cet agent
 
@@ -443,6 +444,7 @@ model Shipment {
   documents      Document[]
   pickupRequests PickupRequest[]
   fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition (colis)
+  logs           ShipmentLog[]   // Historique complet des événements (changements de statut, etc.)
 
   // 🔐 Access Policies
 
@@ -1091,6 +1093,123 @@ model TrackingEvent {
 }
 
 // ============================================
+// HISTORIQUE DES EXPÉDITIONS (SHIPMENT LOG)
+// ============================================
+//
+// Table d'historique pour tracer tous les changements sur les expéditions.
+// Similaire à PickupLog et PurchaseLog, permet de :
+// - Suivre les transitions de statut (oldStatus → newStatus)
+// - Enregistrer les événements métier (création, assignation, paiement, etc.)
+// - Garder une trace de qui a fait quoi et quand
+//
+// Types d'événements :
+// - CREATED : Création de l'expédition
+// - STATUS_CHANGED : Changement de statut
+// - PAYMENT_RECEIVED : Paiement reçu
+// - DOCUMENT_ADDED : Document ajouté
+// - PICKUP_ASSIGNED : Enlèvement assigné
+// - COMMENT_ADDED : Commentaire ajouté
+// ============================================
+
+/**
+ * ShipmentLog - Historique des événements sur les expéditions
+ *
+ * 🔐 Access Policies :
+ * - Admin : accès complet
+ * - Operations Manager : création et lecture
+ * - Finance Manager : lecture seule (pour audit)
+ * - Client : lecture des logs de ses propres expéditions
+ */
+model ShipmentLog {
+  id        String   @id @default(cuid())
+
+  // ════════════════════════════════════════════
+  // RELATION AVEC L'EXPÉDITION
+  // ════════════════════════════════════════════
+
+  shipmentId  String
+  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  // ════════════════════════════════════════════
+  // CHANGEMENT DE STATUT
+  // ════════════════════════════════════════════
+
+  // Statut avant le changement (NULL pour le premier log - création)
+  oldStatus ShipmentStatus?
+
+  // Statut après le changement (NULL si pas de changement de statut)
+  newStatus ShipmentStatus?
+
+  // ════════════════════════════════════════════
+  // TYPE D'ÉVÉNEMENT
+  // ════════════════════════════════════════════
+
+  // Type d'événement pour différencier les logs
+  // Valeurs : "CREATED", "STATUS_CHANGED", "PAYMENT_RECEIVED",
+  //           "DOCUMENT_ADDED", "PICKUP_ASSIGNED", "COMMENT_ADDED"
+  eventType String
+
+  // ════════════════════════════════════════════
+  // AUTEUR DU CHANGEMENT
+  // ════════════════════════════════════════════
+
+  // ID de l'utilisateur ayant effectué le changement
+  // NULL si changement automatique (système, webhook, etc.)
+  changedById String?
+  changedBy   User?   @relation("ShipmentLogChangedBy", fields: [changedById], references: [id])
+
+  // ════════════════════════════════════════════
+  // DÉTAILS DU CHANGEMENT
+  // ════════════════════════════════════════════
+
+  // Notes ou raison du changement (commentaire agent, explication, etc.)
+  notes       String? @db.Text
+
+  // Métadonnées flexibles en JSON pour données additionnelles
+  // Ex: { "pickupRequestId": "xxx", "documentId": "yyy" }
+  metadata    Json?
+
+  // ════════════════════════════════════════════
+  // HORODATAGE
+  // ════════════════════════════════════════════
+
+  createdAt   DateTime @default(now())
+
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
+
+  // Admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Operations managers peuvent créer et lire
+  @@allow('create,read', auth().role == OPERATIONS_MANAGER)
+
+  // Finance managers peuvent lire (pour audit)
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Le créateur de l'expédition peut lire les logs
+  @@allow('read', auth().id == shipment.createdById)
+
+  // Clients peuvent lire les logs des expéditions de leur entreprise
+  @@allow('read', auth().clientId == shipment.clientId && auth().role == CLIENT)
+
+  @@deny('all', true)
+
+  // ════════════════════════════════════════════
+  // INDEXES POUR PERFORMANCE
+  // ════════════════════════════════════════════
+
+  @@index([shipmentId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([changedById])
+  @@index([shipmentId, createdAt]) // Composite pour historique optimisé
+
+  @@map("shipment_log")
+}
+
+// ============================================
 // DEVIS
 // ============================================
 //
@@ -1369,6 +1488,9 @@ model QuoteLog {
   @@index([eventType])
   @@index([createdAt])
   @@index([changedById])
+  @@index([quoteId, createdAt]) // Composite pour historique optimisé
+
+  @@map("quote_log")
 }
 
 enum ProspectStatus {

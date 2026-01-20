@@ -15,6 +15,12 @@ export {
   type EnhancedPrismaClient,
 } from './enhanced-client';
 
+// Types d'événements pour les logs (Event Sourcing léger)
+export * from './pickup-log-events';
+export * from './purchase-log-events';
+export * from './quote-log-events';
+export * from './shipment-log-events';
+
 /**
  * Guide d'utilisation :
  *

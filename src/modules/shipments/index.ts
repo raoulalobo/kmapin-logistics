@@ -12,3 +12,6 @@ export * from './schemas/shipment.schema';
 
 // Exports des actions
 export * from './actions/shipment.actions';
+
+// Exports des helpers de logs (historique)
+export * from './lib/shipment-log-helper';
