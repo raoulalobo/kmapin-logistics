@@ -530,8 +530,9 @@ export default async function QuoteDetailPage({
 
           {/* Actions générales */}
           <div className="flex gap-2 flex-wrap">
-            {/* Modifier - visible pour DRAFT et SENT */}
-            {(quote.status === 'DRAFT' || quote.status === 'SENT') && (
+            {/* Modifier - visible uniquement pour CLIENT avec devis DRAFT */}
+            {/* Une fois envoyé (SENT), le devis est verrouillé en attente de réponse */}
+            {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/dashboard/quotes/${quote.id}/edit`}>
                   <PencilSimple className="mr-2 h-4 w-4" />
@@ -540,8 +541,8 @@ export default async function QuoteDetailPage({
               </Button>
             )}
 
-            {/* Supprimer - visible pour DRAFT uniquement */}
-            {quote.status === 'DRAFT' && (
+            {/* Supprimer - visible uniquement pour CLIENT avec devis DRAFT */}
+            {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
               <Button variant="destructive" size="sm">
                 <Trash className="mr-2 h-4 w-4" />
                 Supprimer

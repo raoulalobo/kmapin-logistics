@@ -314,16 +314,18 @@ export function QuoteAgentActions({
   return (
     <div className="space-y-4">
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* BOUTON ENVOYER - visible si DRAFT */}
+      {/* BOUTONS PRINCIPAUX - flex container pour alignement cohérent */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      {quoteStatus === 'DRAFT' && (
-        <Dialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="default" className="w-full" disabled={isPending}>
-              <PaperPlaneTilt className="mr-2 h-4 w-4" />
-              Envoyer au client
-            </Button>
-          </DialogTrigger>
+      <div className="flex gap-3">
+        {/* BOUTON ENVOYER - visible si DRAFT */}
+        {quoteStatus === 'DRAFT' && (
+          <Dialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default" className="flex-1" disabled={isPending}>
+                <PaperPlaneTilt className="mr-2 h-4 w-4" />
+                Envoyer au client
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[450px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -386,10 +388,6 @@ export function QuoteAgentActions({
         </Dialog>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* BOUTONS PRINCIPAUX */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex gap-3">
         {/* Bouton "Traiter devis" - visible si SENT ou ACCEPTED */}
         {(quoteStatus === 'SENT' || quoteStatus === 'ACCEPTED') && (
           <Dialog open={isTreatDialogOpen} onOpenChange={setIsTreatDialogOpen}>
@@ -627,11 +625,12 @@ export function QuoteAgentActions({
         )}
 
         {/* Bouton "Annuler" - visible pour tous les statuts sauf VALIDATED et CANCELLED */}
+        {/* flex-1 pour alignement cohérent avec les autres boutons */}
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant="destructive"
-              className={quoteStatus === 'IN_TREATMENT' ? 'flex-1' : ''}
+              className="flex-1"
               disabled={isPending}
             >
               <XCircle className="mr-2 h-4 w-4" />
