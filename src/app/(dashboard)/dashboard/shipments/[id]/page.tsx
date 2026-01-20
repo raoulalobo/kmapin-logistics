@@ -188,8 +188,12 @@ export default async function ShipmentDetailPage({
 
       <Separator />
 
-      {/* Client */}
-      <Card className="dashboard-card">
+      {/* Grid à 2 colonnes sur desktop (comme Purchase/Pickup) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Colonne gauche : Détails (2/3) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Client */}
+          <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Client</CardTitle>
         </CardHeader>
@@ -507,188 +511,193 @@ export default async function ShipmentDetailPage({
         </Card>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* PAIEMENT ET FACTURATION */}
-      {/* Visible si le colis a un devis source (fromQuote) */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <Card className="dashboard-card border-green-100">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CurrencyEur className="h-5 w-5 text-green-600" />
-            Paiement et Facturation
-          </CardTitle>
-          <CardDescription>
-            Confirmation du paiement et génération de facture
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ShipmentPaymentActions
-            shipmentId={shipment.id}
-            trackingNumber={shipment.trackingNumber}
-            paymentReceivedAt={shipment.paymentReceivedAt}
-            paymentReceivedByName={shipment.paymentReceivedBy?.name}
-            estimatedCost={Number(shipment.fromQuote?.estimatedCost || shipment.estimatedCost || 0)}
-            currency={shipment.fromQuote?.currency || shipment.currency}
-            userRole={userRole}
-            hasSourceQuote={!!shipment.fromQuote}
-          />
-        </CardContent>
-      </Card>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* PAIEMENT ET FACTURATION */}
+          {/* Visible si le colis a un devis source (fromQuote) */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          <Card className="dashboard-card border-green-100">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CurrencyEur className="h-5 w-5 text-green-600" />
+                Paiement et Facturation
+              </CardTitle>
+              <CardDescription>
+                Confirmation du paiement et génération de facture
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ShipmentPaymentActions
+                shipmentId={shipment.id}
+                trackingNumber={shipment.trackingNumber}
+                paymentReceivedAt={shipment.paymentReceivedAt}
+                paymentReceivedByName={shipment.paymentReceivedBy?.name}
+                estimatedCost={Number(shipment.fromQuote?.estimatedCost || shipment.estimatedCost || 0)}
+                currency={shipment.fromQuote?.currency || shipment.currency}
+                userRole={userRole}
+                hasSourceQuote={!!shipment.fromQuote}
+              />
+            </CardContent>
+          </Card>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HISTORIQUE DES ACTIONS (AUDIT LOG) */}
-      {/* Timeline des événements système : création, paiements, etc. */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <ShipmentHistoryTimeline logs={shipmentLogs} />
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* HISTORIQUE DE TRACKING (GÉOGRAPHIQUE) */}
-      {/* Événements de localisation du colis */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Historique de tracking</CardTitle>
-          <CardDescription>
-            Événements de localisation et transit
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {shipment.trackingEvents && shipment.trackingEvents.length > 0 ? (
-            <div className="relative space-y-4">
-              {shipment.trackingEvents.map((event, index) => (
-                <div key={event.id} className="flex gap-4">
-                  <div className="relative flex flex-col items-center">
-                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                      <MapPin className="h-4 w-4 text-primary-foreground" />
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* HISTORIQUE DE TRACKING (GÉOGRAPHIQUE) */}
+          {/* Événements de localisation du colis */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Historique de tracking</CardTitle>
+              <CardDescription>
+                Événements de localisation et transit
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {shipment.trackingEvents && shipment.trackingEvents.length > 0 ? (
+                <div className="relative space-y-4">
+                  {shipment.trackingEvents.map((event, index) => (
+                    <div key={event.id} className="flex gap-4">
+                      <div className="relative flex flex-col items-center">
+                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                          <MapPin className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                        {index < shipment.trackingEvents.length - 1 && (
+                          <div className="h-full w-0.5 bg-border absolute top-8" style={{ height: '100%' }} />
+                        )}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <p className="font-medium">{formatStatus(event.status)}</p>
+                        <p className="text-sm text-muted-foreground">{event.location}</p>
+                        {event.description && (
+                          <p className="text-sm mt-1">{event.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 mt-2">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(event.timestamp).toLocaleString('fr-FR')}
+                          </p>
+                          {/* Afficher le nom de l'agent qui a effectué l'action */}
+                          {event.performedBy && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              {event.performedBy.name || event.performedBy.email}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {index < shipment.trackingEvents.length - 1 && (
-                      <div className="h-full w-0.5 bg-border absolute top-8" style={{ height: '100%' }} />
-                    )}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Aucun événement de tracking pour cette expédition
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Métadonnées */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Informations système</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Date de création</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(shipment.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
                   </div>
-                  <div className="flex-1 pb-4">
-                    <p className="font-medium">{formatStatus(event.status)}</p>
-                    <p className="text-sm text-muted-foreground">{event.location}</p>
-                    {event.description && (
-                      <p className="text-sm mt-1">{event.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 mt-2">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {new Date(event.timestamp).toLocaleString('fr-FR')}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Dernière modification</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(shipment.updatedAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {shipment.createdBy && (
+                  <div className="flex items-center gap-3">
+                    <Buildings className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Créé par</p>
+                      <p className="text-sm text-muted-foreground">
+                        {shipment.createdBy.name || shipment.createdBy.email}
                       </p>
-                      {/* Afficher le nom de l'agent qui a effectué l'action */}
-                      {event.performedBy && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {event.performedBy.name || event.performedBy.email}
-                        </p>
-                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Aucun événement de tracking pour cette expédition
-            </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* ACTIONS WORKFLOW AGENT */}
+          {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle>Actions Agent</CardTitle>
+                <CardDescription>
+                  Gestion du workflow d'expédition
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ShipmentAgentActions
+                  shipmentId={shipment.id}
+                  trackingNumber={shipment.trackingNumber}
+                  shipmentStatus={shipment.status}
+                  originCountry={shipment.originCountry}
+                  destinationCountry={shipment.destinationCountry}
+                  userRole={userRole}
+                  agentName={userName}
+                />
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Métadonnées */}
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Informations système</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Date de création</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(shipment.createdAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* ACTIONS GÉNÉRALES */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {shipment.status === 'DRAFT' && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
+                  <PencilSimple className="mr-2 h-4 w-4" />
+                  Modifier
+                </Link>
+              </Button>
+              <Button variant="destructive" size="sm">
+                <Trash className="mr-2 h-4 w-4" />
+                Supprimer
+              </Button>
             </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Dernière modification</p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(shipment.updatedAt).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
-            </div>
-
-            {shipment.createdBy && (
-              <div className="flex items-center gap-3">
-                <Buildings className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Créé par</p>
-                  <p className="text-sm text-muted-foreground">
-                    {shipment.createdBy.name || shipment.createdBy.email}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS WORKFLOW AGENT */}
-      {/* Visible pour ADMIN et OPERATIONS_MANAGER */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle>Actions Agent</CardTitle>
-            <CardDescription>
-              Gestion du workflow d'expédition
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ShipmentAgentActions
-              shipmentId={shipment.id}
-              trackingNumber={shipment.trackingNumber}
-              shipmentStatus={shipment.status}
-              originCountry={shipment.originCountry}
-              destinationCountry={shipment.destinationCountry}
-              userRole={userRole}
-              agentName={userName}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ACTIONS GÉNÉRALES */}
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {shipment.status === 'DRAFT' && (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
-              <PencilSimple className="mr-2 h-4 w-4" />
-              Modifier
-            </Link>
-          </Button>
-          <Button variant="destructive" size="sm">
-            <Trash className="mr-2 h-4 w-4" />
-            Supprimer
-          </Button>
+          )}
         </div>
-      )}
+
+        {/* Colonne droite : Historique (1/3) */}
+        <div className="lg:col-span-1">
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* HISTORIQUE DES ACTIONS (AUDIT LOG) */}
+          {/* Timeline des événements système : création, paiements, etc. */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          <ShipmentHistoryTimeline logs={shipmentLogs} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -371,15 +371,16 @@ export function ShipmentAgentActions({
 
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {/* BOUTONS PRINCIPAUX */}
+      {/* Grille responsive : 1 colonne sur mobile, 3 colonnes sur desktop */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex gap-3 flex-wrap">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {/* Bouton de transition principal */}
         {availableTransition && (
           <Dialog open={isTransitionDialogOpen} onOpenChange={setIsTransitionDialogOpen}>
             <DialogTrigger asChild>
               <Button
                 variant={availableTransition.variant}
-                className="flex-1 min-w-[200px]"
+                className="w-full justify-center"
                 disabled={isPending}
                 onClick={() => openTransitionDialog(availableTransition)}
               >
@@ -483,7 +484,7 @@ export function ShipmentAgentActions({
         {shipmentStatus !== 'ON_HOLD' && (
           <Dialog open={isHoldDialogOpen} onOpenChange={setIsHoldDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="secondary" disabled={isPending}>
+              <Button variant="secondary" className="w-full justify-center" disabled={isPending}>
                 <Pause className="mr-2 h-4 w-4" />
                 Mettre en attente
               </Button>
@@ -573,6 +574,7 @@ export function ShipmentAgentActions({
         {shipmentStatus === 'ON_HOLD' && (
           <Button
             variant="default"
+            className="w-full justify-center"
             disabled={isPending}
             onClick={() => {
               // Reprendre au statut PENDING_APPROVAL pour recommencer le workflow
@@ -598,7 +600,7 @@ export function ShipmentAgentActions({
         {/* Bouton Annuler */}
         <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="destructive" disabled={isPending}>
+            <Button variant="destructive" className="w-full justify-center" disabled={isPending}>
               <XCircle className="mr-2 h-4 w-4" />
               Annuler l'expédition
             </Button>

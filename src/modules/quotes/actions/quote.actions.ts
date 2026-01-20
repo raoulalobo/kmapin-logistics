@@ -13,7 +13,8 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 import { requirePermission, hasPermission } from '@/lib/auth/permissions';
-import { UserRole } from '@/lib/db/enums';
+import { UserRole, ShipmentStatus } from '@/lib/db/enums';
+import { logShipmentCreated } from '@/modules/shipments';
 import {
   quoteSchema,
   quoteUpdateSchema,
@@ -1522,22 +1523,23 @@ export async function startQuoteTreatmentAction(
     }
 
     // 6. Mettre à jour le devis avec le nouveau statut
+    // NOTE : La méthode de paiement n'est PAS modifiée ici - elle a été définie par le client
+    // lors de l'acceptation et seul le client (owner) ou un ADMIN peut la modifier
     const updatedQuote = await prisma.quote.update({
       where: { id: quoteId },
       data: {
         status: 'IN_TREATMENT',
-        paymentMethod: validatedData.paymentMethod,
         agentComment: validatedData.comment,
         treatmentStartedAt: new Date(),
         treatmentAgentId: session.user.id,
       },
     });
 
-    // 7. Si virement bancaire, déclencher l'envoi d'email RIB
+    // 7. Si virement bancaire (choisi par le client), déclencher l'envoi d'email RIB
     // TODO: Intégration Inngest pour l'envoi d'email
-    if (validatedData.paymentMethod === 'BANK_TRANSFER') {
+    if (existingQuote.paymentMethod === 'BANK_TRANSFER') {
       console.log(
-        `[QUOTE TREATMENT] Virement bancaire sélectionné pour le devis ${existingQuote.quoteNumber}. Email RIB à envoyer.`
+        `[QUOTE TREATMENT] Virement bancaire choisi par le client pour le devis ${existingQuote.quoteNumber}. Email RIB à envoyer.`
       );
       // L'intégration Inngest sera ajoutée ultérieurement
     }
@@ -1719,23 +1721,31 @@ export async function validateQuoteTreatmentAction(
       };
     }
 
-    // 6. Générer un numéro de suivi pour l'expédition (avec pays destination)
+    // 6. Vérifier que le devis a un client associé (obligatoire pour créer une expédition)
+    // Un devis sans clientId ne peut pas être converti en expédition car le modèle Shipment
+    // exige un clientId obligatoire pour le suivi et la facturation
+    if (!existingQuote.clientId) {
+      return {
+        success: false,
+        error: 'Impossible de valider ce devis : aucun client associé. Le devis doit être rattaché à un compte client avant de pouvoir créer une expédition.',
+      };
+    }
+
+    // 7. Générer un numéro de suivi pour l'expédition (avec pays destination)
     const trackingNumber = await generateTrackingNumber(existingQuote.destinationCountry);
 
-    // 7. Récupérer les informations du client pour les adresses par défaut
+    // 8. Récupérer les informations du client pour les adresses par défaut
     const clientUser = existingQuote.client?.users?.[0];
     const companyName = existingQuote.client?.name || 'Client';
 
-    // 8. Créer l'expédition (transaction pour assurer l'intégrité)
+    // 9. Créer l'expédition (transaction pour assurer l'intégrité)
     const result = await prisma.$transaction(async (tx) => {
-      // Créer l'expédition
-      // PROPRIÉTÉ HYBRIDE : si le devis a une company, l'expédition appartient à la company
-      // Sinon, l'expédition appartient directement à l'utilisateur du devis (particulier)
+      // Créer l'expédition liée au client du devis
       const shipment = await tx.shipment.create({
         data: {
           trackingNumber,
-          clientId: existingQuote.clientId, // NULL si particulier
-          userId: existingQuote.clientId ? null : existingQuote.userId, // userId si pas de company
+          // clientId est garanti non-null grâce à la validation à l'étape 6
+          clientId: existingQuote.clientId,
 
           // Origine (depuis les données de validation ou valeurs par défaut)
           originAddress:
@@ -1802,7 +1812,20 @@ export async function validateQuoteTreatmentAction(
       return { shipment, updatedQuote };
     });
 
-    // 9. Revalider les caches
+    // 10. Enregistrer l'événement de création dans l'historique (ShipmentLog)
+    // Cela permet de tracer l'origine de l'expédition et l'agent qui l'a créée
+    await logShipmentCreated({
+      shipmentId: result.shipment.id,
+      changedById: session.user.id,
+      initialStatus: ShipmentStatus.PENDING_APPROVAL,
+      notes: `Expédition créée depuis le devis ${existingQuote.quoteNumber}`,
+      metadata: {
+        source: 'quote',
+        quoteId: existingQuote.id,
+      },
+    });
+
+    // 11. Revalider les caches
     revalidatePath('/dashboard/quotes');
     revalidatePath(`/dashboard/quotes/${quoteId}`);
     revalidatePath('/dashboard/shipments');
