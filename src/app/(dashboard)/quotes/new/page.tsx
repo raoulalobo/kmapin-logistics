@@ -293,9 +293,15 @@ export default function NewQuotePage() {
                           step="0.01"
                           min="0.01"
                           max="100000"
-                          placeholder="1000"
-                          {...field}
-                          onChange={e => field.onChange(parseFloat(e.target.value))}
+                          placeholder="Ex: 1000"
+                          value={field.value ?? ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? undefined : parseFloat(val));
+                          }}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormDescription>
@@ -419,9 +425,15 @@ export default function NewQuotePage() {
                           step="0.01"
                           min="0.01"
                           max="10000000"
-                          placeholder="2500.00"
-                          {...field}
-                          onChange={e => field.onChange(parseFloat(e.target.value))}
+                          placeholder="Ex: 2500.00"
+                          value={field.value ?? ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            field.onChange(val === '' ? undefined : parseFloat(val));
+                          }}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormDescription>

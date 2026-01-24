@@ -473,11 +473,18 @@ export default function EditQuotePage({
                     <FormLabel>Poids (kg) *</FormLabel>
                     <FormControl>
                       <Input
-                        {...field}
                         type="number"
                         min="0"
                         step="0.1"
-                        onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                        placeholder="Ex: 150"
+                        value={field.value ?? ''}
+                        onChange={e => {
+                          const val = e.target.value;
+                          field.onChange(val === '' ? undefined : parseFloat(val));
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormDescription>Poids total en kilogrammes</FormDescription>
@@ -498,10 +505,17 @@ export default function EditQuotePage({
                         <FormLabel className="text-sm text-muted-foreground">Longueur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 100"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
@@ -517,10 +531,17 @@ export default function EditQuotePage({
                         <FormLabel className="text-sm text-muted-foreground">Largeur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 80"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
@@ -536,10 +557,17 @@ export default function EditQuotePage({
                         <FormLabel className="text-sm text-muted-foreground">Hauteur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 60"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />

@@ -112,6 +112,10 @@ export const PERMISSIONS = {
     'pickups:read:own',
     'pickups:create:own', // Peut réserver un enlèvement
 
+    // Achats délégués personnels
+    'purchases:read:own',    // Peut voir ses propres achats délégués
+    'purchases:create:own',  // Peut créer un achat délégué
+
     // Documents personnels
     'documents:read:own',
 

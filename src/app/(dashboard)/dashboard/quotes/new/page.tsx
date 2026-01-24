@@ -77,10 +77,12 @@ export default function NewQuotePage() {
       originCountry: 'FR',
       destinationCountry: '',
       cargoType: 'GENERAL' as CargoType,
-      weight: 0,
-      length: 0,
-      width: 0,
-      height: 0,
+      // Champs numériques : undefined permet d'avoir un champ vide par défaut
+      // au lieu de 0 qui bloque l'utilisateur
+      weight: undefined as unknown as number,
+      length: undefined as unknown as number,
+      width: undefined as unknown as number,
+      height: undefined as unknown as number,
       transportMode: ['ROAD' as TransportMode],
       estimatedCost: 0,
       currency: 'EUR',
@@ -439,12 +441,20 @@ export default function NewQuotePage() {
                     <FormLabel>Poids (kg) *</FormLabel>
                     <FormControl>
                       <Input
-                        {...field}
                         type="number"
                         min="0"
                         step="0.1"
-                        placeholder="0"
-                        onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                        placeholder="Ex: 150"
+                        // Afficher vide si undefined/null/0, sinon la valeur
+                        value={field.value ?? ''}
+                        onChange={e => {
+                          // Permettre le champ vide (undefined) pour une meilleure UX
+                          const val = e.target.value;
+                          field.onChange(val === '' ? undefined : parseFloat(val));
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormDescription>
@@ -469,12 +479,18 @@ export default function NewQuotePage() {
                         <FormLabel className="text-sm text-muted-foreground">Longueur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
                             step="1"
-                            placeholder="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 100"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
@@ -490,12 +506,18 @@ export default function NewQuotePage() {
                         <FormLabel className="text-sm text-muted-foreground">Largeur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
                             step="1"
-                            placeholder="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 80"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
@@ -511,12 +533,18 @@ export default function NewQuotePage() {
                         <FormLabel className="text-sm text-muted-foreground">Hauteur (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             type="number"
                             min="0"
                             step="1"
-                            placeholder="0"
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            placeholder="Ex: 60"
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val === '' ? undefined : parseFloat(val));
+                            }}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
