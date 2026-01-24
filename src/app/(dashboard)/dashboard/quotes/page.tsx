@@ -12,7 +12,7 @@
  */
 
 import Link from 'next/link';
-import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Play } from '@phosphor-icons/react/dist/ssr';
+import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Eye, ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,16 +59,19 @@ function formatStatus(status: QuoteStatus): string {
 }
 
 /**
- * Fonction utilitaire pour obtenir la variante du badge selon le statut
- * Inclut tous les statuts du workflow agent
+ * Labels français pour chaque statut de devis
+ * Simple mapping statut -> texte affiché
  */
-function getStatusVariant(status: QuoteStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
-  if (status === 'ACCEPTED' || status === 'VALIDATED') return 'default';
-  if (status === 'REJECTED' || status === 'CANCELLED') return 'destructive';
-  if (status === 'DRAFT' || status === 'EXPIRED') return 'secondary';
-  if (status === 'IN_TREATMENT') return 'outline';
-  return 'outline';
-}
+const STATUS_LABELS: Record<QuoteStatus, string> = {
+  DRAFT: 'Brouillon',
+  SENT: 'Envoyé',
+  ACCEPTED: 'Accepté',
+  REJECTED: 'Refusé',
+  EXPIRED: 'Expiré',
+  IN_TREATMENT: 'En traitement',
+  VALIDATED: 'Validé',
+  CANCELLED: 'Annulé',
+};
 
 /**
  * Fonction utilitaire pour formater le type de cargo en français
@@ -362,14 +365,36 @@ export default async function QuotesPage({
                     </div>
                   </div>
 
-                  {/* Statut et actions */}
+                  {/* ═══════════════════════════════════════════════════════════ */}
+                  {/* STATUT ET ACTIONS                                           */}
+                  {/* Badge de statut attrayant + bouton "Voir détails"           */}
+                  {/* ═══════════════════════════════════════════════════════════ */}
                   <div className="flex flex-col items-end gap-3">
-                    <Badge variant={getStatusVariant(quote.status)}>
-                      {formatStatus(quote.status)}
-                    </Badge>
-                    <Button variant="ghost" size="sm" asChild>
+                    {/* Badge de statut - Couleur uniforme, bien contrasté */}
+                    <div
+                      className="
+                        inline-flex items-center px-4 py-2 rounded-full
+                        font-bold text-sm uppercase tracking-wide
+                        bg-indigo-600 text-white
+                        border-2 border-indigo-700
+                        shadow-lg shadow-indigo-500/30
+                        hover:bg-indigo-700 hover:scale-105
+                        transition-all duration-200
+                      "
+                    >
+                      {STATUS_LABELS[quote.status]}
+                    </div>
+
+                    {/* Bouton "Voir détails" attrayant */}
+                    <Button
+                      asChild
+                      size="sm"
+                      className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 group"
+                    >
                       <Link href={`/dashboard/quotes/${quote.id}`}>
-                        Voir détails
+                        <Eye className="h-4 w-4" weight="fill" />
+                        <span>Voir détails</span>
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </Link>
                     </Button>
                   </div>

@@ -53,6 +53,30 @@ type ActionResult<T = void> =
   | { success: false; error: string; field?: string };
 
 /**
+ * Formate le mode de paiement en français
+ *
+ * Traduit les valeurs de l'enum QuotePaymentMethod pour l'affichage
+ * dans les logs et les messages utilisateur.
+ *
+ * @param method - Valeur brute du mode de paiement (CASH, ON_DELIVERY, BANK_TRANSFER)
+ * @returns Libellé traduit en français
+ *
+ * @example
+ * formatPaymentMethod('ON_DELIVERY') // => "À la livraison"
+ */
+function formatPaymentMethod(method: string | null | undefined): string {
+  if (!method) return 'Non défini';
+
+  const methodMap: Record<string, string> = {
+    CASH: 'Comptant',
+    ON_DELIVERY: 'À la livraison',
+    BANK_TRANSFER: 'Virement bancaire',
+  };
+
+  return methodMap[method] || method;
+}
+
+/**
  * Générer un numéro de devis unique
  * Format: QTE-YYYYMMDD-XXXXX (ex: QTE-20250103-00001)
  */
@@ -918,10 +942,11 @@ export async function acceptQuoteAction(
     });
 
     // Enregistrer l'événement d'acceptation dans l'historique (QuoteLog)
+    // Note : on utilise formatPaymentMethod pour afficher le mode de paiement en français
     await logQuoteAcceptedByClient({
       quoteId: quote.id,
       changedById: session.user.id,
-      notes: `Devis accepté par le client avec méthode de paiement: ${validatedData.paymentMethod}`,
+      notes: `Devis accepté par le client avec méthode de paiement: ${formatPaymentMethod(validatedData.paymentMethod)}`,
     });
 
     // Revalider les pages

@@ -246,6 +246,54 @@ function formatDate(date: Date): string {
 }
 
 /**
+ * Formate le mode de paiement en français
+ *
+ * Traduit les valeurs de l'enum QuotePaymentMethod :
+ * - CASH → "Comptant"
+ * - ON_DELIVERY → "À la livraison"
+ * - BANK_TRANSFER → "Virement bancaire"
+ *
+ * @param method - Valeur brute du mode de paiement
+ * @returns Libellé traduit en français
+ */
+function formatPaymentMethod(method: string | null | undefined): string {
+  if (!method) return 'Non défini';
+
+  const methodMap: Record<string, string> = {
+    CASH: 'Comptant',
+    ON_DELIVERY: 'À la livraison',
+    BANK_TRANSFER: 'Virement bancaire',
+  };
+
+  return methodMap[method] || method;
+}
+
+/**
+ * Traduit les modes de paiement dans une chaîne de texte
+ *
+ * Remplace les valeurs brutes (CASH, ON_DELIVERY, BANK_TRANSFER)
+ * par leurs équivalents français dans n'importe quel texte.
+ *
+ * Utilisé pour corriger l'affichage des anciens logs qui ont
+ * été enregistrés avec les valeurs brutes de l'enum.
+ *
+ * @param text - Texte contenant potentiellement des modes de paiement non traduits
+ * @returns Texte avec les modes de paiement traduits
+ *
+ * @example
+ * translatePaymentMethodsInText("Mode de paiement: ON_DELIVERY")
+ * // => "Mode de paiement: À la livraison"
+ */
+function translatePaymentMethodsInText(text: string | null): string | null {
+  if (!text) return null;
+
+  return text
+    .replace(/\bCASH\b/g, 'Comptant')
+    .replace(/\bON_DELIVERY\b/g, 'À la livraison')
+    .replace(/\bBANK_TRANSFER\b/g, 'Virement bancaire');
+}
+
+/**
  * Formatte une date relative en français
  *
  * @param date - Date à formater
@@ -321,7 +369,7 @@ function renderMetadata(
           )}
           {metadata.paymentMethod && (
             <p>
-              Mode de paiement : <strong>{metadata.paymentMethod as string}</strong>
+              Mode de paiement : <strong>{formatPaymentMethod(metadata.paymentMethod as string)}</strong>
             </p>
           )}
         </div>
@@ -332,7 +380,7 @@ function renderMetadata(
       return (
         <div className="text-sm text-muted-foreground">
           <p>
-            Méthode : <strong>{metadata.paymentMethod as string}</strong>
+            Méthode : <strong>{formatPaymentMethod(metadata.paymentMethod as string)}</strong>
           </p>
         </div>
       );
@@ -520,9 +568,10 @@ function TimelineItem({
             )}
 
           {/* Notes (raison d'annulation, commentaires, etc.) */}
+          {/* On applique translatePaymentMethodsInText pour corriger les anciens logs */}
           {log.notes && !compact && (
             <p className="mt-2 text-sm text-gray-600 italic">
-              &quot;{log.notes}&quot;
+              &quot;{translatePaymentMethodsInText(log.notes)}&quot;
             </p>
           )}
 

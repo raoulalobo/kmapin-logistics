@@ -40,6 +40,7 @@ import {
   XCircle,
   WarningCircle,
   Clock,
+  CreditCard,
 } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
@@ -123,6 +124,22 @@ function formatTransportMode(mode: string): string {
   };
 
   return modeMap[mode] || mode;
+}
+
+/**
+ * Formate le mode de paiement en français
+ * Affiche le libellé correspondant à la méthode de paiement choisie
+ */
+function formatPaymentMethod(method: string | null | undefined): string {
+  if (!method) return 'Non défini';
+
+  const methodMap: Record<string, string> = {
+    CASH: 'Comptant',
+    ON_DELIVERY: 'À la livraison',
+    BANK_TRANSFER: 'Virement bancaire',
+  };
+
+  return methodMap[method] || method;
 }
 
 /**
@@ -285,7 +302,7 @@ export default async function QuoteDetailPage({
               </CardContent>
             </Card>
 
-            {/* Validité */}
+            {/* Validité et Paiement */}
             <Card className="dashboard-card">
               <CardHeader>
                 <CardTitle>Validité</CardTitle>
@@ -318,6 +335,17 @@ export default async function QuoteDetailPage({
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mode de paiement */}
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Mode de paiement</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatPaymentMethod(quote.paymentMethod)}
                     </p>
                   </div>
                 </div>
