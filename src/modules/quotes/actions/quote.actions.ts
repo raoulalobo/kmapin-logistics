@@ -158,6 +158,20 @@ export async function createQuoteAction(
       cargoType: formData.get('cargoType'),
       weight: Number(formData.get('weight')),
       volume: formData.get('volume') ? Number(formData.get('volume')) : null,
+      // Snapshot adresses expéditeur (optionnelles)
+      originAddress: formData.get('originAddress') || undefined,
+      originCity: formData.get('originCity') || undefined,
+      originPostalCode: formData.get('originPostalCode') || undefined,
+      originContactName: formData.get('originContactName') || undefined,
+      originContactPhone: formData.get('originContactPhone') || undefined,
+      originContactEmail: formData.get('originContactEmail') || undefined,
+      // Snapshot adresses destinataire (optionnelles)
+      destinationAddress: formData.get('destinationAddress') || undefined,
+      destinationCity: formData.get('destinationCity') || undefined,
+      destinationPostalCode: formData.get('destinationPostalCode') || undefined,
+      destinationContactName: formData.get('destinationContactName') || undefined,
+      destinationContactPhone: formData.get('destinationContactPhone') || undefined,
+      destinationContactEmail: formData.get('destinationContactEmail') || undefined,
       transportMode: formData.getAll('transportMode'),
       estimatedCost: Number(formData.get('estimatedCost')),
       currency: formData.get('currency') || 'EUR',
@@ -216,6 +230,20 @@ export async function createQuoteAction(
         cargoType: validatedData.cargoType,
         weight: validatedData.weight,
         volume: validatedData.volume,
+        // Snapshot adresses expéditeur (optionnelles - Pattern Immutable Data)
+        originAddress: validatedData.originAddress,
+        originCity: validatedData.originCity,
+        originPostalCode: validatedData.originPostalCode,
+        originContactName: validatedData.originContactName,
+        originContactPhone: validatedData.originContactPhone,
+        originContactEmail: validatedData.originContactEmail,
+        // Snapshot adresses destinataire (optionnelles - Pattern Immutable Data)
+        destinationAddress: validatedData.destinationAddress,
+        destinationCity: validatedData.destinationCity,
+        destinationPostalCode: validatedData.destinationPostalCode,
+        destinationContactName: validatedData.destinationContactName,
+        destinationContactPhone: validatedData.destinationContactPhone,
+        destinationContactEmail: validatedData.destinationContactEmail,
         transportMode: validatedData.transportMode,
         estimatedCost: validatedData.estimatedCost,
         currency: validatedData.currency,
@@ -1795,13 +1823,13 @@ export async function validateQuoteTreatmentAction(
       };
     }
 
-    // 6. Vérifier que le devis a un client associé (obligatoire pour créer une expédition)
-    // Un devis sans clientId ne peut pas être converti en expédition car le modèle Shipment
-    // exige un clientId obligatoire pour le suivi et la facturation
-    if (!existingQuote.clientId) {
+    // 6. Si pas de client associé, vérifier que les informations de contact sont disponibles
+    // Le modèle Shipment accepte désormais clientId optionnel
+    // Dans ce cas, on utilise les informations de contact du devis (contactEmail, contactName)
+    if (!existingQuote.clientId && !existingQuote.contactEmail) {
       return {
         success: false,
-        error: 'Impossible de valider ce devis : aucun client associé. Le devis doit être rattaché à un compte client avant de pouvoir créer une expédition.',
+        error: 'Impossible de valider ce devis : aucun client associé et pas d\'email de contact. Le devis doit avoir un client ou des informations de contact.',
       };
     }
 
@@ -1814,33 +1842,45 @@ export async function validateQuoteTreatmentAction(
 
     // 9. Créer l'expédition (transaction pour assurer l'intégrité)
     const result = await prisma.$transaction(async (tx) => {
-      // Créer l'expédition liée au client du devis
+      // Créer l'expédition liée au client du devis (optionnel)
+      // Si pas de client, on utilise les informations de contact du devis
       const shipment = await tx.shipment.create({
         data: {
           trackingNumber,
-          // clientId est garanti non-null grâce à la validation à l'étape 6
-          clientId: existingQuote.clientId,
+          // clientId peut être null si l'expéditeur n'est pas un client enregistré
+          clientId: existingQuote.clientId || null,
 
-          // Origine (depuis les données de validation ou valeurs par défaut)
+          // Origine - Pattern Snapshot : Copie depuis Quote
+          // Ordre de priorité : 1) Agent override, 2) Snapshot Quote, 3) Défaut
           originAddress:
-            validatedData.originAddress || 'Adresse à compléter',
-          originCity: validatedData.originCity || 'Ville à compléter',
-          originPostalCode: validatedData.originPostalCode || '00000',
+            validatedData.originAddress || existingQuote.originAddress || 'Adresse à compléter',
+          originCity:
+            validatedData.originCity || existingQuote.originCity || 'Ville à compléter',
+          originPostalCode:
+            validatedData.originPostalCode || existingQuote.originPostalCode || '00000',
           originCountry: existingQuote.originCountry,
-          originContact: validatedData.originContact,
-          originPhone: validatedData.originPhone,
+          originContact:
+            validatedData.originContact || existingQuote.originContactName || existingQuote.contactName || 'Contact à définir',
+          originEmail:
+            existingQuote.originContactEmail || existingQuote.contactEmail, // Email de l'expéditeur depuis le snapshot Quote
+          originPhone:
+            validatedData.originPhone || existingQuote.originContactPhone || existingQuote.contactPhone,
 
-          // Destination (depuis les données de validation ou valeurs par défaut)
+          // Destination - Pattern Snapshot : Copie depuis Quote
+          // Ordre de priorité : 1) Agent override, 2) Snapshot Quote, 3) Client info, 4) Défaut
           destinationAddress:
-            validatedData.destinationAddress || 'Adresse à compléter',
+            validatedData.destinationAddress || existingQuote.destinationAddress || 'Adresse à compléter',
           destinationCity:
-            validatedData.destinationCity || 'Ville à compléter',
-          destinationPostalCode: validatedData.destinationPostalCode || '00000',
+            validatedData.destinationCity || existingQuote.destinationCity || 'Ville à compléter',
+          destinationPostalCode:
+            validatedData.destinationPostalCode || existingQuote.destinationPostalCode || '00000',
           destinationCountry: existingQuote.destinationCountry,
           destinationContact:
-            validatedData.destinationContact || clientUser?.name || companyName,
+            validatedData.destinationContact || existingQuote.destinationContactName || clientUser?.name || companyName,
+          destinationEmail:
+            validatedData.destinationEmail || existingQuote.destinationContactEmail || clientUser?.email || existingQuote.client?.email,
           destinationPhone:
-            validatedData.destinationPhone || clientUser?.phone,
+            validatedData.destinationPhone || existingQuote.destinationContactPhone || clientUser?.phone,
 
           // Détails marchandise (depuis le devis)
           cargoType: existingQuote.cargoType,

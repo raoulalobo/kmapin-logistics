@@ -28,19 +28,32 @@ import {
  * Schéma de validation pour la création d'une expédition
  *
  * Valide toutes les informations d'une expédition :
- * - Informations d'origine et de destination
+ * - Informations d'origine et de destination (expéditeur et destinataire)
  * - Détails de la marchandise (type, poids, volume)
  * - Modes de transport et priorité
  * - Dates de collecte et livraison
  * - Informations de coût
+ *
+ * Note : clientId est optionnel pour permettre des expéditions sans client enregistré.
+ * Dans ce cas, les champs originEmail et originContact doivent être remplis.
  */
 export const shipmentSchema = z.object({
-  // === Informations du client ===
+  // ════════════════════════════════════════════
+  // CLIENT (Optionnel)
+  // ════════════════════════════════════════════
+  // Le client est optionnel pour permettre :
+  // - Des expéditions créées par des agents pour des tiers non-enregistrés
+  // - Des expéditions B2B où l'expéditeur n'a pas de compte
+  // - Des envois ponctuels sans création de fiche client
   clientId: z
     .string()
-    .cuid('ID de compagnie invalide'),
+    .cuid('ID de client invalide')
+    .optional()
+    .nullable(),
 
-  // === Origine ===
+  // ════════════════════════════════════════════
+  // EXPÉDITEUR (Origine)
+  // ════════════════════════════════════════════
   originAddress: z
     .string()
     .min(5, "L'adresse d'origine doit contenir au moins 5 caractères")
@@ -55,6 +68,8 @@ export const shipmentSchema = z.object({
 
   originCountry: countryCodeSchema,
 
+  // Nom de la personne à contacter à l'origine
+  // Obligatoire si clientId n'est pas rempli
   originContact: z
     .string()
     .min(2, 'Le nom du contact doit contenir au moins 2 caractères')
@@ -62,9 +77,20 @@ export const shipmentSchema = z.object({
     .optional()
     .nullable(),
 
+  // Email de l'expéditeur (obligatoire si pas de clientId)
+  // Permet d'identifier l'expéditeur et de le contacter
+  originEmail: z
+    .string()
+    .email("L'email de l'expéditeur n'est pas valide")
+    .max(255, "L'email ne peut pas dépasser 255 caractères")
+    .optional()
+    .nullable(),
+
   originPhone: phoneSchemaOptional.nullable(),
 
-  // === Destination ===
+  // ════════════════════════════════════════════
+  // DESTINATAIRE (Destination)
+  // ════════════════════════════════════════════
   destinationAddress: z
     .string()
     .min(5, 'L\'adresse de destination doit contenir au moins 5 caractères')
@@ -79,6 +105,7 @@ export const shipmentSchema = z.object({
 
   destinationCountry: countryCodeSchema,
 
+  // Nom de la personne à contacter à destination
   destinationContact: z
     .string()
     .min(2, 'Le nom du contact doit contenir au moins 2 caractères')
@@ -86,9 +113,19 @@ export const shipmentSchema = z.object({
     .optional()
     .nullable(),
 
+  // Email du destinataire pour notifications de livraison
+  destinationEmail: z
+    .string()
+    .email("L'email du destinataire n'est pas valide")
+    .max(255, "L'email ne peut pas dépasser 255 caractères")
+    .optional()
+    .nullable(),
+
   destinationPhone: phoneSchemaOptional.nullable(),
 
-  // === Informations de la marchandise ===
+  // ════════════════════════════════════════════
+  // INFORMATIONS DE LA MARCHANDISE
+  // ════════════════════════════════════════════
   cargoType: z.nativeEnum(CargoType, {
     errorMap: () => ({ message: 'Type de marchandise invalide' }),
   }),
@@ -200,11 +237,42 @@ export const shipmentSchema = z.object({
     })
     .default('DRAFT')
     .optional(),
+}).superRefine((data, ctx) => {
+  // ════════════════════════════════════════════
+  // VALIDATION CONDITIONNELLE : Identification de l'expéditeur
+  // ════════════════════════════════════════════
+  // Si clientId n'est pas fourni, on doit avoir les informations de contact
+  // de l'expéditeur (originEmail et originContact obligatoires)
+
+  const hasClient = data.clientId && data.clientId.trim() !== '';
+  const hasOriginEmail = data.originEmail && data.originEmail.trim() !== '';
+  const hasOriginContact = data.originContact && data.originContact.trim() !== '';
+
+  // Si pas de client, on vérifie les infos de contact
+  if (!hasClient) {
+    if (!hasOriginEmail) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "L'email de l'expéditeur est obligatoire si aucun client n'est sélectionné",
+        path: ['originEmail'],
+      });
+    }
+    if (!hasOriginContact) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Le nom du contact d'origine est obligatoire si aucun client n'est sélectionné",
+        path: ['originContact'],
+      });
+    }
+  }
 });
 
 /**
  * Type TypeScript inféré du schéma de création
  * Utilisé pour le typage dans les composants et actions
+ *
+ * Note : La validation superRefine garantit que soit clientId,
+ * soit (originEmail + originContact) sont remplis.
  */
 export type ShipmentFormData = z.infer<typeof shipmentSchema>;
 

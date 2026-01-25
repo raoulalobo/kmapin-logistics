@@ -615,6 +615,82 @@ export async function logQuoteSystemNote(params: BaseLogParams) {
   });
 }
 
+/**
+ * Crée un log de modification d'adresse
+ *
+ * Enregistre toute modification des adresses expéditeur ou destinataire
+ * pour assurer un audit trail complet et permettre la résolution de litiges.
+ *
+ * Pattern Snapshot/Immutable Data : Les anciennes et nouvelles valeurs
+ * sont stockées dans metadata pour traçabilité complète.
+ *
+ * @param params - Paramètres du log incluant type d'adresse et modifications
+ * @returns Le log créé
+ *
+ * @example Modification complète de l'adresse destinataire
+ * ```ts
+ * await logQuoteAddressUpdated({
+ *   quoteId: 'clxxx',
+ *   changedById: agentId,
+ *   addressType: 'destination',
+ *   changedFields: ['address', 'city', 'postalCode'],
+ *   oldAddress: {
+ *     address: '123 Rue de la Paix',
+ *     city: 'Paris',
+ *     postalCode: '75001',
+ *   },
+ *   newAddress: {
+ *     address: '456 Avenue de l\'Indépendance',
+ *     city: 'Lyon',
+ *     postalCode: '69001',
+ *   },
+ *   notes: 'Correction suite à appel client - client a déménagé',
+ *   reason: 'Déménagement client',
+ * });
+ * ```
+ *
+ * @example Modification simple du téléphone de contact
+ * ```ts
+ * await logQuoteAddressUpdated({
+ *   quoteId: 'clxxx',
+ *   changedById: agentId,
+ *   addressType: 'origin',
+ *   changedFields: ['contactPhone'],
+ *   oldAddress: {
+ *     contactPhone: '+226 70 12 34 56',
+ *   },
+ *   newAddress: {
+ *     contactPhone: '+226 70 98 76 54',
+ *   },
+ *   notes: 'Mise à jour du numéro de téléphone de contact',
+ * });
+ * ```
+ */
+export async function logQuoteAddressUpdated(
+  params: BaseLogParams & {
+    addressType: 'origin' | 'destination';
+    changedFields: string[];
+    oldAddress: Record<string, string | null | undefined>;
+    newAddress: Record<string, string | null | undefined>;
+    reason?: string;
+  }
+) {
+  return await createQuoteLog({
+    quoteId: params.quoteId,
+    eventType: QuoteLogEventType.ADDRESS_UPDATED,
+    changedById: params.changedById,
+    notes: params.notes,
+    metadata: {
+      addressType: params.addressType,
+      changedFields: params.changedFields,
+      oldAddress: params.oldAddress,
+      newAddress: params.newAddress,
+      reason: params.reason,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
 // ============================================
 // UTILITAIRES
 // ============================================

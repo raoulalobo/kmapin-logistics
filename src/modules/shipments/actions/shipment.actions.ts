@@ -125,19 +125,22 @@ export async function createShipmentAction(
     const session = await requirePermission('shipments:create');
 
     // Extraire et valider les données
+    // Note : clientId est optionnel - si non fourni, originEmail et originContact sont requis
     const rawData = {
-      clientId: formData.get('clientId'),
+      clientId: formData.get('clientId') || null,
       originAddress: formData.get('originAddress'),
       originCity: formData.get('originCity'),
       originPostalCode: formData.get('originPostalCode'),
       originCountry: formData.get('originCountry'),
       originContact: formData.get('originContact') || null,
+      originEmail: formData.get('originEmail') || null,
       originPhone: formData.get('originPhone') || null,
       destinationAddress: formData.get('destinationAddress'),
       destinationCity: formData.get('destinationCity'),
       destinationPostalCode: formData.get('destinationPostalCode'),
       destinationCountry: formData.get('destinationCountry'),
       destinationContact: formData.get('destinationContact') || null,
+      destinationEmail: formData.get('destinationEmail') || null,
       destinationPhone: formData.get('destinationPhone') || null,
       cargoType: formData.get('cargoType'),
       weight: Number(formData.get('weight')),
@@ -160,38 +163,44 @@ export async function createShipmentAction(
 
     const validatedData = shipmentSchema.parse(rawData);
 
-    // Vérifier que la compagnie existe
-    const company = await prisma.client.findUnique({
-      where: { id: validatedData.clientId },
-    });
+    // Vérifier que la compagnie existe (seulement si clientId est fourni)
+    // Si pas de clientId, on se base sur les informations de contact de l'expéditeur
+    if (validatedData.clientId) {
+      const company = await prisma.client.findUnique({
+        where: { id: validatedData.clientId },
+      });
 
-    if (!company) {
-      return {
-        success: false,
-        error: 'Compagnie introuvable',
-        field: 'clientId',
-      };
+      if (!company) {
+        return {
+          success: false,
+          error: 'Client introuvable',
+          field: 'clientId',
+        };
+      }
     }
 
     // Générer un numéro de tracking unique avec le pays de destination
     const trackingNumber = await generateTrackingNumber(validatedData.destinationCountry);
 
     // Créer l'expédition
+    // Note : clientId peut être null si l'expéditeur n'est pas un client enregistré
     const shipment = await prisma.shipment.create({
       data: {
         trackingNumber,
-        clientId: validatedData.clientId,
+        clientId: validatedData.clientId || null,
         originAddress: validatedData.originAddress,
         originCity: validatedData.originCity,
         originPostalCode: validatedData.originPostalCode,
         originCountry: validatedData.originCountry,
         originContact: validatedData.originContact,
+        originEmail: validatedData.originEmail,
         originPhone: validatedData.originPhone,
         destinationAddress: validatedData.destinationAddress,
         destinationCity: validatedData.destinationCity,
         destinationPostalCode: validatedData.destinationPostalCode,
         destinationCountry: validatedData.destinationCountry,
         destinationContact: validatedData.destinationContact,
+        destinationEmail: validatedData.destinationEmail,
         destinationPhone: validatedData.destinationPhone,
         cargoType: validatedData.cargoType,
         weight: validatedData.weight,
@@ -633,6 +642,7 @@ export async function updateShipmentAction(
     const rawData: any = {};
 
     // Parcourir tous les champs possibles
+    // Note : clientId et originEmail peuvent être null pour les expéditeurs non-enregistrés
     const fields = [
       'clientId',
       'originAddress',
@@ -640,12 +650,14 @@ export async function updateShipmentAction(
       'originPostalCode',
       'originCountry',
       'originContact',
+      'originEmail',
       'originPhone',
       'destinationAddress',
       'destinationCity',
       'destinationPostalCode',
       'destinationCountry',
       'destinationContact',
+      'destinationEmail',
       'destinationPhone',
       'cargoType',
       'description',

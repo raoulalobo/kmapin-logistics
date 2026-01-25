@@ -652,6 +652,109 @@ export async function logSystemNote(params: BaseLogParams) {
   });
 }
 
+/**
+ * Crée un log de modification d'adresse
+ *
+ * Enregistre toute modification des adresses expéditeur ou destinataire
+ * pour assurer un audit trail complet et permettre la résolution de litiges.
+ *
+ * Cas d'usage typiques :
+ * - Client déménage après création du Shipment
+ * - Correction d'erreur de saisie
+ * - Changement de point de livraison (bureau vs domicile)
+ * - Mise à jour des coordonnées de contact
+ *
+ * Pattern Snapshot/Immutable Data : Les anciennes et nouvelles valeurs
+ * sont stockées dans metadata pour traçabilité complète.
+ *
+ * @param params - Paramètres du log incluant type d'adresse et modifications
+ * @returns Le log créé
+ *
+ * @example Modification de l'adresse de livraison suite à déménagement client
+ * ```ts
+ * await logShipmentAddressUpdated({
+ *   shipmentId: 'clxxx',
+ *   changedById: agentId,
+ *   addressType: 'destination',
+ *   changedFields: ['address', 'city'],
+ *   oldAddress: {
+ *     address: '123 Rue Ancienne',
+ *     city: 'Ouagadougou',
+ *   },
+ *   newAddress: {
+ *     address: '456 Rue Nouvelle',
+ *     city: 'Bobo-Dioulasso',
+ *   },
+ *   notes: 'Client a déménagé - nouvelle adresse confirmée par téléphone le 20/01/2026',
+ *   reason: 'Déménagement client',
+ * });
+ * ```
+ *
+ * @example Correction de l'email de contact expéditeur
+ * ```ts
+ * await logShipmentAddressUpdated({
+ *   shipmentId: 'clxxx',
+ *   changedById: agentId,
+ *   addressType: 'origin',
+ *   changedFields: ['contactEmail'],
+ *   oldAddress: {
+ *     contactEmail: 'ancien@example.com',
+ *   },
+ *   newAddress: {
+ *     contactEmail: 'nouveau@example.com',
+ *   },
+ *   notes: 'Correction de l\'email - erreur de saisie initiale',
+ *   reason: 'Erreur de saisie',
+ * });
+ * ```
+ *
+ * @example Changement de point de livraison (bureau → domicile)
+ * ```ts
+ * await logShipmentAddressUpdated({
+ *   shipmentId: 'clxxx',
+ *   changedById: agentId,
+ *   addressType: 'destination',
+ *   changedFields: ['address', 'contactName', 'contactPhone'],
+ *   oldAddress: {
+ *     address: 'Société ABC - 10 Rue du Commerce',
+ *     contactName: 'Secrétariat',
+ *     contactPhone: '+226 25 11 22 33',
+ *   },
+ *   newAddress: {
+ *     address: '25 Avenue Résidentielle',
+ *     contactName: 'M. Dupont',
+ *     contactPhone: '+226 70 99 88 77',
+ *   },
+ *   notes: 'Changement de lieu de livraison : bureau → domicile (demande client)',
+ *   reason: 'Préférence client',
+ * });
+ * ```
+ */
+export async function logShipmentAddressUpdated(
+  params: BaseLogParams & {
+    addressType: 'origin' | 'destination';
+    changedFields: string[];
+    oldAddress: Record<string, string | null | undefined>;
+    newAddress: Record<string, string | null | undefined>;
+    reason?: string;
+  }
+) {
+  return await createShipmentLog({
+    shipmentId: params.shipmentId,
+    eventType: ShipmentLogEventType.ADDRESS_UPDATED,
+    changedById: params.changedById,
+    notes: params.notes,
+    metadata: {
+      addressType: params.addressType,
+      changedFields: params.changedFields,
+      oldAddress: params.oldAddress,
+      newAddress: params.newAddress,
+      reason: params.reason,
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
 // ============================================
 // UTILITAIRES
 // ============================================

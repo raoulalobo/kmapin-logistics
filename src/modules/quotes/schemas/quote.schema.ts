@@ -62,6 +62,77 @@ export const quoteSchema = z.object({
   width: z.number().nonnegative('La largeur doit être positive ou nulle').max(10000, 'La largeur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
   height: z.number().nonnegative('La hauteur doit être positive ou nulle').max(10000, 'La hauteur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
 
+  // === Snapshot Adresses (Pattern Immutable Data) - Optionnelles ===
+  // Suivant le pattern utilisé par Magento, Shopify et autres leaders e-commerce
+
+  // Adresse expéditeur (origine)
+  originAddress: z
+    .string()
+    .min(5, 'L\'adresse d\'origine doit contenir au moins 5 caractères')
+    .max(500, 'L\'adresse d\'origine ne peut pas dépasser 500 caractères')
+    .optional(),
+
+  originCity: z
+    .string()
+    .min(2, 'La ville d\'origine doit contenir au moins 2 caractères')
+    .max(100, 'La ville d\'origine ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  originPostalCode: z
+    .string()
+    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  originContactName: z
+    .string()
+    .max(100, 'Le nom du contact ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  originContactPhone: z
+    .string()
+    .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  originContactEmail: z
+    .string()
+    .email('Email du contact expéditeur invalide')
+    .max(255, 'L\'email ne peut pas dépasser 255 caractères')
+    .optional(),
+
+  // Adresse destinataire (destination)
+  destinationAddress: z
+    .string()
+    .min(5, 'L\'adresse de destination doit contenir au moins 5 caractères')
+    .max(500, 'L\'adresse de destination ne peut pas dépasser 500 caractères')
+    .optional(),
+
+  destinationCity: z
+    .string()
+    .min(2, 'La ville de destination doit contenir au moins 2 caractères')
+    .max(100, 'La ville de destination ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  destinationPostalCode: z
+    .string()
+    .max(20, 'Le code postal ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  destinationContactName: z
+    .string()
+    .max(100, 'Le nom du contact ne peut pas dépasser 100 caractères')
+    .optional(),
+
+  destinationContactPhone: z
+    .string()
+    .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
+    .optional(),
+
+  destinationContactEmail: z
+    .string()
+    .email('Email du contact destinataire invalide')
+    .max(255, 'L\'email ne peut pas dépasser 255 caractères')
+    .optional(),
+
   // === Transport ===
   transportMode: z
     .array(z.nativeEnum(TransportMode))
@@ -452,6 +523,12 @@ export const quoteValidateTreatmentSchema = z.object({
     .max(100, 'Le nom du contact ne peut pas dépasser 100 caractères')
     .optional(),
 
+  destinationEmail: z
+    .string()
+    .email("L'email du destinataire n'est pas valide")
+    .max(255, "L'email ne peut pas dépasser 255 caractères")
+    .optional(),
+
   destinationPhone: z
     .string()
     .max(20, 'Le téléphone ne peut pas dépasser 20 caractères')
@@ -684,6 +761,80 @@ export const createGuestQuoteSchema = z.object({
       .nonnegative('La hauteur doit être positive ou nulle')
       .max(10000, 'La hauteur ne peut pas dépasser 10000 cm (100 m)')
   ),
+
+  // ============================================
+  // SNAPSHOT ADRESSES (Optionnelles)
+  // ============================================
+
+  /**
+   * Adresse expéditeur (origine) - Optionnelle
+   * Permet au client de fournir l'adresse complète dès la demande
+   */
+  originAddress: z
+    .string()
+    .min(5, VALIDATION_MESSAGES.minLength(5))
+    .max(500, VALIDATION_MESSAGES.maxLength(500))
+    .optional(),
+
+  originCity: z
+    .string()
+    .min(2, VALIDATION_MESSAGES.minLength(2))
+    .max(100, VALIDATION_MESSAGES.maxLength(100))
+    .optional(),
+
+  originPostalCode: z
+    .string()
+    .max(20, VALIDATION_MESSAGES.maxLength(20))
+    .optional(),
+
+  originContactName: z
+    .string()
+    .min(2, VALIDATION_MESSAGES.minLength(2))
+    .max(100, VALIDATION_MESSAGES.maxLength(100))
+    .optional(),
+
+  originContactPhone: phoneSchemaOptional,
+
+  originContactEmail: z
+    .string()
+    .email('Email du contact expéditeur invalide')
+    .max(255, VALIDATION_MESSAGES.maxLength(255))
+    .optional(),
+
+  /**
+   * Adresse destinataire (destination) - Optionnelle
+   * Permet au client de fournir l'adresse de livraison dès la demande
+   */
+  destinationAddress: z
+    .string()
+    .min(5, VALIDATION_MESSAGES.minLength(5))
+    .max(500, VALIDATION_MESSAGES.maxLength(500))
+    .optional(),
+
+  destinationCity: z
+    .string()
+    .min(2, VALIDATION_MESSAGES.minLength(2))
+    .max(100, VALIDATION_MESSAGES.maxLength(100))
+    .optional(),
+
+  destinationPostalCode: z
+    .string()
+    .max(20, VALIDATION_MESSAGES.maxLength(20))
+    .optional(),
+
+  destinationContactName: z
+    .string()
+    .min(2, VALIDATION_MESSAGES.minLength(2))
+    .max(100, VALIDATION_MESSAGES.maxLength(100))
+    .optional(),
+
+  destinationContactPhone: phoneSchemaOptional,
+
+  destinationContactEmail: z
+    .string()
+    .email('Email du contact destinataire invalide')
+    .max(255, VALIDATION_MESSAGES.maxLength(255))
+    .optional(),
 
   // ============================================
   // MODE DE TRANSPORT

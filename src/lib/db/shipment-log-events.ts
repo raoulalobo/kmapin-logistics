@@ -230,6 +230,53 @@ export const ShipmentLogEventType = {
   COMMENT_ADDED: 'COMMENT_ADDED',
 
   // ============================================
+  // MODIFICATIONS D'ADRESSES (Snapshot Pattern)
+  // ============================================
+
+  /**
+   * Adresse modifiée (expéditeur ou destinataire)
+   * - Enregistre toute modification d'adresse pour traçabilité
+   * - Conforme RGPD/ISO (audit trail complet)
+   * - Permet la résolution de litiges (preuve de modification)
+   * - notes: description de la modification
+   * - metadata: {
+   *     addressType: 'origin' | 'destination',
+   *     changedFields: string[],  // ex: ['address', 'city', 'postalCode']
+   *     oldAddress: {
+   *       address?: string,
+   *       city?: string,
+   *       postalCode?: string,
+   *       contactName?: string,
+   *       contactPhone?: string,
+   *       contactEmail?: string
+   *     },
+   *     newAddress: {
+   *       address?: string,
+   *       city?: string,
+   *       postalCode?: string,
+   *       contactName?: string,
+   *       contactPhone?: string,
+   *       contactEmail?: string
+   *     },
+   *     reason?: string // Raison de la modification
+   *   }
+   *
+   * @example Modification de l'adresse de livraison
+   * ```ts
+   * await logShipmentAddressUpdated({
+   *   shipmentId: 'clxxx',
+   *   changedById: agentId,
+   *   addressType: 'destination',
+   *   changedFields: ['address'],
+   *   oldAddress: { address: '123 Rue Ancienne' },
+   *   newAddress: { address: '456 Rue Nouvelle' },
+   *   notes: 'Client a déménagé - nouvelle adresse confirmée par téléphone',
+   * });
+   * ```
+   */
+  ADDRESS_UPDATED: 'ADDRESS_UPDATED',
+
+  // ============================================
   // SYSTÈME
   // ============================================
 

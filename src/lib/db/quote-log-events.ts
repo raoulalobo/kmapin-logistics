@@ -157,6 +157,53 @@ export const QuoteLogEventType = {
   COMMENT_ADDED: 'COMMENT_ADDED',
 
   // ============================================
+  // MODIFICATIONS D'ADRESSES (Snapshot Pattern)
+  // ============================================
+
+  /**
+   * Adresse modifiée (expéditeur ou destinataire)
+   * - Enregistre toute modification d'adresse pour traçabilité
+   * - Conforme RGPD/ISO (audit trail complet)
+   * - Permet la résolution de litiges
+   * - notes: description de la modification (ex: "Adresse expéditeur modifiée suite à appel client")
+   * - metadata: {
+   *     addressType: 'origin' | 'destination',
+   *     changedFields: string[],  // ex: ['address', 'city', 'postalCode']
+   *     oldAddress: {
+   *       address?: string,
+   *       city?: string,
+   *       postalCode?: string,
+   *       contactName?: string,
+   *       contactPhone?: string,
+   *       contactEmail?: string
+   *     },
+   *     newAddress: {
+   *       address?: string,
+   *       city?: string,
+   *       postalCode?: string,
+   *       contactName?: string,
+   *       contactPhone?: string,
+   *       contactEmail?: string
+   *     },
+   *     reason?: string // Raison de la modification (optionnel)
+   *   }
+   *
+   * @example
+   * ```ts
+   * await logQuoteAddressUpdated({
+   *   quoteId: 'clxxx',
+   *   changedById: agentId,
+   *   addressType: 'destination',
+   *   changedFields: ['address', 'city'],
+   *   oldAddress: { address: '123 Rue A', city: 'Paris' },
+   *   newAddress: { address: '456 Rue B', city: 'Lyon' },
+   *   notes: 'Correction suite à appel client',
+   * });
+   * ```
+   */
+  ADDRESS_UPDATED: 'ADDRESS_UPDATED',
+
+  // ============================================
   // SYSTÈME
   // ============================================
 
