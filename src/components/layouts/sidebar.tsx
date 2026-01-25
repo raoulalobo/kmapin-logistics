@@ -136,6 +136,12 @@ const navigation: NavSection[] = [
         permission: 'settings:pricing', // Réservé aux ADMIN uniquement
       },
       {
+        label: 'Configuration Plateforme',
+        href: '/dashboard/settings/platform',
+        icon: Gear,
+        permission: 'settings:platform', // Réservé aux ADMIN uniquement
+      },
+      {
         label: 'Pays',
         href: '/dashboard/countries',
         icon: Globe,
@@ -165,10 +171,17 @@ const navigation: NavSection[] = [
 
 /**
  * Props du composant Sidebar
+ *
+ * @param className - Classes CSS additionnelles
+ * @param userRole - Rôle de l'utilisateur pour filtrer les liens selon les permissions
+ * @param platformName - Nom de la plateforme (depuis SystemConfig, défaut: "Faso Fret")
+ * @param primaryColor - Couleur primaire de la marque (depuis SystemConfig, défaut: "#003D82")
  */
 interface SidebarProps {
   className?: string;
   userRole?: UserRole; // Rôle de l'utilisateur pour filtrer les liens selon les permissions
+  platformName?: string; // Nom dynamique de la plateforme
+  primaryColor?: string; // Couleur primaire de la marque
 }
 
 /**
@@ -178,7 +191,12 @@ interface SidebarProps {
  * Gère l'état actif des liens et le scroll
  * Filtre les liens selon les permissions de l'utilisateur
  */
-export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
+export function Sidebar({
+  className,
+  userRole = 'CLIENT',
+  platformName = 'Faso Fret',
+  primaryColor = '#003D82',
+}: SidebarProps) {
   const pathname = usePathname();
 
   /**
@@ -215,13 +233,16 @@ export function Sidebar({ className, userRole = 'CLIENT' }: SidebarProps) {
 
   return (
     <div className={cn('flex h-full flex-col border-r bg-background', className)}>
-      {/* Logo et titre */}
+      {/* Logo et titre (nom dynamique depuis la configuration) */}
       <div className="flex h-20 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#003D82] text-white">
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-lg text-white"
+            style={{ backgroundColor: primaryColor }}
+          >
             <Package className="h-7 w-7" />
           </div>
-          <span className="text-lg">Faso Fret</span>
+          <span className="text-lg">{platformName}</span>
         </Link>
       </div>
 

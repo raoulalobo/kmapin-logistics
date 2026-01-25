@@ -83,6 +83,20 @@ export default function NewQuotePage() {
       length: undefined as unknown as number,
       width: undefined as unknown as number,
       height: undefined as unknown as number,
+      // Adresses expéditeur (optionnelles)
+      originAddress: '',
+      originCity: '',
+      originPostalCode: '',
+      originContactName: '',
+      originContactPhone: '',
+      originContactEmail: '',
+      // Adresses destinataire (optionnelles)
+      destinationAddress: '',
+      destinationCity: '',
+      destinationPostalCode: '',
+      destinationContactName: '',
+      destinationContactPhone: '',
+      destinationContactEmail: '',
       transportMode: ['ROAD' as TransportMode],
       estimatedCost: 0,
       currency: 'EUR',
@@ -105,6 +119,20 @@ export default function NewQuotePage() {
       length: 'Longueur',
       width: 'Largeur',
       height: 'Hauteur',
+      // Adresse expéditeur
+      originAddress: 'Adresse expéditeur',
+      originCity: 'Ville expéditeur',
+      originPostalCode: 'Code postal expéditeur',
+      originContactName: 'Nom contact expéditeur',
+      originContactPhone: 'Téléphone contact expéditeur',
+      originContactEmail: 'Email contact expéditeur',
+      // Adresse destinataire
+      destinationAddress: 'Adresse destinataire',
+      destinationCity: 'Ville destinataire',
+      destinationPostalCode: 'Code postal destinataire',
+      destinationContactName: 'Nom contact destinataire',
+      destinationContactPhone: 'Téléphone contact destinataire',
+      destinationContactEmail: 'Email contact destinataire',
       transportMode: 'Mode de transport',
       estimatedCost: 'Coût estimé',
       currency: 'Devise',
@@ -251,6 +279,22 @@ export default function NewQuotePage() {
       if (data.width) formData.append('width', data.width.toString());
       if (data.height) formData.append('height', data.height.toString());
 
+      // Adresses expéditeur (optionnelles)
+      if (data.originAddress) formData.append('originAddress', data.originAddress);
+      if (data.originCity) formData.append('originCity', data.originCity);
+      if (data.originPostalCode) formData.append('originPostalCode', data.originPostalCode);
+      if (data.originContactName) formData.append('originContactName', data.originContactName);
+      if (data.originContactPhone) formData.append('originContactPhone', data.originContactPhone);
+      if (data.originContactEmail) formData.append('originContactEmail', data.originContactEmail);
+
+      // Adresses destinataire (optionnelles)
+      if (data.destinationAddress) formData.append('destinationAddress', data.destinationAddress);
+      if (data.destinationCity) formData.append('destinationCity', data.destinationCity);
+      if (data.destinationPostalCode) formData.append('destinationPostalCode', data.destinationPostalCode);
+      if (data.destinationContactName) formData.append('destinationContactName', data.destinationContactName);
+      if (data.destinationContactPhone) formData.append('destinationContactPhone', data.destinationContactPhone);
+      if (data.destinationContactEmail) formData.append('destinationContactEmail', data.destinationContactEmail);
+
       // Transport mode (array)
       data.transportMode.forEach(mode => formData.append('transportMode', mode));
 
@@ -385,6 +429,258 @@ export default function NewQuotePage() {
                       <FormDescription>
                         Pays d'arrivée de la marchandise
                       </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Adresse Expéditeur (Optionnelle) */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Adresse Expéditeur (Optionnel)</CardTitle>
+              <CardDescription>
+                Adresse complète de l'expéditeur - Permet un traitement plus rapide du devis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="originAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse complète</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: 123 Rue de la Paix"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Rue, numéro, bâtiment
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ville</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Ouagadougou"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originPostalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code postal</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: 01 BP 1234"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originContactName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Jean Dupont"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originContactPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="tel"
+                          placeholder="Ex: +226 70 12 34 56"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="originContactEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Ex: jean@example.com"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Adresse Destinataire (Optionnelle) */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Adresse Destinataire (Optionnel)</CardTitle>
+              <CardDescription>
+                Adresse complète du destinataire - Permet un traitement plus rapide du devis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="destinationAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse complète</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: 456 Avenue de l'Indépendance"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Rue, numéro, bâtiment
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="destinationCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ville</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Bobo-Dioulasso"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="destinationPostalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code postal</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: 01 BP 5678"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="destinationContactName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: Marie Martin"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="destinationContactPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="tel"
+                          placeholder="Ex: +226 70 98 76 54"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="destinationContactEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email du contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Ex: marie@example.com"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

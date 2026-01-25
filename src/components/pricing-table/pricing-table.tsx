@@ -39,6 +39,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { TableSkeleton } from '@/components/skeletons';
 
 import { getStandardRatesAction } from '@/modules/pricing';
 import { listCountries } from '@/modules/countries/actions/country.actions';
@@ -186,9 +187,8 @@ export function PricingTable() {
           {/* Tableau des tarifs */}
           <div className="rounded-lg border">
             {isLoading ? (
-              <div className="flex items-center justify-center p-12">
-                <CircleNotch className="h-8 w-8 animate-spin text-[#003D82]" />
-                <span className="ml-3 text-lg text-gray-600">Chargement des tarifs...</span>
+              <div className="p-4">
+                <TableSkeleton rows={5} columns={6} showHeader={true} />
               </div>
             ) : isError ? (
               <div className="flex flex-col items-center justify-center p-12 text-center">
