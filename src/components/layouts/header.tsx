@@ -19,8 +19,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Sidebar } from './sidebar';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { logoutAction } from '@/app/(auth)/_actions/auth';
 import { useRouter } from 'next/navigation';
 import type { UserRole } from '@/generated/prisma';
@@ -28,6 +29,11 @@ import { countPendingQuotesAction } from '@/modules/quotes';
 
 /**
  * Props du composant Header
+ *
+ * @param user - Informations de l'utilisateur connecté (nom, email, avatar)
+ * @param userRole - Rôle de l'utilisateur pour filtrer la navigation (ADMIN, CLIENT, etc.)
+ * @param platformName - Nom de la plateforme (depuis SystemConfig) pour la sidebar mobile
+ * @param primaryColor - Couleur primaire de la marque (depuis SystemConfig) pour la sidebar mobile
  */
 interface HeaderProps {
   user?: {
@@ -36,6 +42,8 @@ interface HeaderProps {
     image?: string | null;
   };
   userRole?: UserRole; // Rôle de l'utilisateur pour le passer à la Sidebar mobile
+  platformName?: string; // Nom dynamique de la plateforme (depuis SystemConfig)
+  primaryColor?: string; // Couleur primaire de la marque (depuis SystemConfig)
 }
 
 /**
@@ -46,7 +54,12 @@ interface HeaderProps {
  * - List utilisateur avec dropdown (profil, paramètres, déconnexion)
  * - Notifications (badge indicatif)
  */
-export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
+export function Header({
+  user,
+  userRole = 'CLIENT',
+  platformName = 'Faso Fret',
+  primaryColor = '#003D82',
+}: HeaderProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [pendingQuotesCount, setPendingQuotesCount] = useState(0);
@@ -113,8 +126,22 @@ export function Header({ user, userRole = 'CLIENT' }: HeaderProps) {
             <span className="sr-only">Ouvrir le menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-64">
-          <Sidebar userRole={userRole} />
+        {/*
+         * SheetContent pour la navigation mobile
+         * bg-white ajouté explicitement car bg-background peut être transparent
+         * avec Tailwind v4 dans le contexte des portails DOM
+         * SheetTitle caché pour l'accessibilité (requis par Radix UI Dialog)
+         */}
+        <SheetContent side="left" className="p-0 w-64 bg-white">
+          <VisuallyHidden.Root>
+            <SheetTitle>Menu de navigation</SheetTitle>
+          </VisuallyHidden.Root>
+          {/* Sidebar mobile avec configuration dynamique (nom et couleur de la plateforme) */}
+          <Sidebar
+            userRole={userRole}
+            platformName={platformName}
+            primaryColor={primaryColor}
+          />
         </SheetContent>
       </Sheet>
 
