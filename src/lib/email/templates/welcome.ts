@@ -1,8 +1,38 @@
 /**
  * Template email de bienvenue après création de compte
  *
+ * Utilise la configuration dynamique de la plateforme pour :
+ * - Le nom de la plateforme dans le titre et le footer
+ * - L'email de support
+ * - La couleur primaire pour les boutons et accents
+ *
  * @module lib/email/templates/welcome
  */
+
+/**
+ * Configuration de la plateforme pour les emails
+ * Ces valeurs sont passées depuis la fonction d'envoi après récupération de SystemConfig
+ */
+export interface PlatformEmailConfig {
+  /** Nom complet de la plateforme (ex: "Faso Fret Logistics") */
+  platformFullName: string;
+  /** Slogan de la plateforme */
+  platformSlogan?: string | null;
+  /** Email de support */
+  contactEmail: string;
+  /** Couleur primaire de la marque (format hexadécimal) */
+  primaryColor: string;
+}
+
+/**
+ * Configuration par défaut si non fournie
+ */
+const DEFAULT_PLATFORM_CONFIG: PlatformEmailConfig = {
+  platformFullName: 'Faso Fret Logistics',
+  platformSlogan: 'Transport multi-modal international',
+  contactEmail: 'support@kmapin.com',
+  primaryColor: '#003D82',
+};
 
 /**
  * Paramètres pour le template de bienvenue
@@ -12,6 +42,8 @@ export interface WelcomeEmailParams {
   userName?: string | null;
   /** Nombre de devis rattachés au compte */
   quoteCount: number;
+  /** Configuration de la plateforme (optionnel, utilise les valeurs par défaut si non fourni) */
+  platformConfig?: Partial<PlatformEmailConfig>;
 }
 
 /**
@@ -19,9 +51,27 @@ export interface WelcomeEmailParams {
  *
  * @param params - Paramètres du template
  * @returns HTML de l'email
+ *
+ * @example
+ * // Avec configuration personnalisée
+ * const html = generateWelcomeTemplate({
+ *   userName: 'Jean Dupont',
+ *   quoteCount: 2,
+ *   platformConfig: {
+ *     platformFullName: 'Ma Plateforme Logistique',
+ *     contactEmail: 'support@maplateforme.com',
+ *     primaryColor: '#FF5722',
+ *   },
+ * });
  */
 export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
   const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
+
+  // Fusionner la config par défaut avec celle fournie
+  const config: PlatformEmailConfig = {
+    ...DEFAULT_PLATFORM_CONFIG,
+    ...params.platformConfig,
+  };
 
   return `
     <!DOCTYPE html>
@@ -29,7 +79,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Bienvenue sur Faso Fret Logistics</title>
+      <title>Bienvenue sur ${config.platformFullName}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -45,7 +95,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           background-color: #ffffff;
         }
         .header {
-          background: linear-gradient(135deg, #003D82 0%, #002952 100%);
+          background: linear-gradient(135deg, ${config.primaryColor} 0%, ${adjustColor(config.primaryColor, -30)} 100%);
           padding: 40px 20px;
           text-align: center;
         }
@@ -82,7 +132,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           border-radius: 5px;
         }
         .features h3 {
-          color: #003D82;
+          color: ${config.primaryColor};
           margin-top: 0;
         }
         .features ul {
@@ -99,7 +149,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
           content: "✓";
           position: absolute;
           left: 0;
-          color: #003D82;
+          color: ${config.primaryColor};
           font-weight: bold;
         }
         .cta-container {
@@ -108,7 +158,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
         }
         .cta-button {
           display: inline-block;
-          background: #003D82;
+          background: ${config.primaryColor};
           color: white;
           padding: 15px 40px;
           text-decoration: none;
@@ -133,7 +183,7 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
         <!-- En-tête -->
         <div class="header">
           <div class="emoji">🎉</div>
-          <h1>Bienvenue sur Faso Fret Logistics !</h1>
+          <h1>Bienvenue sur ${config.platformFullName} !</h1>
           <p>Votre compte a été créé avec succès</p>
         </div>
 
@@ -187,14 +237,34 @@ export function generateWelcomeTemplate(params: WelcomeEmailParams): string {
 
         <!-- Pied de page -->
         <div class="footer">
-          <p><strong>Faso Fret Logistics</strong></p>
-          <p>Transport multi-modal international</p>
+          <p><strong>${config.platformFullName}</strong></p>
+          <p>${config.platformSlogan || 'Transport multi-modal international'}</p>
           <p style="margin-top: 10px;">
-            Besoin d'aide ? Répondez à cet email ou contactez-nous à support@kmapin.com
+            Besoin d'aide ? Répondez à cet email ou contactez-nous à ${config.contactEmail}
           </p>
         </div>
       </div>
     </body>
     </html>
   `;
+}
+
+/**
+ * Ajuste une couleur hexadécimale en l'éclaircissant ou l'assombrissant
+ *
+ * @param color - Couleur au format hexadécimal (#RRGGBB)
+ * @param amount - Quantité d'ajustement (-255 à 255, négatif = plus sombre)
+ * @returns Couleur ajustée au format hexadécimal
+ */
+function adjustColor(color: string, amount: number): string {
+  // Supprimer le # si présent
+  const hex = color.replace('#', '');
+
+  // Convertir en RGB
+  const r = Math.max(0, Math.min(255, parseInt(hex.substring(0, 2), 16) + amount));
+  const g = Math.max(0, Math.min(255, parseInt(hex.substring(2, 4), 16) + amount));
+  const b = Math.max(0, Math.min(255, parseInt(hex.substring(4, 6), 16) + amount));
+
+  // Reconvertir en hexadécimal
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }

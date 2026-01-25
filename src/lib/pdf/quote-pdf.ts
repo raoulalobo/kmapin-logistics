@@ -4,10 +4,47 @@
  * Utilise jsPDF pour créer des devis professionnels
  * avec en-tête, détails transport, et conditions
  *
+ * Supporte la configuration dynamique de la plateforme :
+ * - Nom de la plateforme dans l'en-tête et le footer
+ * - Couleur primaire pour les accents
+ *
  * @module lib/pdf
  */
 
 import jsPDF from 'jspdf';
+
+/**
+ * Configuration de la plateforme pour les PDF
+ * Ces valeurs sont passées depuis la fonction de génération après récupération de SystemConfig
+ */
+export interface PlatformPDFConfig {
+  /** Nom complet de la plateforme (ex: "Faso Fret Logistics") */
+  platformFullName: string;
+  /** Couleur primaire de la marque (format hexadécimal) */
+  primaryColor: string;
+}
+
+/**
+ * Configuration par défaut si non fournie
+ */
+const DEFAULT_PDF_CONFIG: PlatformPDFConfig = {
+  platformFullName: 'Faso Fret Logistics',
+  primaryColor: '#003D82',
+};
+
+/**
+ * Convertit une couleur hexadécimale en tuple RGB
+ *
+ * @param hex - Couleur au format hexadécimal (#RRGGBB)
+ * @returns Tuple [R, G, B] avec des valeurs de 0 à 255
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const cleanHex = hex.replace('#', '');
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  return [r, g, b];
+}
 
 /**
  * Type pour les données de devis nécessaires au PDF
@@ -71,9 +108,26 @@ function translateTransportMode(mode: string): string {
  * Génère un PDF de devis
  *
  * @param data - Données du devis
+ * @param platformConfig - Configuration de la plateforme (optionnel)
  * @returns Buffer du PDF généré
+ *
+ * @example
+ * // Avec configuration personnalisée
+ * const pdf = generateQuotePDF(quoteData, {
+ *   platformFullName: 'Ma Plateforme Logistique',
+ *   primaryColor: '#FF5722',
+ * });
  */
-export function generateQuotePDF(data: QuotePDFData): Buffer {
+export function generateQuotePDF(
+  data: QuotePDFData,
+  platformConfig?: Partial<PlatformPDFConfig>
+): Buffer {
+  // Fusionner la config par défaut avec celle fournie
+  const config: PlatformPDFConfig = {
+    ...DEFAULT_PDF_CONFIG,
+    ...platformConfig,
+  };
+
   // Créer un nouveau document PDF (A4, portrait)
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -85,8 +139,8 @@ export function generateQuotePDF(data: QuotePDFData): Buffer {
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPos = 20;
 
-  // Couleurs
-  const primaryColor: [number, number, number] = [52, 152, 219]; // Bleu clair
+  // Couleurs (utiliser la couleur primaire de la config pour l'en-tête)
+  const primaryColor: [number, number, number] = hexToRgb(config.primaryColor);
   const textColor: [number, number, number] = [51, 51, 51]; // Gris foncé
   const lightGray: [number, number, number] = [240, 240, 240];
   const accentColor: [number, number, number] = [46, 204, 113]; // Vert
@@ -104,7 +158,7 @@ export function generateQuotePDF(data: QuotePDFData): Buffer {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Faso Fret Logistics', 20, 33);
+  doc.text(config.platformFullName, 20, 33);
 
   yPos = 50;
 
@@ -310,7 +364,7 @@ export function generateQuotePDF(data: QuotePDFData): Buffer {
 
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'Faso Fret Logistics - Votre partenaire en logistique multi-modale',
+    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
     pageWidth / 2,
     pageHeight - 10,
     { align: 'center' }

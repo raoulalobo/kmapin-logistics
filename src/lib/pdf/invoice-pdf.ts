@@ -4,6 +4,10 @@
  * Utilise jsPDF et jspdf-autotable pour créer des factures professionnelles
  * avec en-tête, détails client, tableau des articles et totaux
  *
+ * Supporte la configuration dynamique de la plateforme :
+ * - Nom de la plateforme dans l'en-tête et le footer
+ * - Couleur primaire pour les accents
+ *
  * NOUVEAU WORKFLOW (v2) :
  * - Les factures sont générées à la volée depuis les données du devis (Quote)
  * - Pas de table Invoice en base de données
@@ -14,6 +18,29 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { type PlatformPDFConfig } from './quote-pdf';
+
+/**
+ * Configuration par défaut si non fournie
+ */
+const DEFAULT_PDF_CONFIG: PlatformPDFConfig = {
+  platformFullName: 'Faso Fret Logistics',
+  primaryColor: '#003D82',
+};
+
+/**
+ * Convertit une couleur hexadécimale en tuple RGB
+ *
+ * @param hex - Couleur au format hexadécimal (#RRGGBB)
+ * @returns Tuple [R, G, B] avec des valeurs de 0 à 255
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const cleanHex = hex.replace('#', '');
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  return [r, g, b];
+}
 
 /**
  * Type pour les données de facture générée depuis un Quote
@@ -106,9 +133,19 @@ export interface InvoicePDFData {
  * Génère un PDF de facture
  *
  * @param data - Données de la facture
+ * @param platformConfig - Configuration de la plateforme (optionnel)
  * @returns Buffer du PDF généré
  */
-export function generateInvoicePDF(data: InvoicePDFData): Buffer {
+export function generateInvoicePDF(
+  data: InvoicePDFData,
+  platformConfig?: Partial<PlatformPDFConfig>
+): Buffer {
+  // Fusionner la config par défaut avec celle fournie
+  const config: PlatformPDFConfig = {
+    ...DEFAULT_PDF_CONFIG,
+    ...platformConfig,
+  };
+
   // Créer un nouveau document PDF (A4, portrait)
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -120,8 +157,8 @@ export function generateInvoicePDF(data: InvoicePDFData): Buffer {
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPos = 20;
 
-  // Couleurs
-  const primaryColor: [number, number, number] = [41, 128, 185]; // Bleu
+  // Couleurs (utiliser la couleur primaire de la config)
+  const primaryColor: [number, number, number] = hexToRgb(config.primaryColor);
   const textColor: [number, number, number] = [51, 51, 51]; // Gris foncé
   const lightGray: [number, number, number] = [240, 240, 240];
 
@@ -138,7 +175,7 @@ export function generateInvoicePDF(data: InvoicePDFData): Buffer {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Faso Fret Logistics', 20, 33);
+  doc.text(config.platformFullName, 20, 33);
 
   yPos = 50;
 
@@ -318,7 +355,7 @@ export function generateInvoicePDF(data: InvoicePDFData): Buffer {
 
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'Faso Fret Logistics - Votre partenaire en logistique multi-modale',
+    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
     pageWidth / 2,
     pageHeight - 10,
     { align: 'center' }
@@ -397,6 +434,7 @@ function generateInvoiceNumberFromQuote(quoteNumber: string, paymentDate: Date):
  * lorsque le paiement a été confirmé sur un devis ou un colis.
  *
  * @param data - Données du devis pour générer la facture
+ * @param platformConfig - Configuration de la plateforme (optionnel)
  * @returns Buffer du PDF généré
  *
  * @example
@@ -409,9 +447,21 @@ function generateInvoiceNumberFromQuote(quoteNumber: string, paymentDate: Date):
  *   expedition: { ... },
  *   estimatedCost: 1500.00,
  *   currency: 'EUR',
+ * }, {
+ *   platformFullName: 'Ma Plateforme',
+ *   primaryColor: '#FF5722',
  * });
  */
-export function generateInvoiceFromQuotePDF(data: QuoteInvoicePDFData): Buffer {
+export function generateInvoiceFromQuotePDF(
+  data: QuoteInvoicePDFData,
+  platformConfig?: Partial<PlatformPDFConfig>
+): Buffer {
+  // Fusionner la config par défaut avec celle fournie
+  const config: PlatformPDFConfig = {
+    ...DEFAULT_PDF_CONFIG,
+    ...platformConfig,
+  };
+
   // Créer un nouveau document PDF (A4, portrait)
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -423,8 +473,8 @@ export function generateInvoiceFromQuotePDF(data: QuoteInvoicePDFData): Buffer {
   const pageHeight = doc.internal.pageSize.getHeight();
   let yPos = 20;
 
-  // Couleurs Faso Fret
-  const primaryColor: [number, number, number] = [0, 61, 130]; // Bleu Faso Fret #003D82
+  // Couleurs (utiliser la couleur primaire de la config)
+  const primaryColor: [number, number, number] = hexToRgb(config.primaryColor);
   const successColor: [number, number, number] = [34, 197, 94]; // Vert pour PAYÉ
   const textColor: [number, number, number] = [51, 51, 51]; // Gris foncé
   const lightGray: [number, number, number] = [240, 240, 240];
@@ -445,7 +495,7 @@ export function generateInvoiceFromQuotePDF(data: QuoteInvoicePDFData): Buffer {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Faso Fret Logistics', 20, 33);
+  doc.text(config.platformFullName, 20, 33);
 
   // Badge PAYÉ (coin droit)
   doc.setFillColor(...successColor);
@@ -678,7 +728,7 @@ export function generateInvoiceFromQuotePDF(data: QuoteInvoicePDFData): Buffer {
 
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'Faso Fret Logistics - Votre partenaire en logistique multi-modale',
+    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
     pageWidth / 2,
     pageHeight - 10,
     { align: 'center' }

@@ -1,8 +1,24 @@
 /**
  * Template email pour rappel d'invitation (J-3 avant expiration)
  *
+ * Utilise la configuration dynamique de la plateforme pour :
+ * - Le nom de la plateforme dans le footer
+ * - Le slogan de la plateforme
+ *
  * @module lib/email/templates/invitation
  */
+
+import { type PlatformEmailConfig } from './welcome';
+
+/**
+ * Configuration par défaut si non fournie
+ */
+const DEFAULT_PLATFORM_CONFIG: PlatformEmailConfig = {
+  platformFullName: 'Faso Fret Logistics',
+  platformSlogan: 'Transport multi-modal international',
+  contactEmail: 'support@kmapin.com',
+  primaryColor: '#003D82',
+};
 
 /**
  * Paramètres pour le template de rappel d'invitation
@@ -16,6 +32,8 @@ export interface InvitationReminderParams {
   daysRemaining: number;
   /** Nombre de devis du prospect */
   quoteCount: number;
+  /** Configuration de la plateforme (optionnel, utilise les valeurs par défaut si non fourni) */
+  platformConfig?: Partial<PlatformEmailConfig>;
 }
 
 /**
@@ -29,6 +47,12 @@ export function generateInvitationReminderTemplate(
 ): string {
   const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
   const invitationUrl = `${baseUrl}/complete-registration?token=${params.invitationToken}`;
+
+  // Fusionner la config par défaut avec celle fournie
+  const config: PlatformEmailConfig = {
+    ...DEFAULT_PLATFORM_CONFIG,
+    ...params.platformConfig,
+  };
 
   return `
     <!DOCTYPE html>
@@ -92,7 +116,7 @@ export function generateInvitationReminderTemplate(
           content: "✓";
           position: absolute;
           left: 0;
-          color: #003D82;
+          color: ${config.primaryColor};
           font-weight: bold;
         }
         .cta-container {
@@ -163,8 +187,8 @@ export function generateInvitationReminderTemplate(
 
         <!-- Pied de page -->
         <div class="footer">
-          <p><strong>Faso Fret Logistics</strong></p>
-          <p>Transport multi-modal international</p>
+          <p><strong>${config.platformFullName}</strong></p>
+          <p>${config.platformSlogan || 'Transport multi-modal international'}</p>
         </div>
       </div>
     </body>
