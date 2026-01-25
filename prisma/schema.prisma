@@ -177,6 +177,7 @@ model User {
   shipmentLogs              ShipmentLog[]     @relation("ShipmentLogChangedBy")
   treatedQuotes             Quote[]           @relation("QuoteTreatmentAgent")
   performedTrackingEvents   TrackingEvent[]   @relation("PerformedTrackingEvents")
+  systemConfigUpdates       SystemConfig[]    @relation("SystemConfigUpdatedBy")
   userQuotes                Quote[]           @relation("UserQuotes")
   createdQuotes             Quote[]           @relation("CreatedQuotes")
   confirmedQuotePayments    Quote[]           @relation("QuotePaymentReceiver")
@@ -275,19 +276,21 @@ model Client {
 model Shipment {
   id                    String          @id() @default(cuid())
   trackingNumber        String          @unique()
-  clientId              String
-  client                Client          @relation(fields: [clientId], references: [id])
+  clientId              String?
+  client                Client?         @relation(fields: [clientId], references: [id])
   originAddress         String
   originCity            String
   originPostalCode      String
   originCountry         String
   originContact         String?
+  originEmail           String?
   originPhone           String?
   destinationAddress    String
   destinationCity       String
   destinationPostalCode String
   destinationCountry    String
   destinationContact    String?
+  destinationEmail      String?
   destinationPhone      String?
   cargoType             CargoType
   weight                Float
@@ -327,6 +330,8 @@ model Shipment {
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
+  @@index([originEmail])
+  @@index([destinationEmail])
 }
 
 model PickupRequest {
@@ -527,53 +532,65 @@ model ShipmentLog {
 }
 
 model Quote {
-  id                   String              @id() @default(cuid())
-  quoteNumber          String              @unique()
-  trackingToken        String              @unique() @default(cuid())
-  tokenExpiresAt       DateTime
-  userId               String?
-  user                 User?               @relation("UserQuotes", fields: [userId], references: [id])
-  isAttachedToAccount  Boolean             @default(false)
-  contactEmail         String
-  contactPhone         String?
-  contactName          String?
-  clientId             String?
-  client               Client?             @relation(fields: [clientId], references: [id])
-  prospectId           String?
-  prospect             Prospect?           @relation(fields: [prospectId], references: [id])
-  originCountry        String
-  destinationCountry   String
-  transportMode        TransportMode[]
-  cargoType            CargoType
-  weight               Float
-  length               Float?
-  width                Float?
-  height               Float?
-  estimatedCost        Float
-  validUntil           DateTime
-  currency             String              @default("EUR")
-  status               QuoteStatus         @default(DRAFT)
-  acceptedAt           DateTime?
-  rejectedAt           DateTime?
-  paymentMethod        QuotePaymentMethod?
-  agentComment         String?
-  treatmentStartedAt   DateTime?
-  treatmentValidatedAt DateTime?
-  treatmentAgentId     String?
-  treatmentAgent       User?               @relation("QuoteTreatmentAgent", fields: [treatmentAgentId], references: [id])
-  cancelledAt          DateTime?
-  cancelReason         String?
-  shipmentId           String?             @unique()
-  shipment             Shipment?           @relation("QuoteToShipment", fields: [shipmentId], references: [id])
-  paymentReceivedAt    DateTime?
-  paymentReceivedById  String?
-  paymentReceivedBy    User?               @relation("QuotePaymentReceiver", fields: [paymentReceivedById], references: [id])
-  createdById          String?
-  createdBy            User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
-  documents            Document[]
-  logs                 QuoteLog[]
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt()
+  id                      String              @id() @default(cuid())
+  quoteNumber             String              @unique()
+  trackingToken           String              @unique() @default(cuid())
+  tokenExpiresAt          DateTime
+  userId                  String?
+  user                    User?               @relation("UserQuotes", fields: [userId], references: [id])
+  isAttachedToAccount     Boolean             @default(false)
+  contactEmail            String
+  contactPhone            String?
+  contactName             String?
+  clientId                String?
+  client                  Client?             @relation(fields: [clientId], references: [id])
+  prospectId              String?
+  prospect                Prospect?           @relation(fields: [prospectId], references: [id])
+  originCountry           String
+  destinationCountry      String
+  transportMode           TransportMode[]
+  cargoType               CargoType
+  weight                  Float
+  length                  Float?
+  width                   Float?
+  height                  Float?
+  originAddress           String?
+  originCity              String?
+  originPostalCode        String?
+  originContactName       String?
+  originContactPhone      String?
+  originContactEmail      String?
+  destinationAddress      String?
+  destinationCity         String?
+  destinationPostalCode   String?
+  destinationContactName  String?
+  destinationContactPhone String?
+  destinationContactEmail String?
+  estimatedCost           Float
+  validUntil              DateTime
+  currency                String              @default("EUR")
+  status                  QuoteStatus         @default(DRAFT)
+  acceptedAt              DateTime?
+  rejectedAt              DateTime?
+  paymentMethod           QuotePaymentMethod?
+  agentComment            String?
+  treatmentStartedAt      DateTime?
+  treatmentValidatedAt    DateTime?
+  treatmentAgentId        String?
+  treatmentAgent          User?               @relation("QuoteTreatmentAgent", fields: [treatmentAgentId], references: [id])
+  cancelledAt             DateTime?
+  cancelReason            String?
+  shipmentId              String?             @unique()
+  shipment                Shipment?           @relation("QuoteToShipment", fields: [shipmentId], references: [id])
+  paymentReceivedAt       DateTime?
+  paymentReceivedById     String?
+  paymentReceivedBy       User?               @relation("QuotePaymentReceiver", fields: [paymentReceivedById], references: [id])
+  createdById             String?
+  createdBy               User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
+  documents               Document[]
+  logs                    QuoteLog[]
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt()
 
   @@index([clientId])
   @@index([prospectId])
@@ -581,6 +598,10 @@ model Quote {
   @@index([trackingToken])
   @@index([contactEmail])
   @@index([userId])
+  @@index([originContactEmail])
+  @@index([destinationContactEmail])
+  @@index([originCity])
+  @@index([destinationCity])
 }
 
 model QuoteLog {
@@ -739,4 +760,35 @@ model Country {
   @@index([code])
   @@index([isActive])
   @@map("country")
+}
+
+model SystemConfig {
+  id                  String   @id() @default(cuid())
+  platformName        String   @default("Faso Fret")
+  platformFullName    String   @default("Faso Fret Logistics")
+  platformSlogan      String?  @default("Transport multi-modal international")
+  contactEmail        String   @default("support@kmapin.com")
+  contactPhone        String?
+  logoUrl             String?
+  faviconUrl          String?
+  primaryColor        String   @default("#003D82")
+  secondaryColor      String?  @default("#10B981")
+  companyAddress      String?
+  companyCity         String?
+  companyCountry      String?  @default("Burkina Faso")
+  companyPostalCode   String?
+  facebookUrl         String?
+  linkedinUrl         String?
+  twitterUrl          String?
+  instagramUrl        String?
+  companyLegalName    String?  @default("Faso Fret Logistics SAS")
+  companyRegistration String?
+  vatNumber           String?
+  copyrightYear       Int      @default(2025)
+  updatedById         String
+  updatedBy           User     @relation("SystemConfigUpdatedBy", fields: [updatedById], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt()
+
+  @@map("system_config")
 }

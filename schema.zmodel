@@ -100,6 +100,7 @@ model User {
   treatedQuotes      Quote[] @relation("QuoteTreatmentAgent") // Devis traités par cet agent
 
   performedTrackingEvents TrackingEvent[] @relation("PerformedTrackingEvents") // Événements de tracking effectués par cet agent
+  systemConfigUpdates     SystemConfig[]  @relation("SystemConfigUpdatedBy") // Configurations système modifiées par cet utilisateur
 
   // Relations pour les devis (pattern création sans compte)
   userQuotes         Quote[] @relation("UserQuotes")    // Devis rattachés à cet utilisateur
@@ -367,25 +368,42 @@ model Shipment {
   trackingNumber String   @unique
 
   // ════════════════════════════════════════════
-  // CLIENT (Entreprise ou Particulier)
+  // CLIENT (Optionnel - Entreprise ou Particulier)
   // ════════════════════════════════════════════
+  // Le client est optionnel pour permettre :
+  // - Des expéditions créées par des agents pour des tiers non-enregistrés
+  // - Des expéditions B2B où l'expéditeur n'a pas de compte
+  // - Des envois ponctuels sans création de fiche client
 
-  clientId       String
-  client         Client   @relation(fields: [clientId], references: [id])
+  clientId       String?
+  client         Client?   @relation(fields: [clientId], references: [id])
 
-  // Origine & Destination
+  // ════════════════════════════════════════════
+  // EXPÉDITEUR (Origine) - Informations de contact
+  // ════════════════════════════════════════════
+  // Ces champs permettent d'identifier l'expéditeur même sans clientId
+  // Si clientId est rempli, ces champs servent de surcharge ou d'info additionnelle
+
   originAddress      String
   originCity         String
   originPostalCode   String
   originCountry      String
-  originContact      String?
+  originContact      String?   // Nom de la personne à contacter
+  originEmail        String?   // Email de l'expéditeur (obligatoire si pas de clientId)
   originPhone        String?
+
+  // ════════════════════════════════════════════
+  // DESTINATAIRE (Destination) - Informations de contact
+  // ════════════════════════════════════════════
+  // Le destinataire peut être un client enregistré ou un tiers non-enregistré
+  // Ces champs permettent d'identifier le destinataire dans tous les cas
 
   destinationAddress    String
   destinationCity       String
   destinationPostalCode String
   destinationCountry    String
-  destinationContact    String?
+  destinationContact    String?   // Nom de la personne à contacter
+  destinationEmail      String?   // Email du destinataire (pour notifications)
   destinationPhone      String?
 
   // Détails marchandise
@@ -446,7 +464,9 @@ model Shipment {
   fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition (colis)
   logs           ShipmentLog[]   // Historique complet des événements (changements de statut, etc.)
 
-  // 🔐 Access Policies
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
 
   // Les admins peuvent tout faire
   @@allow('all', auth().role == ADMIN)
@@ -458,17 +478,24 @@ model Shipment {
   @@allow('read', auth().role == FINANCE_MANAGER)
 
   // Les clients peuvent lire les expéditions de leur client (COMPANY ou INDIVIDUAL)
-  @@allow('read', auth().clientId == clientId && auth().role == CLIENT)
+  // Note : clientId doit être défini pour cette règle (pas d'accès aux expéditions sans client)
+  @@allow('read', clientId != null && auth().clientId == clientId && auth().role == CLIENT)
 
   // Le créateur peut modifier tant que status != DELIVERED
   @@allow('read,update', auth().id == createdById && status != DELIVERED)
 
   @@deny('all', true)
 
+  // ════════════════════════════════════════════
+  // INDEX
+  // ════════════════════════════════════════════
+
   @@index([clientId])
   @@index([trackingNumber])
   @@index([status])
   @@index([createdAt])
+  @@index([originEmail])       // Index pour recherche par email expéditeur
+  @@index([destinationEmail])  // Index pour recherche par email destinataire
 }
 
 enum CargoType {
@@ -1273,6 +1300,40 @@ model Quote {
   width              Float?           // Largeur en mètres
   height             Float?           // Hauteur en mètres
 
+  // ════════════════════════════════════════════
+  // SNAPSHOT ADRESSES (Pattern Immutable Data)
+  // ════════════════════════════════════════════
+  // Ces champs capturent les adresses AU MOMENT de la demande de devis
+  // Ils sont optionnels car le client peut ne pas les fournir initialement
+  // Suivant le pattern utilisé par Magento, Shopify et autres leaders e-commerce
+  // Pour garantir l'historique immutable et la conformité légale
+
+  // ────────────────────────────────────────────
+  // ADRESSE EXPÉDITEUR (Origine) - Optionnelle
+  // ────────────────────────────────────────────
+
+  originAddress      String?          // Adresse complète (rue, numéro)
+  originCity         String?          // Ville d'expédition
+  originPostalCode   String?          // Code postal origine
+  originContactName  String?          // Nom de la personne à contacter
+  originContactPhone String?          // Téléphone contact expéditeur
+  originContactEmail String?          // Email contact expéditeur
+
+  // ────────────────────────────────────────────
+  // ADRESSE DESTINATAIRE (Destination) - Optionnelle
+  // ────────────────────────────────────────────
+
+  destinationAddress      String?     // Adresse complète (rue, numéro)
+  destinationCity         String?     // Ville de destination
+  destinationPostalCode   String?     // Code postal destination
+  destinationContactName  String?     // Nom de la personne à contacter
+  destinationContactPhone String?     // Téléphone contact destinataire
+  destinationContactEmail String?     // Email contact destinataire
+
+  // ════════════════════════════════════════════
+  // TARIFICATION
+  // ════════════════════════════════════════════
+
   estimatedCost      Float
   validUntil         DateTime
   currency           String          @default("EUR")
@@ -1359,6 +1420,10 @@ model Quote {
   @@index([trackingToken])
   @@index([contactEmail])
   @@index([userId])
+  @@index([originContactEmail])      // Recherche par email expéditeur
+  @@index([destinationContactEmail]) // Recherche par email destinataire
+  @@index([originCity])              // Filtrage par ville origine
+  @@index([destinationCity])         // Filtrage par ville destination
 }
 
 enum QuoteStatus {
@@ -1944,4 +2009,147 @@ model Country {
   @@index([code])
   @@index([isActive])
   @@map("country")
+}
+
+// ============================================
+// CONFIGURATION SYSTÈME (PLATEFORME)
+// ============================================
+
+/**
+ * Modèle SystemConfig (Configuration globale de la plateforme)
+ *
+ * Singleton pour stocker tous les paramètres de personnalisation de la plateforme :
+ * - Identité (nom, slogan)
+ * - Contact (email, téléphone)
+ * - Branding (logo, favicon, couleurs)
+ * - Adresse (siège social)
+ * - Réseaux sociaux (liens)
+ * - Mentions légales (raison sociale, SIREN, TVA)
+ *
+ * Ce modèle ne doit contenir qu'une seule entrée (singleton).
+ * La lecture est publique pour permettre l'affichage dans les composants.
+ * Seuls les admins peuvent modifier la configuration.
+ *
+ * Access policies :
+ * - Lecture publique (nécessaire pour l'affichage UI)
+ * - Création/Modification/Suppression : ADMIN uniquement
+ */
+model SystemConfig {
+  id                String   @id @default(cuid())
+
+  // ════════════════════════════════════════════
+  // IDENTITÉ DE LA PLATEFORME
+  // ════════════════════════════════════════════
+
+  // Nom court de la plateforme (affiché dans le header, sidebar, etc.)
+  platformName      String   @default("Faso Fret")
+
+  // Nom complet de la plateforme (utilisé dans les documents officiels, PDF, emails)
+  platformFullName  String   @default("Faso Fret Logistics")
+
+  // Slogan ou accroche marketing (affiché sur la page d'accueil)
+  platformSlogan    String?  @default("Transport multi-modal international")
+
+  // ════════════════════════════════════════════
+  // COORDONNÉES DE CONTACT
+  // ════════════════════════════════════════════
+
+  // Email principal de contact (support, formulaire de contact)
+  contactEmail      String   @default("support@kmapin.com")
+
+  // Numéro de téléphone principal (format international)
+  contactPhone      String?
+
+  // ════════════════════════════════════════════
+  // BRANDING & IDENTITÉ VISUELLE
+  // ════════════════════════════════════════════
+
+  // URL du logo principal (stocké sur Backblaze B2)
+  // Format recommandé : PNG ou SVG, dimensions min 200x50px
+  logoUrl           String?
+
+  // URL du favicon (stocké sur Backblaze B2)
+  // Format recommandé : ICO ou PNG 32x32px
+  faviconUrl        String?
+
+  // Couleur primaire de la marque (format hexadécimal #RRGGBB)
+  // Utilisée pour les boutons, liens, accents principaux
+  primaryColor      String   @default("#003D82")
+
+  // Couleur secondaire de la marque (format hexadécimal #RRGGBB)
+  // Utilisée pour les éléments d'accentuation secondaires
+  secondaryColor    String?  @default("#10B981")
+
+  // ════════════════════════════════════════════
+  // ADRESSE DU SIÈGE SOCIAL
+  // ════════════════════════════════════════════
+
+  // Adresse complète (rue, numéro, etc.)
+  companyAddress    String?
+
+  // Ville
+  companyCity       String?
+
+  // Pays
+  companyCountry    String?  @default("Burkina Faso")
+
+  // Code postal
+  companyPostalCode String?
+
+  // ════════════════════════════════════════════
+  // RÉSEAUX SOCIAUX
+  // ════════════════════════════════════════════
+
+  // URL de la page Facebook
+  facebookUrl       String?
+
+  // URL de la page LinkedIn
+  linkedinUrl       String?
+
+  // URL du compte Twitter/X
+  twitterUrl        String?
+
+  // URL du compte Instagram
+  instagramUrl      String?
+
+  // ════════════════════════════════════════════
+  // MENTIONS LÉGALES
+  // ════════════════════════════════════════════
+
+  // Raison sociale légale de l'entreprise
+  companyLegalName  String?  @default("Faso Fret Logistics SAS")
+
+  // Numéro d'immatriculation (SIREN, SIRET ou équivalent local)
+  companyRegistration String?
+
+  // Numéro de TVA intracommunautaire
+  vatNumber         String?
+
+  // Année de copyright pour le footer (mise à jour automatique possible)
+  copyrightYear     Int      @default(2025)
+
+  // ════════════════════════════════════════════
+  // MÉTADONNÉES
+  // ════════════════════════════════════════════
+
+  // ID de l'utilisateur ayant effectué la dernière modification
+  updatedById       String
+  updatedBy         User     @relation("SystemConfigUpdatedBy", fields: [updatedById], references: [id])
+
+  // Horodatage de création et mise à jour
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
+
+  // Lecture publique pour l'affichage dans les composants UI
+  // (header, footer, sidebar, métadonnées, etc.)
+  @@allow('read', true)
+
+  // Seuls les admins peuvent créer, modifier ou supprimer la configuration
+  @@allow('create,update,delete', auth().role == ADMIN)
+
+  @@map("system_config")
 }
