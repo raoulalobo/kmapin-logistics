@@ -15,7 +15,12 @@ const nextConfig: NextConfig = {
     "@prisma/client",
     "prisma",
   ],
-  // Configuration Webpack pour exclure les modules Node.js du bundle client
+  // Configuration Turbopack (Next.js 16+ utilise Turbopack par défaut)
+  // Cette configuration vide permet d'accepter Turbopack sans erreur
+  // Les modules Node.js sont automatiquement exclus du bundle client par Turbopack
+  turbopack: {},
+  // Configuration Webpack (utilisée si --webpack est passé ou en fallback)
+  // Conservée pour compatibilité arrière
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Exclure les modules Node.js du bundle client
