@@ -25,3 +25,14 @@ export {
   type PublicShipmentTracking,
   type PublicTrackingEvent,
 } from './actions/public-tracking.actions';
+
+// ============================================================================
+// Schémas de validation (Zod)
+// ============================================================================
+export {
+  addTrackingEventSchema,
+  gpsCoordinatesSchema,
+  updateGpsPositionSchema,
+  type AddTrackingEventInput,
+  type UpdateGpsPositionInput,
+} from './schemas/tracking-event.schema';

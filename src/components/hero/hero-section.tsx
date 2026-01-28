@@ -8,7 +8,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Calculator, CalendarBlank } from '@phosphor-icons/react';
+import { Phone, Calculator, CalendarBlank, MagnifyingGlass } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
@@ -82,6 +82,25 @@ export function HeroSection() {
                     <Link href="/pickups/request" className="flex items-center gap-2">
                       <CalendarBlank className="h-5 w-5" />
                       Demander un enlèvement
+                    </Link>
+                  </Button>
+                </motion.div>
+
+                {/* Bouton Suivi de colis */}
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
+                  >
+                    <Link href="/tracking" className="flex items-center gap-2">
+                      <MagnifyingGlass className="h-5 w-5" weight="bold" />
+                      Suivi de colis
                     </Link>
                   </Button>
                 </motion.div>

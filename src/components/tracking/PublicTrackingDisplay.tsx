@@ -223,17 +223,18 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
       </Card>
 
       {/* ===================================================================
-          SECTION 3 : TIMELINE SIMPLIFIÉE
+          SECTION 3 : DERNIER STATUT (un seul événement pour les guests)
           =================================================================== */}
       <Card className="dashboard-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Historique de Suivi
+            Dernier Statut
           </CardTitle>
         </CardHeader>
         <CardContent>
           {tracking.trackingEvents.length === 0 ? (
+            // Aucun événement de tracking enregistré
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Clock className="h-12 w-12 text-gray-300 mb-4" />
               <p className="text-lg font-medium text-gray-900">
@@ -244,29 +245,28 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
               </p>
             </div>
           ) : (
+            // Affichage du dernier événement uniquement (guests)
             <div className="space-y-4">
-              {tracking.trackingEvents.map((event, index) => {
+              {(() => {
+                // Récupérer le dernier (et unique) événement
+                const event = tracking.trackingEvents[0];
                 const eventBadge = getStatusBadge(event.status);
-                const isLast = index === tracking.trackingEvents.length - 1;
 
                 return (
                   <div key={event.id} className="flex gap-4">
-                    {/* Point coloré + ligne verticale */}
+                    {/* Icône du statut */}
                     <div className="flex flex-col items-center">
                       <div
-                        className={`h-10 w-10 rounded-full ${eventBadge.color} flex items-center justify-center text-white`}
+                        className={`h-12 w-12 rounded-full ${eventBadge.color} flex items-center justify-center text-white`}
                       >
                         {eventBadge.icon}
                       </div>
-                      {!isLast && (
-                        <div className="w-0.5 h-full bg-gray-200 mt-2" />
-                      )}
                     </div>
 
                     {/* Contenu de l'événement */}
-                    <div className="flex-1 pb-8">
+                    <div className="flex-1">
                       <div className="flex items-start justify-between mb-1">
-                        <p className="font-semibold text-lg">{event.statusLabel}</p>
+                        <p className="font-semibold text-xl">{event.statusLabel}</p>
                         <p className="text-sm text-gray-600">
                           {format(new Date(event.timestamp), 'dd MMM yyyy à HH:mm', {
                             locale: fr,
@@ -283,7 +283,15 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
                     </div>
                   </div>
                 );
-              })}
+              })()}
+
+              {/* Message pour inciter à créer un compte */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 text-center">
+                  <Info className="h-4 w-4 inline-block mr-1" />
+                  Connectez-vous pour voir l'historique complet des événements
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -299,15 +307,15 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
         </AlertTitle>
         <AlertDescription className="text-blue-800 space-y-3">
           <p>
-            Le tracking public affiche uniquement les informations de base. Connectez-vous
+            Le tracking public affiche uniquement le dernier statut. Connectez-vous
             ou créez un compte pour accéder à :
           </p>
           <ul className="list-disc list-inside space-y-1 text-sm">
-            <li>L'historique complet avec coordonnées GPS</li>
+            <li><strong>L'historique complet</strong> de tous les événements de suivi</li>
+            <li>Les coordonnées GPS et localisation détaillée</li>
             <li>Les documents de transport et factures</li>
             <li>Les notifications en temps réel par email/SMS</li>
             <li>Les informations de coût et de tarification</li>
-            <li>La gestion de vos expéditions</li>
           </ul>
           <div className="flex gap-2 mt-4">
             <Button asChild className="bg-blue-600 hover:bg-blue-700">

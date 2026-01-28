@@ -41,6 +41,7 @@ import { getSession } from '@/lib/auth/config';
 import { ShipmentAgentActions } from '@/components/shipments/shipment-agent-actions';
 import { ShipmentPaymentActions } from '@/components/shipments/shipment-payment-actions';
 import { ShipmentHistoryTimeline } from '@/components/shipments';
+import { AddTrackingEventDialog } from '@/components/tracking/AddTrackingEventDialog';
 
 /**
  * Fonction utilitaire pour formater le statut en français
@@ -544,11 +545,21 @@ export default async function ShipmentDetailPage({
           {/* Événements de localisation du colis */}
           {/* ════════════════════════════════════════════════════════════════ */}
           <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Historique de tracking</CardTitle>
-              <CardDescription>
-                Événements de localisation et transit
-              </CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <div>
+                <CardTitle>Historique de tracking</CardTitle>
+                <CardDescription>
+                  Événements de localisation et transit
+                </CardDescription>
+              </div>
+              {/* Bouton d'ajout visible pour ADMIN et OPERATIONS_MANAGER */}
+              {(userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+                <AddTrackingEventDialog
+                  shipmentId={shipment.id}
+                  currentStatus={shipment.status}
+                  trackingNumber={shipment.trackingNumber}
+                />
+              )}
             </CardHeader>
             <CardContent>
               {shipment.trackingEvents && shipment.trackingEvents.length > 0 ? (
