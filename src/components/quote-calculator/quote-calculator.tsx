@@ -240,10 +240,12 @@ export function QuoteCalculator() {
       originCountry: origin || '',
       destinationCountry: destination || '',
       cargoType: 'GENERAL' as const,
-      weight: 0,
-      length: 0,
-      width: 0,
-      height: 0,
+      // Utiliser undefined pour afficher les placeholders au lieu de "0"
+      // Le schéma Zod convertira les valeurs vides/NaN en 0 via le préprocesseur
+      weight: undefined as unknown as number,
+      length: undefined as unknown as number,
+      width: undefined as unknown as number,
+      height: undefined as unknown as number,
       transportMode: mode && Object.values(TransportMode).includes(mode as TransportMode)
         ? [mode as TransportMode]
         : [],
