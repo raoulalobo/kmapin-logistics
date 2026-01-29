@@ -7,9 +7,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  // Définir explicitement la racine de traçage des fichiers de sortie
-  // pour éviter les avertissements liés à la détection de plusieurs fichiers de verrouillage
-  outputFileTracingRoot: "/home/alobo/Bureau/NextJS/kmapin/v2",
+  // Note: outputFileTracingRoot retiré car chemin absolu local incompatible avec Vercel
+  // Si nécessaire, utiliser process.cwd() ou __dirname
   // Exclure les packages serveur du bundle client
   // CRITIQUE : Better Auth utilise AsyncLocalStorage (async_hooks) qui doit rester côté serveur
   serverExternalPackages: [
