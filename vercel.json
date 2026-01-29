@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx zenstack generate && npx prisma generate && next build",
+  "buildCommand": "npm run db:generate && next build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["cdg1"]
