@@ -46,4 +46,4 @@ next-env.d.ts
 # zenstack
 /node_modules/.zenstack
 
-/src/generated/prisma
+# Note: /src/generated/prisma est maintenant suivi par Git pour Vercel
