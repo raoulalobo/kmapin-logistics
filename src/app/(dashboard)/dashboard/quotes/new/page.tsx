@@ -69,6 +69,16 @@ export default function NewQuotePage() {
   const isClient = session?.user?.role === 'CLIENT';
   const userClientId = session?.user?.clientId || '';
 
+  // === DIAGNOSTIC LOGS - Chargement session CLIENT ===
+  console.log('[NewQuotePage] === DIAGNOSTIC SESSION CLIENT ===');
+  console.log('[NewQuotePage] Session chargée?', !!session);
+  console.log('[NewQuotePage] session?.user?.role:', session?.user?.role);
+  console.log('[NewQuotePage] isClient:', isClient);
+  console.log('[NewQuotePage] session?.user?.clientId:', session?.user?.clientId);
+  console.log('[NewQuotePage] userClientId (après || ""):', userClientId);
+  console.log('[NewQuotePage] userClientId est vide?', !userClientId || userClientId === '');
+  // === FIN DIAGNOSTIC ===
+
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
@@ -140,6 +150,24 @@ export default function NewQuotePage() {
       status: 'Statut',
     },
   });
+
+  /**
+   * Mettre à jour le clientId quand la session se charge (pour les utilisateurs CLIENT)
+   *
+   * Problème résolu : useForm({ defaultValues }) est calculé au premier render,
+   * AVANT que la session soit chargée. Ce useEffect met à jour le clientId
+   * dès que la session est disponible.
+   */
+  useEffect(() => {
+    if (session?.user?.role === 'CLIENT' && session?.user?.clientId) {
+      const currentClientId = form.getValues('clientId');
+      // Ne mettre à jour que si le clientId est vide (pas encore initialisé)
+      if (!currentClientId || currentClientId === '') {
+        console.log('[NewQuotePage] Mise à jour clientId depuis session:', session.user.clientId);
+        form.setValue('clientId', session.user.clientId);
+      }
+    }
+  }, [session?.user?.role, session?.user?.clientId, form]);
 
   // Surveiller la devise sélectionnée
   const selectedCurrency = form.watch('currency');
@@ -264,6 +292,18 @@ export default function NewQuotePage() {
    */
   async function onSubmit(data: QuoteFormData) {
     try {
+      // === DIAGNOSTIC LOGS ===
+      console.log('[NewQuotePage] === DIAGNOSTIC CLIENTID ===');
+      console.log('[NewQuotePage] Session user:', {
+        role: session?.user?.role,
+        clientId: session?.user?.clientId,
+      });
+      console.log('[NewQuotePage] Form data.clientId:', data.clientId);
+      console.log('[NewQuotePage] Type de clientId:', typeof data.clientId);
+      console.log('[NewQuotePage] clientId vide?', !data.clientId || data.clientId === '');
+      console.log('[NewQuotePage] clientId longueur:', data.clientId?.length);
+      // === FIN DIAGNOSTIC ===
+
       // Créer un FormData à partir des données du formulaire
       const formData = new FormData();
 
@@ -302,6 +342,11 @@ export default function NewQuotePage() {
       formData.append('currency', data.currency);
       formData.append('validUntil', data.validUntil);
       formData.append('status', data.status || 'DRAFT');
+
+      // === DIAGNOSTIC LOGS ===
+      console.log('[NewQuotePage] FormData clientId envoyé:', formData.get('clientId'));
+      console.log('[NewQuotePage] Type FormData clientId:', typeof formData.get('clientId'));
+      // === FIN DIAGNOSTIC ===
 
       const result = await createQuoteAction(formData);
 

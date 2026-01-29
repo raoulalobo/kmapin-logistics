@@ -24,6 +24,7 @@ import {
   logQuoteTreatmentValidated,
   logQuoteCancelled,
 } from '../lib/quote-log-helper';
+import { z } from 'zod';
 import {
   quoteSchema,
   quoteUpdateSchema,
@@ -150,6 +151,18 @@ export async function createQuoteAction(
       };
     }
 
+    // === DIAGNOSTIC LOGS ===
+    console.log('[createQuoteAction] === DIAGNOSTIC CLIENTID ===');
+    console.log('[createQuoteAction] formData.get("clientId"):', formData.get('clientId'));
+    console.log('[createQuoteAction] Type formData clientId:', typeof formData.get('clientId'));
+    console.log('[createQuoteAction] Est vide?', !formData.get('clientId') || formData.get('clientId') === '');
+    console.log('[createQuoteAction] Session user:', {
+      id: session.user.id,
+      role: userRole,
+      clientId: session.user.clientId,
+    });
+    // === FIN DIAGNOSTIC ===
+
     // Extraire et valider les données
     const rawData = {
       clientId: formData.get('clientId'),
@@ -179,7 +192,31 @@ export async function createQuoteAction(
       status: formData.get('status') || 'DRAFT',
     };
 
-    const validatedData = quoteSchema.parse(rawData);
+    // === DIAGNOSTIC LOGS ===
+    console.log('[createQuoteAction] rawData.clientId:', rawData.clientId);
+    console.log('[createQuoteAction] Type rawData.clientId:', typeof rawData.clientId);
+    // === FIN DIAGNOSTIC ===
+
+    // Valider les données avec Zod (avec capture des erreurs détaillées)
+    let validatedData: QuoteFormData;
+    try {
+      validatedData = quoteSchema.parse(rawData);
+      console.log('[createQuoteAction] Validation Zod réussie pour clientId:', validatedData.clientId);
+    } catch (zodError) {
+      // === DIAGNOSTIC LOGS ERREUR ZOD ===
+      console.error('[createQuoteAction] === ERREUR ZOD ===');
+      console.error('[createQuoteAction] rawData.clientId au moment de l\'erreur:', rawData.clientId);
+      if (zodError instanceof z.ZodError) {
+        console.error('[createQuoteAction] Erreurs de validation détaillées:', JSON.stringify(zodError.errors, null, 2));
+        // Chercher spécifiquement l'erreur sur clientId
+        const clientIdError = zodError.errors.find(e => e.path.includes('clientId'));
+        if (clientIdError) {
+          console.error('[createQuoteAction] Erreur clientId spécifique:', clientIdError);
+        }
+      }
+      // === FIN DIAGNOSTIC ===
+      throw zodError; // Re-lancer pour que le catch externe le gère
+    }
 
     // Si l'utilisateur est CLIENT, vérifier qu'il crée un devis pour sa propre compagnie
     if (canCreateOwn && !canCreateAll) {

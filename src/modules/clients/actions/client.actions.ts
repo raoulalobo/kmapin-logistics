@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 import { requirePermission } from '@/lib/auth/permissions';
+import { hasPermission } from '@/lib/auth/permissions-client';
 import {
   clientSchema,
   clientUpdateSchema,
@@ -162,9 +163,21 @@ export async function getClientsAction(params: GetClientsParams = {}) {
     /**
      * Vérifier l'authentification et les permissions
      * La plupart des rôles peuvent lire les clients
-     * Permission requise: 'clients:read'
+     * Permission requise: 'clients:read' ou 'clients:read:own'
      */
-    await requirePermission('clients:read');
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Vérifier les permissions
+    const canReadAll = hasPermission(userRole, 'clients:read');
+    const canReadOwn = hasPermission(userRole, 'clients:read:own');
+
+    if (!canReadAll && !canReadOwn) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions nécessaires pour consulter les clients',
+      };
+    }
 
     // Extraire les paramètres avec valeurs par défaut
     const { page = 1, limit = 10, search } = params;
@@ -173,7 +186,7 @@ export async function getClientsAction(params: GetClientsParams = {}) {
     const skip = (page - 1) * limit;
 
     // Construire le filtre de recherche (nom, email, raison sociale, taxId)
-    const whereClause = search
+    const whereClause: any = search
       ? {
           OR: [
             { name: { contains: search, mode: 'insensitive' as const } },
@@ -183,6 +196,17 @@ export async function getClientsAction(params: GetClientsParams = {}) {
           ],
         }
       : {};
+
+    // Si l'utilisateur est CLIENT, il ne voit que son propre client
+    if (canReadOwn && !canReadAll) {
+      if (!session.user.clientId) {
+        return {
+          success: false,
+          error: 'Votre compte n\'est pas associé à un client',
+        };
+      }
+      whereClause.id = session.user.clientId;
+    }
 
     // Récupérer les clients avec le filtre de recherche
     const [clients, total] = await Promise.all([
@@ -253,12 +277,24 @@ export async function getClientAction(id: string) {
   try {
     /**
      * Vérifier l'authentification et les permissions
-     * Permission requise: 'clients:read'
+     * Permission requise: 'clients:read' ou 'clients:read:own'
      */
-    await requirePermission('clients:read');
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Vérifier les permissions
+    const canReadAll = hasPermission(userRole, 'clients:read');
+    const canReadOwn = hasPermission(userRole, 'clients:read:own');
+
+    if (!canReadAll && !canReadOwn) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions nécessaires pour consulter ce client',
+      };
+    }
 
     // Récupérer le client avec statistiques
-    const client = await prisma.client.findUnique({
+    let client = await prisma.client.findUnique({
       where: { id },
       include: {
         shipments: {
@@ -281,6 +317,16 @@ export async function getClientAction(id: string) {
         success: false,
         error: 'Client introuvable',
       };
+    }
+
+    // Si l'utilisateur est CLIENT, vérifier qu'il accède à son propre client
+    if (canReadOwn && !canReadAll) {
+      if (!session.user.clientId || session.user.clientId !== id) {
+        return {
+          success: false,
+          error: 'Vous n\'avez pas les permissions nécessaires pour consulter ce client',
+        };
+      }
     }
 
     return { success: true, data: client };

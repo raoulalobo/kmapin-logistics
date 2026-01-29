@@ -72,6 +72,11 @@ export function ClientSelect({
         const result = await getClientsAction({ page: 1, limit: 100 });
 
         if (result.success && result.data) {
+          // === DIAGNOSTIC LOGS ===
+          console.log('[ClientSelect] Clients chargés:', result.data.clients.length);
+          console.log('[ClientSelect] Liste des IDs:', result.data.clients.map(c => ({ id: c.id, name: c.name })));
+          // === FIN DIAGNOSTIC ===
+
           setClients(result.data.clients);
           setFilteredClients(result.data.clients);
         }
@@ -138,8 +143,15 @@ export function ClientSelect({
 
   /**
    * Sélectionner un client
+   * Met à jour l'état local et notifie le parent via onChange
    */
   function selectClient(client: Client) {
+    // === DIAGNOSTIC LOGS ===
+    console.log('[ClientSelect] Client sélectionné:', { id: client.id, name: client.name });
+    console.log('[ClientSelect] Appel onChange avec:', client.id);
+    console.log('[ClientSelect] Type de client.id:', typeof client.id);
+    // === FIN DIAGNOSTIC ===
+
     setSelectedClient(client);
     onChange(client.id);
     setIsOpen(false);
