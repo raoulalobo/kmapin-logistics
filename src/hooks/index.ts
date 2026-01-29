@@ -5,7 +5,7 @@
  */
 
 export { useFilters, type FilterState, type FilterConfig } from './use-filters';
-export { useToast, toast } from './use-toast';
+export { useToast } from './use-toast';
 export {
   useFormValidation,
   type UseFormValidationOptions,

@@ -40,7 +40,9 @@ export function useSafeSession() {
 
     // Utiliser l'API fetch pour récupérer la session
     // Plus stable que le hook useSession avec React 19
-    fetch('/api/auth/get-session', {
+    // IMPORTANT: disableCookieCache=true force la lecture depuis la DB
+    // Cela garantit que les données (comme clientId) sont toujours à jour
+    fetch('/api/auth/get-session?disableCookieCache=true', {
       credentials: 'include',
     })
       .then(res => res.json())
