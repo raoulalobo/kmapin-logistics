@@ -28,7 +28,7 @@
 
 // Import depuis les fichiers pré-générés (pour compatibilité Vercel)
 // Voir: https://zenstack.dev/docs/guides/deploy
-import { enhance } from '@/.zenstack/enhance';
+import { enhance } from '@/zenstack/enhance';
 import { prisma } from './client';
 import { UserRole } from '@/lib/db/enums';
 
