@@ -195,8 +195,9 @@ export default async function QuoteDetailsPage({
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Client</p>
-              <p className="text-lg font-semibold">{quote.client.name}</p>
-              <p className="text-sm text-muted-foreground">{quote.client.email}</p>
+              {/* Fallback si client non enregistré */}
+              <p className="text-lg font-semibold">{quote.client?.name || quote.originContactName || 'Client non enregistré'}</p>
+              <p className="text-sm text-muted-foreground">{quote.client?.email || quote.originContactEmail || '—'}</p>
             </div>
           </CardContent>
         </Card>

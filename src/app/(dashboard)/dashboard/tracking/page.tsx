@@ -212,7 +212,8 @@ export default async function TrackingPage() {
                       <span>•</span>
                       <span>{shipment.weight} kg</span>
                       <span>•</span>
-                      <span className="capitalize">{shipment.client.name}</span>
+                      {/* Fallback si client non enregistré */}
+                      <span className="capitalize">{shipment.client?.name || shipment.originContact || 'Expéditeur inconnu'}</span>
                       {shipment.estimatedDeliveryDate && (
                         <>
                           <span>•</span>

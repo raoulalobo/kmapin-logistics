@@ -202,7 +202,8 @@ export default async function ShipmentsPage({
                           {shipment.trackingNumber}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          {shipment.client.name}
+                          {/* Fallback: client.name > originContact > originEmail > "Expéditeur non enregistré" */}
+                          {shipment.client?.name || shipment.originContact || shipment.originEmail || 'Expéditeur non enregistré'}
                         </p>
                       </div>
                     </div>

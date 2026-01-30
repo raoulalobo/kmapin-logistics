@@ -202,8 +202,9 @@ export default async function ShipmentDetailPage({
           <div className="flex items-center gap-3">
             <Buildings className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-semibold text-lg">{shipment.client.name}</p>
-              <p className="text-sm text-muted-foreground">{shipment.client.email}</p>
+              {/* Fallback si client non enregistré */}
+              <p className="font-semibold text-lg">{shipment.client?.name || shipment.originContact || 'Expéditeur non enregistré'}</p>
+              <p className="text-sm text-muted-foreground">{shipment.client?.email || shipment.originEmail || '—'}</p>
             </div>
           </div>
         </CardContent>

@@ -283,9 +283,10 @@ export default async function QuotesPage({
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium">{quote.client.name}</span>
+                          {/* Fallback si client non enregistré */}
+                          <span className="font-medium">{quote.client?.name || quote.originContactName || 'Client non enregistré'}</span>
                           <span className="text-xs text-muted-foreground">
-                            {quote.client.email}
+                            {quote.client?.email || quote.originContactEmail || '—'}
                           </span>
                         </div>
                       </TableCell>
