@@ -64,7 +64,14 @@ export async function getStandardRatesAction(filters?: PricingFiltersData) {
         code: { in: allCountryCodes },
       },
     });
-    const countryMap = new Map(countries.map((c) => [c.code, c.name]));
+
+    // Filtrer les éléments null (protection défensive)
+    // Prisma ne devrait pas retourner de null, mais on se protège au cas où
+    const validCountries = countries.filter(
+      (c): c is typeof c => c !== null && c !== undefined && typeof c.code === 'string' && typeof c.name === 'string'
+    );
+
+    const countryMap = new Map(validCountries.map((c) => [c.code, c.name]));
 
     // === ÉTAPE 3 : Récupérer la configuration pour les délais ===
     const config = await getPricingConfig();

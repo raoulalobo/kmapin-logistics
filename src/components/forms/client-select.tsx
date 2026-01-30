@@ -72,13 +72,22 @@ export function ClientSelect({
         const result = await getClientsAction({ page: 1, limit: 100 });
 
         if (result.success && result.data) {
+          // Filtrer les éléments null ou invalides (protection défensive)
+          // Prisma ne devrait pas retourner de null, mais on se protège au cas où
+          const validClients = result.data.clients.filter(
+            (c): c is Client => c !== null && c !== undefined && typeof c.name === 'string'
+          );
+
           // === DIAGNOSTIC LOGS ===
-          console.log('[ClientSelect] Clients chargés:', result.data.clients.length);
-          console.log('[ClientSelect] Liste des IDs:', result.data.clients.map(c => ({ id: c.id, name: c.name })));
+          console.log('[ClientSelect] Clients chargés:', validClients.length);
+          console.log('[ClientSelect] Liste des IDs:', validClients.map(c => ({ id: c.id, name: c.name })));
+          if (validClients.length !== result.data.clients.length) {
+            console.warn('[ClientSelect] Attention: certains clients ont été filtrés car invalides');
+          }
           // === FIN DIAGNOSTIC ===
 
-          setClients(result.data.clients);
-          setFilteredClients(result.data.clients);
+          setClients(validClients);
+          setFilteredClients(validClients);
         }
       } catch (error) {
         console.error('Error loading clients:', error);

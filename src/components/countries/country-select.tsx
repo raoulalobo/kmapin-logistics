@@ -71,7 +71,18 @@ export function CountrySelect({
       try {
         setIsLoading(true);
         const data = await listCountries(true); // Uniquement les pays actifs
-        setCountries(data);
+
+        // Filtrer les éléments null ou invalides (protection défensive)
+        // Prisma ne devrait pas retourner de null, mais on se protège au cas où
+        const validCountries = data.filter(
+          (c): c is Country => c !== null && c !== undefined && typeof c.name === 'string' && typeof c.code === 'string'
+        );
+
+        if (validCountries.length !== data.length) {
+          console.warn('[CountrySelect] Attention: certains pays ont été filtrés car invalides');
+        }
+
+        setCountries(validCountries);
       } catch (error) {
         console.error('Erreur lors du chargement des pays:', error);
       } finally {

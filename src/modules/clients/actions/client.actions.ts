@@ -13,6 +13,7 @@ import { prisma } from '@/lib/db/client';
 import { requireAuth } from '@/lib/auth/config';
 import { requirePermission } from '@/lib/auth/permissions';
 import { hasPermission } from '@/lib/auth/permissions-client';
+import { UserRole } from '@/lib/db/enums';
 import {
   clientSchema,
   clientUpdateSchema,
