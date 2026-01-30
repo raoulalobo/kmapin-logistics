@@ -514,39 +514,54 @@ export function generateInvoiceFromQuotePDF(
   doc.setFont('helvetica', 'bold');
 
   // Colonne gauche : Client
+  // Protection défensive : fallback si client manquant (ne devrait pas arriver pour une facture)
+  const clientName = data.client?.name || 'Client non renseigné';
+  const clientEmail = data.client?.email || '—';
+  const clientAddress = data.client?.address || '';
+  const clientCity = data.client?.city || '';
+  const clientCountry = data.client?.country || '';
+  const clientPostalCode = data.client?.postalCode || '';
+  const clientLegalName = data.client?.legalName;
+  const clientTaxId = data.client?.taxId;
+  const clientPhone = data.client?.phone;
+
   doc.text('CLIENT :', 20, yPos);
   yPos += 6;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(data.client.name, 20, yPos);
+  doc.text(clientName, 20, yPos);
   yPos += 5;
 
-  if (data.client.legalName && data.client.legalName !== data.client.name) {
+  if (clientLegalName && clientLegalName !== clientName) {
     doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
-    doc.text(data.client.legalName, 20, yPos);
+    doc.text(clientLegalName, 20, yPos);
     yPos += 4;
     doc.setFontSize(9);
     doc.setTextColor(...textColor);
   }
 
-  doc.text(data.client.address, 20, yPos);
+  if (clientAddress) {
+    doc.text(clientAddress, 20, yPos);
+    yPos += 5;
+  }
+  doc.text(`${clientPostalCode} ${clientCity}`.trim(), 20, yPos);
   yPos += 5;
-  doc.text(`${data.client.postalCode || ''} ${data.client.city}`.trim(), 20, yPos);
-  yPos += 5;
-  doc.text(data.client.country, 20, yPos);
-  yPos += 5;
-
-  if (data.client.taxId) {
-    doc.text(`TVA: ${data.client.taxId}`, 20, yPos);
+  if (clientCountry) {
+    doc.text(clientCountry, 20, yPos);
     yPos += 5;
   }
 
-  doc.text(`Email: ${data.client.email}`, 20, yPos);
-  if (data.client.phone) {
+  if (clientTaxId) {
+    doc.text(`TVA: ${clientTaxId}`, 20, yPos);
     yPos += 5;
-    doc.text(`Tél: ${data.client.phone}`, 20, yPos);
+  }
+
+  doc.text(`Email: ${clientEmail}`, 20, yPos);
+  if (clientPhone) {
+    yPos += 5;
+    doc.text(`Tél: ${clientPhone}`, 20, yPos);
   }
 
   // Colonne droite : Détails de la facture

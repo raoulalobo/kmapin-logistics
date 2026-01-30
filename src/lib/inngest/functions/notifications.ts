@@ -72,7 +72,8 @@ export const notifyShipmentCreated = inngest.createFunction(
         userId: manager.id,
         type: 'SHIPMENT_CREATED' as const,
         title: 'Nouvelle expédition',
-        message: `Nouvelle expédition ${trackingNumber} pour ${shipment.client.name}`,
+        // Fallback si client non enregistré (expédition pour tiers)
+        message: `Nouvelle expédition ${trackingNumber} pour ${shipment.client?.name || shipment.originContact || 'un expéditeur'}`,
         data: { shipmentId, trackingNumber, clientId },  // clientId du Client (COMPANY ou INDIVIDUAL)
       }));
 
