@@ -309,6 +309,10 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
       destinationCountry: true,
       status: true,
       createdAt: true,
+      // Champs pour identifier l'expéditeur (fallback si pas de client enregistré)
+      originContact: true,
+      originEmail: true,
+      // Relation client (optionnelle - peut être null pour les expéditeurs non-enregistrés)
       client: {
         select: {
           name: true,
@@ -317,25 +321,16 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
     },
   });
 
-  // Filtrer les expéditions sans client (protection défensive)
-  // Prisma ne devrait pas retourner de client null, mais on se protège au cas où
-  const validShipments = shipments.filter(
-    (s): s is typeof s & { client: { name: string } } =>
-      s.client !== null && s.client !== undefined && typeof s.client.name === 'string'
-  );
-
-  if (validShipments.length !== shipments.length) {
-    console.warn('[getRecentShipments] Attention: certaines expéditions ont été filtrées car sans client valide');
-  }
-
-  return validShipments.map((shipment) => ({
+  // Mapper les expéditions avec fallback pour le nom du client
+  // Priorité : client.name > originContact > originEmail > "Expéditeur inconnu"
+  return shipments.map((shipment) => ({
     id: shipment.id,
     trackingNumber: shipment.trackingNumber,
     destination: shipment.destinationCity || shipment.destinationCountry,
     destinationCountry: shipment.destinationCountry,
     status: shipment.status,
     createdAt: shipment.createdAt,
-    companyName: shipment.client.name,
+    companyName: shipment.client?.name || shipment.originContact || shipment.originEmail || 'Expéditeur inconnu',
   }));
 }
 
