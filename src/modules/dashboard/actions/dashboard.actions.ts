@@ -317,7 +317,18 @@ export async function getRecentShipments(limit: number = 5): Promise<RecentShipm
     },
   });
 
-  return shipments.map((shipment) => ({
+  // Filtrer les expéditions sans client (protection défensive)
+  // Prisma ne devrait pas retourner de client null, mais on se protège au cas où
+  const validShipments = shipments.filter(
+    (s): s is typeof s & { client: { name: string } } =>
+      s.client !== null && s.client !== undefined && typeof s.client.name === 'string'
+  );
+
+  if (validShipments.length !== shipments.length) {
+    console.warn('[getRecentShipments] Attention: certaines expéditions ont été filtrées car sans client valide');
+  }
+
+  return validShipments.map((shipment) => ({
     id: shipment.id,
     trackingNumber: shipment.trackingNumber,
     destination: shipment.destinationCity || shipment.destinationCountry,
