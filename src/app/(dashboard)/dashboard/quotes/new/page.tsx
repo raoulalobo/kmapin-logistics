@@ -485,7 +485,7 @@ export default function NewQuotePage() {
           {/* Adresse Expéditeur (Optionnelle) */}
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Adresse Expéditeur (Optionnel)</CardTitle>
+              <CardTitle>Adresse Expéditeur (Obligatoire)</CardTitle>
               <CardDescription>
                 Adresse complète de l'expéditeur - Permet un traitement plus rapide du devis
               </CardDescription>
@@ -611,7 +611,7 @@ export default function NewQuotePage() {
           {/* Adresse Destinataire (Optionnelle) */}
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Adresse Destinataire (Optionnel)</CardTitle>
+              <CardTitle>Adresse Destinataire (Obligatoire)</CardTitle>
               <CardDescription>
                 Adresse complète du destinataire - Permet un traitement plus rapide du devis
               </CardDescription>

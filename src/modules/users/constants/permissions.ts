@@ -167,6 +167,12 @@ export const PERMISSION_CATEGORIES: Record<string, PermissionItem[]> = {
       label: 'Modifier les devis',
       description: 'Permet de mettre à jour les devis existants',
     },
+    {
+      id: 'quotes:update:own',
+      label: 'Modifier ses propres devis',
+      description:
+        'Permet à un client de modifier ses propres devis en brouillon (DRAFT)',
+    },
   ],
 
   /**

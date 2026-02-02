@@ -157,6 +157,21 @@ export const QuoteLogEventType = {
   COMMENT_ADDED: 'COMMENT_ADDED',
 
   // ============================================
+  // MODIFICATION GÉNÉRALE DU DEVIS
+  // ============================================
+
+  /**
+   * Devis modifié (mise à jour des champs)
+   * - Enregistre toute modification via le formulaire d'édition
+   * - changedById: ID de l'utilisateur qui modifie
+   * - metadata: {
+   *     changedFields: string[],  // Liste des champs modifiés
+   *     source: 'dashboard' | 'client-portal'
+   *   }
+   */
+  UPDATED: 'UPDATED',
+
+  // ============================================
   // MODIFICATIONS D'ADRESSES (Snapshot Pattern)
   // ============================================
 

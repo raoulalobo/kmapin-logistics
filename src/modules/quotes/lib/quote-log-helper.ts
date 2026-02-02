@@ -691,6 +691,50 @@ export async function logQuoteAddressUpdated(
   });
 }
 
+/**
+ * Crée un log de modification générale d'un devis
+ *
+ * Enregistre les champs modifiés lors d'une mise à jour via le formulaire d'édition.
+ * Permet de tracer qui a modifié quoi et quand.
+ *
+ * @param params - Paramètres du log
+ * @param params.quoteId - ID du devis modifié
+ * @param params.changedById - ID de l'utilisateur qui modifie
+ * @param params.changedFields - Liste des noms de champs modifiés (ex: ['weight', 'originCountry'])
+ * @param params.source - Source de la modification ('dashboard' pour agents, 'client-portal' pour clients)
+ * @param params.notes - Description optionnelle de la modification
+ * @returns Le log créé
+ *
+ * @example
+ * ```ts
+ * await logQuoteUpdated({
+ *   quoteId: 'clxxx',
+ *   changedById: session.user.id,
+ *   changedFields: ['weight', 'originCountry', 'destinationCountry'],
+ *   source: 'dashboard',
+ *   notes: 'Modification du poids et des pays',
+ * });
+ * ```
+ */
+export async function logQuoteUpdated(
+  params: BaseLogParams & {
+    changedFields: string[];
+    source?: 'dashboard' | 'client-portal';
+  }
+) {
+  return await createQuoteLog({
+    quoteId: params.quoteId,
+    eventType: QuoteLogEventType.UPDATED,
+    changedById: params.changedById,
+    notes: params.notes,
+    metadata: {
+      changedFields: params.changedFields,
+      source: params.source ?? 'dashboard',
+      updatedAt: new Date().toISOString(),
+    },
+  });
+}
+
 // ============================================
 // UTILITAIRES
 // ============================================

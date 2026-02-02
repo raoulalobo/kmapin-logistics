@@ -17,6 +17,7 @@ import { UserRole, ShipmentStatus, QuoteStatus } from '@/lib/db/enums';
 import { logShipmentCreated } from '@/modules/shipments';
 import {
   logQuoteCreated,
+  logQuoteUpdated,
   logQuoteSentToClient,
   logQuoteAcceptedByClient,
   logQuoteRejectedByClient,
@@ -610,6 +611,7 @@ export async function getQuoteAction(id: string) {
  * @returns Résultat de la mise à jour
  *
  * @permissions 'quotes:update' - ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER
+ * @permissions 'quotes:update:own' - CLIENT (uniquement ses propres devis en DRAFT)
  */
 export async function updateQuoteAction(
   id: string,
@@ -618,10 +620,23 @@ export async function updateQuoteAction(
   try {
     /**
      * Vérifier l'authentification et les permissions
-     * Seuls les ADMIN, OPERATIONS_MANAGER et FINANCE_MANAGER peuvent modifier des devis
-     * Permission requise: 'quotes:update'
+     *
+     * Deux niveaux de permission :
+     * - 'quotes:update' : ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER → peut modifier tout devis
+     * - 'quotes:update:own' : CLIENT → peut modifier uniquement ses propres devis en DRAFT
      */
-    await requirePermission('quotes:update');
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    const canUpdateAll = hasPermission(userRole, 'quotes:update');
+    const canUpdateOwn = hasPermission(userRole, 'quotes:update:own');
+
+    if (!canUpdateAll && !canUpdateOwn) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions nécessaires pour modifier un devis',
+      };
+    }
 
     // Vérifier que le devis existe
     const existingQuote = await prisma.quote.findUnique({
@@ -632,7 +647,39 @@ export async function updateQuoteAction(
       return { success: false, error: 'Devis introuvable' };
     }
 
-    // Empêcher la modification si le devis est accepté ou expiré
+    /**
+     * Vérification d'ownership pour les utilisateurs CLIENT
+     *
+     * Si l'utilisateur n'a que la permission 'quotes:update:own' (pas 'quotes:update'),
+     * il doit être propriétaire du devis (via clientId) et le devis doit être en DRAFT.
+     */
+    if (canUpdateOwn && !canUpdateAll) {
+      // Vérifier que l'utilisateur est bien associé à un client
+      if (!session.user.clientId) {
+        return {
+          success: false,
+          error: 'Votre compte n\'est pas associé à une entreprise',
+        };
+      }
+
+      // Vérifier que le devis appartient au client de l'utilisateur
+      if (existingQuote.clientId !== session.user.clientId) {
+        return {
+          success: false,
+          error: 'Vous n\'avez pas accès à ce devis',
+        };
+      }
+
+      // Un CLIENT ne peut modifier que ses devis en brouillon (DRAFT)
+      if (existingQuote.status !== 'DRAFT') {
+        return {
+          success: false,
+          error: 'Seuls les devis en brouillon peuvent être modifiés par un client',
+        };
+      }
+    }
+
+    // Empêcher la modification si le devis est accepté ou expiré (pour tous les rôles)
     if (existingQuote.status === 'ACCEPTED' || existingQuote.status === 'EXPIRED') {
       return {
         success: false,
@@ -640,8 +687,10 @@ export async function updateQuoteAction(
       };
     }
 
-    // Extraire et valider les données
+    // Extraire et valider les données du FormData
     const rawData: any = {};
+
+    // Champs simples (strings) - incluant les adresses expéditeur et destinataire
     const simpleFields = [
       'clientId',
       'originCountry',
@@ -652,30 +701,58 @@ export async function updateQuoteAction(
       'validUntil',
       'acceptedAt',
       'rejectedAt',
+      // Adresses expéditeur
+      'originAddress',
+      'originCity',
+      'originPostalCode',
+      'originContactName',
+      'originContactPhone',
+      'originContactEmail',
+      // Adresses destinataire
+      'destinationAddress',
+      'destinationCity',
+      'destinationPostalCode',
+      'destinationContactName',
+      'destinationContactPhone',
+      'destinationContactEmail',
     ];
 
     simpleFields.forEach((field) => {
       const value = formData.get(field);
       if (value !== null) {
+        // Pour les champs adresse, on garde la chaîne vide ou null
         rawData[field] = value || null;
       }
     });
 
-    // Champs numériques
-    ['weight', 'volume', 'estimatedCost'].forEach((field) => {
+    // Champs numériques (incluant les dimensions)
+    ['weight', 'volume', 'estimatedCost', 'length', 'width', 'height'].forEach((field) => {
       const value = formData.get(field);
       if (value !== null && value !== '') {
         rawData[field] = Number(value);
       }
     });
 
-    // Champs array
+    // Champs array (modes de transport)
     const transportMode = formData.getAll('transportMode');
     if (transportMode.length > 0) {
       rawData.transportMode = transportMode;
     }
 
     const validatedData = quoteUpdateSchema.parse(rawData);
+
+    // Déterminer les champs modifiés en comparant avec les valeurs existantes
+    // On collecte les noms des champs envoyés dans le FormData (= champs potentiellement modifiés)
+    const changedFields = Object.keys(validatedData).filter((key) => {
+      const newVal = validatedData[key as keyof typeof validatedData];
+      const oldVal = existingQuote[key as keyof typeof existingQuote];
+
+      // Ignorer les champs non définis dans les nouvelles données
+      if (newVal === undefined) return false;
+
+      // Comparer les valeurs (conversion en string pour gérer Date vs string, Decimal vs number)
+      return String(newVal ?? '') !== String(oldVal ?? '');
+    });
 
     // Mettre à jour le devis
     const updatedQuote = await prisma.quote.update({
@@ -693,6 +770,19 @@ export async function updateQuoteAction(
           : undefined,
       },
     });
+
+    // Enregistrer l'événement de modification dans l'historique
+    // Permet de tracer qui a modifié quoi et quand
+    if (changedFields.length > 0) {
+      const isClient = canUpdateOwn && !canUpdateAll;
+      await logQuoteUpdated({
+        quoteId: id,
+        changedById: session.user.id,
+        changedFields,
+        source: isClient ? 'client-portal' : 'dashboard',
+        notes: `Devis modifié (${changedFields.length} champ${changedFields.length > 1 ? 's' : ''})`,
+      });
+    }
 
     // Revalider les pages
     revalidatePath('/dashboard/quotes');

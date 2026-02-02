@@ -40,6 +40,7 @@ import {
   MessageSquare,
   Upload,
   DollarSign,
+  Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { QuoteStatusBadge } from './quote-status-badge';
@@ -176,6 +177,14 @@ const EVENT_CONFIG: Record<
     label: 'Refusé par le client',
     colorClass: 'text-red-600',
     bgColorClass: 'bg-red-100',
+  },
+
+  // Modification générale du devis
+  [QuoteLogEventType.UPDATED]: {
+    icon: Pencil,
+    label: 'Devis modifié',
+    colorClass: 'text-amber-600',
+    bgColorClass: 'bg-amber-100',
   },
 
   // Annulation et expiration
@@ -399,6 +408,57 @@ function renderMetadata(
           )}
         </div>
       );
+
+    // Modification générale du devis
+    case QuoteLogEventType.UPDATED: {
+      const fields = metadata.changedFields as string[] | undefined;
+      // Traduction des noms de champs techniques en libellés lisibles
+      const fieldLabels: Record<string, string> = {
+        clientId: 'Client',
+        originCountry: 'Pays d\'origine',
+        destinationCountry: 'Pays de destination',
+        originAddress: 'Adresse expéditeur',
+        originCity: 'Ville expéditeur',
+        originPostalCode: 'Code postal expéditeur',
+        originContactName: 'Contact expéditeur',
+        originContactPhone: 'Tél. expéditeur',
+        originContactEmail: 'Email expéditeur',
+        destinationAddress: 'Adresse destinataire',
+        destinationCity: 'Ville destinataire',
+        destinationPostalCode: 'Code postal destinataire',
+        destinationContactName: 'Contact destinataire',
+        destinationContactPhone: 'Tél. destinataire',
+        destinationContactEmail: 'Email destinataire',
+        weight: 'Poids',
+        volume: 'Volume',
+        length: 'Longueur',
+        width: 'Largeur',
+        height: 'Hauteur',
+        cargoType: 'Type de marchandise',
+        transportMode: 'Mode de transport',
+        estimatedCost: 'Coût estimé',
+        currency: 'Devise',
+        validUntil: 'Date de validité',
+        status: 'Statut',
+      };
+      return (
+        <div className="text-sm text-muted-foreground">
+          {fields && fields.length > 0 && (
+            <p>
+              Champs modifiés :{' '}
+              <strong>
+                {fields.map((f) => fieldLabels[f] || f).join(', ')}
+              </strong>
+            </p>
+          )}
+          {metadata.source && (
+            <p>
+              Source : {(metadata.source as string) === 'client-portal' ? 'Portail client' : 'Dashboard'}
+            </p>
+          )}
+        </div>
+      );
+    }
 
     // Envoyé au client
     case QuoteLogEventType.SENT_TO_CLIENT:

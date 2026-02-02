@@ -4,8 +4,11 @@
  * Affiche toutes les informations détaillées d'un devis :
  * - Numéro de devis et statut
  * - Informations client
- * - Détails de la route et de la marchandise
- * - Tarification et validité
+ * - Expéditeur (adresse origine + contact)
+ * - Destinataire (adresse destination + contact)
+ * - Validité et conditions de paiement
+ * - Détails de la marchandise
+ * - Tarification
  * - Boutons d'actions (modifier, supprimer, accepter, rejeter)
  * - Historique sur le côté (même layout que Purchase et Pickup)
  *
@@ -15,7 +18,8 @@
  * ├─────────────────────────────────┬──────────────────────────┤
  * │ Colonne gauche (2/3)            │ Colonne droite (1/3)     │
  * │ - Client                        │ - Historique Timeline    │
- * │ - Itinéraire / Validité         │                          │
+ * │ - Expéditeur / Destinataire     │                          │
+ * │ - Validité / Paiement           │                          │
  * │ - Marchandise                   │                          │
  * │ - Tarification                  │                          │
  * │ - Actions (Agent/Client)        │                          │
@@ -41,6 +45,12 @@ import {
   WarningCircle,
   Clock,
   CreditCard,
+  User,
+  Phone,
+  Envelope,
+  MapTrifold,
+  NavigationArrow,
+  Flag,
 } from '@phosphor-icons/react/dist/ssr';
 
 import { Button } from '@/components/ui/button';
@@ -275,40 +285,186 @@ export default async function QuoteDetailPage({
             </CardContent>
           </Card>
 
-          {/* Itinéraire et Validité (grid 2 colonnes) */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* EXPÉDITEUR ET DESTINATAIRE (grid 2 colonnes) */}
+          {/* Affiche les adresses complètes et contacts pour l'origine et la destination */}
+          {/* ════════════════════════════════════════════════════════════════ */}
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Itinéraire */}
+            {/* ──────────────────────────────────────────────────────────────── */}
+            {/* EXPÉDITEUR (Origine) */}
+            {/* Adresse de départ de la marchandise avec contact sur place */}
+            {/* ──────────────────────────────────────────────────────────────── */}
             <Card className="dashboard-card">
               <CardHeader>
-                <CardTitle>Itinéraire</CardTitle>
-                <CardDescription>Route de transport</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <NavigationArrow className="h-5 w-5 text-blue-600" />
+                  Expéditeur
+                </CardTitle>
+                <CardDescription>Point de départ de l&apos;expédition</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
+              <CardContent className="space-y-4">
+                {/* Pays d'origine (toujours affiché) */}
+                <div className="flex items-start gap-3">
+                  <Flag className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Origine</p>
+                    <p className="text-sm font-medium">Pays</p>
                     <p className="text-sm text-muted-foreground">{quote.originCountry}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Destination</p>
-                    <p className="text-sm text-muted-foreground">{quote.destinationCountry}</p>
+                {/* Adresse complète (si renseignée) */}
+                {(quote.originAddress || quote.originCity || quote.originPostalCode) && (
+                  <div className="flex items-start gap-3">
+                    <MapTrifold className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Adresse</p>
+                      <div className="text-sm text-muted-foreground">
+                        {quote.originAddress && <p>{quote.originAddress}</p>}
+                        {(quote.originPostalCode || quote.originCity) && (
+                          <p>
+                            {quote.originPostalCode && `${quote.originPostalCode} `}
+                            {quote.originCity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Contact expéditeur (si renseigné) */}
+                {(quote.originContactName || quote.originContactPhone || quote.originContactEmail) && (
+                  <>
+                    <Separator className="my-2" />
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Contact sur place
+                    </p>
+
+                    {quote.originContactName && (
+                      <div className="flex items-center gap-3">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.originContactName}</p>
+                      </div>
+                    )}
+
+                    {quote.originContactPhone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.originContactPhone}</p>
+                      </div>
+                    )}
+
+                    {quote.originContactEmail && (
+                      <div className="flex items-center gap-3">
+                        <Envelope className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.originContactEmail}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Message si aucune adresse détaillée */}
+                {!quote.originAddress && !quote.originCity && !quote.originContactName && (
+                  <p className="text-sm text-muted-foreground italic">
+                    Adresse détaillée non renseignée
+                  </p>
+                )}
               </CardContent>
             </Card>
 
-            {/* Validité et Paiement */}
+            {/* ──────────────────────────────────────────────────────────────── */}
+            {/* DESTINATAIRE (Destination) */}
+            {/* Adresse d'arrivée de la marchandise avec contact sur place */}
+            {/* ──────────────────────────────────────────────────────────────── */}
             <Card className="dashboard-card">
               <CardHeader>
-                <CardTitle>Validité</CardTitle>
-                <CardDescription>Période de validité du devis</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-green-600" />
+                  Destinataire
+                </CardTitle>
+                <CardDescription>Point d&apos;arrivée de l&apos;expédition</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
+                {/* Pays de destination (toujours affiché) */}
+                <div className="flex items-start gap-3">
+                  <Flag className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">Pays</p>
+                    <p className="text-sm text-muted-foreground">{quote.destinationCountry}</p>
+                  </div>
+                </div>
+
+                {/* Adresse complète (si renseignée) */}
+                {(quote.destinationAddress || quote.destinationCity || quote.destinationPostalCode) && (
+                  <div className="flex items-start gap-3">
+                    <MapTrifold className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Adresse</p>
+                      <div className="text-sm text-muted-foreground">
+                        {quote.destinationAddress && <p>{quote.destinationAddress}</p>}
+                        {(quote.destinationPostalCode || quote.destinationCity) && (
+                          <p>
+                            {quote.destinationPostalCode && `${quote.destinationPostalCode} `}
+                            {quote.destinationCity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact destinataire (si renseigné) */}
+                {(quote.destinationContactName || quote.destinationContactPhone || quote.destinationContactEmail) && (
+                  <>
+                    <Separator className="my-2" />
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Contact sur place
+                    </p>
+
+                    {quote.destinationContactName && (
+                      <div className="flex items-center gap-3">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.destinationContactName}</p>
+                      </div>
+                    )}
+
+                    {quote.destinationContactPhone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.destinationContactPhone}</p>
+                      </div>
+                    )}
+
+                    {quote.destinationContactEmail && (
+                      <div className="flex items-center gap-3">
+                        <Envelope className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm">{quote.destinationContactEmail}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Message si aucune adresse détaillée */}
+                {!quote.destinationAddress && !quote.destinationCity && !quote.destinationContactName && (
+                  <p className="text-sm text-muted-foreground italic">
+                    Adresse détaillée non renseignée
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* VALIDITÉ ET PAIEMENT */}
+          {/* Informations sur la période de validité du devis et mode de paiement */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Validité et Paiement</CardTitle>
+              <CardDescription>Période de validité du devis et conditions de paiement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Date de création */}
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
@@ -323,10 +479,11 @@ export default async function QuoteDetailPage({
                   </div>
                 </div>
 
+                {/* Date de validité */}
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Valide jusqu'au</p>
+                    <p className="text-sm font-medium">Valide jusqu&apos;au</p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(quote.validUntil).toLocaleDateString('fr-FR', {
                         day: 'numeric',
@@ -349,9 +506,9 @@ export default async function QuoteDetailPage({
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Détails de la marchandise */}
           <Card className="dashboard-card">
@@ -379,13 +536,15 @@ export default async function QuoteDetailPage({
                   </div>
                 </div>
 
-                {quote.length && quote.width && quote.height && (
+                {/* Dimensions - Affichées si au moins une dimension est définie */}
+                {/* Note: != null vérifie à la fois null et undefined, mais accepte 0 */}
+                {(quote.length != null || quote.width != null || quote.height != null) && (
                   <div className="flex items-center gap-3">
                     <Cube className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Dimensions</p>
+                      <p className="text-sm font-medium">Dimensions (L × l × H)</p>
                       <p className="text-sm text-muted-foreground">
-                        {quote.length} × {quote.width} × {quote.height} m
+                        {quote.length ?? '—'} × {quote.width ?? '—'} × {quote.height ?? '—'} cm
                       </p>
                     </div>
                   </div>

@@ -104,6 +104,7 @@ export const PERMISSIONS = {
     // Devis personnels
     'quotes:read:own',
     'quotes:create:own', // Peut demander un devis
+    'quotes:update:own', // Peut modifier ses propres devis (uniquement en DRAFT)
 
     // Factures personnelles
     'invoices:read:own',
