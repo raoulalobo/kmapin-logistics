@@ -110,10 +110,13 @@ export function PickupsListClient({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* compact={true} : affiche uniquement la barre de recherche par défaut,
+              les autres filtres sont accessibles via "Recherche détaillée" */}
           <PickupFilters
             initialValues={filters}
             onFiltersChange={handleFiltersChange}
             onReset={handleReset}
+            compact={true}
           />
         </CardContent>
       </Card>

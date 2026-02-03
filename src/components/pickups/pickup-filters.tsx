@@ -236,7 +236,7 @@ export function PickupFilters({
               className="relative"
             >
               <Filter className="h-4 w-4 mr-2" />
-              Filtres
+              Recherche détaillée
               {activeFiltersCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {activeFiltersCount}
