@@ -32,6 +32,12 @@ import type { QuoteDataFormData } from '@/modules/prospects';
 import { useSafeSession } from '@/lib/auth/hooks';
 import { CountrySelect } from '@/components/countries';
 import { usePendingQuotes } from '@/hooks';
+import {
+  getTransportModeOptionsAction,
+  getPriorityOptionsAction,
+  type TransportModeOption,
+  type PriorityOption,
+} from '@/modules/pricing-config';
 
 /**
  * Traductions françaises pour les types de marchandise
@@ -48,23 +54,27 @@ const cargoTypeLabels: Record<CargoType, string> = {
 };
 
 /**
- * Traductions françaises pour les modes de transport
+ * Labels de base pour les modes de transport
+ * Utilisés comme fallback quand les options dynamiques ne sont pas encore chargées
+ * (par ex: notifications toast au chargement depuis query params)
  */
-const transportModeLabels: Record<TransportMode, { label: string; icon: any }> = {
-  ROAD: { label: 'Routier', icon: Truck },
-  SEA: { label: 'Maritime', icon: Boat },
-  AIR: { label: 'Aérien', icon: Airplane },
-  RAIL: { label: 'Ferroviaire', icon: Train },
+const TRANSPORT_MODE_BASE_LABELS: Record<TransportMode, string> = {
+  ROAD: 'Routier',
+  SEA: 'Maritime',
+  AIR: 'Aérien',
+  RAIL: 'Ferroviaire',
 };
 
 /**
- * Traductions françaises pour les priorités
+ * Icônes pour les modes de transport
+ * Les icônes sont définies statiquement car non configurables en base de données
+ * Les labels et multiplicateurs sont chargés dynamiquement depuis PricingConfig
  */
-const priorityLabels = {
-  STANDARD: 'Standard',
-  NORMAL: 'Normal (+10%)',
-  EXPRESS: 'Express (+50%)',
-  URGENT: 'Urgent (+30%)',
+const transportModeIcons: Record<TransportMode, React.ComponentType<{ className?: string }>> = {
+  ROAD: Truck,
+  SEA: Boat,
+  AIR: Airplane,
+  RAIL: Train,
 };
 
 /**
@@ -208,6 +218,20 @@ export function QuoteCalculator() {
   const [lastFormData, setLastFormData] = useState<QuoteEstimateData | null>(null);
 
   /**
+   * Options dynamiques pour les modes de transport
+   * Chargées depuis PricingConfig via Server Action
+   * Contiennent les labels enrichis avec multiplicateurs et délais
+   */
+  const [transportModeOptions, setTransportModeOptions] = useState<TransportModeOption[]>([]);
+
+  /**
+   * Options dynamiques pour les priorités de livraison
+   * Chargées depuis PricingConfig via Server Action
+   * Contiennent les labels enrichis avec surcharges tarifaires
+   */
+  const [priorityOptions, setPriorityOptions] = useState<PriorityOption[]>([]);
+
+  /**
    * Récupération de la session utilisateur via Better Auth
    * Utilise un hook sécurisé compatible React 19
    * Si l'utilisateur est connecté, `session.user` contiendra les infos utilisateur
@@ -287,7 +311,7 @@ export function QuoteCalculator() {
       }
 
       if (mode && Object.values(TransportMode).includes(mode as TransportMode)) {
-        toast.info(`Mode de transport sélectionné : ${transportModeLabels[mode as TransportMode].label}`);
+        toast.info(`Mode de transport sélectionné : ${TRANSPORT_MODE_BASE_LABELS[mode as TransportMode]}`);
       }
 
       // Scroll smooth vers le calculateur si params présents
@@ -301,6 +325,36 @@ export function QuoteCalculator() {
 
     return () => clearTimeout(timer);
   }, [searchParams]);
+
+  /**
+   * Charger les options dynamiques de mode de transport et priorité
+   * Récupère les valeurs configurées (multiplicateurs, délais, surcharges) depuis PricingConfig
+   * Ces options sont utilisées pour afficher les labels enrichis dans l'interface
+   */
+  useEffect(() => {
+    async function loadDynamicOptions() {
+      try {
+        // Charger les options en parallèle pour optimiser le temps de chargement
+        const [transportResult, priorityResult] = await Promise.all([
+          getTransportModeOptionsAction(),
+          getPriorityOptionsAction(),
+        ]);
+
+        if (transportResult.success) {
+          setTransportModeOptions(transportResult.data);
+        }
+
+        if (priorityResult.success) {
+          setPriorityOptions(priorityResult.data);
+        }
+      } catch (error) {
+        console.error('[QuoteCalculator] Erreur chargement options dynamiques:', error);
+        // En cas d'erreur, les options resteront vides et on utilisera les fallbacks
+      }
+    }
+
+    loadDynamicOptions();
+  }, []);
 
   /**
    * Observer les modes de transport sélectionnés
@@ -486,7 +540,7 @@ export function QuoteCalculator() {
         doc.text('Modes de transport :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...textDark);
-        const modes = lastFormData.transportMode.map(m => transportModeLabels[m].label).join(', ');
+        const modes = lastFormData.transportMode.map(m => TRANSPORT_MODE_BASE_LABELS[m]).join(', ');
         doc.text(modes, valueCol, yPos);
         yPos += 6;
 
@@ -843,20 +897,21 @@ export function QuoteCalculator() {
                 )}
               </div>
 
-              {/* Priorité */}
+              {/* Priorité - Options dynamiques depuis PricingConfig */}
               <div className="space-y-2">
-                <Label htmlFor="priority" className="text-base font-semibold">Priorité</Label>
+                <Label htmlFor="priority" className="text-base font-semibold">Priorité de livraison</Label>
                 <Select
                   defaultValue="STANDARD"
-                  onValueChange={(value) => setValue('priority', value as 'STANDARD' | 'EXPRESS' | 'URGENT')}
+                  onValueChange={(value) => setValue('priority', value as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT')}
                 >
                   <SelectTrigger id="priority" className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(priorityLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
+                    {priorityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {/* Label enrichi avec supplément tarifaire et description (dynamique) */}
+                        {option.labelWithDetails}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -872,23 +927,40 @@ export function QuoteCalculator() {
               </Label>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(transportModeLabels).map(([value, { label, icon: Icon }]) => {
-                  const isSelected = selectedTransportModes.includes(value as TransportMode);
+                {transportModeOptions.map((option) => {
+                  const isSelected = selectedTransportModes.includes(option.value);
+                  const Icon = transportModeIcons[option.value];
                   return (
                     <button
-                      key={value}
+                      key={option.value}
                       type="button"
-                      onClick={() => toggleTransportMode(value as TransportMode)}
-                      className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-4 transition-all hover:scale-105 ${
+                      onClick={() => toggleTransportMode(option.value)}
+                      className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 transition-all hover:scale-105 ${
                         isSelected
                           ? 'border-[#003D82] bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 bg-white'
                       }`}
                     >
                       <Icon className={`h-8 w-8 ${isSelected ? 'text-[#003D82]' : 'text-gray-500'}`} />
-                      <span className={`text-sm font-medium ${isSelected ? 'text-[#003D82]' : 'text-gray-700'}`}>
-                        {label}
+                      {/* Label principal */}
+                      <span className={`text-sm font-semibold ${isSelected ? 'text-[#003D82]' : 'text-gray-700'}`}>
+                        {option.label}
                       </span>
+                      {/* Indicateurs tarifaires et délais (dynamiques depuis PricingConfig) */}
+                      <div className="text-center space-y-0.5">
+                        <span className={`text-xs font-medium ${
+                          option.percentageImpact === 'référence'
+                            ? 'text-gray-500'
+                            : option.percentageImpact.startsWith('+')
+                              ? 'text-orange-600'
+                              : 'text-green-600'
+                        }`}>
+                          {option.percentageImpact}
+                        </span>
+                        <span className="text-xs text-gray-400 block">
+                          {option.deliveryLabel}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}

@@ -49,11 +49,21 @@ import { quoteSchema, type QuoteFormData, createQuoteAction } from '@/modules/qu
 import { CargoType, TransportMode } from '@/lib/db/enums';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 import { useSafeSession } from '@/lib/auth/hooks';
+import {
+  getTransportModeOptionsAction,
+  getPriorityOptionsAction,
+  type TransportModeOption,
+  type PriorityOption,
+} from '@/modules/pricing-config';
 
 export default function NewQuotePage() {
   const router = useRouter();
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  // Options dynamiques avec labels incluant les multiplicateurs/surcharges configurés
+  const [transportModeOptions, setTransportModeOptions] = useState<TransportModeOption[]>([]);
+  const [priorityOptions, setPriorityOptions] = useState<PriorityOption[]>([]);
 
   // Récupérer la session utilisateur pour gérer l'affichage conditionnel du champ client
   const { data: session } = useSafeSession();
@@ -78,6 +88,26 @@ export default function NewQuotePage() {
   console.log('[NewQuotePage] userClientId (après || ""):', userClientId);
   console.log('[NewQuotePage] userClientId est vide?', !userClientId || userClientId === '');
   // === FIN DIAGNOSTIC ===
+
+  // Charger les options de mode de transport et de priorité au montage
+  // Les labels incluent les multiplicateurs et surcharges configurés dans PricingConfig
+  useEffect(() => {
+    async function loadOptions() {
+      // Charger les deux types d'options en parallèle
+      const [transportResult, priorityResult] = await Promise.all([
+        getTransportModeOptionsAction(),
+        getPriorityOptionsAction(),
+      ]);
+
+      if (transportResult.success) {
+        setTransportModeOptions(transportResult.data);
+      }
+      if (priorityResult.success) {
+        setPriorityOptions(priorityResult.data);
+      }
+    }
+    loadOptions();
+  }, []);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -916,14 +946,26 @@ export default function NewQuotePage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="ROAD">Routier</SelectItem>
-                        <SelectItem value="SEA">Maritime</SelectItem>
-                        <SelectItem value="AIR">Aérien</SelectItem>
-                        <SelectItem value="RAIL">Ferroviaire</SelectItem>
+                        {/* Options dynamiques avec labels incluant multiplicateurs et délais */}
+                        {transportModeOptions.length > 0 ? (
+                          transportModeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.labelWithDetails}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          // Fallback si les options ne sont pas encore chargées
+                          <>
+                            <SelectItem value="ROAD">Routier</SelectItem>
+                            <SelectItem value="SEA">Maritime</SelectItem>
+                            <SelectItem value="AIR">Aérien</SelectItem>
+                            <SelectItem value="RAIL">Ferroviaire</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Sélectionnez le mode de transport principal
+                      Le mode de transport affecte le prix et le délai de livraison
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -944,10 +986,22 @@ export default function NewQuotePage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
-                        <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
-                        <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
-                        <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
+                        {/* Options dynamiques avec surcharges configurées */}
+                        {priorityOptions.length > 0 ? (
+                          priorityOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.labelWithDetails}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          // Fallback si les options ne sont pas encore chargées
+                          <>
+                            <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
+                            <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
+                            <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
+                            <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormDescription>

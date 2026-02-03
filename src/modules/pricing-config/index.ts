@@ -26,3 +26,11 @@ export {
   deleteCountryDistance,
   bulkImportCountryDistances,
 } from './actions/pricing-config.actions';
+
+// Server Actions : Options de mode de transport et priorité avec labels dynamiques
+export {
+  getTransportModeOptionsAction,
+  getPriorityOptionsAction,
+  type TransportModeOption,
+  type PriorityOption,
+} from './actions/transport-mode-options';
