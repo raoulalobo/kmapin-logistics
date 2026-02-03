@@ -12,11 +12,12 @@
  * - Conversion automatique en majuscules
  * - Gestion des erreurs avec feedback visuel
  * - Loading state pendant la recherche
- * - Message d'aide avec exemple de format
+ * - Message d'aide avec exemples de formats
  * - Lien vers inscription pour encourager la création de compte
  *
- * Format attendu : SHP-YYYYMMDD-XXXXX
- * Exemple : SHP-20250109-A1B2C
+ * Formats acceptés :
+ * 1. Format actuel : {PAYS}-{CODE3}-{JJAA}-{SEQ5} → Ex: BF-XK7-1425-00042
+ * 2. Format historique : SHP-YYYYMMDD-XXXXX → Ex: SHP-20250109-A1B2C
  *
  * @module components/tracking/PublicTrackingSearch
  */
@@ -33,14 +34,32 @@ import Link from 'next/link';
 
 /**
  * Valider le format du numéro de tracking
- * Format : SHP-YYYYMMDD-XXXXX
+ *
+ * Formats acceptés :
+ * 1. Format actuel : {PAYS}-{CODE3}-{JJAA}-{SEQ5}
+ *    - PAYS : Code pays ISO 2 lettres (ex: BF, FR, CI)
+ *    - CODE3 : Code aléatoire 3 caractères alphanumériques
+ *    - JJAA : Jour (2 chiffres) + Année (2 derniers chiffres)
+ *    - SEQ5 : Séquence journalière sur 5 chiffres
+ *    - Exemple : BF-XK7-1425-00042
+ *
+ * 2. Format historique : SHP-YYYYMMDD-XXXXX
+ *    - Exemple : SHP-20250109-A1B2C
  *
  * @param value - Numéro de tracking à valider
  * @returns true si le format est valide, false sinon
  */
 function isValidFormat(value: string): boolean {
-  const regex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
-  return regex.test(value.trim().toUpperCase());
+  const trimmed = value.trim().toUpperCase();
+
+  // Format actuel : XX-XXX-DDYY-XXXXX (ex: BF-XK7-1425-00042)
+  // - 2 lettres (pays) - 3 alphanumériques - 4 chiffres (JJAA) - 5 chiffres (séquence)
+  const currentFormatRegex = /^[A-Z]{2}-[A-Z0-9]{3}-\d{4}-\d{5}$/;
+
+  // Format historique : SHP-YYYYMMDD-XXXXX (ex: SHP-20250109-A1B2C)
+  const legacyFormatRegex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
+
+  return currentFormatRegex.test(trimmed) || legacyFormatRegex.test(trimmed);
 }
 
 /**
@@ -74,7 +93,7 @@ export function PublicTrackingSearch() {
     }
 
     if (!isValidFormat(trimmed)) {
-      setError('Format invalide. Exemple : SHP-20250109-A1B2C');
+      setError('Format invalide. Exemples : BF-XK7-1425-00042 ou SHP-20250109-A1B2C');
       return;
     }
 
@@ -112,7 +131,7 @@ export function PublicTrackingSearch() {
             <Input
               id="trackingNumber"
               type="text"
-              placeholder="SHP-20250109-A1B2C"
+              placeholder="BF-XK7-1425-00042"
               value={trackingNumber}
               onChange={handleChange}
               className={`text-lg font-mono ${error ? 'border-red-500' : ''}`}
@@ -140,7 +159,7 @@ export function PublicTrackingSearch() {
 
           {/* Message d'aide */}
           <p className="text-sm text-gray-600">
-            Format attendu : <span className="font-mono">SHP-YYYYMMDD-XXXXX</span>
+            Formats acceptés : <span className="font-mono">XX-XXX-0000-00000</span> ou <span className="font-mono">SHP-00000000-XXXXX</span>
           </p>
         </div>
       </form>

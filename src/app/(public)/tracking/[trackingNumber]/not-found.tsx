@@ -73,8 +73,9 @@ export default function TrackingNotFound() {
                 Assurez-vous que le numéro de tracking est correctement saisi :
               </p>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Format : <span className="font-mono">SHP-YYYYMMDD-XXXXX</span></li>
-                <li>• Exemple : <span className="font-mono">SHP-20250109-A1B2C</span></li>
+                <li>• Format actuel : <span className="font-mono">XX-XXX-0000-00000</span></li>
+                <li>• Exemple : <span className="font-mono">BF-XK7-1425-00042</span></li>
+                <li>• Format historique : <span className="font-mono">SHP-YYYYMMDD-XXXXX</span></li>
                 <li>• Pas d'espaces ni de caractères spéciaux</li>
                 <li>• Lettres en MAJUSCULES uniquement</li>
               </ul>

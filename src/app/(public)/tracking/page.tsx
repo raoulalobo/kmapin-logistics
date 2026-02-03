@@ -108,7 +108,7 @@ export default function TrackingPage() {
               <h3 className="text-xl font-semibold mb-3">Document de transport</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
                 Le numéro de tracking figure en haut du bordereau de transport (lettre de voiture)
-                fourni avec votre colis. Le format commence toujours par "SHP-" suivi de
+                fourni avec votre colis. Le format contient le code pays de destination suivi de
                 chiffres et lettres.
               </p>
             </div>
@@ -128,25 +128,45 @@ export default function TrackingPage() {
           </div>
 
           {/* Format du numéro */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 max-w-2xl mx-auto">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 max-w-3xl mx-auto">
             <h3 className="text-lg font-semibold mb-3 text-blue-900">
-              Format du numéro de tracking
+              Formats du numéro de tracking acceptés
             </h3>
-            <p className="text-blue-800 mb-2">
-              Votre numéro de tracking suit ce format :
-            </p>
-            <p className="font-mono text-2xl text-center py-4 bg-white rounded-lg border border-blue-200 text-blue-900">
-              SHP-YYYYMMDD-XXXXX
-            </p>
-            <p className="text-sm text-blue-700 mt-3">
-              <strong>Exemple :</strong>{' '}
-              <span className="font-mono">SHP-20250109-A1B2C</span>
-            </p>
-            <ul className="text-sm text-blue-700 mt-3 space-y-1">
-              <li>• <strong>SHP-</strong> : Préfixe standard (Shipment)</li>
-              <li>• <strong>YYYYMMDD</strong> : Date de création (année, mois, jour)</li>
-              <li>• <strong>XXXXX</strong> : Code unique alphanumérique</li>
-            </ul>
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Format actuel */}
+              <div className="bg-white rounded-lg border border-blue-200 p-4">
+                <p className="text-sm font-semibold text-blue-900 mb-2">Format actuel</p>
+                <p className="font-mono text-lg text-center py-2 bg-blue-50 rounded text-blue-900">
+                  XX-XXX-0000-00000
+                </p>
+                <p className="text-sm text-blue-700 mt-2">
+                  <strong>Exemple :</strong>{' '}
+                  <span className="font-mono">BF-XK7-1425-00042</span>
+                </p>
+                <ul className="text-xs text-blue-600 mt-2 space-y-1">
+                  <li>• <strong>XX</strong> : Code pays destination (BF, FR...)</li>
+                  <li>• <strong>XXX</strong> : Code unique</li>
+                  <li>• <strong>0000</strong> : Jour + année</li>
+                  <li>• <strong>00000</strong> : Séquence</li>
+                </ul>
+              </div>
+              {/* Format historique */}
+              <div className="bg-white rounded-lg border border-blue-200 p-4">
+                <p className="text-sm font-semibold text-blue-900 mb-2">Format historique</p>
+                <p className="font-mono text-lg text-center py-2 bg-blue-50 rounded text-blue-900">
+                  SHP-YYYYMMDD-XXXXX
+                </p>
+                <p className="text-sm text-blue-700 mt-2">
+                  <strong>Exemple :</strong>{' '}
+                  <span className="font-mono">SHP-20250109-A1B2C</span>
+                </p>
+                <ul className="text-xs text-blue-600 mt-2 space-y-1">
+                  <li>• <strong>SHP-</strong> : Préfixe standard</li>
+                  <li>• <strong>YYYYMMDD</strong> : Date de création</li>
+                  <li>• <strong>XXXXX</strong> : Code unique</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 

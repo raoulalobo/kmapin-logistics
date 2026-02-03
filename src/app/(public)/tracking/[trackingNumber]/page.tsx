@@ -6,7 +6,7 @@
  * les données filtrées (pas de coûts, GPS, métadonnées).
  *
  * Route : /tracking/[trackingNumber]
- * Exemple : /tracking/SHP-20250109-A1B2C
+ * Exemples : /tracking/BF-XK7-1425-00042 ou /tracking/SHP-20250109-A1B2C
  *
  * Sécurité :
  * - Validation stricte du format de tracking
@@ -38,11 +38,21 @@ interface PageProps {
 
 /**
  * Validation du format de tracking number
- * Format attendu : SHP-YYYYMMDD-XXXXX
+ *
+ * Formats acceptés :
+ * 1. Format actuel : {PAYS}-{CODE3}-{JJAA}-{SEQ5} → Ex: BF-XK7-1425-00042
+ * 2. Format historique : SHP-YYYYMMDD-XXXXX → Ex: SHP-20250109-A1B2C
  */
 function isValidTrackingFormat(trackingNumber: string): boolean {
-  const regex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
-  return regex.test(trackingNumber);
+  const trimmed = trackingNumber.trim().toUpperCase();
+
+  // Format actuel : XX-XXX-DDYY-XXXXX (ex: BF-XK7-1425-00042)
+  const currentFormatRegex = /^[A-Z]{2}-[A-Z0-9]{3}-\d{4}-\d{5}$/;
+
+  // Format historique : SHP-YYYYMMDD-XXXXX (ex: SHP-20250109-A1B2C)
+  const legacyFormatRegex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
+
+  return currentFormatRegex.test(trimmed) || legacyFormatRegex.test(trimmed);
 }
 
 /**
@@ -96,26 +106,43 @@ export default async function TrackingResultPage({ params }: PageProps) {
             <AlertDescription className="text-base space-y-2">
               <p>
                 Le numéro de tracking <span className="font-mono font-semibold">{trackingNumberRaw}</span>{' '}
-                ne correspond pas au format attendu.
+                ne correspond pas aux formats acceptés.
               </p>
               <p className="mt-3">
-                Format correct : <span className="font-mono">SHP-YYYYMMDD-XXXXX</span>
+                Formats acceptés :
               </p>
-              <p>
-                Exemple : <span className="font-mono">SHP-20250109-A1B2C</span>
-              </p>
+              <ul className="list-disc list-inside ml-2">
+                <li><span className="font-mono">XX-XXX-0000-00000</span> (ex: <span className="font-mono">BF-XK7-1425-00042</span>)</li>
+                <li><span className="font-mono">SHP-YYYYMMDD-XXXXX</span> (ex: <span className="font-mono">SHP-20250109-A1B2C</span>)</li>
+              </ul>
             </AlertDescription>
           </Alert>
 
           {/* Carte d'aide */}
           <div className="bg-white border rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">Vérifiez votre numéro</h2>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li>• Le numéro doit commencer par <strong>SHP-</strong></li>
-              <li>• Il doit contenir exactement 8 chiffres après le premier tiret</li>
-              <li>• Il se termine par 5 caractères alphanumériques en majuscules</li>
-              <li>• Exemple valide : <span className="font-mono">SHP-20250109-A1B2C</span></li>
-            </ul>
+            <p className="text-sm text-gray-700 mb-3">Deux formats sont acceptés :</p>
+            <div className="space-y-4 text-sm text-gray-600">
+              <div className="p-3 bg-gray-50 rounded">
+                <p className="font-semibold text-gray-800 mb-1">Format actuel :</p>
+                <ul className="space-y-1">
+                  <li>• Commence par 2 lettres (code pays) : <strong>BF, FR, CI...</strong></li>
+                  <li>• Suivi de 3 caractères alphanumériques</li>
+                  <li>• Puis 4 chiffres (jour + année)</li>
+                  <li>• Se termine par 5 chiffres (séquence)</li>
+                  <li>• Exemple : <span className="font-mono">BF-XK7-1425-00042</span></li>
+                </ul>
+              </div>
+              <div className="p-3 bg-gray-50 rounded">
+                <p className="font-semibold text-gray-800 mb-1">Format historique :</p>
+                <ul className="space-y-1">
+                  <li>• Commence par <strong>SHP-</strong></li>
+                  <li>• Suivi de 8 chiffres (date)</li>
+                  <li>• Se termine par 5 caractères alphanumériques</li>
+                  <li>• Exemple : <span className="font-mono">SHP-20250109-A1B2C</span></li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>

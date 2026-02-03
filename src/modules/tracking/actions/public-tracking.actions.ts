@@ -86,15 +86,32 @@ function translateStatus(status: ShipmentStatus): string {
 
 /**
  * Valider le format du numéro de tracking
- * Format attendu : SHP-YYYYMMDD-XXXXX
+ *
+ * Formats acceptés :
+ * 1. Format actuel : {PAYS}-{CODE3}-{JJAA}-{SEQ5}
+ *    - PAYS : Code pays ISO 2 lettres (ex: BF, FR, CI)
+ *    - CODE3 : Code aléatoire 3 caractères alphanumériques
+ *    - JJAA : Jour (2 chiffres) + Année (2 derniers chiffres)
+ *    - SEQ5 : Séquence journalière sur 5 chiffres
+ *    - Exemple : BF-XK7-1425-00042
+ *
+ * 2. Format historique : SHP-YYYYMMDD-XXXXX
+ *    - Exemple : SHP-20250109-A1B2C
  *
  * @param trackingNumber - Numéro de tracking à valider
  * @returns true si valide, false sinon
  */
 function isValidTrackingNumber(trackingNumber: string): boolean {
-  // Regex : SHP- suivi de 8 chiffres (date) puis - puis 5 caractères alphanumériques
-  const regex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
-  return regex.test(trackingNumber);
+  const trimmed = trackingNumber.trim().toUpperCase();
+
+  // Format actuel : XX-XXX-DDYY-XXXXX (ex: BF-XK7-1425-00042)
+  // - 2 lettres (pays) - 3 alphanumériques - 4 chiffres (JJAA) - 5 chiffres (séquence)
+  const currentFormatRegex = /^[A-Z]{2}-[A-Z0-9]{3}-\d{4}-\d{5}$/;
+
+  // Format historique : SHP-YYYYMMDD-XXXXX (ex: SHP-20250109-A1B2C)
+  const legacyFormatRegex = /^SHP-\d{8}-[A-Z0-9]{5}$/;
+
+  return currentFormatRegex.test(trimmed) || legacyFormatRegex.test(trimmed);
 }
 
 /**
@@ -109,7 +126,7 @@ function isValidTrackingNumber(trackingNumber: string): boolean {
  * - Les coûts (estimatedCost, actualCost) sont masqués
  * - Les notes internes et métadonnées sensibles sont filtrées
  *
- * @param trackingNumber - Numéro de tracking (format SHP-YYYYMMDD-XXXXX)
+ * @param trackingNumber - Numéro de tracking (format XX-XXX-0000-00000 ou SHP-YYYYMMDD-XXXXX)
  * @returns Données publiques de tracking ou null si introuvable/non accessible
  */
 export async function getPublicTracking(
