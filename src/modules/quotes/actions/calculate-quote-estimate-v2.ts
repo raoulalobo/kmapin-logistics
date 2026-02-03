@@ -13,8 +13,9 @@ import { quoteEstimateSchema, type QuoteEstimateResult } from '../schemas/quote.
 import {
   calculerPrixDevisDynamic,
   type PriorityType,
+  type CargoTypeForPricing,
 } from '../lib/pricing-calculator-dynamic';
-import { TransportMode } from '@/lib/db/enums';
+import { TransportMode, CargoType } from '@/lib/db/enums';
 
 /**
  * Type pour les résultats d'actions avec erreur ou succès
@@ -116,6 +117,19 @@ export async function calculateQuoteEstimateV2Action(
     // Mapper la priorité (défaut: STANDARD)
     const priority = (validatedData.priority || 'STANDARD') as PriorityType;
 
+    // Mapper le type de marchandise pour le calculateur
+    // CargoType enum peut avoir plus de valeurs que CargoTypeForPricing
+    // On mappe les valeurs connues, sinon on utilise 'GENERAL'
+    const knownCargoTypes: CargoTypeForPricing[] = [
+      'GENERAL', 'DANGEROUS', 'PERISHABLE', 'FRAGILE',
+      'BULK', 'CONTAINER', 'PALLETIZED', 'OTHER'
+    ];
+    const cargoTypeForPricing: CargoTypeForPricing = knownCargoTypes.includes(
+      validatedData.cargoType as CargoTypeForPricing
+    )
+      ? (validatedData.cargoType as CargoTypeForPricing)
+      : 'GENERAL';
+
     // === Étape 3 : Calcul avec le nouvel algorithme ===
     const resultatCalcul = await calculerPrixDevisDynamic({
       poidsReel: validatedData.weight,
@@ -124,6 +138,7 @@ export async function calculateQuoteEstimateV2Action(
       hauteur: validatedData.height || 0,
       modeTransport: primaryTransportMode,
       priorite: priority,
+      typeMarchandise: cargoTypeForPricing,
       paysOrigine: originCode,
       paysDestination: destCode,
     });
@@ -132,15 +147,11 @@ export async function calculateQuoteEstimateV2Action(
     // Le nouvel algorithme retourne un format différent, on doit le mapper
     const estimatedCost = resultatCalcul.prixFinal;
 
-    // Calcul du breakdown pour compatibilité avec l'ancienne interface
+    // Breakdown avec les vraies valeurs calculées par l'algorithme
     const breakdown = {
       baseCost: resultatCalcul.coutBase,
-      transportModeCost: 0, // Non applicable dans le nouvel algorithme
-      cargoTypeSurcharge: 0, // Non inclus dans ce calcul simplifié
-      prioritySurcharge: Math.round(
-        resultatCalcul.coutBase * (resultatCalcul.coefficientPriorite - 1)
-      ),
-      distanceFactor: 0, // Non utilisé dans le nouvel algorithme
+      cargoTypeSurcharge: resultatCalcul.surchargeTypeMarchandise,
+      prioritySurcharge: Math.round(resultatCalcul.surchargePriorite),
     };
 
     // Estimation du délai de livraison (utiliser la config si disponible)

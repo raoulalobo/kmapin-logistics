@@ -108,6 +108,8 @@ export default function NewQuotePage() {
       destinationContactPhone: '',
       destinationContactEmail: '',
       transportMode: ['ROAD' as TransportMode],
+      // Priorité de livraison (défaut: STANDARD)
+      priority: 'STANDARD' as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
       estimatedCost: 0,
       currency: 'EUR',
       validUntil: getDefaultValidUntil(),
@@ -200,6 +202,7 @@ export default function NewQuotePage() {
   };
 
   // Watcher pour recalculer le prix automatiquement
+  // Inclut la priorité pour que le prix se mette à jour quand elle change
   const watchedFields = form.watch([
     'originCountry',
     'destinationCountry',
@@ -209,6 +212,7 @@ export default function NewQuotePage() {
     'width',
     'height',
     'transportMode',
+    'priority',
   ]);
 
   /**
@@ -246,6 +250,7 @@ export default function NewQuotePage() {
 
       try {
         // Préparer les données pour le calculateur
+        // Utilise la priorité sélectionnée par l'utilisateur (ou STANDARD par défaut)
         const estimateData = {
           originCountry: values.originCountry,
           destinationCountry: values.destinationCountry,
@@ -255,7 +260,7 @@ export default function NewQuotePage() {
           width: values.width || 0,
           height: values.height || 0,
           transportMode: values.transportMode,
-          priority: 'STANDARD' as const,
+          priority: (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
         };
 
         // Calculer le prix avec la Server Action
@@ -919,6 +924,34 @@ export default function NewQuotePage() {
                     </Select>
                     <FormDescription>
                       Sélectionnez le mode de transport principal
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Priorité de livraison - Affecte le prix et le délai */}
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priorité de livraison</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || 'STANDARD'}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une priorité" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
+                        <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
+                        <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
+                        <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      La priorité affecte le prix et le délai de livraison estimé
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

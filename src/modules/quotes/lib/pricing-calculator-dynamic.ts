@@ -1,36 +1,141 @@
 /**
+ * ═══════════════════════════════════════════════════════════════════════════════
  * Module de Calcul de Devis Fret (VERSION DYNAMIQUE)
+ * ═══════════════════════════════════════════════════════════════════════════════
  *
- * Version dynamique qui récupère les paramètres depuis la base de données
- * au lieu d'utiliser des constantes hardcodées.
+ * Version dynamique du calculateur de prix qui récupère les paramètres depuis
+ * la base de données au lieu d'utiliser des constantes hardcodées.
  *
  * @module modules/quotes/lib/pricing-calculator-dynamic
+ * @version 2.0.0
+ * @author Faso Fret Logistics
  *
- * === Différences avec la version statique ===
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * CONFORMITÉ AUX NORMES INTERNATIONALES
+ * ═══════════════════════════════════════════════════════════════════════════════
  *
- * - Récupère les ratios volumétriques depuis PricingConfig (BDD)
- * - Récupère les tarifs depuis TransportRate (BDD)
- * - Récupère les surcharges de priorité depuis PricingConfig (BDD)
- * - Supporte l'activation/désactivation du poids volumétrique par mode
+ * Ce module implémente les standards de l'industrie du fret :
  *
- * === Règles Métier (identiques) ===
+ * ┌─────────────────────────────────────────────────────────────────────────────┐
+ * │  Mode       │  Ratio        │  Norme              │  Signification         │
+ * ├─────────────┼───────────────┼─────────────────────┼────────────────────────┤
+ * │  AIR        │  167 kg/m³    │  IATA (1:6000)      │  1 m³ = 167 kg         │
+ * │  ROAD       │  333 kg/m³    │  Standard (1:3000)  │  1 m³ = 333 kg         │
+ * │  SEA        │  W/M          │  Unité Payante      │  MAX(tonnes, m³)       │
+ * │  RAIL       │  250 kg/m³    │  Variable           │  1 m³ = 250 kg         │
+ * └─────────────┴───────────────┴─────────────────────┴────────────────────────┘
  *
- * 1. Calcul du Poids Volumétrique (PV) :
- *    - Aérien  : Volume (m³) × ratio_config (défaut: 167 kg)
- *    - Routier : Volume (m³) × ratio_config (défaut: 333 kg)
- *    - Maritime: MAX(Poids/1000, Volume) → Unité Payante (UP)
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * ALGORITHME DE CALCUL
+ * ═══════════════════════════════════════════════════════════════════════════════
  *
- * 2. Masse Taxable :
- *    - Si poids volumétrique activé : MAX(Poids Réel, Poids Volumétrique)
- *    - Si désactivé (ex: Maritime) : Utiliser le système spécifique (UP)
+ * ÉTAPE 1 : Calcul du Volume
+ * ─────────────────────────────
+ * Volume_m³ = (Longueur_cm × Largeur_cm × Hauteur_cm) / 1.000.000
  *
- * 3. Coût de Base :
- *    - Chercher tarif dans TransportRate pour la route
- *    - Sinon, utiliser les tarifs par défaut de PricingConfig
+ * ÉTAPE 2 : Poids Volumétrique (selon mode)
+ * ─────────────────────────────────────────────
+ * │ AIR   │ PV = Volume_m³ × 167 kg/m³      │ Ratio IATA 1:6000
+ * │ ROAD  │ PV = Volume_m³ × 333 kg/m³      │ Ratio standard 1:3000
+ * │ SEA   │ UP = MAX(Poids_tonnes, Volume)  │ Unité Payante (W/M)
+ * │ RAIL  │ PV = Volume_m³ × 250 kg/m³      │ Estimation ferroviaire
  *
- * 4. Prix Final (avec Priorité) :
- *    - Récupérer le coefficient de priorité depuis PricingConfig
- *    - Prix_Final = Coût_Base × (1 + coefficient)
+ * ÉTAPE 3 : Masse Taxable (Chargeable Weight)
+ * ────────────────────────────────────────────────
+ * │ AIR/ROAD/RAIL │ MT = MAX(Poids_réel, Poids_volumétrique)
+ * │ SEA           │ MT = MAX(Poids_tonnes, Volume_m³) = Unité Payante
+ *
+ * ÉTAPE 4 : Tarif Applicable
+ * ───────────────────────────────
+ * 1. Rechercher dans TransportRate (BDD) pour la route spécifique
+ * 2. Si non trouvé → utiliser tarif par défaut × multiplicateur mode
+ *
+ * ÉTAPE 5 : Coût de Base
+ * ──────────────────────────
+ * Coût_Base = Masse_Taxable × Tarif_par_unité
+ *
+ * ÉTAPE 6 : Surcharge Type de Marchandise
+ * ──────────────────────────────────────────────
+ * │ GENERAL     │  0%  │ Pas de surcharge
+ * │ DANGEROUS   │ +50% │ Matières dangereuses (ADR/IMDG)
+ * │ PERISHABLE  │ +40% │ Denrées périssables (chaîne du froid)
+ * │ FRAGILE     │ +30% │ Manipulation spéciale requise
+ * │ BULK        │ -10% │ Vrac (économies d'échelle)
+ * │ CONTAINER   │ +20% │ Conteneur standardisé
+ * │ PALLETIZED  │ +15% │ Palettisé
+ *
+ * Surcharge_Cargo = Coût_Base × Coefficient_Cargo
+ *
+ * ÉTAPE 7 : Surcharge Priorité
+ * ─────────────────────────────────
+ * │ STANDARD │ ×1.0  │  0% │ Délai normal
+ * │ NORMAL   │ ×1.1  │ +10%│ Légèrement accéléré
+ * │ EXPRESS  │ ×1.5  │ +50%│ Rapide
+ * │ URGENT   │ ×1.3  │ +30%│ Prioritaire
+ *
+ * ÉTAPE 8 : Prix Final
+ * ─────────────────────────
+ * Prix_Final = (Coût_Base + Surcharge_Cargo) × Coefficient_Priorité
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * EXEMPLE DE CALCUL COMPLET
+ * ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * Données d'entrée :
+ * - Poids réel : 50 kg
+ * - Dimensions : 100 × 80 × 60 cm
+ * - Mode : AIR
+ * - Route : FR → BF
+ * - Type marchandise : FRAGILE
+ * - Priorité : URGENT
+ *
+ * Calcul :
+ * 1. Volume = (100 × 80 × 60) / 1.000.000 = 0.48 m³
+ * 2. Poids volumétrique = 0.48 × 167 = 80.16 kg
+ * 3. Masse taxable = MAX(50, 80.16) = 80.16 kg (facturation au volume)
+ * 4. Tarif FR→BF AIR = 7.25 €/kg
+ * 5. Coût base = 80.16 × 7.25 = 581.16 €
+ * 6. Surcharge FRAGILE (+30%) = 581.16 × 0.30 = 174.35 €
+ * 7. Prix avant priorité = 581.16 + 174.35 = 755.51 €
+ * 8. Surcharge URGENT (×1.3) = 755.51 × 1.3 = 982.16 €
+ *
+ * Prix final : 982.16 €
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * SOURCES DE DONNÉES
+ * ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * ┌────────────────────┬────────────────────────────────────────────────────────┐
+ * │  Paramètre         │  Source                                                │
+ * ├────────────────────┼────────────────────────────────────────────────────────┤
+ * │  Ratios volum.     │  PricingConfig.volumetricWeightRatios (BDD)            │
+ * │  Tarifs routes     │  TransportRate (BDD) pour chaque origine→destination   │
+ * │  Tarifs défaut     │  PricingConfig.defaultRatePerKg / defaultRatePerM3     │
+ * │  Surcharges cargo  │  PricingConfig.cargoTypeSurcharges (BDD)               │
+ * │  Surcharges prio.  │  PricingConfig.prioritySurcharges (BDD)                │
+ * │  Activation PV     │  PricingConfig.useVolumetricWeightPerMode (BDD)        │
+ * └────────────────────┴────────────────────────────────────────────────────────┘
+ *
+ * Note : Toutes les configurations sont cachées pendant 1 heure (unstable_cache)
+ * pour optimiser les performances.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * DIFFÉRENCES AVEC LA VERSION STATIQUE (pricing-calculator.ts)
+ * ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * │ Aspect                 │ Statique          │ Dynamique                      │
+ * ├────────────────────────┼───────────────────┼────────────────────────────────┤
+ * │ Tarifs                 │ Hardcodés         │ BDD (TransportRate)            │
+ * │ Ratios volumétriques   │ Constantes        │ BDD (PricingConfig)            │
+ * │ Surcharges cargo       │ Non implémenté    │ BDD (PricingConfig)            │
+ * │ Surcharges priorité    │ Constantes        │ BDD (PricingConfig)            │
+ * │ Niveaux priorité       │ 3 (STD/NORM/URG)  │ 4 (STD/NORM/EXP/URG)           │
+ * │ Performance            │ Immédiat          │ Async (cache 1h)               │
+ * │ Modifiable par admin   │ Non               │ Oui (via dashboard)            │
+ *
+ * @see pricing-calculator.ts pour la version statique avec valeurs hardcodées
+ * @see /modules/pricing-config pour la gestion de la configuration
+ * @see /modules/transport-rates pour la gestion des tarifs par route
  */
 
 import { TransportMode } from '@/lib/db/enums';
@@ -48,11 +153,48 @@ import { getTransportRate } from '@/modules/transport-rates';
 export type PriorityType = 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
 
 /**
+ * Types de marchandise supportés pour les surcharges
+ *
+ * Les surcharges sont configurées dans PricingConfig.cargoTypeSurcharges
+ * et appliquées au coût de base avant la priorité.
+ *
+ * @example
+ * - GENERAL : 0% (pas de surcharge)
+ * - DANGEROUS : +50% (matières dangereuses, ADR)
+ * - PERISHABLE : +40% (denrées périssables, chaîne du froid)
+ * - FRAGILE : +30% (manipulation spéciale requise)
+ */
+export type CargoTypeForPricing =
+  | 'GENERAL'
+  | 'DANGEROUS'
+  | 'PERISHABLE'
+  | 'FRAGILE'
+  | 'BULK'
+  | 'CONTAINER'
+  | 'PALLETIZED'
+  | 'OTHER';
+
+/**
  * Entrées pour le calcul de devis
  *
  * Toutes les mesures doivent être fournies dans les unités suivantes :
  * - Poids : kilogrammes (kg)
  * - Dimensions : centimètres (cm)
+ *
+ * @example
+ * ```typescript
+ * const input: QuotePricingInputDynamic = {
+ *   poidsReel: 500,          // 500 kg
+ *   longueur: 120,           // 120 cm
+ *   largeur: 80,             // 80 cm (palette EUR)
+ *   hauteur: 100,            // 100 cm
+ *   modeTransport: 'AIR',
+ *   priorite: 'URGENT',
+ *   typeMarchandise: 'FRAGILE',
+ *   paysOrigine: 'FR',
+ *   paysDestination: 'BF',
+ * };
+ * ```
  */
 export interface QuotePricingInputDynamic {
   /** Poids réel de la marchandise en kilogrammes (kg) */
@@ -73,6 +215,12 @@ export interface QuotePricingInputDynamic {
   /** Priorité de livraison (défaut: STANDARD) */
   priorite?: PriorityType;
 
+  /**
+   * Type de marchandise pour calcul de la surcharge
+   * Si non fourni, aucune surcharge n'est appliquée (équivalent à GENERAL)
+   */
+  typeMarchandise?: CargoTypeForPricing;
+
   /** Code pays d'origine (ISO 2 lettres, ex: FR, BF, CI) */
   paysOrigine: string;
 
@@ -83,7 +231,22 @@ export interface QuotePricingInputDynamic {
 /**
  * Résultat détaillé du calcul de devis
  *
- * Contient tous les détails du calcul pour transparence et debugging
+ * Contient tous les détails du calcul pour transparence et debugging.
+ *
+ * === Formule de calcul ===
+ * 1. Coût Base = Masse Taxable × Tarif
+ * 2. Surcharge Cargo = Coût Base × Coefficient Cargo (ex: +50% pour DANGEROUS)
+ * 3. Prix Avant Priorité = Coût Base + Surcharge Cargo
+ * 4. Prix Final = Prix Avant Priorité × Coefficient Priorité (ex: ×1.3 pour URGENT)
+ *
+ * @example
+ * // Résultat pour 500kg de marchandise FRAGILE en AIR, priorité URGENT
+ * {
+ *   coutBase: 1000,           // 500 kg × 2 €/kg
+ *   surchargeTypeMarchandise: 300,  // +30% FRAGILE
+ *   coefficientPriorite: 1.3, // +30% URGENT
+ *   prixFinal: 1690,          // (1000 + 300) × 1.3
+ * }
  */
 export interface QuotePricingResultDynamic {
   /** Volume calculé en mètres cubes (m³) */
@@ -101,13 +264,37 @@ export interface QuotePricingResultDynamic {
   /** Tarif par unité appliqué (€/kg, €/m³, ou €/tonne selon le mode) */
   tarifParUnite: number;
 
-  /** Coût de base AVANT application de la priorité */
+  /** Coût de base AVANT application des surcharges (Masse Taxable × Tarif) */
   coutBase: number;
+
+  /**
+   * Type de marchandise utilisé pour la surcharge
+   * Correspond à CargoTypeForPricing ou null si non spécifié
+   */
+  typeMarchandise: CargoTypeForPricing | null;
+
+  /**
+   * Coefficient de surcharge pour le type de marchandise (ex: 0.3 = +30%)
+   * 0 si GENERAL ou non spécifié
+   */
+  coefficientTypeMarchandise: number;
+
+  /**
+   * Montant de la surcharge type de marchandise en devise
+   * = coutBase × coefficientTypeMarchandise
+   */
+  surchargeTypeMarchandise: number;
 
   /** Coefficient multiplicateur de priorité (ex: 1.0, 1.1, 1.3) */
   coefficientPriorite: number;
 
-  /** Prix final APRÈS application de la priorité */
+  /**
+   * Montant de la surcharge priorité en devise
+   * = (coutBase + surchargeTypeMarchandise) × (coefficientPriorite - 1)
+   */
+  surchargePriorite: number;
+
+  /** Prix final APRÈS application de toutes les surcharges */
   prixFinal: number;
 
   /** Devise du prix (toujours EUR pour l'instant) */
@@ -297,16 +484,37 @@ export async function calculerPrixDevisDynamic(
   // Coût_Base = Masse_Taxable × Tarif_Par_Unité
   const coutBase = masseTaxable * tarifParUnite;
 
-  // === ÉTAPE 7 : Application du Coefficient de Priorité ===
+  // === ÉTAPE 7 : Application de la Surcharge Type de Marchandise ===
+  // Récupérer le coefficient de surcharge pour le type de marchandise depuis la config
+  // Si non spécifié ou GENERAL, le coefficient est 0 (pas de surcharge)
+  const typeMarchandise = input.typeMarchandise || null;
+  const coefficientTypeMarchandise = typeMarchandise
+    ? (config.cargoTypeSurcharges[typeMarchandise] || 0)
+    : 0;
+
+  // Calculer le montant de la surcharge type de marchandise
+  // Surcharge = Coût_Base × Coefficient (ex: 1000 × 0.3 = 300€ pour FRAGILE +30%)
+  const surchargeTypeMarchandise = coutBase * coefficientTypeMarchandise;
+
+  // Prix après surcharge marchandise (avant priorité)
+  const prixApresCargoSurcharge = coutBase + surchargeTypeMarchandise;
+
+  // === ÉTAPE 8 : Application du Coefficient de Priorité ===
   // Récupérer le coefficient de priorité depuis la config
-  const prioritySurcharge = config.prioritySurcharges[priorite] || 0;
-  const coefficientPriorite = 1 + prioritySurcharge; // ex: 0.1 → 1.1 (coefficient multiplicateur)
+  const prioritySurchargeCoef = config.prioritySurcharges[priorite] || 0;
+  const coefficientPriorite = 1 + prioritySurchargeCoef; // ex: 0.1 → 1.1 (coefficient multiplicateur)
 
-  // === ÉTAPE 8 : Calcul du Prix Final ===
-  // Prix_Final = Coût_Base × Coefficient_Priorité
-  const prixFinal = coutBase * coefficientPriorite;
+  // Calculer le montant de la surcharge priorité
+  // Surcharge Priorité = Prix_Après_Cargo × (Coefficient - 1)
+  // Exemple : 1300 × 0.3 = 390€ pour URGENT +30%
+  const surchargePriorite = prixApresCargoSurcharge * prioritySurchargeCoef;
 
-  // === ÉTAPE 9 : Construction du Résultat ===
+  // === ÉTAPE 9 : Calcul du Prix Final ===
+  // Prix_Final = (Coût_Base + Surcharge_Cargo) × Coefficient_Priorité
+  // ou de façon équivalente : Prix_Final = Coût_Base + Surcharge_Cargo + Surcharge_Priorité
+  const prixFinal = prixApresCargoSurcharge * coefficientPriorite;
+
+  // === ÉTAPE 10 : Construction du Résultat ===
   return {
     volume_m3: Math.round(volume_m3 * 1000) / 1000, // Arrondir à 3 décimales
     poidsVolumetrique_kg: Math.round(poidsVolumetrique_kg * 100) / 100, // Arrondir à 2 décimales
@@ -314,7 +522,11 @@ export async function calculerPrixDevisDynamic(
     uniteMasseTaxable,
     tarifParUnite,
     coutBase: Math.round(coutBase * 100) / 100,
+    typeMarchandise,
+    coefficientTypeMarchandise,
+    surchargeTypeMarchandise: Math.round(surchargeTypeMarchandise * 100) / 100,
     coefficientPriorite,
+    surchargePriorite: Math.round(surchargePriorite * 100) / 100,
     prixFinal: Math.round(prixFinal * 100) / 100,
     devise: 'EUR',
     route: {
@@ -342,6 +554,18 @@ export function formaterResultatDevisDynamic(result: QuotePricingResultDynamic):
   details: string[];
   alertes: string[];
 } {
+  // Labels français pour les types de marchandise
+  const cargoTypeLabels: Record<string, string> = {
+    GENERAL: 'Générale',
+    DANGEROUS: 'Dangereuse',
+    PERISHABLE: 'Périssable',
+    FRAGILE: 'Fragile',
+    BULK: 'Vrac',
+    CONTAINER: 'Conteneur',
+    PALLETIZED: 'Palettisée',
+    OTHER: 'Autre',
+  };
+
   const details = [
     `Route : ${result.route.axe}`,
     `Volume : ${result.volume_m3} m³`,
@@ -349,8 +573,13 @@ export function formaterResultatDevisDynamic(result: QuotePricingResultDynamic):
     `Masse taxable : ${result.masseTaxable} ${result.uniteMasseTaxable}`,
     `Tarif : ${result.tarifParUnite} EUR/${result.uniteMasseTaxable}`,
     `Coût de base : ${result.coutBase} EUR`,
+    // Afficher la surcharge type de marchandise si applicable
+    result.surchargeTypeMarchandise > 0 && result.typeMarchandise
+      ? `Supplément ${cargoTypeLabels[result.typeMarchandise] || result.typeMarchandise} (+${Math.round(result.coefficientTypeMarchandise * 100)}%) : +${result.surchargeTypeMarchandise} EUR`
+      : null,
+    // Afficher la surcharge priorité si applicable
     result.coefficientPriorite !== 1
-      ? `Supplément priorité (${result.priorite}) : ×${result.coefficientPriorite}`
+      ? `Supplément priorité ${result.priorite} (+${Math.round((result.coefficientPriorite - 1) * 100)}%) : +${result.surchargePriorite} EUR`
       : null,
   ].filter(Boolean) as string[];
 
@@ -374,6 +603,19 @@ export function formaterResultatDevisDynamic(result: QuotePricingResultDynamic):
     alertes.push(
       '⚠️ Tarif estimatif : Cette route n\'est pas configurée. ' +
       'Le tarif utilisé est une estimation basée sur les valeurs par défaut.'
+    );
+  }
+
+  // Alerte pour marchandise spéciale
+  if (result.typeMarchandise === 'DANGEROUS') {
+    alertes.push(
+      '⚠️ Matières dangereuses : Transport soumis à réglementation ADR/IMDG. ' +
+      'Documents spéciaux requis.'
+    );
+  } else if (result.typeMarchandise === 'PERISHABLE') {
+    alertes.push(
+      '🧊 Périssable : Transport en température contrôlée. ' +
+      'Chaîne du froid garantie.'
     );
   }
 

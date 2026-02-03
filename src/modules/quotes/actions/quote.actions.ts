@@ -701,6 +701,8 @@ export async function updateQuoteAction(
       'validUntil',
       'acceptedAt',
       'rejectedAt',
+      // Priorité de livraison (affecte le prix et le délai)
+      'priority',
       // Adresses expéditeur
       'originAddress',
       'originCity',

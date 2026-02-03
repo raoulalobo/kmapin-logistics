@@ -67,6 +67,15 @@ import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calcula
  * Type pour les données du devis chargées depuis l'API
  * Note: validUntil peut être un objet Date (Prisma) ou une string ISO (après sérialisation)
  */
+/**
+ * Type des priorités disponibles pour la livraison
+ * - STANDARD : Délai normal, aucun supplément
+ * - NORMAL : Légèrement accéléré, +10%
+ * - EXPRESS : Livraison rapide, +50%
+ * - URGENT : Prioritaire, +30%
+ */
+type PriorityType = 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+
 interface QuoteData {
   id: string;
   quoteNumber: string;
@@ -91,6 +100,8 @@ interface QuoteData {
   destinationContactPhone: string | null;
   destinationContactEmail: string | null;
   transportMode: string[];
+  // Priorité de livraison : affecte le prix (+10% à +50%) et le délai
+  priority: PriorityType | null;
   estimatedCost: number;
   currency: string;
   // Prisma retourne Date, mais après sérialisation JSON c'est une string
@@ -150,6 +161,8 @@ function QuoteEditForm({
       destinationContactPhone: quoteData.destinationContactPhone || '',
       destinationContactEmail: quoteData.destinationContactEmail || '',
       transportMode: quoteData.transportMode as TransportMode[],
+      // Priorité de livraison : par défaut STANDARD si non définie
+      priority: (quoteData.priority || 'STANDARD') as PriorityType,
       estimatedCost: Number(quoteData.estimatedCost),
       currency: quoteData.currency,
       // Prisma retourne un objet Date, mais Zod attend une chaîne ISO 8601
@@ -207,6 +220,7 @@ function QuoteEditForm({
   };
 
   // Watcher pour recalculer le prix
+  // Surveille tous les champs qui affectent le calcul du tarif
   const watchedFields = form.watch([
     'originCountry',
     'destinationCountry',
@@ -216,6 +230,7 @@ function QuoteEditForm({
     'width',
     'height',
     'transportMode',
+    'priority', // Ajouté : la priorité affecte le prix (+10% à +50%)
   ]);
 
   // Mise à jour du prix quand la devise change
@@ -248,6 +263,7 @@ function QuoteEditForm({
 
       try {
         // Préparer les données pour le calculateur
+        // La priorité est récupérée du formulaire pour un calcul précis
         const estimateData = {
           originCountry: values.originCountry,
           destinationCountry: values.destinationCountry,
@@ -257,7 +273,8 @@ function QuoteEditForm({
           width: values.width || 0,
           height: values.height || 0,
           transportMode: values.transportMode,
-          priority: 'STANDARD' as const,
+          // Utilise la priorité sélectionnée par l'utilisateur
+          priority: (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
         };
 
         // Calculer le prix avec la Server Action
@@ -320,6 +337,9 @@ function QuoteEditForm({
 
       // Transport mode (array)
       data.transportMode.forEach(mode => formData.append('transportMode', mode));
+
+      // Priorité de livraison
+      formData.append('priority', data.priority || 'STANDARD');
 
       // Tarification
       formData.append('estimatedCost', data.estimatedCost.toString());
@@ -826,6 +846,41 @@ function QuoteEditForm({
                       <SelectItem value="RAIL">Ferroviaire</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* ────────────────────────────────────────────────────────────── */}
+            {/* PRIORITÉ DE LIVRAISON */}
+            {/* Affecte le prix final et le délai de livraison estimé */}
+            {/* STANDARD (×1.0), NORMAL (+10%), EXPRESS (+50%), URGENT (+30%) */}
+            {/* ────────────────────────────────────────────────────────────── */}
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priorité de livraison</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || 'STANDARD'}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une priorité" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
+                      <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
+                      <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
+                      <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    La priorité affecte le prix et le délai de livraison estimé
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

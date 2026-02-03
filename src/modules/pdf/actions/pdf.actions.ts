@@ -297,6 +297,7 @@ export async function generateQuotePDFAction(
     }
 
     // Préparer les données pour le PDF
+    // Inclut la priorité de livraison pour affichage sur le devis
     const pdfData = {
       quoteNumber: quote.quoteNumber,
       createdAt: quote.createdAt,
@@ -317,6 +318,8 @@ export async function generateQuotePDFAction(
       cargoType: quote.cargoType,
       weight: quote.weight,
       volume: quote.volume,
+      // Priorité de livraison : STANDARD, NORMAL, EXPRESS, URGENT
+      priority: quote.priority,
       estimatedCost: quote.estimatedCost,
       currency: quote.currency,
       status: quote.status,

@@ -69,6 +69,8 @@ export interface QuotePDFData {
   cargoType: string;
   weight: number;
   volume?: number | null;
+  /** Priorité de livraison - affecte le prix et le délai */
+  priority?: string | null;
   estimatedCost: number;
   currency: string;
   status: string;
@@ -102,6 +104,22 @@ function translateTransportMode(mode: string): string {
     RAIL: 'Ferroviaire',
   };
   return translations[mode] || mode;
+}
+
+/**
+ * Traduit la priorité de livraison en français
+ * Inclut le supplément tarifaire pour information client
+ */
+function translatePriority(priority: string | null | undefined): string {
+  if (!priority) return 'Standard';
+
+  const translations: Record<string, string> = {
+    STANDARD: 'Standard',
+    NORMAL: 'Normal (+10%)',
+    EXPRESS: 'Express (+50%)',
+    URGENT: 'Urgent (+30%)',
+  };
+  return translations[priority] || priority;
 }
 
 /**
@@ -276,6 +294,14 @@ export function generateQuotePDF(
     doc.text(`${data.volume.toLocaleString('fr-FR')} m³`, 50, yPos);
     yPos += 8;
   }
+
+  // Priorité de livraison
+  // Affiche toujours la priorité pour que le client connaisse le niveau de service
+  doc.setFont('helvetica', 'bold');
+  doc.text('Priorité :', 25, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(translatePriority(data.priority), 50, yPos);
+  yPos += 8;
 
   yPos += 10;
 

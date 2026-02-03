@@ -137,6 +137,31 @@ function formatTransportMode(mode: string): string {
 }
 
 /**
+ * Formate la priorité en français avec le supplément
+ */
+function formatPriority(priority: string | null | undefined): string {
+  if (!priority) return 'Standard';
+
+  const priorityMap: Record<string, string> = {
+    STANDARD: 'Standard',
+    NORMAL: 'Normal (+10%)',
+    EXPRESS: 'Express (+50%)',
+    URGENT: 'Urgent (+30%)',
+  };
+
+  return priorityMap[priority] || priority;
+}
+
+/**
+ * Obtient la couleur du badge selon la priorité
+ */
+function getPriorityVariant(priority: string | null | undefined): 'default' | 'secondary' | 'destructive' | 'outline' {
+  if (!priority || priority === 'STANDARD') return 'secondary';
+  if (priority === 'URGENT' || priority === 'EXPRESS') return 'destructive';
+  return 'outline';
+}
+
+/**
  * Formate le mode de paiement en français
  * Affiche le libellé correspondant à la méthode de paiement choisie
  */
@@ -551,18 +576,33 @@ export default async function QuoteDetailPage({
                 )}
               </div>
 
-              {quote.transportMode && quote.transportMode.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium mb-2">Modes de transport</p>
-                  <div className="flex gap-2">
-                    {quote.transportMode.map((mode) => (
-                      <Badge key={mode} variant="secondary">
-                        {formatTransportMode(mode)}
-                      </Badge>
-                    ))}
+              {/* ────────────────────────────────────────────────────────── */}
+              {/* MODES DE TRANSPORT ET PRIORITÉ */}
+              {/* Affichage sous forme de badges pour une lecture rapide */}
+              {/* ────────────────────────────────────────────────────────── */}
+              <div className="mt-4 flex flex-wrap gap-6">
+                {/* Modes de transport */}
+                {quote.transportMode && quote.transportMode.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Modes de transport</p>
+                    <div className="flex gap-2">
+                      {quote.transportMode.map((mode) => (
+                        <Badge key={mode} variant="secondary">
+                          {formatTransportMode(mode)}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
+                )}
+
+                {/* Priorité de livraison */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Priorité de livraison</p>
+                  <Badge variant={getPriorityVariant(quote.priority)}>
+                    {formatPriority(quote.priority)}
+                  </Badge>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
 

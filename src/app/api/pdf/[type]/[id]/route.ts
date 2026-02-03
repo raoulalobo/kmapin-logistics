@@ -329,34 +329,34 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
 
   // Préparer les données pour le PDF
   // Les informations du client (COMPANY ou INDIVIDUAL) sont utilisées pour l'en-tête
+  // Note: Cette route utilise la structure V1 avec items, mais on ajoute priority
   const pdfData = {
     quoteNumber: quote.quoteNumber,
-    issueDate: quote.issueDate,
+    createdAt: quote.createdAt,
     validUntil: quote.validUntil,
     company: {  // Garder "company" pour compatibilité avec le template PDF
       name: quote.client?.name || quote.contactName || 'N/A',
       legalName: quote.client?.legalName,
       address: quote.client?.address || '',
       city: quote.client?.city || '',
-      postalCode: quote.client?.postalCode,
+      postalCode: quote.client?.postalCode || '',
       country: quote.client?.country || '',
       taxId: quote.client?.taxId,
       email: quote.client?.email || quote.contactEmail || '',
       phone: quote.client?.phone || quote.contactPhone,
     },
-    items: quote.items.map((item) => ({
-      description: item.description,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      amount: item.amount,
-    })),
-    subtotal: quote.subtotal,
-    taxRate: quote.taxRate,
-    taxAmount: quote.taxAmount,
-    discount: quote.discount,
-    total: quote.total,
+    // Données transport pour le template simplifié
+    originCountry: quote.originCountry,
+    destinationCountry: quote.destinationCountry,
+    transportMode: quote.transportModes,
+    cargoType: quote.cargoType,
+    weight: Number(quote.weight),
+    volume: quote.volume ? Number(quote.volume) : null,
+    // Priorité de livraison (STANDARD, NORMAL, EXPRESS, URGENT)
+    priority: quote.priority,
+    estimatedCost: Number(quote.estimatedCost),
     currency: quote.currency,
-    notes: quote.notes,
+    status: quote.status,
   };
 
   // Générer le PDF

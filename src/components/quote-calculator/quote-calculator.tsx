@@ -978,33 +978,29 @@ export function QuoteCalculator() {
                   Détail du calcul
                 </h4>
                 <div className="space-y-3">
+                  {/* Coût de base = Masse Taxable × Tarif */}
                   <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
                     <span className="text-gray-700 font-medium">Coût de base</span>
-                    <span className="font-bold text-gray-900">{result.breakdown.baseCost} €</span>
+                    <span className="font-bold text-gray-900">{result.breakdown.baseCost.toLocaleString('fr-FR')} €</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
-                    <span className="text-gray-700 font-medium">Facteur distance</span>
-                    <span className="font-bold text-gray-900">{result.breakdown.distanceFactor} €</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
-                    <span className="text-gray-700 font-medium">Coût mode de transport</span>
-                    <span className="font-bold text-gray-900">{result.breakdown.transportModeCost} €</span>
-                  </div>
+                  {/* Supplément type de marchandise (si applicable) */}
                   {result.breakdown.cargoTypeSurcharge > 0 && (
                     <div className="flex justify-between items-center p-3 rounded-lg bg-orange-50">
                       <span className="text-orange-700 font-medium">Supplément type marchandise</span>
-                      <span className="font-bold text-orange-900">+{result.breakdown.cargoTypeSurcharge} €</span>
+                      <span className="font-bold text-orange-900">+{result.breakdown.cargoTypeSurcharge.toLocaleString('fr-FR')} €</span>
                     </div>
                   )}
+                  {/* Supplément priorité (si applicable) */}
                   {result.breakdown.prioritySurcharge > 0 && (
                     <div className="flex justify-between items-center p-3 rounded-lg bg-purple-50">
                       <span className="text-purple-700 font-medium">Supplément priorité</span>
-                      <span className="font-bold text-purple-900">+{result.breakdown.prioritySurcharge} €</span>
+                      <span className="font-bold text-purple-900">+{result.breakdown.prioritySurcharge.toLocaleString('fr-FR')} €</span>
                     </div>
                   )}
+                  {/* Total */}
                   <div className="border-t-2 border-[#003D82] pt-3 mt-4 flex justify-between items-center p-4 rounded-lg bg-blue-50">
                     <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="text-2xl font-bold text-[#003D82]">{result.estimatedCost} €</span>
+                    <span className="text-2xl font-bold text-[#003D82]">{result.estimatedCost.toLocaleString('fr-FR')} €</span>
                   </div>
                 </div>
 

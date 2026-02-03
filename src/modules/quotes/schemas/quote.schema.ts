@@ -139,6 +139,17 @@ export const quoteSchema = z.object({
     .min(1, 'Au moins un mode de transport est requis')
     .max(4, 'Maximum 4 modes de transport'),
 
+  // === Priorité de livraison (optionnelle) ===
+  // Affecte le prix et le délai estimé
+  // - STANDARD : Livraison normale (0%)
+  // - NORMAL   : Livraison accélérée (+10%)
+  // - EXPRESS  : Livraison rapide (+50%)
+  // - URGENT   : Livraison prioritaire (+30%)
+  priority: z
+    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .default('STANDARD')
+    .optional(),
+
   // === Coût et validité ===
   estimatedCost: z
     .number()
@@ -423,17 +434,29 @@ export type QuoteEstimateData = z.infer<typeof quoteEstimateSchema>;
 
 /**
  * Type pour le résultat du calcul d'estimation
+ *
+ * Breakdown :
+ * - baseCost : Coût de base = Masse Taxable × Tarif (avant surcharges)
+ * - cargoTypeSurcharge : Supplément type de marchandise (ex: +50% pour DANGEROUS)
+ * - prioritySurcharge : Supplément priorité (ex: +30% pour URGENT)
+ *
+ * Note : Le prix final (estimatedCost) = baseCost + cargoTypeSurcharge + prioritySurcharge
  */
 export type QuoteEstimateResult = {
+  /** Prix final estimé en devise locale */
   estimatedCost: number;
+  /** Code devise ISO (EUR, USD, etc.) */
   currency: string;
+  /** Détail du calcul pour transparence */
   breakdown: {
+    /** Coût de base (Masse Taxable × Tarif) */
     baseCost: number;
-    transportModeCost: number;
+    /** Supplément type de marchandise (DANGEROUS, FRAGILE, etc.) */
     cargoTypeSurcharge: number;
+    /** Supplément priorité (NORMAL, EXPRESS, URGENT) */
     prioritySurcharge: number;
-    distanceFactor: number;
   };
+  /** Délai de livraison estimé en jours */
   estimatedDeliveryDays: number;
 };
 
