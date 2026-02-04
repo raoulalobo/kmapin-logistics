@@ -757,10 +757,15 @@ export async function updateQuoteAction(
     });
 
     // Mettre à jour le devis
+    // Extraction des champs non-persistés et des FK scalaires avant le spread
+    // - priority : utilisé uniquement pour le calcul du tarif, pas de colonne en DB
+    // - clientId : Prisma update() exige la syntaxe relationnelle client: { connect: { id } }
+    const { clientId, priority, ...restValidatedData } = validatedData;
+
     const updatedQuote = await prisma.quote.update({
       where: { id },
       data: {
-        ...validatedData,
+        ...restValidatedData,
         validUntil: validatedData.validUntil
           ? new Date(validatedData.validUntil)
           : undefined,
@@ -770,6 +775,12 @@ export async function updateQuoteAction(
         rejectedAt: validatedData.rejectedAt
           ? new Date(validatedData.rejectedAt)
           : undefined,
+        // Relation client : connect si clientId fourni, disconnect si null, ignorer si undefined
+        ...(clientId !== undefined
+          ? clientId !== null
+            ? { client: { connect: { id: clientId } } }
+            : { client: { disconnect: true } }
+          : {}),
       },
     });
 
@@ -1754,7 +1765,8 @@ export async function startQuoteTreatmentAction(
         status: 'IN_TREATMENT',
         agentComment: validatedData.comment,
         treatmentStartedAt: new Date(),
-        treatmentAgentId: session.user.id,
+        // Syntaxe relationnelle Prisma : connect l'agent qui traite le devis
+        treatmentAgent: { connect: { id: session.user.id } },
       },
     });
 
@@ -2045,7 +2057,8 @@ export async function validateQuoteTreatmentAction(
         data: {
           status: 'VALIDATED',
           treatmentValidatedAt: new Date(),
-          shipmentId: shipment.id,
+          // Syntaxe relationnelle Prisma : connect l'expédition créée au devis
+          shipment: { connect: { id: shipment.id } },
           agentComment: validatedData.comment
             ? `${existingQuote.agentComment || ''}\n[Validation] ${validatedData.comment}`.trim()
             : existingQuote.agentComment,
@@ -2183,7 +2196,9 @@ export async function cancelQuoteAction(
         status: 'CANCELLED',
         cancelledAt: new Date(),
         cancelReason: validatedData.reason,
-        treatmentAgentId: existingQuote.treatmentAgentId || session.user.id,
+        // Syntaxe relationnelle Prisma : connect l'agent qui a annulé le devis
+        // Utilise l'agent de traitement existant ou l'utilisateur courant
+        treatmentAgent: { connect: { id: existingQuote.treatmentAgentId || session.user.id } },
       },
     });
 
@@ -2708,11 +2723,14 @@ export async function attachQuotesToUserAction(
     await Promise.all(
       orphanedQuotes.map(async (quote) => {
         // Mise à jour du devis
+        // Syntaxe relationnelle Prisma pour update() :
+        // Les FK scalaires (userId, clientId) ne sont pas acceptées,
+        // il faut utiliser user: { connect } et client: { connect }
         await prisma.quote.update({
           where: { id: quote.id },
           data: {
-            userId: user.id,
-            clientId: user.clientId,
+            user: { connect: { id: user.id } },
+            ...(user.clientId ? { client: { connect: { id: user.clientId } } } : {}),
             isAttachedToAccount: true,
           },
         });
@@ -2842,7 +2860,8 @@ export async function markQuotePaymentReceivedAction(
       where: { id: quoteId },
       data: {
         paymentReceivedAt: now,
-        paymentReceivedById: session.user.id,
+        // Syntaxe relationnelle Prisma : connect l'utilisateur qui confirme le paiement
+        paymentReceivedBy: { connect: { id: session.user.id } },
       },
     });
 

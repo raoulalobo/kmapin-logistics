@@ -35,7 +35,6 @@ import {
   Calendar,
   CurrencyEur,
   PencilSimple,
-  Trash,
   Buildings,
   Scales,
   Cube,
@@ -65,6 +64,7 @@ import {
   QuotePaymentActions,
   QuoteHistoryTimeline,
   QuoteActions,
+  QuoteDeleteButton,
 } from '@/components/quotes';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -769,11 +769,9 @@ export default async function QuoteDetailPage({
             )}
 
             {/* Supprimer - visible uniquement pour CLIENT avec devis DRAFT */}
+            {/* Utilise un Client Component avec AlertDialog de confirmation */}
             {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
-              <Button variant="destructive" size="sm">
-                <Trash className="mr-2 h-4 w-4" />
-                Supprimer
-              </Button>
+              <QuoteDeleteButton quoteId={quote.id} quoteNumber={quote.quoteNumber} />
             )}
 
             {/* Voir l'expédition - visible si une expédition est liée */}

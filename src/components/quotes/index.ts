@@ -31,3 +31,6 @@ export { QuotePaymentActions } from './quote-payment-actions';
 
 // Actions client (accepter/rejeter)
 export { QuoteActions } from './quote-actions';
+
+// Bouton de suppression (client, devis DRAFT uniquement)
+export { QuoteDeleteButton } from './quote-delete-button';
