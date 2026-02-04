@@ -140,8 +140,8 @@ export async function getPublicTracking(
     }
 
     // Récupérer l'expédition avec le client Prisma standard (bypass Zenstack)
-    // IMPORTANT: Pour les guests (public), on ne récupère que le DERNIER événement
-    // L'historique complet est réservé aux utilisateurs connectés (dashboard)
+    // Récupérer TOUS les événements de tracking pour l'affichage public
+    // Note: Les données sensibles (GPS, metadata) restent exclues du select
     const shipment = await prisma.shipment.findUnique({
       where: { trackingNumber },
       include: {
@@ -152,7 +152,7 @@ export async function getPublicTracking(
         },
         trackingEvents: {
           orderBy: { timestamp: 'desc' }, // Tri décroissant pour avoir le plus récent en premier
-          take: 1, // LIMITER à 1 seul événement (le dernier)
+          // Plus de limite take: 1 - on récupère tous les événements
           select: {
             id: true,
             status: true,

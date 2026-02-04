@@ -40,7 +40,6 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
 import type { PublicShipmentTracking } from '@/modules/tracking';
@@ -121,116 +120,112 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
       </Card>
 
       {/* ===================================================================
-          SECTION 2 : INFORMATIONS TRANSPORT
+          SECTION 2 : INFORMATIONS TRANSPORT (Design compact)
+          - Ligne 1 : Origine → Destination (horizontal compact)
+          - Ligne 2 : Grille 4 colonnes (poids, colis, type, transport)
+          - Ligne 3 : Dates (optionnel, horizontal compact)
           =================================================================== */}
       <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Package className="h-4 w-4" />
             Informations Transport
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Origine → Destination */}
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm text-gray-600">Origine</p>
-              <p className="text-lg font-semibold">
+        <CardContent className="space-y-4">
+          {/* Ligne 1 : Origine → Destination (compact horizontal) */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Origine (à gauche) */}
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <MapPin className="h-4 w-4 text-blue-600 flex-shrink-0" weight="fill" />
+              <span className="font-medium truncate">
                 {tracking.originCity}, {tracking.originCountry}
-              </p>
+              </span>
             </div>
 
-            <div className="px-4">
-              <TrendUp className="h-6 w-6 text-blue-600" weight="bold" />
+            {/* Flèche centrale avec lignes décoratives */}
+            <div className="flex items-center gap-2 text-gray-400">
+              <div className="w-8 h-px bg-gray-300" />
+              <TrendUp className="h-4 w-4 text-blue-600 flex-shrink-0" weight="bold" />
+              <div className="w-8 h-px bg-gray-300" />
             </div>
 
-            <div className="flex-1 text-right">
-              <p className="text-sm text-gray-600">Destination</p>
-              <p className="text-lg font-semibold">
+            {/* Destination (à droite) */}
+            <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+              <span className="font-medium truncate text-right">
                 {tracking.destinationCity}, {tracking.destinationCountry}
-              </p>
+              </span>
+              <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" weight="fill" />
             </div>
           </div>
 
-          <Separator />
-
-          {/* Détails */}
-          <div className="grid md:grid-cols-3 gap-4">
+          {/* Ligne 2 : Grille 4 colonnes (poids, colis, type, transport) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-2 px-3 bg-gray-50 rounded-lg">
             <div>
-              <p className="text-sm text-gray-600">Poids</p>
-              <p className="font-semibold">{tracking.weight.toLocaleString('fr-FR')} kg</p>
+              <p className="text-xs text-gray-500">Poids</p>
+              <p className="font-semibold text-sm">{tracking.weight.toLocaleString('fr-FR')} kg</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Nombre de colis</p>
-              <p className="font-semibold">{tracking.packageCount}</p>
+              <p className="text-xs text-gray-500">Colis</p>
+              <p className="font-semibold text-sm">{tracking.packageCount}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Type de marchandise</p>
-              <p className="font-semibold">{tracking.cargoType}</p>
+              <p className="text-xs text-gray-500">Marchandise</p>
+              <p className="font-semibold text-sm">{tracking.cargoType}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Transport</p>
+              <div className="flex gap-1 flex-wrap">
+                {tracking.transportMode.map((mode, index) => (
+                  <Badge key={index} variant="outline" className="text-xs px-1.5 py-0">
+                    {mode}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 
-          <Separator />
-
-          {/* Dates */}
-          <div className="grid md:grid-cols-2 gap-4">
-            {tracking.estimatedDeliveryDate && (
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-600">Livraison estimée</p>
-                  <p className="font-semibold">
-                    {format(new Date(tracking.estimatedDeliveryDate), 'dd MMMM yyyy', {
-                      locale: fr,
-                    })}
-                  </p>
+          {/* Ligne 3 : Dates (si présentes) - compact horizontal */}
+          {(tracking.estimatedDeliveryDate || tracking.actualDeliveryDate) && (
+            <div className="flex flex-wrap gap-4 text-sm">
+              {tracking.estimatedDeliveryDate && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span className="text-gray-600">Livraison estimée :</span>
+                  <span className="font-medium">
+                    {format(new Date(tracking.estimatedDeliveryDate), 'dd MMM yyyy', { locale: fr })}
+                  </span>
                 </div>
-              </div>
-            )}
-
-            {tracking.actualDeliveryDate && (
-              <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" weight="fill" />
-                <div>
-                  <p className="text-sm text-gray-600">Livré le</p>
-                  <p className="font-semibold">
-                    {format(new Date(tracking.actualDeliveryDate), 'dd MMMM yyyy à HH:mm', {
-                      locale: fr,
-                    })}
-                  </p>
+              )}
+              {tracking.actualDeliveryDate && (
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="h-4 w-4 text-green-600" weight="fill" />
+                  <span className="text-gray-600">Livré le :</span>
+                  <span className="font-medium">
+                    {format(new Date(tracking.actualDeliveryDate), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                  </span>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mode de transport */}
-          {tracking.transportMode.length > 0 && (
-            <>
-              <Separator />
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Mode(s) de transport</p>
-                <div className="flex gap-2 flex-wrap">
-                  {tracking.transportMode.map((mode, index) => (
-                    <Badge key={index} variant="outline" className="text-sm">
-                      {mode}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* ===================================================================
-          SECTION 3 : DERNIER STATUT (un seul événement pour les guests)
+          SECTION 3 : HISTORIQUE DE TRACKING (Timeline complète)
+          Affiche tous les événements de tracking avec un design vertical
           =================================================================== */}
       <Card className="dashboard-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Dernier Statut
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Historique de tracking
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Événements de localisation et transit
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           {tracking.trackingEvents.length === 0 ? (
@@ -245,53 +240,49 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
               </p>
             </div>
           ) : (
-            // Affichage du dernier événement uniquement (guests)
-            <div className="space-y-4">
-              {(() => {
-                // Récupérer le dernier (et unique) événement
-                const event = tracking.trackingEvents[0];
-                const eventBadge = getStatusBadge(event.status);
+            // Timeline verticale complète avec tous les événements
+            <div className="relative">
+              {tracking.trackingEvents.map((event, index) => {
+                // Déterminer si c'est le dernier élément (pas de ligne après)
+                const isLast = index === tracking.trackingEvents.length - 1;
 
                 return (
                   <div key={event.id} className="flex gap-4">
-                    {/* Icône du statut */}
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`h-12 w-12 rounded-full ${eventBadge.color} flex items-center justify-center text-white`}
-                      >
-                        {eventBadge.icon}
-                      </div>
+                    {/* Colonne timeline : point circulaire + ligne verticale */}
+                    <div className="relative flex flex-col items-center">
+                      {/* Point de la timeline */}
+                      <div className="h-3 w-3 rounded-full bg-gray-400 z-10 ring-4 ring-background" />
+                      {/* Ligne verticale (sauf pour le dernier élément) */}
+                      {!isLast && (
+                        <div className="w-0.5 bg-gray-200 flex-1 min-h-[80px]" />
+                      )}
                     </div>
 
                     {/* Contenu de l'événement */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-1">
-                        <p className="font-semibold text-xl">{event.statusLabel}</p>
-                        <p className="text-sm text-gray-600">
-                          {format(new Date(event.timestamp), 'dd MMM yyyy à HH:mm', {
-                            locale: fr,
-                          })}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-700 flex items-center gap-2">
-                        <MapPin className="h-4 w-4" weight="fill" />
+                    <div className="flex-1 pb-6">
+                      {/* Statut en gras */}
+                      <h4 className="font-semibold text-base">{event.statusLabel}</h4>
+
+                      {/* Description (si présente) */}
+                      {event.description && (
+                        <p className="text-sm text-gray-600 mt-0.5">{event.description}</p>
+                      )}
+
+                      {/* Localisation avec icône MapPin */}
+                      <p className="text-sm text-gray-700 mt-1 flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" weight="fill" />
                         {event.location}
                       </p>
-                      {event.description && (
-                        <p className="text-sm text-gray-600 mt-2">{event.description}</p>
-                      )}
+
+                      {/* Date et heure formatées */}
+                      <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(event.timestamp), 'dd/MM/yyyy HH:mm:ss', { locale: fr })}
+                      </p>
                     </div>
                   </div>
                 );
-              })()}
-
-              {/* Message pour inciter à créer un compte */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-600 text-center">
-                  <Info className="h-4 w-4 inline-block mr-1" />
-                  Connectez-vous pour voir l'historique complet des événements
-                </p>
-              </div>
+              })}
             </div>
           )}
         </CardContent>
@@ -300,6 +291,10 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
       {/* ===================================================================
           SECTION 4 : ALERT INCITATION À SE CONNECTER
           =================================================================== */}
+      {/* ===================================================================
+          SECTION 4 : ALERT INCITATION À SE CONNECTER
+          Liste les fonctionnalités exclusives aux utilisateurs connectés
+          =================================================================== */}
       <Alert className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <Info className="h-5 w-5 text-blue-600" />
         <AlertTitle className="text-blue-900 text-lg">
@@ -307,11 +302,9 @@ export function PublicTrackingDisplay({ tracking }: PublicTrackingDisplayProps) 
         </AlertTitle>
         <AlertDescription className="text-blue-800 space-y-3">
           <p>
-            Le tracking public affiche uniquement le dernier statut. Connectez-vous
-            ou créez un compte pour accéder à :
+            Connectez-vous ou créez un compte pour accéder à :
           </p>
           <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><strong>L'historique complet</strong> de tous les événements de suivi</li>
             <li>Les coordonnées GPS et localisation détaillée</li>
             <li>Les documents de transport et factures</li>
             <li>Les notifications en temps réel par email/SMS</li>
