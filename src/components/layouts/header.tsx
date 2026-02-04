@@ -23,7 +23,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Sidebar } from './sidebar';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { logoutAction } from '@/app/(auth)/_actions/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import type { UserRole } from '@/generated/prisma';
 import { countPendingQuotesAction } from '@/modules/quotes';
 
@@ -61,8 +61,19 @@ export function Header({
   primaryColor = '#003D82',
 }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [pendingQuotesCount, setPendingQuotesCount] = useState(0);
+  // État contrôlé du menu mobile (Sheet) pour pouvoir le fermer programmatiquement
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  /**
+   * Fermer automatiquement le menu mobile lors d'un changement de route
+   * Se déclenche quand l'utilisateur clique sur un lien dans la Sidebar
+   */
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   /**
    * Charger le nombre de devis en attente de validation
@@ -119,7 +130,7 @@ export function Header({
   return (
     <header className="sticky top-0 z-40 flex h-20 items-center gap-4 border-b bg-background px-6">
       {/* List hamburger mobile - Affiche la sidebar en Sheet */}
-      <Sheet>
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
             <List className="h-5 w-5 text-[#003D82]" />

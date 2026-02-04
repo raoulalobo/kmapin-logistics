@@ -182,20 +182,6 @@ export default function TrackingPage() {
               Créez un compte gratuit pour accéder à l'historique complet, aux documents
               et aux notifications en temps réel
             </p>
-            <div className="flex gap-4 justify-center">
-              <a
-                href="/sign-up"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-              >
-                Créer un compte
-              </a>
-              <a
-                href="/sign-in"
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
-              >
-                Se connecter
-              </a>
-            </div>
           </div>
         </div>
       </div>

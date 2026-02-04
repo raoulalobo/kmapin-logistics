@@ -47,6 +47,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // ALLEMAGNE
   {
     id: 'eu-de-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Allemagne',
     destinationCode: 'DE',
     transportMode: TransportMode.ROAD,
@@ -60,6 +62,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'eu-de-rail-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Allemagne',
     destinationCode: 'DE',
     transportMode: TransportMode.RAIL,
@@ -75,6 +79,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // BELGIQUE
   {
     id: 'eu-be-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Belgique',
     destinationCode: 'BE',
     transportMode: TransportMode.ROAD,
@@ -90,6 +96,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // ESPAGNE
   {
     id: 'eu-es-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Espagne',
     destinationCode: 'ES',
     transportMode: TransportMode.ROAD,
@@ -103,6 +111,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'eu-es-sea-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Espagne',
     destinationCode: 'ES',
     transportMode: TransportMode.SEA,
@@ -118,6 +128,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // ITALIE
   {
     id: 'eu-it-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Italie',
     destinationCode: 'IT',
     transportMode: TransportMode.ROAD,
@@ -133,6 +145,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // ROYAUME-UNI
   {
     id: 'eu-gb-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Royaume-Uni',
     destinationCode: 'GB',
     transportMode: TransportMode.ROAD,
@@ -146,6 +160,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'eu-gb-sea-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Royaume-Uni',
     destinationCode: 'GB',
     transportMode: TransportMode.SEA,
@@ -161,6 +177,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // PAYS-BAS
   {
     id: 'eu-nl-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Pays-Bas',
     destinationCode: 'NL',
     transportMode: TransportMode.ROAD,
@@ -176,6 +194,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // POLOGNE
   {
     id: 'eu-pl-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Pologne',
     destinationCode: 'PL',
     transportMode: TransportMode.ROAD,
@@ -191,6 +211,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // CHINE
   {
     id: 'asia-cn-sea-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Chine',
     destinationCode: 'CN',
     transportMode: TransportMode.SEA,
@@ -204,6 +226,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'asia-cn-air-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Chine',
     destinationCode: 'CN',
     transportMode: TransportMode.AIR,
@@ -219,6 +243,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // ÉTATS-UNIS
   {
     id: 'na-us-sea-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'États-Unis',
     destinationCode: 'US',
     transportMode: TransportMode.SEA,
@@ -232,6 +258,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'na-us-air-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'États-Unis',
     destinationCode: 'US',
     transportMode: TransportMode.AIR,
@@ -247,6 +275,8 @@ export const STANDARD_RATES: StandardRate[] = [
   // MAROC
   {
     id: 'af-ma-sea-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Maroc',
     destinationCode: 'MA',
     transportMode: TransportMode.SEA,
@@ -260,6 +290,8 @@ export const STANDARD_RATES: StandardRate[] = [
   },
   {
     id: 'af-ma-road-general',
+    origin: 'France',
+    originCode: 'FR',
     destination: 'Maroc',
     destinationCode: 'MA',
     transportMode: TransportMode.ROAD,

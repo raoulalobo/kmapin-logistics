@@ -9,7 +9,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Package,
   Envelope,
@@ -31,6 +31,7 @@ import {
   Question,
   Info,
   Phone,
+  CurrencyEur,
 } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,7 +47,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useSafeSession } from '@/lib/auth/hooks';
 import { authClient } from '@/lib/auth/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 /**
  * Props du composant HomepageHeader
@@ -68,9 +69,18 @@ export function HomepageHeader({
 }: HomepageHeaderProps = {}) {
   const { data: session, isLoading } = useSafeSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   // État pour contrôler l'ouverture/fermeture du menu mobile
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fermer automatiquement le menu mobile lors d'un changement de route
+  // Résout le conflit entre Radix Dialog (Sheet) et Next.js Link (soft navigation)
+  // où le onClick peut ne pas se propager correctement à cause de la gestion
+  // des événements pointer par Radix
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   /**
    * Gérer la déconnexion de l'utilisateur
@@ -199,6 +209,17 @@ export function HomepageHeader({
                       <div>
                         <div>Transport Maritime</div>
                         <div className="text-xs text-gray-500">Fret FCL et LCL</div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/tarifs"
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <CurrencyEur className="h-5 w-5 text-[#003D82]" />
+                      <div>
+                        <div>Tarifs Standards</div>
+                        <div className="text-xs text-gray-500">Prix indicatifs par destination</div>
                       </div>
                     </Link>
                     <Link
@@ -359,6 +380,15 @@ export function HomepageHeader({
                   <div>
                     <div className="font-medium">Calcul devis</div>
                     <div className="text-xs text-gray-500">Estimation instantanée</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/tarifs" className="flex items-center gap-3 cursor-pointer">
+                  <CurrencyEur className="h-5 w-5 text-[#003D82]" />
+                  <div>
+                    <div className="font-medium">Tarifs Standards</div>
+                    <div className="text-xs text-gray-500">Prix indicatifs par destination</div>
                   </div>
                 </Link>
               </DropdownMenuItem>
