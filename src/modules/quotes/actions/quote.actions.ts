@@ -846,14 +846,29 @@ export async function updateQuoteAction(
  * @returns Résultat de la suppression
  *
  * @permissions 'quotes:delete' - ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER
+ * @permissions 'quotes:delete:own' - CLIENT (uniquement ses propres devis en DRAFT)
  */
 export async function deleteQuoteAction(id: string): Promise<ActionResult> {
   try {
     /**
      * Vérifier l'authentification et les permissions
-     * Permission requise: 'quotes:delete' (implique ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER)
+     *
+     * Deux niveaux de permission :
+     * - 'quotes:delete' : ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER → peut supprimer tout devis en DRAFT
+     * - 'quotes:delete:own' : CLIENT → peut supprimer uniquement ses propres devis en DRAFT
      */
-    await requirePermission('quotes:update'); // Utiliser update car delete n'est pas défini dans les permissions
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    const canDeleteAll = hasPermission(userRole, 'quotes:delete');
+    const canDeleteOwn = hasPermission(userRole, 'quotes:delete:own');
+
+    if (!canDeleteAll && !canDeleteOwn) {
+      return {
+        success: false,
+        error: 'Vous n\'avez pas les permissions nécessaires pour supprimer un devis',
+      };
+    }
 
     // Vérifier que le devis existe
     const quote = await prisma.quote.findUnique({
@@ -862,6 +877,30 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
 
     if (!quote) {
       return { success: false, error: 'Devis introuvable' };
+    }
+
+    /**
+     * Vérification d'ownership pour les utilisateurs CLIENT
+     *
+     * Si l'utilisateur n'a que la permission 'quotes:delete:own' (pas 'quotes:delete'),
+     * il doit être propriétaire du devis (via clientId) et le devis doit être en DRAFT.
+     */
+    if (canDeleteOwn && !canDeleteAll) {
+      // Vérifier que l'utilisateur est bien associé à un client
+      if (!session.user.clientId) {
+        return {
+          success: false,
+          error: 'Votre compte n\'est pas associé à une entreprise',
+        };
+      }
+
+      // Vérifier que le devis appartient au client de l'utilisateur
+      if (quote.clientId !== session.user.clientId) {
+        return {
+          success: false,
+          error: 'Vous n\'avez pas accès à ce devis',
+        };
+      }
     }
 
     // Empêcher la suppression si le devis n'est pas en DRAFT

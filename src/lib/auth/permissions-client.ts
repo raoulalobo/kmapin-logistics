@@ -46,6 +46,7 @@ export const PERMISSIONS = {
     'quotes:read',
     'quotes:create',
     'quotes:update',
+    'quotes:delete',
 
     // Douanes
     'customs:read',
@@ -77,6 +78,7 @@ export const PERMISSIONS = {
     'quotes:read',
     'quotes:create',
     'quotes:update',
+    'quotes:delete',
 
     // Expéditions (lecture pour facturation)
     'shipments:read',
@@ -105,6 +107,7 @@ export const PERMISSIONS = {
     'quotes:read:own',
     'quotes:create:own', // Peut demander un devis
     'quotes:update:own', // Peut modifier ses propres devis (uniquement en DRAFT)
+    'quotes:delete:own', // Peut supprimer ses propres devis (uniquement en DRAFT)
 
     // Factures personnelles
     'invoices:read:own',
