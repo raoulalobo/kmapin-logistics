@@ -151,10 +151,10 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   <div>
                     <p className="text-sm font-semibold text-gray-900 mb-1">Email</p>
                     <a
-                      href="mailto:contact@fasofret.fr"
+                      href="mailto:fasofret@gmail.com"
                       className="text-sm text-[#003D82] hover:underline font-medium"
                     >
-                      contact@fasofret.fr
+                      fasofret@gmail.com
                     </a>
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="+33 6 12 34 56 78"
+                            placeholder="+33 6 16 02 10 10"
                             disabled={isPending}
                             {...field}
                           />

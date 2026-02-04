@@ -23,10 +23,10 @@ import { CountUp } from './count-up';
 
 // Données des statistiques affichées
 const statsData = [
-  { value: 100, suffix: '+', label: "Années d'expérience" },
-  { value: 5000, suffix: '+', label: 'Employés dans le monde' },
-  { value: 50, suffix: '+', label: "Pays d'opération" },
-  { value: 200, suffix: '+', label: 'Sites dans le monde' },
+  { value: 10, suffix: '+', label: "Années d'expérience" },
+  { value: 20, suffix: '+', label: 'Employés dans le monde' },
+  { value: 5, suffix: '+', label: "Pays d'opération" },
+  { value: 10, suffix: '+', label: 'Sites dans le monde' },
 ];
 
 export function StatsSection() {

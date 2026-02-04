@@ -142,10 +142,10 @@ export default async function House() {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#003D82] transition-colors">
-                          À votre service depuis plus de 100 ans
+                          À votre service depuis 10 ans
                         </h3>
                         <p className="text-gray-600 leading-relaxed">
-                          Depuis plus d'un siècle, nous relevons les défis de votre chaîne d'approvisionnement avec une compréhension profonde et des processus fiables.
+                          Depuis une décennie, nous relevons les défis de votre chaîne d'approvisionnement avec une compréhension profonde et des processus fiables.
                         </p>
                       </div>
                     </div>
@@ -199,10 +199,10 @@ export default async function House() {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-[#003D82] transition-colors">
-                          Réseau mondial
+                          Un véritable po,t entre l'Afrique et l'Europe
                         </h3>
                         <p className="text-gray-600 leading-relaxed">
-                          Nos sites et partenaires dans le monde entier nous permettent de livrer vos marchandises rapidement et en toute sécurité.
+                          Nos sites et partenaires en Uurope et en Afrique nous permettent de livrer vos marchandises rapidement et en toute sécurité.
                         </p>
                       </div>
                     </div>
