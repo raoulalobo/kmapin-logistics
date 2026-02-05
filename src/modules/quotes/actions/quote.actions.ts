@@ -18,6 +18,7 @@ import { logShipmentCreated } from '@/modules/shipments';
 import {
   logQuoteCreated,
   logQuoteUpdated,
+  logQuoteSubmittedByClient,
   logQuoteSentToClient,
   logQuoteAcceptedByClient,
   logQuoteRejectedByClient,
@@ -959,7 +960,7 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
 /**
  * Action : Envoyer un devis au client
  *
- * Passe le devis de DRAFT à SENT, le rendant visible et actionnable par le client
+ * Passe le devis de SUBMITTED à SENT, le rendant visible et actionnable par le client
  * Le client pourra ensuite accepter ou rejeter le devis depuis son dashboard
  *
  * @param id - ID du devis à envoyer
@@ -993,11 +994,11 @@ export async function sendQuoteAction(
       return { success: false, error: 'Devis introuvable' };
     }
 
-    // Vérifier que le devis est en DRAFT
-    if (quote.status !== 'DRAFT') {
+    // Vérifier que le devis est en SUBMITTED (soumis par le client, prêt à être envoyé par l'agent)
+    if (quote.status !== 'SUBMITTED') {
       return {
         success: false,
-        error: 'Seuls les devis en brouillon peuvent être envoyés',
+        error: 'Seuls les devis soumis peuvent être envoyés au client',
       };
     }
 
@@ -2925,6 +2926,148 @@ export async function markQuotePaymentReceivedAction(
     return {
       success: false,
       error: 'Une erreur est survenue lors de la confirmation du paiement',
+    };
+  }
+}
+
+// ============================================
+// SOUMISSION DU DEVIS (CLIENT)
+// ============================================
+
+/**
+ * Action : Soumettre un devis brouillon pour traitement
+ *
+ * Permet au client propriétaire d'un devis de soumettre son brouillon aux agents.
+ * Après soumission, le devis devient visible aux agents (OPERATIONS_MANAGER, FINANCE_MANAGER)
+ * et passe du statut DRAFT à SUBMITTED.
+ *
+ * Workflow Client → Agent :
+ * 1. Client crée un brouillon (DRAFT) - invisible aux agents
+ * 2. Client soumet son devis (DRAFT → SUBMITTED) - visible aux agents
+ * 3. Agent envoie une offre formelle (SUBMITTED → SENT)
+ * 4. Client accepte ou rejette (SENT → ACCEPTED/REJECTED)
+ *
+ * Permissions :
+ * - Seul le propriétaire du devis (userId) ou le client (clientId) peut soumettre
+ * - Le devis doit être au statut DRAFT pour être soumis
+ *
+ * @param id - ID du devis à soumettre
+ * @returns Résultat avec ID et numéro de devis ou erreur
+ *
+ * @example
+ * ```ts
+ * // Client soumet son brouillon
+ * const result = await submitQuoteAction('cuid123');
+ * if (result.success) {
+ *   console.log(`Devis ${result.data.quoteNumber} soumis avec succès`);
+ * }
+ * ```
+ */
+export async function submitQuoteAction(
+  id: string
+): Promise<ActionResult<{ id: string; quoteNumber: string }>> {
+  try {
+    // 1. Vérifier l'authentification
+    const session = await requireAuth();
+    const userId = session.user.id;
+    const userClientId = session.user.clientId;
+    const userRole = session.user.role as UserRole;
+
+    // 2. Récupérer le devis
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        quoteNumber: true,
+        status: true,
+        userId: true,        // Propriétaire direct du devis
+        clientId: true,      // Client (COMPANY ou INDIVIDUAL) associé
+        contactEmail: true,  // Email de contact
+        createdById: true,   // Utilisateur ayant créé le devis
+      },
+    });
+
+    // 3. Vérifier que le devis existe
+    if (!quote) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
+    }
+
+    // 4. Vérifier le statut actuel (doit être DRAFT)
+    if (quote.status !== 'DRAFT') {
+      const statusMessages: Record<string, string> = {
+        SUBMITTED: 'Ce devis a déjà été soumis et est en attente de traitement.',
+        SENT: 'Une offre a déjà été envoyée pour ce devis.',
+        ACCEPTED: 'Ce devis a déjà été accepté.',
+        REJECTED: 'Ce devis a été rejeté.',
+        EXPIRED: 'Ce devis a expiré.',
+        IN_TREATMENT: 'Ce devis est en cours de traitement.',
+        VALIDATED: 'Ce devis a été validé.',
+        CANCELLED: 'Ce devis a été annulé.',
+      };
+      return {
+        success: false,
+        error: statusMessages[quote.status] || 'Seuls les brouillons peuvent être soumis.',
+      };
+    }
+
+    // 5. Vérifier les permissions : le propriétaire ou le client peut soumettre
+    // - userId correspond à l'utilisateur connecté
+    // - OU clientId correspond au client de l'utilisateur connecté
+    // - OU createdById correspond à l'utilisateur connecté (il a créé le devis)
+    // - OU l'utilisateur est ADMIN (accès complet)
+    const isOwner = quote.userId === userId;
+    const isSameClient = quote.clientId && quote.clientId === userClientId;
+    const isCreator = quote.createdById === userId;
+    const isAdmin = userRole === 'ADMIN';
+
+    if (!isOwner && !isSameClient && !isCreator && !isAdmin) {
+      return {
+        success: false,
+        error: 'Vous n\'êtes pas autorisé à soumettre ce devis.',
+      };
+    }
+
+    // 6. Mettre à jour le statut et la date de soumission
+    const now = new Date();
+    const updatedQuote = await prisma.quote.update({
+      where: { id },
+      data: {
+        status: 'SUBMITTED',
+        submittedAt: now,
+      },
+    });
+
+    // 7. Enregistrer l'événement dans l'historique (QuoteLog)
+    await logQuoteSubmittedByClient({
+      quoteId: quote.id,
+      changedById: userId,
+      notes: `Devis ${quote.quoteNumber} soumis par ${session.user.email}`,
+    });
+
+    console.log(
+      `📤 [Quote] Devis ${quote.quoteNumber} soumis par ${session.user.email} (DRAFT → SUBMITTED)`
+    );
+
+    // 8. Revalider les caches
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${id}`);
+
+    return {
+      success: true,
+      data: {
+        id: updatedQuote.id,
+        quoteNumber: updatedQuote.quoteNumber,
+      },
+    };
+  } catch (error) {
+    console.error('Erreur lors de la soumission du devis:', error);
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la soumission du devis',
     };
   }
 }

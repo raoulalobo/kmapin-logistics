@@ -409,6 +409,7 @@ exports.Prisma.QuoteScalarFieldEnum = {
   validUntil: 'validUntil',
   currency: 'currency',
   status: 'status',
+  submittedAt: 'submittedAt',
   acceptedAt: 'acceptedAt',
   rejectedAt: 'rejectedAt',
   paymentMethod: 'paymentMethod',
@@ -672,6 +673,7 @@ exports.PurchaseStatus = exports.$Enums.PurchaseStatus = {
 
 exports.QuoteStatus = exports.$Enums.QuoteStatus = {
   DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
   SENT: 'SENT',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',

@@ -50,12 +50,18 @@ import { DocumentsSection } from '@/components/documents';
 function getStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   switch (status) {
     case 'ACCEPTED':
+    case 'VALIDATED':
       return 'default';
-    case 'SENT':
+    case 'DRAFT':
+    case 'EXPIRED':
       return 'secondary';
     case 'REJECTED':
-    case 'EXPIRED':
+    case 'CANCELLED':
       return 'destructive';
+    case 'SUBMITTED':
+    case 'SENT':
+    case 'IN_TREATMENT':
+      return 'outline';
     default:
       return 'outline';
   }
@@ -67,10 +73,14 @@ function getStatusVariant(status: string): 'default' | 'secondary' | 'destructiv
 function translateStatus(status: string): string {
   const translations: Record<string, string> = {
     DRAFT: 'Brouillon',
-    SENT: 'Envoyé',
+    SUBMITTED: 'Soumis',       // Nouveau : soumis par le client, en attente d'offre
+    SENT: 'Offre envoyée',     // Renommé : offre formelle de l'agent
     ACCEPTED: 'Accepté',
     REJECTED: 'Rejeté',
     EXPIRED: 'Expiré',
+    IN_TREATMENT: 'En traitement',
+    VALIDATED: 'Validé',
+    CANCELLED: 'Annulé',
   };
   return translations[status] || status;
 }

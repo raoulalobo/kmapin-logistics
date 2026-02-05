@@ -128,7 +128,7 @@ export default async function House() {
               {/* Contenu */}
               <div>
                 <h2 className="text-4xl font-bold text-gray-900 mb-12">
-                  Faso Fret – Expérimenté, innovant et international
+                  {systemConfig.platformName} – Expérimenté, innovant et international
                 </h2>
 
                 <div className="space-y-8">
@@ -323,7 +323,7 @@ export default async function House() {
                     <Badge variant="secondary">Communiqué</Badge>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Faso Fret renforce son réseau en Afrique de l'Ouest
+                    {systemConfig.platformName} renforce son réseau en Afrique de l'Ouest
                   </h3>
                   <Link href="#" className="text-[#003D82] font-semibold hover:underline inline-flex items-center">
                     Lire l'article complet

@@ -26,6 +26,7 @@ import { getPublicTracking } from '@/modules/tracking';
 import { PublicTrackingDisplay } from '@/components/tracking/PublicTrackingDisplay';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
  * Props de la page (params dynamiques)
@@ -57,14 +58,22 @@ function isValidTrackingFormat(trackingNumber: string): boolean {
 
 /**
  * Génération des métadonnées dynamiques
+ *
+ * Utilise le nom de la plateforme depuis la configuration système.
  * IMPORTANT : noindex pour éviter l'indexation des pages de tracking (privacité)
+ *
+ * @param params - Paramètres de la route contenant le trackingNumber
+ * @returns Metadata Next.js avec titre dynamique et robots noindex
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { trackingNumber: trackingNumberRaw } = await params;
   const trackingNumber = trackingNumberRaw.toUpperCase();
 
+  // Récupérer la config pour le nom de la plateforme
+  const config = await getSystemConfig();
+
   return {
-    title: `Suivi ${trackingNumber} - Faso Fret Logistics`,
+    title: `Suivi ${trackingNumber} - ${config.platformFullName}`,
     description: `Suivez l'expédition ${trackingNumber} en temps réel. Consultez le statut actuel et l'historique de livraison.`,
     robots: 'noindex, nofollow', // CRITIQUE : Pas d'indexation Google (privacité)
   };

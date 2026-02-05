@@ -7,7 +7,7 @@
  * - Bouton "Annuler" → Dialog raison → Statut CANCELLED
  *
  * Workflow complet :
- * [DRAFT] → [Envoyer] → [SENT] → (Client accepte) → [ACCEPTED] → [Traiter] → [IN_TREATMENT] → [Valider] → [VALIDATED]
+ * [SUBMITTED] → [Envoyer] → [SENT] → (Client accepte) → [ACCEPTED] → [Traiter] → [IN_TREATMENT] → [Valider] → [VALIDATED]
  *
  * IMPORTANT : L'agent ne peut traiter un devis que si le client l'a accepté (statut ACCEPTED)
  * Cela garantit que le client a donné son consentement et choisi sa méthode de paiement
@@ -89,7 +89,7 @@ interface QuoteAgentActionsProps {
  * Composant d'actions agent sur un devis
  *
  * Affiche les boutons d'action appropriés selon le statut du devis :
- * - DRAFT : Bouton "Envoyer" (envoie le devis au client)
+ * - SUBMITTED : Bouton "Envoyer" (envoie le devis soumis par le client)
  * - SENT : Aucun bouton d'action (en attente de la réponse du client)
  * - ACCEPTED : Boutons "Traiter devis" et "Annuler" (le client a accepté)
  * - IN_TREATMENT : Boutons "Valider" et "Annuler"
@@ -225,7 +225,7 @@ export function QuoteAgentActions({
 
   /**
    * Envoyer le devis au client
-   * Statut : DRAFT → SENT
+   * Statut : SUBMITTED → SENT
    */
   function handleSendQuote() {
     startTransition(async () => {
@@ -276,8 +276,8 @@ export function QuoteAgentActions({
       {/* BOUTONS PRINCIPAUX - flex container pour alignement cohérent */}
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <div className="flex gap-3">
-        {/* BOUTON ENVOYER - visible si DRAFT */}
-        {quoteStatus === 'DRAFT' && (
+        {/* BOUTON ENVOYER - visible si SUBMITTED (soumis par le client, prêt à être envoyé) */}
+        {quoteStatus === 'SUBMITTED' && (
           <Dialog open={isSendDialogOpen} onOpenChange={setIsSendDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="default" className="flex-1" disabled={isPending}>

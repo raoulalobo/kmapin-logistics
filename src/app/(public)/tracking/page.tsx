@@ -19,23 +19,33 @@ import { Metadata } from 'next';
 import { Package, Truck } from '@phosphor-icons/react/dist/ssr';
 
 import { PublicTrackingSearch } from '@/components/tracking/PublicTrackingSearch';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
- * Métadonnées SEO de la page
+ * Génération des métadonnées SEO dynamiques
+ *
+ * Utilise le nom de la plateforme depuis la configuration système
+ * pour personnaliser le titre et les mots-clés de la page de tracking.
+ *
+ * @returns Metadata Next.js avec titre, description et keywords dynamiques
  */
-export const metadata: Metadata = {
-  title: 'Suivi de colis - Faso Fret Logistics',
-  description:
-    'Suivez votre expédition en temps réel avec votre numéro de tracking. Accédez au statut actuel et à l\'historique de livraison.',
-  keywords: [
-    'suivi colis',
-    'tracking',
-    'livraison',
-    'expédition',
-    'Faso Fret',
-    'transport',
-  ],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSystemConfig();
+
+  return {
+    title: `Suivi de colis - ${config.platformFullName}`,
+    description:
+      'Suivez votre expédition en temps réel avec votre numéro de tracking. Accédez au statut actuel et à l\'historique de livraison.',
+    keywords: [
+      'suivi colis',
+      'tracking',
+      'livraison',
+      'expédition',
+      config.platformName,
+      'transport',
+    ],
+  };
+}
 
 /**
  * Page de recherche de tracking

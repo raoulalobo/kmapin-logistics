@@ -246,6 +246,7 @@ export type DeliveryMode = (typeof DeliveryMode)[keyof typeof DeliveryMode]
 
 export const QuoteStatus: {
   DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
   SENT: 'SENT',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
@@ -20763,6 +20764,7 @@ export namespace Prisma {
     validUntil: Date | null
     currency: string | null
     status: $Enums.QuoteStatus | null
+    submittedAt: Date | null
     acceptedAt: Date | null
     rejectedAt: Date | null
     paymentMethod: $Enums.QuotePaymentMethod | null
@@ -20815,6 +20817,7 @@ export namespace Prisma {
     validUntil: Date | null
     currency: string | null
     status: $Enums.QuoteStatus | null
+    submittedAt: Date | null
     acceptedAt: Date | null
     rejectedAt: Date | null
     paymentMethod: $Enums.QuotePaymentMethod | null
@@ -20868,6 +20871,7 @@ export namespace Prisma {
     validUntil: number
     currency: number
     status: number
+    submittedAt: number
     acceptedAt: number
     rejectedAt: number
     paymentMethod: number
@@ -20938,6 +20942,7 @@ export namespace Prisma {
     validUntil?: true
     currency?: true
     status?: true
+    submittedAt?: true
     acceptedAt?: true
     rejectedAt?: true
     paymentMethod?: true
@@ -20990,6 +20995,7 @@ export namespace Prisma {
     validUntil?: true
     currency?: true
     status?: true
+    submittedAt?: true
     acceptedAt?: true
     rejectedAt?: true
     paymentMethod?: true
@@ -21043,6 +21049,7 @@ export namespace Prisma {
     validUntil?: true
     currency?: true
     status?: true
+    submittedAt?: true
     acceptedAt?: true
     rejectedAt?: true
     paymentMethod?: true
@@ -21183,6 +21190,7 @@ export namespace Prisma {
     validUntil: Date
     currency: string
     status: $Enums.QuoteStatus
+    submittedAt: Date | null
     acceptedAt: Date | null
     rejectedAt: Date | null
     paymentMethod: $Enums.QuotePaymentMethod | null
@@ -21255,6 +21263,7 @@ export namespace Prisma {
     validUntil?: boolean
     currency?: boolean
     status?: boolean
+    submittedAt?: boolean
     acceptedAt?: boolean
     rejectedAt?: boolean
     paymentMethod?: boolean
@@ -21318,6 +21327,7 @@ export namespace Prisma {
     validUntil?: boolean
     currency?: boolean
     status?: boolean
+    submittedAt?: boolean
     acceptedAt?: boolean
     rejectedAt?: boolean
     paymentMethod?: boolean
@@ -21378,6 +21388,7 @@ export namespace Prisma {
     validUntil?: boolean
     currency?: boolean
     status?: boolean
+    submittedAt?: boolean
     acceptedAt?: boolean
     rejectedAt?: boolean
     paymentMethod?: boolean
@@ -21438,6 +21449,7 @@ export namespace Prisma {
     validUntil?: boolean
     currency?: boolean
     status?: boolean
+    submittedAt?: boolean
     acceptedAt?: boolean
     rejectedAt?: boolean
     paymentMethod?: boolean
@@ -21455,7 +21467,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quoteNumber" | "trackingToken" | "tokenExpiresAt" | "userId" | "isAttachedToAccount" | "contactEmail" | "contactPhone" | "contactName" | "clientId" | "prospectId" | "originCountry" | "destinationCountry" | "transportMode" | "cargoType" | "weight" | "length" | "width" | "height" | "originAddress" | "originCity" | "originPostalCode" | "originContactName" | "originContactPhone" | "originContactEmail" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationContactName" | "destinationContactPhone" | "destinationContactEmail" | "estimatedCost" | "validUntil" | "currency" | "status" | "acceptedAt" | "rejectedAt" | "paymentMethod" | "agentComment" | "treatmentStartedAt" | "treatmentValidatedAt" | "treatmentAgentId" | "cancelledAt" | "cancelReason" | "shipmentId" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
+  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quoteNumber" | "trackingToken" | "tokenExpiresAt" | "userId" | "isAttachedToAccount" | "contactEmail" | "contactPhone" | "contactName" | "clientId" | "prospectId" | "originCountry" | "destinationCountry" | "transportMode" | "cargoType" | "weight" | "length" | "width" | "height" | "originAddress" | "originCity" | "originPostalCode" | "originContactName" | "originContactPhone" | "originContactEmail" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationContactName" | "destinationContactPhone" | "destinationContactEmail" | "estimatedCost" | "validUntil" | "currency" | "status" | "submittedAt" | "acceptedAt" | "rejectedAt" | "paymentMethod" | "agentComment" | "treatmentStartedAt" | "treatmentValidatedAt" | "treatmentAgentId" | "cancelledAt" | "cancelReason" | "shipmentId" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
   export type QuoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Quote$userArgs<ExtArgs>
     client?: boolean | Quote$clientArgs<ExtArgs>
@@ -21536,6 +21548,7 @@ export namespace Prisma {
       validUntil: Date
       currency: string
       status: $Enums.QuoteStatus
+      submittedAt: Date | null
       acceptedAt: Date | null
       rejectedAt: Date | null
       paymentMethod: $Enums.QuotePaymentMethod | null
@@ -22018,6 +22031,7 @@ export namespace Prisma {
     readonly validUntil: FieldRef<"Quote", 'DateTime'>
     readonly currency: FieldRef<"Quote", 'String'>
     readonly status: FieldRef<"Quote", 'QuoteStatus'>
+    readonly submittedAt: FieldRef<"Quote", 'DateTime'>
     readonly acceptedAt: FieldRef<"Quote", 'DateTime'>
     readonly rejectedAt: FieldRef<"Quote", 'DateTime'>
     readonly paymentMethod: FieldRef<"Quote", 'QuotePaymentMethod'>
@@ -33425,6 +33439,7 @@ export namespace Prisma {
     validUntil: 'validUntil',
     currency: 'currency',
     status: 'status',
+    submittedAt: 'submittedAt',
     acceptedAt: 'acceptedAt',
     rejectedAt: 'rejectedAt',
     paymentMethod: 'paymentMethod',
@@ -35588,6 +35603,7 @@ export namespace Prisma {
     validUntil?: DateTimeFilter<"Quote"> | Date | string
     currency?: StringFilter<"Quote"> | string
     status?: EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+    submittedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     acceptedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     rejectedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentMethod?: EnumQuotePaymentMethodNullableFilter<"Quote"> | $Enums.QuotePaymentMethod | null
@@ -35650,6 +35666,7 @@ export namespace Prisma {
     validUntil?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    submittedAt?: SortOrderInput | SortOrder
     acceptedAt?: SortOrderInput | SortOrder
     rejectedAt?: SortOrderInput | SortOrder
     paymentMethod?: SortOrderInput | SortOrder
@@ -35716,6 +35733,7 @@ export namespace Prisma {
     validUntil?: DateTimeFilter<"Quote"> | Date | string
     currency?: StringFilter<"Quote"> | string
     status?: EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+    submittedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     acceptedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     rejectedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentMethod?: EnumQuotePaymentMethodNullableFilter<"Quote"> | $Enums.QuotePaymentMethod | null
@@ -35777,6 +35795,7 @@ export namespace Prisma {
     validUntil?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    submittedAt?: SortOrderInput | SortOrder
     acceptedAt?: SortOrderInput | SortOrder
     rejectedAt?: SortOrderInput | SortOrder
     paymentMethod?: SortOrderInput | SortOrder
@@ -35838,6 +35857,7 @@ export namespace Prisma {
     validUntil?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
     currency?: StringWithAggregatesFilter<"Quote"> | string
     status?: EnumQuoteStatusWithAggregatesFilter<"Quote"> | $Enums.QuoteStatus
+    submittedAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
     acceptedAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
     rejectedAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
     paymentMethod?: EnumQuotePaymentMethodNullableWithAggregatesFilter<"Quote"> | $Enums.QuotePaymentMethod | null
@@ -38608,6 +38628,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -38666,6 +38687,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -38718,6 +38740,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -38776,6 +38799,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -38831,6 +38855,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -38881,6 +38906,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -38930,6 +38956,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -41443,6 +41470,7 @@ export namespace Prisma {
     validUntil?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    submittedAt?: SortOrder
     acceptedAt?: SortOrder
     rejectedAt?: SortOrder
     paymentMethod?: SortOrder
@@ -41503,6 +41531,7 @@ export namespace Prisma {
     validUntil?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    submittedAt?: SortOrder
     acceptedAt?: SortOrder
     rejectedAt?: SortOrder
     paymentMethod?: SortOrder
@@ -41555,6 +41584,7 @@ export namespace Prisma {
     validUntil?: SortOrder
     currency?: SortOrder
     status?: SortOrder
+    submittedAt?: SortOrder
     acceptedAt?: SortOrder
     rejectedAt?: SortOrder
     paymentMethod?: SortOrder
@@ -46151,6 +46181,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46208,6 +46239,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46367,6 +46399,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46423,6 +46456,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46485,6 +46519,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46542,6 +46577,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46603,6 +46639,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -46660,6 +46697,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -47448,6 +47486,7 @@ export namespace Prisma {
     validUntil?: DateTimeFilter<"Quote"> | Date | string
     currency?: StringFilter<"Quote"> | string
     status?: EnumQuoteStatusFilter<"Quote"> | $Enums.QuoteStatus
+    submittedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     acceptedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     rejectedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentMethod?: EnumQuotePaymentMethodNullableFilter<"Quote"> | $Enums.QuotePaymentMethod | null
@@ -48143,6 +48182,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -48199,6 +48239,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -48983,6 +49024,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -49040,6 +49082,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -49408,6 +49451,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -49465,6 +49509,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -53378,6 +53423,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -53435,6 +53481,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -53577,6 +53624,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -53634,6 +53682,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -53841,6 +53890,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -53897,6 +53947,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -54161,6 +54212,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -54218,6 +54270,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -54777,6 +54830,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -54834,6 +54888,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -55936,6 +55991,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -56026,6 +56082,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -56079,6 +56136,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -56131,6 +56189,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -57226,6 +57285,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57283,6 +57343,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57337,6 +57398,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57503,6 +57565,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57559,6 +57622,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57613,6 +57677,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57663,6 +57728,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57720,6 +57786,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57774,6 +57841,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57823,6 +57891,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57880,6 +57949,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -57934,6 +58004,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -58188,6 +58259,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -58564,6 +58636,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -58620,6 +58693,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -58674,6 +58748,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -59700,6 +59775,7 @@ export namespace Prisma {
     validUntil: Date | string
     currency?: string
     status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
     acceptedAt?: Date | string | null
     rejectedAt?: Date | string | null
     paymentMethod?: $Enums.QuotePaymentMethod | null
@@ -59750,6 +59826,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -59806,6 +59883,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
@@ -59860,6 +59938,7 @@ export namespace Prisma {
     validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null

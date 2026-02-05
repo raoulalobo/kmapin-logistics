@@ -19,8 +19,12 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
 import { authClient } from '@/lib/auth/client';
+import { useSystemConfig } from '@/components/providers/system-config-provider';
 
 export default function LoginPage() {
+  // Récupérer la configuration système depuis le Context (fourni par AuthLayout)
+  // Permet d'afficher le nom de la plateforme de manière dynamique
+  const { platformFullName } = useSystemConfig();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [rememberMe, setRememberMe] = useState(false);
@@ -87,7 +91,7 @@ export default function LoginPage() {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
                 <Package className="h-7 w-7 text-white" />
               </div>
-              <span className="text-2xl font-bold">Faso Fret Logistics</span>
+              <span className="text-2xl font-bold">{platformFullName}</span>
             </Link>
 
             <div className="space-y-6 max-w-md">

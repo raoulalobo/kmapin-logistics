@@ -5,9 +5,9 @@
  * Une fois envoyé (SENT), le devis est verrouillé et ne peut plus être modifié.
  *
  * Règles métier :
- * - Seul le CLIENT propriétaire peut modifier son devis
- * - Seuls les devis en statut DRAFT sont modifiables
- * - Les agents ne peuvent pas modifier les devis (ils peuvent annuler/traiter)
+ * - Le CLIENT propriétaire peut modifier son devis en DRAFT
+ * - Les agents (ADMIN, OPERATIONS_MANAGER) peuvent modifier les devis en SUBMITTED
+ *   pour ajuster les prix, routes, cargo avant envoi au client
  *
  * Architecture :
  * - EditQuotePage : Composant principal qui charge les données
@@ -54,6 +54,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { quoteSchema, type QuoteFormData, getQuoteAction, updateQuoteAction } from '@/modules/quotes';
 import { CargoType, TransportMode } from '@/lib/db/enums';
+import { useSafeSession } from '@/lib/auth/hooks';
 import { calculateQuoteEstimateV2Action } from '@/modules/quotes/actions/calculate-quote-estimate-v2';
 import {
   getTransportModeOptionsAction,
@@ -200,7 +201,8 @@ function QuoteEditForm({
         : typeof quoteData.validUntil === 'string'
           ? quoteData.validUntil
           : new Date(quoteData.validUntil).toISOString(),
-      status: 'DRAFT',
+      // Préserver le statut actuel (DRAFT pour client, SUBMITTED pour agent)
+      status: quoteData.status as QuoteFormData['status'],
     },
   });
 
@@ -373,7 +375,8 @@ function QuoteEditForm({
       formData.append('estimatedCost', data.estimatedCost.toString());
       formData.append('currency', data.currency);
       formData.append('validUntil', data.validUntil);
-      formData.append('status', 'DRAFT'); // Toujours DRAFT en édition
+      // Préserver le statut actuel du devis (DRAFT pour client, SUBMITTED pour agent)
+      formData.append('status', quoteData.status);
 
       const result = await updateQuoteAction(quoteId, formData);
 
@@ -1055,6 +1058,10 @@ export default function EditQuotePage({
 }) {
   const { id } = use(params);
 
+  // Session utilisateur pour vérifier le rôle (CLIENT vs Agent)
+  const { data: session, isLoading: isSessionLoading } = useSafeSession();
+  const userRole = session?.user?.role as string | undefined;
+
   // États de chargement et données
   const [isLoading, setIsLoading] = useState(true);
   const [quoteData, setQuoteData] = useState<QuoteData | null>(null);
@@ -1073,8 +1080,13 @@ export default function EditQuotePage({
 
         const quote = result.data;
 
-        // Vérifier que le devis est en DRAFT
-        if (quote.status !== 'DRAFT') {
+        // Vérifier les droits d'édition selon le rôle et le statut :
+        // - CLIENT ne peut modifier que les devis DRAFT (avant soumission)
+        // - Agent (ADMIN/OPERATIONS_MANAGER) peut modifier les devis SUBMITTED (pour ajuster avant envoi)
+        const isAgent = userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER';
+        const canEdit = quote.status === 'DRAFT' || (isAgent && quote.status === 'SUBMITTED');
+
+        if (!canEdit) {
           setError('Ce devis ne peut plus être modifié (statut: ' + quote.status + ')');
           return;
         }
@@ -1088,8 +1100,11 @@ export default function EditQuotePage({
       }
     }
 
-    loadQuote();
-  }, [id]);
+    // Attendre que la session soit chargée avant de vérifier les droits
+    if (!isSessionLoading) {
+      loadQuote();
+    }
+  }, [id, userRole, isSessionLoading]);
 
   // État de chargement
   if (isLoading) {

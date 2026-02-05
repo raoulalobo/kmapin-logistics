@@ -20,16 +20,27 @@ import { redirect } from 'next/navigation';
 import { CircleNotch } from '@phosphor-icons/react/dist/ssr';
 
 import { CompleteRegistrationForm } from '@/components/registration';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
- * Métadonnées SEO de la page
+ * Génération des métadonnées SEO dynamiques
+ *
+ * Utilise le nom de la plateforme depuis la configuration système
+ * pour personnaliser le titre et la description de la page.
+ *
+ * IMPORTANT : noindex pour éviter l'indexation (page privée avec token)
+ *
+ * @returns Metadata Next.js avec titre et description dynamiques
  */
-export const metadata: Metadata = {
-  title: 'Finaliser mon inscription | Faso Fret Logistics',
-  description:
-    'Créez votre compte Faso Fret Logistics pour accéder à vos devis et suivre vos expéditions en temps réel.',
-  robots: 'noindex, nofollow', // Page privée, ne pas indexer
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSystemConfig();
+
+  return {
+    title: `Finaliser mon inscription | ${config.platformFullName}`,
+    description: `Créez votre compte ${config.platformFullName} pour accéder à vos devis et suivre vos expéditions en temps réel.`,
+    robots: 'noindex, nofollow', // Page privée, ne pas indexer
+  };
+}
 
 /**
  * Props de la page (searchParams Next.js 14+)

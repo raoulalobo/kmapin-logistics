@@ -26,9 +26,10 @@
  * ```
  */
 
-// Import depuis les fichiers pré-générés (pour compatibilité Vercel)
-// Voir: https://zenstack.dev/docs/guides/deploy
-import { enhance } from '@/zenstack/enhance';
+// Import depuis les fichiers générés par Zenstack v2.22+
+// Les fichiers sont générés dans node_modules/.zenstack/ par `npx zenstack generate`
+// L'import '.zenstack/enhance' est résolu par le bundler vers node_modules/.zenstack/enhance.js
+import { enhance } from '.zenstack/enhance';
 import { prisma } from './client';
 import { UserRole } from '@/lib/db/enums';
 

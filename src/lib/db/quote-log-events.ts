@@ -92,6 +92,15 @@ export const QuoteLogEventType = {
   // ============================================
 
   /**
+   * Devis soumis par le client aux agents
+   * - Passage au statut SUBMITTED
+   * - Le client a finalisé son brouillon et le soumet pour traitement
+   * - Le devis devient visible aux agents (OPERATIONS_MANAGER, FINANCE_MANAGER)
+   * - metadata: { submittedAt: ISO8601 }
+   */
+  SUBMITTED_BY_CLIENT: 'SUBMITTED_BY_CLIENT',
+
+  /**
    * Devis envoyé au client
    * - Passage au statut SENT
    * - metadata: { sentTo: string, sentAt: ISO8601 }

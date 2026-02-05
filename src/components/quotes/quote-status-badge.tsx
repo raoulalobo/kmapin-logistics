@@ -5,7 +5,7 @@
  * correspondant à l'état actuel du workflow.
  *
  * Workflow des statuts :
- * DRAFT → SENT → ACCEPTED → IN_TREATMENT → VALIDATED
+ * DRAFT → SUBMITTED → SENT → ACCEPTED → IN_TREATMENT → VALIDATED
  * Ou alternativement : * → REJECTED | CANCELLED | EXPIRED
  *
  * @example
@@ -22,6 +22,7 @@ import { QuoteStatus } from '@/lib/db/enums';
 import {
   Clock,
   Mail,
+  Send,
   CheckCircle,
   XCircle,
   Hourglass,
@@ -54,8 +55,13 @@ const QUOTE_STATUS_CONFIG: Record<
     variant: 'secondary',
     icon: Clock,
   },
+  SUBMITTED: {
+    label: 'Soumis',        // Nouveau : soumis par le client, en attente d'offre agent
+    variant: 'outline',
+    icon: Send,
+  },
   SENT: {
-    label: 'Envoyé',
+    label: 'Offre envoyée', // Renommé : offre formelle envoyée par l'agent
     variant: 'outline',
     icon: Mail,
   },

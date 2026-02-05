@@ -31,6 +31,7 @@ const STATUS_FILTERS: Array<{
 }> = [
   { status: 'ALL', label: 'Tous', variant: 'outline' },
   { status: 'DRAFT', label: 'Brouillons', variant: 'secondary' },
+  { status: 'SUBMITTED', label: 'Soumis', variant: 'outline' },
   { status: 'SENT', label: 'Envoyés', variant: 'outline' },
   { status: 'ACCEPTED', label: 'Acceptés', variant: 'default' },
   { status: 'IN_TREATMENT', label: 'En traitement', variant: 'outline' },
@@ -46,6 +47,7 @@ const STATUS_FILTERS: Array<{
 function formatStatus(status: QuoteStatus): string {
   const statusMap: Record<QuoteStatus, string> = {
     DRAFT: 'Brouillon',
+    SUBMITTED: 'Soumis',
     SENT: 'Envoyé',
     ACCEPTED: 'Accepté',
     REJECTED: 'Rejeté',
@@ -64,6 +66,7 @@ function formatStatus(status: QuoteStatus): string {
  */
 const STATUS_LABELS: Record<QuoteStatus, string> = {
   DRAFT: 'Brouillon',
+  SUBMITTED: 'Soumis',
   SENT: 'Envoyé',
   ACCEPTED: 'Accepté',
   REJECTED: 'Refusé',

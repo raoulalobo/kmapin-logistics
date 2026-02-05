@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -99,6 +99,10 @@ export default function PricingConfigPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<any>(null);
 
+  // Ref pour empêcher form.reset() d'écraser les édits utilisateur
+  // Protège contre le double-fire de useEffect en React 19 StrictMode
+  const isConfigLoadedRef = useRef(false);
+
   // Form pour la configuration générale
   const form = useForm<any>({
     defaultValues: {
@@ -157,6 +161,11 @@ export default function PricingConfigPage() {
   }, []);
 
   async function loadConfiguration() {
+    // Ne charger qu'une seule fois pour éviter d'écraser les édits utilisateur
+    // (React 19 StrictMode fire useEffect 2x en dev, causant une race condition
+    //  où le 2e appel async écrase les modifications déjà saisies par l'utilisateur)
+    if (isConfigLoadedRef.current) return;
+
     setIsFetching(true);
     const result = await getCurrentPricingConfig();
     if (result.success && result.data) {
@@ -171,6 +180,7 @@ export default function PricingConfigPage() {
         prioritySurcharges: result.data.prioritySurcharges,
         deliverySpeedsPerMode: result.data.deliverySpeedsPerMode,
       });
+      isConfigLoadedRef.current = true; // Marquer comme chargé, empêcher tout reset ultérieur
     }
     setIsFetching(false);
   }
@@ -190,6 +200,10 @@ export default function PricingConfigPage() {
 
     if (result.success) {
       toast.success('Configuration sauvegardée avec succès');
+      // Re-synchroniser le baseline du formulaire après sauvegarde réussie
+      // pour que isDirty se remette à false et que les valeurs sauvées
+      // deviennent la nouvelle référence du formulaire
+      form.reset(values);
     } else {
       toast.error(result.error || 'Erreur lors de la sauvegarde');
     }

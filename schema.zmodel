@@ -1338,6 +1338,7 @@ model Quote {
   validUntil         DateTime
   currency           String          @default("EUR")
   status             QuoteStatus     @default(DRAFT)
+  submittedAt        DateTime?       // Date de soumission par le client (DRAFT → SUBMITTED)
   acceptedAt         DateTime?
   rejectedAt         DateTime?
 
@@ -1392,6 +1393,12 @@ model Quote {
   updatedAt          DateTime        @updatedAt
 
   // 🔐 Access Policies
+  //
+  // Workflow SUBMITTED :
+  // - Les agents (OPERATIONS_MANAGER, FINANCE_MANAGER) ne voient les devis qu'à partir
+  //   du statut SUBMITTED (soumis par le client)
+  // - Les devis DRAFT sont privés au client qui les crée
+  // - Cela permet au client de préparer son brouillon sans être visible des agents
 
   // Création publique autorisée (formulaire sans connexion)
   // Note: Le suivi par token est géré hors Zenstack (client prisma standard)
@@ -1400,16 +1407,19 @@ model Quote {
   // Les admins peuvent tout faire
   @@allow('all', auth().role == ADMIN)
 
-  // Les operations managers peuvent créer, lire et modifier
-  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
+  // Les operations managers peuvent créer + lire/modifier devis SUBMITTED et après
+  // Ou leurs propres DRAFT (devis qu'ils auraient créés eux-mêmes)
+  @@allow('create', auth().role == OPERATIONS_MANAGER)
+  @@allow('read,update', auth().role == OPERATIONS_MANAGER && (status != DRAFT || createdById == auth().id))
 
-  // Les finance managers peuvent lire
-  @@allow('read', auth().role == FINANCE_MANAGER)
+  // Les finance managers peuvent lire les devis SUBMITTED et après seulement
+  @@allow('read', auth().role == FINANCE_MANAGER && status != DRAFT)
 
   // Les clients peuvent lire et créer des quotes pour leur client (COMPANY ou INDIVIDUAL)
   @@allow('read,create', clientId != null && auth().clientId == clientId && auth().role == CLIENT)
 
-  // Le propriétaire peut lire et modifier son devis (si rattaché à un compte)
+  // Le propriétaire (userId) peut lire et modifier son devis (si rattaché à un compte)
+  // Cela inclut les brouillons (DRAFT) pour permettre au client de les éditer
   @@allow('read,update', userId != null && auth().id == userId)
 
   @@deny('all', true)
@@ -1427,10 +1437,11 @@ model Quote {
 }
 
 enum QuoteStatus {
-  DRAFT          // Brouillon - devis en cours de création
-  SENT           // Envoyé - devis envoyé au client, en attente de réponse
-  ACCEPTED       // Accepté - le client a accepté le devis
-  REJECTED       // Rejeté - le client a refusé le devis
+  DRAFT          // Brouillon - client travaille dessus (invisible aux agents)
+  SUBMITTED      // Soumis par le client - visible aux agents, en attente d'offre
+  SENT           // Envoyé - offre formelle envoyée au client par l'agent
+  ACCEPTED       // Accepté - le client a accepté l'offre
+  REJECTED       // Rejeté - le client a refusé l'offre
   EXPIRED        // Expiré - date de validité dépassée
   IN_TREATMENT   // En traitement - un agent traite le devis (après acceptation client)
   VALIDATED      // Validé - traitement terminé par l'agent, colis créé
@@ -1862,7 +1873,9 @@ model PricingConfig {
   // Seuls les admins peuvent gérer la configuration des prix
   @@allow('all', auth().role == ADMIN)
 
-  @@deny('all', true)
+  // Bloquer les utilisateurs non authentifiés (et non-admins via l'absence de @@allow)
+  // Note: Ne pas utiliser @@deny('all', true) car cela bloquerait même les @@allow ci-dessus
+  @@deny('all', auth() == null)
 
   @@map("pricing_config")
 }
@@ -1898,7 +1911,9 @@ model CountryDistance {
   // Seuls les admins peuvent créer, modifier ou supprimer
   @@allow('create,update,delete', auth().role == ADMIN)
 
-  @@deny('all', true)
+  // Bloquer les utilisateurs non authentifiés
+  // Note: Ne pas utiliser @@deny('all', true) car cela bloquerait même les @@allow ci-dessus
+  @@deny('all', auth() == null)
 
   @@unique([originCountry, destinationCountry])
   @@index([originCountry])

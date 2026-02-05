@@ -65,6 +65,7 @@ import {
   QuoteHistoryTimeline,
   QuoteActions,
   QuoteDeleteButton,
+  QuoteSubmitButton,
 } from '@/components/quotes';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -73,12 +74,13 @@ import {
 
 /**
  * Formate le statut en français
- * Inclut les nouveaux statuts du workflow agent
+ * Inclut les nouveaux statuts du workflow agent et le statut SUBMITTED
  */
 function formatStatus(status: QuoteStatus): string {
   const statusMap: Record<QuoteStatus, string> = {
     DRAFT: 'Brouillon',
-    SENT: 'Envoyé',
+    SUBMITTED: 'Soumis',       // Nouveau : soumis par le client, en attente d'offre
+    SENT: 'Offre envoyée',     // Renommé : offre formelle envoyée par l'agent
     ACCEPTED: 'Accepté',
     REJECTED: 'Rejeté',
     EXPIRED: 'Expiré',
@@ -97,6 +99,7 @@ function getStatusVariant(status: QuoteStatus): 'default' | 'secondary' | 'destr
   if (status === 'ACCEPTED' || status === 'VALIDATED') return 'default';
   if (status === 'REJECTED' || status === 'CANCELLED') return 'destructive';
   if (status === 'DRAFT' || status === 'EXPIRED') return 'secondary';
+  if (status === 'SUBMITTED') return 'outline';  // Nouveau : en attente d'offre
   if (status === 'IN_TREATMENT') return 'outline';
   return 'outline';
 }
@@ -192,6 +195,8 @@ function getStatusIcon(status: QuoteStatus) {
       return <XCircle className="h-5 w-5 text-red-600" />;
     case 'EXPIRED':
       return <WarningCircle className="h-5 w-5 text-orange-600" />;
+    case 'SUBMITTED':
+      return <Clock className="h-5 w-5 text-amber-600" />; // Nouveau : en attente
     case 'SENT':
       return <Clock className="h-5 w-5 text-blue-600" />;
     case 'IN_TREATMENT':
@@ -651,8 +656,94 @@ export default async function QuoteDetailPage({
           )}
 
           {/* ════════════════════════════════════════════════════════════════ */}
+          {/* SOUMISSION DU DEVIS (DRAFT → SUBMITTED) */}
+          {/* Visible pour le CLIENT quand le devis est DRAFT */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
+            <Card className="dashboard-card border-amber-100 bg-amber-50/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  Soumettre votre devis
+                </CardTitle>
+                <CardDescription>
+                  Votre devis est encore un brouillon. Soumettez-le pour qu&apos;un agent
+                  puisse vous envoyer une offre formelle.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Une fois soumis, un agent analysera votre demande et vous enverra
+                  une offre avec les tarifs et conditions de transport.
+                </p>
+                <QuoteSubmitButton
+                  quoteId={quote.id}
+                  quoteNumber={quote.quoteNumber}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* STATUT EN ATTENTE D'OFFRE (SUBMITTED) */}
+          {/* Message adapté selon le rôle : client ou agent */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {quote.status === 'SUBMITTED' && userRole === 'CLIENT' && (
+            <Card className="dashboard-card border-amber-200 bg-amber-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  En attente d&apos;offre
+                </CardTitle>
+                <CardDescription>
+                  Votre devis a été soumis et est en cours d&apos;analyse par nos agents.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    <strong>Prochaine étape :</strong> Un agent vous enverra une offre
+                    formelle avec les tarifs et conditions de transport.
+                  </p>
+                  <p>
+                    Vous serez notifié dès que l&apos;offre sera disponible et pourrez
+                    alors l&apos;accepter ou la refuser.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Message agent : devis soumis par le client, prêt à être traité */}
+          {quote.status === 'SUBMITTED' && (userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && (
+            <Card className="dashboard-card border-blue-200 bg-blue-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                  Devis soumis par le client
+                </CardTitle>
+                <CardDescription>
+                  Ce devis a été soumis par le client et attend votre traitement.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    <strong>Actions possibles :</strong> Vérifiez les informations, ajustez
+                    les tarifs et conditions si nécessaire, puis envoyez l&apos;offre au client.
+                  </p>
+                  <p>
+                    Utilisez le bouton <strong>Modifier</strong> pour ajuster le devis,
+                    puis <strong>Envoyer au client</strong> pour transmettre l&apos;offre.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ════════════════════════════════════════════════════════════════ */}
           {/* ACTIONS CLIENT */}
-          {/* Visible pour les clients quand le devis est SENT */}
+          {/* Visible pour les clients quand le devis est SENT (offre reçue) */}
           {/* ════════════════════════════════════════════════════════════════ */}
           {userRole === 'CLIENT' && quote.status === 'SENT' && !isExpired && (
             <Card className="dashboard-card border-blue-100">
@@ -662,7 +753,7 @@ export default async function QuoteDetailPage({
                   Votre décision
                 </CardTitle>
                 <CardDescription>
-                  Ce devis attend votre réponse. Acceptez-le pour lancer l'expédition ou rejetez-le si les conditions ne vous conviennent pas.
+                  Vous avez reçu une offre. Acceptez-la pour lancer l&apos;expédition ou rejetez-la si les conditions ne vous conviennent pas.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -757,9 +848,11 @@ export default async function QuoteDetailPage({
 
           {/* Actions générales */}
           <div className="flex gap-2 flex-wrap">
-            {/* Modifier - visible uniquement pour CLIENT avec devis DRAFT */}
-            {/* Une fois envoyé (SENT), le devis est verrouillé en attente de réponse */}
-            {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
+            {/* Modifier - CLIENT sur DRAFT ou Agent (ADMIN/OPERATIONS_MANAGER) sur SUBMITTED */}
+            {/* Le CLIENT peut modifier son brouillon avant soumission */}
+            {/* L'agent peut modifier le devis soumis (prix, routes, cargo) avant de l'envoyer au client */}
+            {((userRole === 'CLIENT' && quote.status === 'DRAFT') ||
+              ((userRole === 'ADMIN' || userRole === 'OPERATIONS_MANAGER') && quote.status === 'SUBMITTED')) && (
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/dashboard/quotes/${quote.id}/edit`}>
                   <PencilSimple className="mr-2 h-4 w-4" />

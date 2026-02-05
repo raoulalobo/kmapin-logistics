@@ -98,6 +98,7 @@ enum DeliveryMode {
 
 enum QuoteStatus {
   DRAFT
+  SUBMITTED
   SENT
   ACCEPTED
   REJECTED
@@ -570,6 +571,7 @@ model Quote {
   validUntil              DateTime
   currency                String              @default("EUR")
   status                  QuoteStatus         @default(DRAFT)
+  submittedAt             DateTime?
   acceptedAt              DateTime?
   rejectedAt              DateTime?
   paymentMethod           QuotePaymentMethod?

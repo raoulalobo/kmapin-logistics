@@ -12,36 +12,54 @@
 import { Metadata } from 'next';
 import { PricingTable } from '@/components/pricing-table';
 import { HomepageHeader } from '@/components/layouts/homepage-header';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
- * Métadonnées SEO de la page
+ * Génération des métadonnées SEO dynamiques
+ *
+ * Utilise le nom de la plateforme depuis la configuration système
+ * pour personnaliser le titre de la page des tarifs.
+ *
+ * @returns Metadata Next.js avec titre dynamique incluant le nom de la plateforme
  */
-export const metadata: Metadata = {
-  title: 'Tarifs Standards - Transport International | Faso Fret Logistics',
-  description:
-    'Consultez nos tarifs indicatifs pour le transport international multi-modal (routier, maritime, aérien, ferroviaire). Prix transparents par destination avec délais estimés.',
-  keywords: [
-    'tarifs transport',
-    'prix logistique',
-    'transport international',
-    'devis transport',
-    'fret routier',
-    'fret maritime',
-    'fret aérien',
-    'transport ferroviaire',
-  ],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSystemConfig();
+
+  return {
+    title: `Tarifs Standards - Transport International | ${config.platformFullName}`,
+    description:
+      'Consultez nos tarifs indicatifs pour le transport international multi-modal (routier, maritime, aérien, ferroviaire). Prix transparents par destination avec délais estimés.',
+    keywords: [
+      'tarifs transport',
+      'prix logistique',
+      'transport international',
+      'devis transport',
+      'fret routier',
+      'fret maritime',
+      'fret aérien',
+      'transport ferroviaire',
+    ],
+  };
+}
 
 /**
  * Page Tarifs Standards
  *
- * Server Component qui affiche le tableau de tarifs avec filtres
+ * Server Component qui affiche le tableau de tarifs avec filtres.
+ * Récupère la configuration système pour passer au header.
  */
-export default function TarifsPage() {
+export default async function TarifsPage() {
+  // Récupérer la configuration système pour le header dynamique
+  const config = await getSystemConfig();
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header avec navigation */}
-      <HomepageHeader />
+      {/* Header avec navigation et nom de plateforme dynamique */}
+      <HomepageHeader
+        platformName={config.platformName}
+        platformFullName={config.platformFullName}
+        primaryColor={config.primaryColor}
+      />
 
       {/* Container principal */}
       <div className="container mx-auto px-4 py-12 mt-20">

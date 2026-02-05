@@ -34,3 +34,6 @@ export { QuoteActions } from './quote-actions';
 
 // Bouton de suppression (client, devis DRAFT uniquement)
 export { QuoteDeleteButton } from './quote-delete-button';
+
+// Bouton de soumission (client soumet son brouillon aux agents, DRAFT → SUBMITTED)
+export { QuoteSubmitButton } from './quote-submit-button';

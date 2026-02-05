@@ -8,7 +8,7 @@
  * pour cohérence visuelle dans tout le dashboard.
  *
  * Workflow des devis :
- * DRAFT → SENT → ACCEPTED → IN_TREATMENT → VALIDATED
+ * DRAFT → SUBMITTED → SENT → ACCEPTED → IN_TREATMENT → VALIDATED
  *
  * @example
  * ```tsx
@@ -160,9 +160,15 @@ const EVENT_CONFIG: Record<
   },
 
   // Actions client
+  [QuoteLogEventType.SUBMITTED_BY_CLIENT]: {
+    icon: Send,
+    label: 'Soumis par le client',
+    colorClass: 'text-amber-600',
+    bgColorClass: 'bg-amber-100',
+  },
   [QuoteLogEventType.SENT_TO_CLIENT]: {
     icon: Send,
-    label: 'Envoyé au client',
+    label: 'Offre envoyée au client',
     colorClass: 'text-blue-600',
     bgColorClass: 'bg-blue-100',
   },
@@ -460,7 +466,22 @@ function renderMetadata(
       );
     }
 
-    // Envoyé au client
+    // Soumis par le client (DRAFT → SUBMITTED)
+    case QuoteLogEventType.SUBMITTED_BY_CLIENT:
+      return (
+        <div className="text-sm text-muted-foreground">
+          {metadata.submittedAt && (
+            <p>
+              Soumis le :{' '}
+              {format(new Date(metadata.submittedAt as string), 'dd/MM/yyyy HH:mm', {
+                locale: fr,
+              })}
+            </p>
+          )}
+        </div>
+      );
+
+    // Offre envoyée au client (SUBMITTED → SENT)
     case QuoteLogEventType.SENT_TO_CLIENT:
       return (
         <div className="text-sm text-muted-foreground">

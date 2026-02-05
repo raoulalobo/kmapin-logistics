@@ -335,6 +335,39 @@ export async function logQuotePaymentReceived(params: PaymentLogParams) {
 }
 
 /**
+ * Crée un log de soumission du devis par le client
+ *
+ * Enregistre l'action du client soumettant son brouillon pour traitement.
+ * Transition : DRAFT → SUBMITTED
+ * Le devis devient visible aux agents après cette action.
+ *
+ * @param params - Paramètres du log
+ * @returns Le log créé
+ *
+ * @example
+ * ```ts
+ * await logQuoteSubmittedByClient({
+ *   quoteId: 'clxxx',
+ *   changedById: clientUserId,
+ *   notes: 'Devis soumis pour traitement',
+ * });
+ * ```
+ */
+export async function logQuoteSubmittedByClient(params: BaseLogParams) {
+  return await createQuoteLog({
+    quoteId: params.quoteId,
+    eventType: QuoteLogEventType.SUBMITTED_BY_CLIENT,
+    oldStatus: QuoteStatus.DRAFT,
+    newStatus: QuoteStatus.SUBMITTED,
+    changedById: params.changedById,
+    notes: params.notes ?? 'Devis soumis par le client pour traitement',
+    metadata: {
+      submittedAt: new Date().toISOString(),
+    },
+  });
+}
+
+/**
  * Crée un log d'envoi au client
  *
  * @param params - Paramètres du log
@@ -355,7 +388,7 @@ export async function logQuoteSentToClient(
   return await createQuoteLog({
     quoteId: params.quoteId,
     eventType: QuoteLogEventType.SENT_TO_CLIENT,
-    oldStatus: QuoteStatus.DRAFT,
+    oldStatus: QuoteStatus.SUBMITTED, // Changement : maintenant SUBMITTED → SENT (au lieu de DRAFT → SENT)
     newStatus: QuoteStatus.SENT,
     changedById: params.changedById,
     notes: params.notes,
