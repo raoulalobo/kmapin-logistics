@@ -13,6 +13,7 @@
 import { revalidateTag } from 'next/cache';
 import { requireAdmin } from '@/lib/auth/config';
 import { getEnhancedPrismaFromSession } from '@/lib/db/enhanced-client';
+import { prisma } from '@/lib/db/client';
 import {
   pricingConfigSchema,
   updatePricingConfigSchema,
@@ -106,11 +107,14 @@ export async function updatePricingConfig(
         },
       });
     } else {
-      // Créer une nouvelle configuration si elle n'existe pas
-      // Valider avec le schéma complet
+      // Créer la configuration initiale si elle n'existe pas encore
+      // On utilise le client Prisma standard (sans Zenstack) car :
+      // - requireAdmin() a déjà vérifié que l'utilisateur est ADMIN
+      // - La policy @@deny('all', true) dans schema.zmodel bloque le 'create'
+      //   même pour les admins avec le client enhanced
       const fullValidated = pricingConfigSchema.parse(data);
 
-      config = await db.pricingConfig.create({
+      config = await prisma.pricingConfig.create({
         data: {
           ...fullValidated,
           updatedById: session.user.id,

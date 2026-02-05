@@ -1120,6 +1120,8 @@ export default function PricingConfigPage() {
                     id="cargo-general"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.GENERAL', { valueAsNumber: true })}
                   />
                 </div>
@@ -1130,6 +1132,8 @@ export default function PricingConfigPage() {
                     id="cargo-dangerous"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.DANGEROUS', { valueAsNumber: true })}
                   />
                 </div>
@@ -1140,6 +1144,8 @@ export default function PricingConfigPage() {
                     id="cargo-perishable"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.PERISHABLE', { valueAsNumber: true })}
                   />
                 </div>
@@ -1150,6 +1156,8 @@ export default function PricingConfigPage() {
                     id="cargo-fragile"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.FRAGILE', { valueAsNumber: true })}
                   />
                 </div>
@@ -1160,6 +1168,8 @@ export default function PricingConfigPage() {
                     id="cargo-bulk"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.BULK', { valueAsNumber: true })}
                   />
                 </div>
@@ -1170,6 +1180,8 @@ export default function PricingConfigPage() {
                     id="cargo-container"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.CONTAINER', { valueAsNumber: true })}
                   />
                 </div>
@@ -1180,6 +1192,8 @@ export default function PricingConfigPage() {
                     id="cargo-palletized"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.PALLETIZED', { valueAsNumber: true })}
                   />
                 </div>
@@ -1190,13 +1204,15 @@ export default function PricingConfigPage() {
                     id="cargo-other"
                     type="number"
                     step="0.1"
+                    min="-1"
+                    max="5"
                     {...form.register('cargoTypeSurcharges.OTHER', { valueAsNumber: true })}
                   />
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Valeurs positives = surcharge (ex: 0.5 = +50%), valeurs négatives = réduction (ex: -0.1 = -10%)
+                Plage : -1 à 5. Positif = surcharge (ex: 0.5 = +50%), négatif = réduction (ex: -0.1 = -10%, -1 = -100% gratuit)
               </p>
 
               <Button
@@ -1229,7 +1245,8 @@ export default function PricingConfigPage() {
                     id="priority-standard"
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="-1"
+                    max="5"
                     {...form.register('prioritySurcharges.STANDARD', { valueAsNumber: true })}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -1243,7 +1260,8 @@ export default function PricingConfigPage() {
                     id="priority-normal"
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="-1"
+                    max="5"
                     {...form.register('prioritySurcharges.NORMAL', { valueAsNumber: true })}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -1257,7 +1275,8 @@ export default function PricingConfigPage() {
                     id="priority-express"
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="-1"
+                    max="5"
                     {...form.register('prioritySurcharges.EXPRESS', { valueAsNumber: true })}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -1271,7 +1290,8 @@ export default function PricingConfigPage() {
                     id="priority-urgent"
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="-1"
+                    max="5"
                     {...form.register('prioritySurcharges.URGENT', { valueAsNumber: true })}
                   />
                   <p className="text-xs text-muted-foreground">

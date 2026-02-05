@@ -23,29 +23,35 @@ export const transportMultipliersSchema = z.object({
 
 /**
  * Schéma pour les surcharges de cargo
- * Valeur >= 0 (0 = pas de surcharge)
+ * Valeur entre -1 et 5 :
+ *   - Négatif = réduction (ex: -0.1 = -10%, -1 = -100% = gratuit)
+ *   - 0 = pas de surcharge
+ *   - Positif = surcharge (ex: 0.5 = +50%, 5 = +500%)
  */
 export const cargoTypeSurchargesSchema = z.object({
-  GENERAL: z.number().nonnegative().max(5),
-  DANGEROUS: z.number().nonnegative().max(5),
-  PERISHABLE: z.number().nonnegative().max(5),
-  FRAGILE: z.number().nonnegative().max(5),
-  BULK: z.number().nonnegative().max(5),
-  CONTAINER: z.number().nonnegative().max(5),
-  PALLETIZED: z.number().nonnegative().max(5),
-  OTHER: z.number().nonnegative().max(5),
+  GENERAL: z.number().min(-1).max(5),
+  DANGEROUS: z.number().min(-1).max(5),
+  PERISHABLE: z.number().min(-1).max(5),
+  FRAGILE: z.number().min(-1).max(5),
+  BULK: z.number().min(-1).max(5),
+  CONTAINER: z.number().min(-1).max(5),
+  PALLETIZED: z.number().min(-1).max(5),
+  OTHER: z.number().min(-1).max(5),
 });
 
 /**
  * Schéma pour les surcharges de priorité
- * Valeur >= 0 (0 = pas de surcharge)
+ * Valeur entre -1 et 5 :
+ *   - Négatif = réduction (ex: -0.1 = -10%)
+ *   - 0 = pas de surcharge
+ *   - Positif = surcharge (ex: 0.5 = +50%)
  * Coefficients multiplicateurs : ex: NORMAL: 0.1 = +10%
  */
 export const prioritySurchargesSchema = z.object({
-  STANDARD: z.number().nonnegative().max(5),
-  NORMAL: z.number().nonnegative().max(5),   // Nouveau : priorité normale (+10% dans le PDF)
-  EXPRESS: z.number().nonnegative().max(5),
-  URGENT: z.number().nonnegative().max(5),
+  STANDARD: z.number().min(-1).max(5),
+  NORMAL: z.number().min(-1).max(5),   // Priorité normale (+10% dans le PDF)
+  EXPRESS: z.number().min(-1).max(5),
+  URGENT: z.number().min(-1).max(5),
 });
 
 /**
