@@ -132,6 +132,10 @@ export async function createQuoteLog(params: {
 export async function logQuoteCreated(
   params: BaseLogParams & {
     source?: 'calculator' | 'dashboard' | 'prospect';
+    /** Nombre total de colis (somme des quantités des packages) */
+    packageCount?: number;
+    /** Résumé textuel des colis (ex: "1x Tablette (2kg) + 2x Cartons (15kg)") */
+    packagesSummary?: string;
   }
 ) {
   return await createQuoteLog({
@@ -143,6 +147,9 @@ export async function logQuoteCreated(
     notes: params.notes,
     metadata: {
       source: params.source ?? 'dashboard',
+      // Metadata multi-colis : enrichit l'événement CREATED avec le détail des colis
+      ...(params.packageCount != null && { packageCount: params.packageCount }),
+      ...(params.packagesSummary && { packagesSummary: params.packagesSummary }),
     },
   });
 }
@@ -258,6 +265,8 @@ export async function logQuoteTreatmentValidated(
   params: TreatmentLogParams & {
     shipmentId?: string;
     paymentMethod?: string;
+    /** Nombre total de colis transférés vers l'expédition */
+    packageCount?: number;
   }
 ) {
   return await createQuoteLog({
@@ -272,6 +281,8 @@ export async function logQuoteTreatmentValidated(
       agentName: params.agentName,
       shipmentId: params.shipmentId,
       paymentMethod: params.paymentMethod,
+      // Nombre de colis transférés vers l'expédition (multi-colis)
+      ...(params.packageCount != null && { packageCount: params.packageCount }),
     },
   });
 }

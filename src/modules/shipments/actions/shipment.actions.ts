@@ -545,6 +545,10 @@ export async function getShipmentAction(id: string) {
             currency: true,
           },
         },
+        // Charger les colis détaillés (ShipmentPackage) triés par date de création
+        packages: {
+          orderBy: { createdAt: 'asc' },
+        },
         trackingEvents: {
           orderBy: { timestamp: 'desc' },
           include: {

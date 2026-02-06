@@ -19,13 +19,156 @@ import {
   VALIDATION_MESSAGES,
 } from '@/lib/validators';
 
+// ════════════════════════════════════════════════════════════════════════════
+// SCHÉMA PACKAGE (COLIS INDIVIDUEL)
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Schéma de validation pour un colis individuel (QuotePackage / ShipmentPackage)
+ *
+ * Représente UNE ligne de colis dans un devis ou une expédition.
+ * Le champ `quantity` permet de regrouper des colis identiques sur une même ligne.
+ *
+ * @example
+ * // 3 cartons identiques de 15 kg chacun, 60×40×40 cm
+ * {
+ *   description: "Cartons vêtements",
+ *   quantity: 3,
+ *   cargoType: "GENERAL",
+ *   weight: 15,       // poids UNITAIRE (pas total)
+ *   length: 60,       // dimensions UNITAIRES en cm
+ *   width: 40,
+ *   height: 40,
+ * }
+ *
+ * @example
+ * // 1 tablette fragile de 2 kg
+ * {
+ *   description: "Tablette Samsung",
+ *   quantity: 1,
+ *   cargoType: "FRAGILE",
+ *   weight: 2,
+ *   length: 30,
+ *   width: 20,
+ *   height: 5,
+ * }
+ */
+export const packageSchema = z.object({
+  /** Description libre du colis (ex: "Tablette Samsung", "Cartons vêtements") */
+  description: z
+    .string()
+    .max(200, 'La description ne peut pas dépasser 200 caractères')
+    .optional(),
+
+  /**
+   * Nombre de colis IDENTIQUES dans cette ligne
+   * Ex: quantity=3 signifie "3 colis identiques avec les mêmes caractéristiques"
+   */
+  quantity: z
+    .number({
+      required_error: 'La quantité est requise',
+      invalid_type_error: 'La quantité doit être un nombre',
+    })
+    .int('La quantité doit être un nombre entier')
+    .positive('La quantité doit être au moins 1')
+    .max(1000, 'La quantité ne peut pas dépasser 1000')
+    .default(1),
+
+  /** Type de marchandise spécifique à CE colis (GENERAL, FRAGILE, DANGEROUS, etc.) */
+  cargoType: z.nativeEnum(CargoType, {
+    required_error: 'Le type de marchandise est requis',
+    errorMap: () => ({ message: 'Type de marchandise invalide' }),
+  }),
+
+  /**
+   * Poids UNITAIRE en kg (pas le poids total de la ligne)
+   * Le poids total de la ligne = weight × quantity
+   */
+  weight: z
+    .number({
+      required_error: 'Le poids est requis',
+      invalid_type_error: 'Le poids doit être un nombre',
+    })
+    .positive('Le poids doit être positif')
+    .max(100000, 'Le poids ne peut pas dépasser 100 tonnes'),
+
+  /**
+   * Dimensions UNITAIRES en centimètres (cm)
+   * Préprocesseur pour gérer les champs vides, NaN, null → converti en undefined
+   */
+  length: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return undefined;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La longueur doit être positive ou nulle')
+      .max(10000, 'La longueur ne peut pas dépasser 10000 cm (100 m)')
+      .optional()
+  ),
+
+  width: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return undefined;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La largeur doit être positive ou nulle')
+      .max(10000, 'La largeur ne peut pas dépasser 10000 cm (100 m)')
+      .optional()
+  ),
+
+  height: z.preprocess(
+    (val) => {
+      if (val === undefined || val === null || val === '' || (typeof val === 'number' && isNaN(val))) {
+        return undefined;
+      }
+      return Number(val);
+    },
+    z
+      .number()
+      .nonnegative('La hauteur doit être positive ou nulle')
+      .max(10000, 'La hauteur ne peut pas dépasser 10000 cm (100 m)')
+      .optional()
+  ),
+});
+
+/**
+ * Type TypeScript inféré du schéma de colis
+ * Utilisé dans les formulaires dynamiques (useFieldArray) et les server actions
+ */
+export type PackageFormData = z.infer<typeof packageSchema>;
+
+/**
+ * Schéma pour un tableau de colis avec validation globale
+ *
+ * Contraintes :
+ * - Minimum 1 colis requis
+ * - Maximum 50 colis par devis/expédition
+ */
+export const packagesArraySchema = z
+  .array(packageSchema)
+  .min(1, 'Au moins un colis est requis')
+  .max(50, 'Maximum 50 lignes de colis par devis');
+
+// ════════════════════════════════════════════════════════════════════════════
+// SCHÉMA QUOTE (DEVIS)
+// ════════════════════════════════════════════════════════════════════════════
+
 /**
  * Schéma de validation pour la création d'un devis
  *
  * Valide toutes les informations d'un devis :
  * - Informations du client
  * - Route (origine → destination)
- * - Détails de la marchandise (type, poids, volume)
+ * - Détails de la marchandise (type, poids, volume) — agrégats calculés depuis packages
+ * - Colis détaillés (packages)
  * - Modes de transport
  * - Coût estimé et validité
  */
@@ -58,9 +201,16 @@ export const quoteSchema = z.object({
 
   // === Dimensions (optionnelles) - Volume = L × W × H ===
   // ⚠️ ATTENTION : Les dimensions sont en CENTIMÈTRES (cm)
+  // Note : Ces champs sont des AGRÉGATS conservés pour rétrocompatibilité (listes, filtres, tri)
+  // La source de vérité est dans packages[]
   length: z.number().nonnegative('La longueur doit être positive ou nulle').max(10000, 'La longueur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
   width: z.number().nonnegative('La largeur doit être positive ou nulle').max(10000, 'La largeur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
   height: z.number().nonnegative('La hauteur doit être positive ou nulle').max(10000, 'La hauteur ne peut pas dépasser 10000 centimètres (100 mètres)').optional(),
+
+  // === Colis détaillés (source de vérité pour la marchandise) ===
+  // Chaque ligne représente un type de colis avec sa quantité, son poids unitaire et ses dimensions
+  // Le prix est calculé par colis puis sommé pour obtenir le total du devis
+  packages: packagesArraySchema.optional(),
 
   // === Snapshot Adresses (Pattern Immutable Data) - Optionnelles ===
   // Suivant le pattern utilisé par Magento, Shopify et autres leaders e-commerce
@@ -592,12 +742,13 @@ export const quoteValidateTreatmentSchema = z.object({
     .max(1000, 'La description ne peut pas dépasser 1000 caractères')
     .optional(),
 
-  // Nombre de colis
+  // Nombre de colis (optionnel - calculé automatiquement depuis les QuotePackage)
+  // Conservé en fallback pour les anciens devis qui n'ont pas encore de packages
   packageCount: z
     .number()
     .int('Le nombre de colis doit être un entier')
     .positive('Le nombre de colis doit être positif')
-    .default(1),
+    .optional(),
 
   // Instructions spéciales
   specialInstructions: z

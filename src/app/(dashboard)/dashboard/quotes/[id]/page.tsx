@@ -540,53 +540,140 @@ export default async function QuoteDetailPage({
             </CardContent>
           </Card>
 
-          {/* Détails de la marchandise */}
+          {/* Détails des colis */}
           <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Détails de la marchandise</CardTitle>
-              <CardDescription>Informations sur le contenu à transporter</CardDescription>
+              <CardDescription>
+                {quote.packages && quote.packages.length > 0
+                  ? `${quote.packages.reduce((sum: number, p: { quantity: number }) => sum + p.quantity, 0)} colis — ${quote.weight} kg au total`
+                  : 'Informations sur le contenu à transporter'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-3">
-                  <Package className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Type</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatCargoType(quote.cargoType)}
-                    </p>
+              {/* Tableau des colis détaillés (si packages disponibles) */}
+              {quote.packages && quote.packages.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Tableau responsive */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left text-muted-foreground">
+                          <th className="pb-2 pr-4 font-medium">#</th>
+                          <th className="pb-2 pr-4 font-medium">Description</th>
+                          <th className="pb-2 pr-4 font-medium text-center">Qté</th>
+                          <th className="pb-2 pr-4 font-medium">Type</th>
+                          <th className="pb-2 pr-4 font-medium text-right">Poids unit.</th>
+                          <th className="pb-2 pr-4 font-medium">Dimensions</th>
+                          <th className="pb-2 font-medium text-right">Poids total</th>
+                          <th className="pb-2 pr-4 font-medium text-right">Prix unit.</th>
+                          <th className="pb-2 font-medium text-right">Montant</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {quote.packages.map((pkg: {
+                          id: string;
+                          description: string | null;
+                          quantity: number;
+                          cargoType: string;
+                          weight: number;
+                          length: number | null;
+                          width: number | null;
+                          height: number | null;
+                          unitPrice: number | null;
+                        }, index: number) => (
+                          <tr key={pkg.id} className="border-b last:border-0">
+                            <td className="py-2 pr-4 text-muted-foreground">{index + 1}</td>
+                            <td className="py-2 pr-4">
+                              {pkg.description || <span className="text-muted-foreground italic">—</span>}
+                            </td>
+                            <td className="py-2 pr-4 text-center font-medium">{pkg.quantity}</td>
+                            <td className="py-2 pr-4">
+                              <Badge variant="secondary" className="text-xs">
+                                {formatCargoType(pkg.cargoType)}
+                              </Badge>
+                            </td>
+                            <td className="py-2 pr-4 text-right">{pkg.weight} kg</td>
+                            <td className="py-2 pr-4 text-muted-foreground">
+                              {pkg.length != null && pkg.width != null && pkg.height != null
+                                ? `${pkg.length} × ${pkg.width} × ${pkg.height} cm`
+                                : '—'}
+                            </td>
+                            <td className="py-2 text-right font-medium">
+                              {(pkg.weight * pkg.quantity).toFixed(1)} kg
+                            </td>
+                            {/* Prix unitaire calculé par le moteur de pricing */}
+                            <td className="py-2 pr-4 text-right">
+                              {pkg.unitPrice != null
+                                ? `${pkg.unitPrice.toFixed(2)} ${quote.currency}`
+                                : '—'}
+                            </td>
+                            {/* Montant = prix unitaire × quantité */}
+                            <td className="py-2 text-right font-medium">
+                              {pkg.unitPrice != null
+                                ? `${(pkg.unitPrice * pkg.quantity).toFixed(2)} ${quote.currency}`
+                                : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      {/* Pied de tableau : totaux */}
+                      <tfoot>
+                        <tr className="border-t font-semibold">
+                          <td className="pt-2" colSpan={2}>Total</td>
+                          <td className="pt-2 text-center">
+                            {quote.packages.reduce((sum: number, p: { quantity: number }) => sum + p.quantity, 0)}
+                          </td>
+                          <td className="pt-2" colSpan={3}></td>
+                          <td className="pt-2 text-right">{quote.weight} kg</td>
+                          {/* Cellule vide sous "Prix unit." */}
+                          <td className="pt-2"></td>
+                          {/* Somme des montants de tous les colis */}
+                          <td className="pt-2 text-right">
+                            {quote.packages.reduce((sum: number, p: { unitPrice: number | null; quantity: number }) => sum + (p.unitPrice ?? 0) * p.quantity, 0).toFixed(2)} {quote.currency}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <Scales className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Poids</p>
-                    <p className="text-sm text-muted-foreground">{quote.weight} kg</p>
-                  </div>
-                </div>
-
-                {/* Dimensions - Affichées si au moins une dimension est définie */}
-                {/* Note: != null vérifie à la fois null et undefined, mais accepte 0 */}
-                {(quote.length != null || quote.width != null || quote.height != null) && (
+              ) : (
+                /* Fallback : affichage des champs plats (anciens devis sans packages) */
+                <div className="grid gap-4 md:grid-cols-3">
                   <div className="flex items-center gap-3">
-                    <Cube className="h-5 w-5 text-muted-foreground" />
+                    <Package className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Dimensions (L × l × H)</p>
+                      <p className="text-sm font-medium">Type</p>
                       <p className="text-sm text-muted-foreground">
-                        {quote.length ?? '—'} × {quote.width ?? '—'} × {quote.height ?? '—'} cm
+                        {formatCargoType(quote.cargoType)}
                       </p>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* ────────────────────────────────────────────────────────── */}
-              {/* MODES DE TRANSPORT ET PRIORITÉ */}
-              {/* Affichage sous forme de badges pour une lecture rapide */}
-              {/* ────────────────────────────────────────────────────────── */}
+                  <div className="flex items-center gap-3">
+                    <Scales className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Poids</p>
+                      <p className="text-sm text-muted-foreground">{quote.weight} kg</p>
+                    </div>
+                  </div>
+
+                  {(quote.length != null || quote.width != null || quote.height != null) && (
+                    <div className="flex items-center gap-3">
+                      <Cube className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Dimensions (L × l × H)</p>
+                        <p className="text-sm text-muted-foreground">
+                          {quote.length ?? '—'} × {quote.width ?? '—'} × {quote.height ?? '—'} cm
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Modes de transport et priorité */}
               <div className="mt-4 flex flex-wrap gap-6">
-                {/* Modes de transport */}
                 {quote.transportMode && quote.transportMode.length > 0 && (
                   <div>
                     <p className="text-sm font-medium mb-2">Modes de transport</p>
@@ -600,7 +687,6 @@ export default async function QuoteDetailPage({
                   </div>
                 )}
 
-                {/* Priorité de livraison */}
                 <div>
                   <p className="text-sm font-medium mb-2">Priorité de livraison</p>
                   <Badge variant={getPriorityVariant(quote.priority)}>

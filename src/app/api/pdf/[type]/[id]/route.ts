@@ -106,14 +106,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * @returns Response avec le PDF ou une erreur
  */
 async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any) {
-  // Récupérer le colis avec son devis source et le client
+  // Récupérer le colis avec son devis source, le client et les packages multi-colis
   const shipment = await prisma.shipment.findUnique({
     where: { id: shipmentId },
     include: {
       fromQuote: {
         include: {
           client: true,
-          items: true,
+          packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
         },
       },
       client: true,
@@ -177,13 +177,41 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any)
       destinationCountry: quote.destinationCountry,
       weight: Number(quote.weight),
       cargoType: quote.cargoType,
-      transportModes: quote.transportModes,
+      transportModes: quote.transportMode,
       dimensions: quote.dimensions as QuoteInvoicePDFData['expedition']['dimensions'],
     },
     estimatedCost: Number(quote.estimatedCost || 0),
     currency: quote.currency,
     paymentMethod: quote.paymentMethod,
     agentComment: quote.agentComment,
+    // Adresses expéditeur et destinataire (snapshots du devis)
+    origin: {
+      address: quote.originAddress,
+      city: quote.originCity,
+      postalCode: quote.originPostalCode,
+      contactName: quote.originContactName,
+      contactPhone: quote.originContactPhone,
+      contactEmail: quote.originContactEmail,
+    },
+    destination: {
+      address: quote.destinationAddress,
+      city: quote.destinationCity,
+      postalCode: quote.destinationPostalCode,
+      contactName: quote.destinationContactName,
+      contactPhone: quote.destinationContactPhone,
+      contactEmail: quote.destinationContactEmail,
+    },
+    // Colis détaillés pour le tableau multi-colis dans la facture
+    packages: quote.packages?.map((pkg) => ({
+      description: pkg.description,
+      quantity: pkg.quantity,
+      cargoType: pkg.cargoType,
+      weight: Number(pkg.weight),
+      length: pkg.length ? Number(pkg.length) : null,
+      width: pkg.width ? Number(pkg.width) : null,
+      height: pkg.height ? Number(pkg.height) : null,
+      unitPrice: pkg.unitPrice ? Number(pkg.unitPrice) : null,
+    })),
   };
 
   // Générer le PDF
@@ -214,13 +242,13 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any)
  * @returns Response avec le PDF ou une erreur
  */
 async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
-  // Récupérer le devis avec le client et le colis éventuel
+  // Récupérer le devis avec le client, le colis éventuel et les packages multi-colis
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
       client: true,
-      items: true,
       shipment: true, // Pour récupérer le numéro de suivi si disponible
+      packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
     },
   });
 
@@ -270,13 +298,41 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
       destinationCountry: quote.destinationCountry,
       weight: Number(quote.weight),
       cargoType: quote.cargoType,
-      transportModes: quote.transportModes,
+      transportModes: quote.transportMode,
       dimensions: quote.dimensions as QuoteInvoicePDFData['expedition']['dimensions'],
     },
     estimatedCost: Number(quote.estimatedCost || 0),
     currency: quote.currency,
     paymentMethod: quote.paymentMethod,
     agentComment: quote.agentComment,
+    // Adresses expéditeur et destinataire (snapshots du devis)
+    origin: {
+      address: quote.originAddress,
+      city: quote.originCity,
+      postalCode: quote.originPostalCode,
+      contactName: quote.originContactName,
+      contactPhone: quote.originContactPhone,
+      contactEmail: quote.originContactEmail,
+    },
+    destination: {
+      address: quote.destinationAddress,
+      city: quote.destinationCity,
+      postalCode: quote.destinationPostalCode,
+      contactName: quote.destinationContactName,
+      contactPhone: quote.destinationContactPhone,
+      contactEmail: quote.destinationContactEmail,
+    },
+    // Colis détaillés pour le tableau multi-colis dans la facture
+    packages: quote.packages?.map((pkg) => ({
+      description: pkg.description,
+      quantity: pkg.quantity,
+      cargoType: pkg.cargoType,
+      weight: Number(pkg.weight),
+      length: pkg.length ? Number(pkg.length) : null,
+      width: pkg.width ? Number(pkg.width) : null,
+      height: pkg.height ? Number(pkg.height) : null,
+      unitPrice: pkg.unitPrice ? Number(pkg.unitPrice) : null,
+    })),
   };
 
   // Générer le PDF
@@ -302,12 +358,13 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
 async function generateQuotePDFRoute(quoteId: string, session: any) {
   // Récupérer le devis avec toutes les relations nécessaires
   // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
+  // Les packages sont inclus pour le tableau multi-colis dans le PDF
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
       client: true,   // Client (COMPANY ou INDIVIDUAL)
-      items: true,
       createdBy: true,
+      packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
     },
   });
 
@@ -348,7 +405,7 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
     // Données transport pour le template simplifié
     originCountry: quote.originCountry,
     destinationCountry: quote.destinationCountry,
-    transportMode: quote.transportModes,
+    transportMode: quote.transportMode,
     cargoType: quote.cargoType,
     weight: Number(quote.weight),
     volume: quote.volume ? Number(quote.volume) : null,
@@ -357,6 +414,18 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
     estimatedCost: Number(quote.estimatedCost),
     currency: quote.currency,
     status: quote.status,
+    // Colis détaillés pour le tableau multi-colis dans le PDF
+    // Si packages est vide ou absent, le PDF utilise l'affichage simple
+    packages: quote.packages?.map((pkg) => ({
+      description: pkg.description,
+      quantity: pkg.quantity,
+      cargoType: pkg.cargoType,
+      weight: Number(pkg.weight),
+      length: pkg.length ? Number(pkg.length) : null,
+      width: pkg.width ? Number(pkg.width) : null,
+      height: pkg.height ? Number(pkg.height) : null,
+      unitPrice: pkg.unitPrice ? Number(pkg.unitPrice) : null,
+    })),
   };
 
   // Générer le PDF

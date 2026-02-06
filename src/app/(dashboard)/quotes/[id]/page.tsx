@@ -302,52 +302,144 @@ export default async function QuoteDetailsPage({
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Marchandise */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Détails de la marchandise
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Type</span>
-              <Badge variant="secondary">{translateCargoType(quote.cargoType)}</Badge>
+      {/* Détails des colis (packages) ou fallback champs plats pour anciens devis */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Détails de la marchandise
+          </CardTitle>
+          <CardDescription>
+            {quote.packages && quote.packages.length > 0
+              ? `${quote.packages.length} ligne${quote.packages.length > 1 ? 's' : ''} de colis`
+              : 'Informations sur le contenu à transporter'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Si le devis a des packages détaillés → tableau */}
+          {quote.packages && quote.packages.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2 pr-4">#</th>
+                    <th className="pb-2 pr-4">Description</th>
+                    <th className="pb-2 pr-4 text-center">Qté</th>
+                    <th className="pb-2 pr-4">Type</th>
+                    <th className="pb-2 pr-4 text-right">Poids unit.</th>
+                    <th className="pb-2 pr-4">Dimensions</th>
+                    <th className="pb-2 text-right">Poids total</th>
+                    <th className="pb-2 pr-4 text-right">Prix unit.</th>
+                    <th className="pb-2 text-right">Montant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quote.packages.map((pkg: {
+                    id: string;
+                    description: string | null;
+                    quantity: number;
+                    cargoType: string;
+                    weight: number;
+                    length: number | null;
+                    width: number | null;
+                    height: number | null;
+                    unitPrice: number | null;
+                  }, index: number) => {
+                    const totalWeight = pkg.weight * pkg.quantity;
+                    const hasDimensions = pkg.length && pkg.width && pkg.height;
+                    return (
+                      <tr key={pkg.id} className="border-b last:border-0">
+                        <td className="py-2 pr-4 text-muted-foreground">{index + 1}</td>
+                        <td className="py-2 pr-4">{pkg.description || '—'}</td>
+                        <td className="py-2 pr-4 text-center">{pkg.quantity}</td>
+                        <td className="py-2 pr-4">
+                          <Badge variant="secondary" className="text-xs">
+                            {translateCargoType(pkg.cargoType)}
+                          </Badge>
+                        </td>
+                        <td className="py-2 pr-4 text-right">{pkg.weight} kg</td>
+                        <td className="py-2 pr-4 text-muted-foreground">
+                          {hasDimensions
+                            ? `${pkg.length} × ${pkg.width} × ${pkg.height} cm`
+                            : '—'}
+                        </td>
+                        <td className="py-2 text-right font-medium">{totalWeight} kg</td>
+                        {/* Prix unitaire calculé par le moteur de pricing */}
+                        <td className="py-2 pr-4 text-right">
+                          {pkg.unitPrice != null
+                            ? `${pkg.unitPrice.toFixed(2)} ${quote.currency}`
+                            : '—'}
+                        </td>
+                        {/* Montant = prix unitaire × quantité */}
+                        <td className="py-2 text-right font-medium">
+                          {pkg.unitPrice != null
+                            ? `${(pkg.unitPrice * pkg.quantity).toFixed(2)} ${quote.currency}`
+                            : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t font-semibold">
+                    <td colSpan={2} className="pt-2">Total</td>
+                    <td className="pt-2 text-center">
+                      {quote.packages.reduce((sum: number, pkg: { quantity: number }) => sum + pkg.quantity, 0)}
+                    </td>
+                    <td colSpan={3}></td>
+                    <td className="pt-2 text-right">
+                      {quote.packages.reduce((sum: number, pkg: { weight: number; quantity: number }) => sum + pkg.weight * pkg.quantity, 0)} kg
+                    </td>
+                    {/* Cellule vide sous "Prix unit." */}
+                    <td className="pt-2"></td>
+                    {/* Somme des montants de tous les colis */}
+                    <td className="pt-2 text-right">
+                      {quote.packages.reduce((sum: number, p: { unitPrice: number | null; quantity: number }) => sum + (p.unitPrice ?? 0) * p.quantity, 0).toFixed(2)} {quote.currency}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Poids</span>
-              <span className="font-medium">{quote.weight} kg</span>
-            </div>
-            {quote.volume && (
+          ) : (
+            /* Fallback pour les anciens devis sans packages → affichage plat */
+            <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Volume</span>
-                <span className="font-medium">{quote.volume} m³</span>
+                <span className="text-sm text-muted-foreground">Type</span>
+                <Badge variant="secondary">{translateCargoType(quote.cargoType)}</Badge>
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Transport */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Modes de transport
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {quote.transportMode.map((mode) => (
-                <Badge key={mode} variant="outline" className="text-sm">
-                  {translateTransportMode(mode)}
-                </Badge>
-              ))}
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Poids</span>
+                <span className="font-medium">{quote.weight} kg</span>
+              </div>
+              {quote.volume && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Volume</span>
+                  <span className="font-medium">{quote.volume} m³</span>
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Transport */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Modes de transport
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {quote.transportMode.map((mode) => (
+              <Badge key={mode} variant="outline" className="text-sm">
+                {translateTransportMode(mode)}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Coût */}
       <Card>

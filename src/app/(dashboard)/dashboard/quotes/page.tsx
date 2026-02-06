@@ -342,11 +342,20 @@ export default async function QuotesPage({
                       </div>
                     </div>
 
-                    {/* Détails */}
+                    {/* Détails — Résumé colis + poids total + validité */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{formatCargoType(quote.cargoType)}</span>
-                      <span>•</span>
-                      <span>{quote.weight} kg</span>
+                      {/* Nombre de colis si disponible (_count.packages), sinon type de cargo */}
+                      {(quote as any)._count?.packages > 0 ? (
+                        <span>
+                          {(quote as any)._count.packages} colis — {quote.weight} kg
+                        </span>
+                      ) : (
+                        <>
+                          <span>{formatCargoType(quote.cargoType)}</span>
+                          <span>•</span>
+                          <span>{quote.weight} kg</span>
+                        </>
+                      )}
                       {quote.volume && (
                         <>
                           <span>•</span>
@@ -355,7 +364,7 @@ export default async function QuotesPage({
                       )}
                       <span>•</span>
                       <span>
-                        Valide jusqu'au {new Date(quote.validUntil).toLocaleDateString('fr-FR')}
+                        Valide jusqu&apos;au {new Date(quote.validUntil).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
 

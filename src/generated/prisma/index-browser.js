@@ -242,6 +242,21 @@ exports.Prisma.ShipmentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ShipmentPackageScalarFieldEnum = {
+  id: 'id',
+  shipmentId: 'shipmentId',
+  description: 'description',
+  quantity: 'quantity',
+  cargoType: 'cargoType',
+  weight: 'weight',
+  length: 'length',
+  width: 'width',
+  height: 'height',
+  unitPrice: 'unitPrice',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.PickupRequestScalarFieldEnum = {
   id: 'id',
   trackingNumber: 'trackingNumber',
@@ -423,6 +438,21 @@ exports.Prisma.QuoteScalarFieldEnum = {
   paymentReceivedAt: 'paymentReceivedAt',
   paymentReceivedById: 'paymentReceivedById',
   createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.QuotePackageScalarFieldEnum = {
+  id: 'id',
+  quoteId: 'quoteId',
+  description: 'description',
+  quantity: 'quantity',
+  cargoType: 'cargoType',
+  weight: 'weight',
+  length: 'length',
+  width: 'width',
+  height: 'height',
+  unitPrice: 'unitPrice',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -731,6 +761,7 @@ exports.Prisma.ModelName = {
   Verification: 'Verification',
   Client: 'Client',
   Shipment: 'Shipment',
+  ShipmentPackage: 'ShipmentPackage',
   PickupRequest: 'PickupRequest',
   PickupLog: 'PickupLog',
   PurchaseRequest: 'PurchaseRequest',
@@ -738,6 +769,7 @@ exports.Prisma.ModelName = {
   TrackingEvent: 'TrackingEvent',
   ShipmentLog: 'ShipmentLog',
   Quote: 'Quote',
+  QuotePackage: 'QuotePackage',
   QuoteLog: 'QuoteLog',
   Prospect: 'Prospect',
   Notification: 'Notification',

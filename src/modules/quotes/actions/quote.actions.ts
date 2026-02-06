@@ -26,6 +26,11 @@ import {
   logQuoteTreatmentValidated,
   logQuoteCancelled,
 } from '../lib/quote-log-helper';
+import {
+  calculerPrixMultiPackages,
+  type CargoTypeForPricing,
+  type PriorityType,
+} from '../lib/pricing-calculator-dynamic';
 import { z } from 'zod';
 import {
   quoteSchema,
@@ -37,6 +42,8 @@ import {
   quoteCancelSchema,
   createGuestQuoteSchema,
   trackQuoteByTokenSchema,
+  packageSchema,
+  packagesArraySchema,
   type QuoteFormData,
   type QuoteUpdateData,
   type QuoteAcceptData,
@@ -46,6 +53,7 @@ import {
   type QuoteCancelData,
   type CreateGuestQuoteInput,
   type TrackQuoteByTokenInput,
+  type PackageFormData,
 } from '../schemas/quote.schema';
 
 /**
@@ -188,11 +196,29 @@ export async function createQuoteAction(
       destinationContactPhone: formData.get('destinationContactPhone') || undefined,
       destinationContactEmail: formData.get('destinationContactEmail') || undefined,
       transportMode: formData.getAll('transportMode'),
+      // Priorité de livraison : sert au moteur de pricing pour appliquer les surcharges
+      // (pas de colonne en DB sur Quote, uniquement utilisé pour le calcul)
+      priority: (formData.get('priority') as string) || 'STANDARD',
       estimatedCost: Number(formData.get('estimatedCost')),
       currency: formData.get('currency') || 'EUR',
       validUntil: formData.get('validUntil'),
       status: formData.get('status') || 'DRAFT',
     };
+
+    // Extraire les packages (colis détaillés) depuis le FormData
+    // Les packages sont sérialisés en JSON dans le champ 'packages'
+    // Si non fournis, on créera un package unique depuis les champs plats (rétrocompatibilité)
+    let packagesData: PackageFormData[] | undefined;
+    const packagesRaw = formData.get('packages');
+    if (packagesRaw && typeof packagesRaw === 'string') {
+      try {
+        const parsed = JSON.parse(packagesRaw);
+        packagesData = packagesArraySchema.parse(parsed);
+      } catch (parseError) {
+        console.error('[createQuoteAction] Erreur parsing packages:', parseError);
+        // En cas d'erreur de parsing, on continue sans packages détaillés
+      }
+    }
 
     // === DIAGNOSTIC LOGS ===
     console.log('[createQuoteAction] rawData.clientId:', rawData.clientId);
@@ -258,7 +284,63 @@ export async function createQuoteAction(
     const tokenExpiresAt = new Date();
     tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
 
-    // Créer le devis
+    // Créer le devis avec les packages (colis détaillés) via Prisma nested create
+    // Si des packages sont fournis, les champs plats (weight, cargoType) servent d'agrégats
+    // Si aucun package n'est fourni, on crée un package unique depuis les champs plats (rétrocompatibilité)
+    //
+    // Préparer les données brutes des packages pour le moteur de pricing
+    // Si des packages détaillés sont fournis, on les utilise directement
+    // Sinon, rétrocompatibilité : on crée un package unique depuis les champs plats du devis
+    const rawPackages = packagesData && packagesData.length > 0
+      ? packagesData.map((pkg) => ({
+          description: pkg.description || null,
+          quantity: pkg.quantity ?? 1,
+          cargoType: pkg.cargoType,
+          weight: pkg.weight,
+          length: pkg.length || null,
+          width: pkg.width || null,
+          height: pkg.height || null,
+        }))
+      : [{
+          description: null,
+          quantity: 1,
+          cargoType: validatedData.cargoType,
+          weight: validatedData.weight,
+          length: validatedData.length || null,
+          width: validatedData.width || null,
+          height: validatedData.height || null,
+        }];
+
+    // === Calcul des prix unitaires via le moteur de pricing serveur ===
+    // Utilise calculerPrixMultiPackages() pour calculer le VRAI prix par colis,
+    // incluant les surcharges cargo spécifiques (FRAGILE +30%, DANGEROUS +50%, etc.)
+    // au lieu de la distribution proportionnelle au poids qui les ignorait.
+    const pricingResult = await calculerPrixMultiPackages({
+      packages: rawPackages.map((pkg) => ({
+        description: pkg.description || undefined,
+        quantity: pkg.quantity,
+        cargoType: pkg.cargoType as CargoTypeForPricing,
+        weight: pkg.weight,
+        length: pkg.length || undefined,
+        width: pkg.width || undefined,
+        height: pkg.height || undefined,
+      })),
+      modeTransport: validatedData.transportMode[0] as 'ROAD' | 'SEA' | 'AIR' | 'RAIL',
+      priorite: (rawData.priority as PriorityType) || 'STANDARD',
+      paysOrigine: validatedData.originCountry,
+      paysDestination: validatedData.destinationCountry,
+    });
+
+    // Le prix autoritatif vient du moteur de pricing serveur (pas du client)
+    const serverEstimatedCost = pricingResult.totalPrice;
+
+    // Construire les données de création des packages avec les vrais unitPrice
+    const packageCreateData = rawPackages.map((pkg, index) => ({
+      ...pkg,
+      // Prix unitaire calculé par le moteur (inclut surcharge cargo, EXCLUT surcharge priorité)
+      unitPrice: pricingResult.lines[index]?.unitPrice ?? null,
+    }));
+
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
@@ -268,7 +350,6 @@ export async function createQuoteAction(
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
         weight: validatedData.weight,
-        volume: validatedData.volume,
         // Snapshot adresses expéditeur (optionnelles - Pattern Immutable Data)
         originAddress: validatedData.originAddress,
         originCity: validatedData.originCity,
@@ -284,20 +365,33 @@ export async function createQuoteAction(
         destinationContactPhone: validatedData.destinationContactPhone,
         destinationContactEmail: validatedData.destinationContactEmail,
         transportMode: validatedData.transportMode,
-        estimatedCost: validatedData.estimatedCost,
+        // Prix total calculé par le moteur de pricing serveur (remplace le prix client)
+        estimatedCost: serverEstimatedCost,
         currency: validatedData.currency,
         validUntil: new Date(validatedData.validUntil),
         status: validatedData.status || 'DRAFT',
         tokenExpiresAt, // Date d'expiration du token de suivi (requis par le schéma)
+        // Création des colis détaillés (nested create Prisma)
+        packages: {
+          create: packageCreateData,
+        },
       },
     });
 
     // Enregistrer l'événement de création dans l'historique (QuoteLog)
+    // Calcul du résumé multi-colis pour enrichir les metadata du log
+    const totalPackageCount = packageCreateData.reduce((sum, pkg) => sum + (pkg.quantity ?? 1), 0);
+    const packagesSummary = packageCreateData
+      .map((pkg) => `${pkg.quantity ?? 1}x ${pkg.description || pkg.cargoType} (${pkg.weight}kg)`)
+      .join(' + ');
+
     await logQuoteCreated({
       quoteId: quote.id,
       changedById: session.user.id,
       notes: `Devis ${quote.quoteNumber} créé`,
       source: 'dashboard',
+      packageCount: totalPackageCount,
+      packagesSummary,
     });
 
     // Revalider la liste des devis
@@ -441,6 +535,11 @@ export async function getQuotesAction(
               email: true,
             },
           },
+          // Compteur de packages pour affichage résumé dans la liste
+          // Retourne quote._count.packages (nombre de lignes de colis)
+          _count: {
+            select: { packages: true },
+          },
         },
       }),
       prisma.quote.count({ where }),
@@ -535,6 +634,13 @@ export async function getQuoteAction(id: string) {
           select: {
             id: true,
             trackingNumber: true,
+          },
+        },
+        // Récupérer les colis détaillés du devis (QuotePackage)
+        // Triés par date de création pour conserver l'ordre d'ajout
+        packages: {
+          orderBy: {
+            createdAt: 'asc',
           },
         },
         // Récupérer l'historique complet des événements (QuoteLog)
@@ -742,6 +848,22 @@ export async function updateQuoteAction(
       rawData.transportMode = transportMode;
     }
 
+    // ── Extraction des packages (colis détaillés) depuis le FormData ──
+    // Les packages sont sérialisés en JSON dans le champ 'packages'
+    // Pattern Delete+Recreate : on supprime les anciens packages et on recrée les nouveaux
+    // dans une transaction atomique (si la recréation échoue, la suppression est annulée)
+    let packagesData: PackageFormData[] | undefined;
+    const packagesRaw = formData.get('packages');
+    if (packagesRaw && typeof packagesRaw === 'string') {
+      try {
+        const parsed = JSON.parse(packagesRaw);
+        packagesData = packagesArraySchema.parse(parsed);
+      } catch (parseError) {
+        console.error('[updateQuoteAction] Erreur parsing packages:', parseError);
+        // En cas d'erreur de parsing, on continue sans modifier les packages
+      }
+    }
+
     const validatedData = quoteUpdateSchema.parse(rawData);
 
     // Déterminer les champs modifiés en comparant avec les valeurs existantes
@@ -757,32 +879,96 @@ export async function updateQuoteAction(
       return String(newVal ?? '') !== String(oldVal ?? '');
     });
 
-    // Mettre à jour le devis
+    // Si des packages sont fournis, les ajouter aux champs modifiés pour le log
+    if (packagesData) {
+      changedFields.push('packages');
+    }
+
+    // Mettre à jour le devis + packages dans une transaction atomique
     // Extraction des champs non-persistés et des FK scalaires avant le spread
     // - priority : utilisé uniquement pour le calcul du tarif, pas de colonne en DB
     // - clientId : Prisma update() exige la syntaxe relationnelle client: { connect: { id } }
-    const { clientId, priority, ...restValidatedData } = validatedData;
+    // - packages : géré séparément via deleteMany + create (pas un champ Prisma update scalaire)
+    const { clientId, priority, packages: _packages, ...restValidatedData } = validatedData;
 
-    const updatedQuote = await prisma.quote.update({
-      where: { id },
-      data: {
-        ...restValidatedData,
-        validUntil: validatedData.validUntil
-          ? new Date(validatedData.validUntil)
-          : undefined,
-        acceptedAt: validatedData.acceptedAt
-          ? new Date(validatedData.acceptedAt)
-          : undefined,
-        rejectedAt: validatedData.rejectedAt
-          ? new Date(validatedData.rejectedAt)
-          : undefined,
-        // Relation client : connect si clientId fourni, disconnect si null, ignorer si undefined
-        ...(clientId !== undefined
-          ? clientId !== null
-            ? { client: { connect: { id: clientId } } }
-            : { client: { disconnect: true } }
-          : {}),
-      },
+    const updatedQuote = await prisma.$transaction(async (tx) => {
+      // 1. Si des packages sont fournis, supprimer les anciens et créer les nouveaux
+      //    Pattern Delete+Recreate : plus simple que l'upsert car useFieldArray
+      //    ne conserve pas les IDs serveur des QuotePackage
+      if (packagesData && packagesData.length > 0) {
+        // Supprimer tous les anciens packages de ce devis
+        await tx.quotePackage.deleteMany({
+          where: { quoteId: id },
+        });
+
+        // === Calcul des prix unitaires via le moteur de pricing serveur ===
+        // Résout le problème de la distribution proportionnelle au poids qui ignorait
+        // les surcharges cargo spécifiques (FRAGILE +30%, DANGEROUS +50%, etc.)
+        // On utilise le mode de transport mis à jour s'il est fourni, sinon celui existant
+        const updateTransportMode = (validatedData.transportMode?.[0] || existingQuote.transportMode[0]) as 'ROAD' | 'SEA' | 'AIR' | 'RAIL';
+        const updateOriginCountry = validatedData.originCountry || existingQuote.originCountry;
+        const updateDestinationCountry = validatedData.destinationCountry || existingQuote.destinationCountry;
+
+        const updatePricingResult = await calculerPrixMultiPackages({
+          packages: packagesData.map((pkg) => ({
+            description: pkg.description || undefined,
+            quantity: pkg.quantity ?? 1,
+            cargoType: pkg.cargoType as CargoTypeForPricing,
+            weight: pkg.weight,
+            length: pkg.length || undefined,
+            width: pkg.width || undefined,
+            height: pkg.height || undefined,
+          })),
+          modeTransport: updateTransportMode,
+          priorite: (priority as PriorityType) || 'STANDARD',
+          paysOrigine: updateOriginCountry,
+          paysDestination: updateDestinationCountry,
+        });
+
+        // Persister le prix recalculé par le moteur serveur dans estimatedCost
+        restValidatedData.estimatedCost = updatePricingResult.totalPrice;
+
+        await tx.quotePackage.createMany({
+          data: packagesData.map((pkg, index) => {
+            const qty = pkg.quantity ?? 1;
+            return {
+              quoteId: id,
+              description: pkg.description || null,
+              quantity: qty,
+              cargoType: pkg.cargoType,
+              weight: pkg.weight,
+              length: pkg.length || null,
+              width: pkg.width || null,
+              height: pkg.height || null,
+              // Prix unitaire calculé par le moteur (inclut surcharge cargo, EXCLUT surcharge priorité)
+              unitPrice: updatePricingResult.lines[index]?.unitPrice ?? null,
+            };
+          }),
+        });
+      }
+
+      // 2. Mettre à jour le devis lui-même (champs plats + agrégats)
+      return tx.quote.update({
+        where: { id },
+        data: {
+          ...restValidatedData,
+          validUntil: validatedData.validUntil
+            ? new Date(validatedData.validUntil)
+            : undefined,
+          acceptedAt: validatedData.acceptedAt
+            ? new Date(validatedData.acceptedAt)
+            : undefined,
+          rejectedAt: validatedData.rejectedAt
+            ? new Date(validatedData.rejectedAt)
+            : undefined,
+          // Relation client : connect si clientId fourni, disconnect si null, ignorer si undefined
+          ...(clientId !== undefined
+            ? clientId !== null
+              ? { client: { connect: { id: clientId } } }
+              : { client: { disconnect: true } }
+            : {}),
+        },
+      });
     });
 
     // Enregistrer l'événement de modification dans l'historique
@@ -1974,6 +2160,7 @@ export async function validateQuoteTreatmentAction(
 
     // 4. Récupérer le devis existant avec les informations nécessaires
     // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
+    // Les packages sont chargés pour être copiés vers ShipmentPackage
     const existingQuote = await prisma.quote.findUnique({
       where: { id: quoteId },
       include: {
@@ -1984,6 +2171,10 @@ export async function validateQuoteTreatmentAction(
               take: 1,
             },
           },
+        },
+        // Charger les colis détaillés pour les copier vers ShipmentPackage
+        packages: {
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
@@ -2021,7 +2212,13 @@ export async function validateQuoteTreatmentAction(
     const clientUser = existingQuote.client?.users?.[0];
     const companyName = existingQuote.client?.name || 'Client';
 
-    // 9. Créer l'expédition (transaction pour assurer l'intégrité)
+    // 9. Calculer le nombre total de colis depuis les QuotePackage
+    // Si des packages existent → somme des quantités, sinon fallback sur la valeur saisie par l'agent
+    const calculatedPackageCount = existingQuote.packages && existingQuote.packages.length > 0
+      ? existingQuote.packages.reduce((sum, pkg) => sum + pkg.quantity, 0)
+      : validatedData.packageCount || 1;
+
+    // 10. Créer l'expédition + copier les packages (transaction pour assurer l'intégrité)
     const result = await prisma.$transaction(async (tx) => {
       // Créer l'expédition liée au client du devis (optionnel)
       // Si pas de client, on utilise les informations de contact du devis
@@ -2063,13 +2260,14 @@ export async function validateQuoteTreatmentAction(
           destinationPhone:
             validatedData.destinationPhone || existingQuote.destinationContactPhone || clientUser?.phone,
 
-          // Détails marchandise (depuis le devis)
+          // Détails marchandise (agrégats depuis le devis)
           cargoType: existingQuote.cargoType,
           weight: existingQuote.weight,
           length: existingQuote.length,
           width: existingQuote.width,
           height: existingQuote.height,
-          packageCount: validatedData.packageCount || 1,
+          // packageCount calculé automatiquement depuis QuotePackage[].quantity
+          packageCount: calculatedPackageCount,
           description:
             validatedData.cargoDescription ||
             `Expédition issue du devis ${existingQuote.quoteNumber}`,
@@ -2091,6 +2289,26 @@ export async function validateQuoteTreatmentAction(
         },
       });
 
+      // Copier les QuotePackage → ShipmentPackage
+      // Chaque ligne de colis du devis est dupliquée dans l'expédition
+      // avec le prix unitaire figé au moment de la validation (snapshot)
+      if (existingQuote.packages && existingQuote.packages.length > 0) {
+        await tx.shipmentPackage.createMany({
+          data: existingQuote.packages.map((pkg) => ({
+            shipmentId: shipment.id,
+            description: pkg.description,
+            quantity: pkg.quantity,
+            cargoType: pkg.cargoType,
+            weight: pkg.weight,
+            length: pkg.length,
+            width: pkg.width,
+            height: pkg.height,
+            // Snapshot du prix unitaire calculé au moment du devis
+            unitPrice: pkg.unitPrice,
+          })),
+        });
+      }
+
       // Mettre à jour le devis avec le lien vers l'expédition
       const updatedQuote = await tx.quote.update({
         where: { id: quoteId },
@@ -2110,6 +2328,7 @@ export async function validateQuoteTreatmentAction(
 
     // 10. Enregistrer l'événement de création dans l'historique (ShipmentLog)
     // Cela permet de tracer l'origine de l'expédition et l'agent qui l'a créée
+    // Le packageCount enrichit le log pour la timeline multi-colis
     await logShipmentCreated({
       shipmentId: result.shipment.id,
       changedById: session.user.id,
@@ -2118,16 +2337,19 @@ export async function validateQuoteTreatmentAction(
       metadata: {
         source: 'quote',
         quoteId: existingQuote.id,
+        packageCount: calculatedPackageCount,
       },
     });
 
     // 11. Enregistrer l'événement de validation dans l'historique (QuoteLog)
     // Permet de tracer la validation du devis et la création de l'expédition associée
+    // Le packageCount enrichit le log pour la timeline multi-colis
     await logQuoteTreatmentValidated({
       quoteId: quoteId,
       changedById: session.user.id,
       shipmentId: result.shipment.id,
       notes: validatedData.comment || `Devis validé - Expédition ${result.shipment.trackingNumber} créée`,
+      packageCount: calculatedPackageCount,
     });
 
     // 12. Revalider les caches
@@ -2467,7 +2689,9 @@ export async function createGuestQuoteAction(
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + 30);
 
-    // 5. Créer le devis (utilise prisma standard car pas de session)
+    // 5. Créer le devis avec un QuotePackage unique (rétrocompatibilité)
+    // Les devis guest utilisent les champs plats → on crée un package unique automatiquement
+    // pour que le système multi-colis fonctionne de manière uniforme
     const quote = await prisma.quote.create({
       data: {
         // Identifiants
@@ -2484,7 +2708,7 @@ export async function createGuestQuoteAction(
         originCountry: validated.originCountry,
         destinationCountry: validated.destinationCountry,
 
-        // Marchandise
+        // Marchandise (agrégats — source de vérité dans packages[])
         cargoType: validated.cargoType,
         weight: validated.weight,
         length: validated.length || null,
@@ -2507,6 +2731,21 @@ export async function createGuestQuoteAction(
         // clientId: null (pas rattaché)
         // createdById: null (création publique)
         isAttachedToAccount: false,
+
+        // Création automatique d'un QuotePackage unique depuis les champs plats
+        // Permet au système multi-colis de fonctionner uniformément
+        packages: {
+          create: {
+            description: null,
+            quantity: 1,
+            cargoType: validated.cargoType,
+            weight: validated.weight,
+            length: validated.length || null,
+            width: validated.width || null,
+            height: validated.height || null,
+            unitPrice: estimatedCost > 0 ? estimatedCost : null,
+          },
+        },
       },
     });
 

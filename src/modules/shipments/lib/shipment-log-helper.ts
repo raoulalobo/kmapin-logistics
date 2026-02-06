@@ -226,7 +226,12 @@ export async function createShipmentLog(params: {
 export async function logShipmentCreated(
   params: BaseLogParams & {
     initialStatus?: ShipmentStatus;
-    metadata?: { source: 'quote' | 'dashboard' | 'api'; quoteId?: string };
+    metadata?: {
+      source: 'quote' | 'dashboard' | 'api';
+      quoteId?: string;
+      /** Nombre total de colis transférés depuis le devis */
+      packageCount?: number;
+    };
   }
 ) {
   return await createShipmentLog({

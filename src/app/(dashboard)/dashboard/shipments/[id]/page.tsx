@@ -292,21 +292,12 @@ export default async function ShipmentDetailPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Résumé global : poids total, nombre de colis, volume, valeur, priorité */}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="flex items-center gap-3">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Type</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatCargoType(shipment.cargoType)}
-                </p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-3">
               <Scales className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Poids</p>
+                <p className="text-sm font-medium">Poids total</p>
                 <p className="text-sm text-muted-foreground">
                   {shipment.weight} kg
                 </p>
@@ -360,12 +351,103 @@ export default async function ShipmentDetailPage({
 
           <Separator className="my-4" />
 
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Description</p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {shipment.description}
-            </p>
-          </div>
+          {/* Tableau détaillé des colis (ShipmentPackage) */}
+          {shipment.packages && shipment.packages.length > 0 ? (
+            <div className="space-y-3">
+              <p className="text-sm font-medium">Détail des colis</p>
+              <div className="overflow-x-auto rounded-lg border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">#</th>
+                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Description</th>
+                      <th className="text-center px-3 py-2 font-medium text-muted-foreground">Qté</th>
+                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Type</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Poids unit.</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Dimensions (cm)</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Poids total</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Prix unit.</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shipment.packages.map((pkg, index) => (
+                      <tr key={pkg.id} className="border-t">
+                        <td className="px-3 py-2 text-muted-foreground">{index + 1}</td>
+                        <td className="px-3 py-2">{pkg.description || '—'}</td>
+                        <td className="px-3 py-2 text-center">{pkg.quantity}</td>
+                        <td className="px-3 py-2">{formatCargoType(pkg.cargoType)}</td>
+                        <td className="px-3 py-2 text-right">{pkg.weight} kg</td>
+                        <td className="px-3 py-2 text-right text-muted-foreground">
+                          {pkg.length && pkg.width && pkg.height
+                            ? `${pkg.length} × ${pkg.width} × ${pkg.height}`
+                            : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right font-medium">
+                          {(pkg.weight * pkg.quantity).toFixed(1)} kg
+                        </td>
+                        {/* Prix unitaire calculé par le moteur de pricing */}
+                        <td className="px-3 py-2 text-right">
+                          {pkg.unitPrice != null
+                            ? `${pkg.unitPrice.toFixed(2)} ${shipment.currency}`
+                            : '—'}
+                        </td>
+                        {/* Montant = prix unitaire × quantité */}
+                        <td className="px-3 py-2 text-right font-medium">
+                          {pkg.unitPrice != null
+                            ? `${(pkg.unitPrice * pkg.quantity).toFixed(2)} ${shipment.currency}`
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  {/* Ligne de totaux */}
+                  <tfoot>
+                    <tr className="border-t bg-muted/30 font-medium">
+                      <td className="px-3 py-2" colSpan={2}>Total</td>
+                      <td className="px-3 py-2 text-center">
+                        {shipment.packages.reduce((sum, pkg) => sum + pkg.quantity, 0)}
+                      </td>
+                      <td className="px-3 py-2" colSpan={3}></td>
+                      <td className="px-3 py-2 text-right">
+                        {shipment.packages.reduce((sum, pkg) => sum + pkg.weight * pkg.quantity, 0).toFixed(1)} kg
+                      </td>
+                      {/* Cellule vide sous "Prix unit." */}
+                      <td className="px-3 py-2"></td>
+                      {/* Somme des montants de tous les colis */}
+                      <td className="px-3 py-2 text-right">
+                        {shipment.packages.reduce((sum, pkg) => sum + ((pkg.unitPrice ?? 0) * pkg.quantity), 0).toFixed(2)} {shipment.currency}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          ) : (
+            /* Fallback pour les anciennes expéditions sans ShipmentPackage */
+            <div className="flex items-center gap-3">
+              <Package className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Type de marchandise</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatCargoType(shipment.cargoType)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Description générale */}
+          {shipment.description && (
+            <>
+              <Separator className="my-4" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Description</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {shipment.description}
+                </p>
+              </div>
+            </>
+          )}
 
           {shipment.specialInstructions && (
             <div className="space-y-2 mt-4">

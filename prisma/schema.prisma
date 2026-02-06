@@ -275,10 +275,10 @@ model Client {
 }
 
 model Shipment {
-  id                    String          @id() @default(cuid())
-  trackingNumber        String          @unique()
+  id                    String            @id() @default(cuid())
+  trackingNumber        String            @unique()
   clientId              String?
-  client                Client?         @relation(fields: [clientId], references: [id])
+  client                Client?           @relation(fields: [clientId], references: [id])
   originAddress         String
   originCity            String
   originPostalCode      String
@@ -300,32 +300,33 @@ model Shipment {
   height                Float?
   packageCount          Int
   value                 Float?
-  currency              String          @default("EUR")
+  currency              String            @default("EUR")
   description           String
   specialInstructions   String?
   transportMode         TransportMode[]
-  priority              Priority        @default(STANDARD)
-  isDangerous           Boolean         @default(false)
-  isFragile             Boolean         @default(false)
+  priority              Priority          @default(STANDARD)
+  isDangerous           Boolean           @default(false)
+  isFragile             Boolean           @default(false)
   requestedPickupDate   DateTime?
   actualPickupDate      DateTime?
   estimatedDeliveryDate DateTime?
   actualDeliveryDate    DateTime?
-  status                ShipmentStatus  @default(DRAFT)
+  status                ShipmentStatus    @default(DRAFT)
   estimatedCost         Float?
   actualCost            Float?
   paymentReceivedAt     DateTime?
   paymentReceivedById   String?
-  paymentReceivedBy     User?           @relation("ShipmentPaymentReceiver", fields: [paymentReceivedById], references: [id])
+  paymentReceivedBy     User?             @relation("ShipmentPaymentReceiver", fields: [paymentReceivedById], references: [id])
   createdById           String
-  createdBy             User            @relation("CreatedBy", fields: [createdById], references: [id])
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt()
+  createdBy             User              @relation("CreatedBy", fields: [createdById], references: [id])
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt()
   trackingEvents        TrackingEvent[]
   documents             Document[]
   pickupRequests        PickupRequest[]
-  fromQuote             Quote?          @relation("QuoteToShipment")
+  fromQuote             Quote?            @relation("QuoteToShipment")
   logs                  ShipmentLog[]
+  packages              ShipmentPackage[]
 
   @@index([clientId])
   @@index([trackingNumber])
@@ -333,6 +334,24 @@ model Shipment {
   @@index([createdAt])
   @@index([originEmail])
   @@index([destinationEmail])
+}
+
+model ShipmentPackage {
+  id          String    @id() @default(cuid())
+  shipmentId  String
+  shipment    Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  description String?
+  quantity    Int       @default(1)
+  cargoType   CargoType
+  weight      Float
+  length      Float?
+  width       Float?
+  height      Float?
+  unitPrice   Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt()
+
+  @@index([shipmentId])
 }
 
 model PickupRequest {
@@ -591,6 +610,7 @@ model Quote {
   createdBy               User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
   documents               Document[]
   logs                    QuoteLog[]
+  packages                QuotePackage[]
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt()
 
@@ -604,6 +624,24 @@ model Quote {
   @@index([destinationContactEmail])
   @@index([originCity])
   @@index([destinationCity])
+}
+
+model QuotePackage {
+  id          String    @id() @default(cuid())
+  quoteId     String
+  quote       Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  description String?
+  quantity    Int       @default(1)
+  cargoType   CargoType
+  weight      Float
+  length      Float?
+  width       Float?
+  height      Float?
+  unitPrice   Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt()
+
+  @@index([quoteId])
 }
 
 model QuoteLog {

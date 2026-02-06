@@ -305,7 +305,7 @@ function renderMetadata(
   if (!metadata) return null;
 
   switch (eventType) {
-    // Création avec source
+    // Création avec source et résumé colis (enrichi multi-colis)
     case ShipmentLogEventType.CREATED:
       return (
         <div className="text-sm text-muted-foreground">
@@ -323,6 +323,12 @@ function renderMetadata(
           )}
           {metadata.quoteId && (
             <p>Devis : {metadata.quoteId as string}</p>
+          )}
+          {/* Nombre de colis transférés depuis le devis (enrichi multi-colis) */}
+          {metadata.packageCount && (
+            <p>
+              {metadata.packageCount as number} colis transféré{(metadata.packageCount as number) > 1 ? 's' : ''} depuis le devis
+            </p>
           )}
         </div>
       );

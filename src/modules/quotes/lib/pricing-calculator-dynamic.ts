@@ -541,6 +541,291 @@ export async function calculerPrixDevisDynamic(
   };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// CALCUL MULTI-PACKAGES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Entrée pour un colis individuel dans le calcul multi-packages
+ *
+ * Chaque colis a ses propres caractéristiques (type, poids, dimensions)
+ * et une quantité pour les colis identiques regroupés sur une même ligne.
+ *
+ * @example
+ * // 3 cartons GENERAL de 15 kg, 60×40×40 cm
+ * {
+ *   description: "Cartons vêtements",
+ *   quantity: 3,
+ *   cargoType: "GENERAL",
+ *   weight: 15,       // poids UNITAIRE
+ *   length: 60,
+ *   width: 40,
+ *   height: 40,
+ * }
+ */
+export interface PackageInput {
+  /** Description libre du colis (optionnel) */
+  description?: string;
+
+  /** Nombre de colis identiques dans cette ligne (défaut: 1) */
+  quantity: number;
+
+  /** Type de marchandise spécifique à ce colis */
+  cargoType: CargoTypeForPricing;
+
+  /** Poids UNITAIRE en kg */
+  weight: number;
+
+  /** Longueur unitaire en cm (optionnel) */
+  length?: number;
+
+  /** Largeur unitaire en cm (optionnel) */
+  width?: number;
+
+  /** Hauteur unitaire en cm (optionnel) */
+  height?: number;
+}
+
+/**
+ * Entrées pour le calcul multi-packages
+ *
+ * Contient la liste des colis + les paramètres globaux du devis
+ * (route, mode de transport, priorité).
+ */
+export interface MultiPackageInput {
+  /** Liste des colis à calculer (min 1, max 50) */
+  packages: PackageInput[];
+
+  /** Mode de transport principal */
+  modeTransport: TransportMode;
+
+  /** Priorité de livraison (défaut: STANDARD) */
+  priorite?: PriorityType;
+
+  /** Code pays d'origine (ISO 2 lettres, ex: FR, BF) */
+  paysOrigine: string;
+
+  /** Code pays de destination (ISO 2 lettres, ex: FR, BF) */
+  paysDestination: string;
+}
+
+/**
+ * Résultat du calcul pour UN colis (une ligne)
+ *
+ * Contient le prix unitaire calculé via calculerPrixDevisDynamic()
+ * ainsi que le total de la ligne (unitPrice × quantity).
+ */
+export interface PackageLineResult {
+  /** Description du colis (si fournie) */
+  description?: string;
+
+  /** Quantité de colis identiques */
+  quantity: number;
+
+  /** Type de marchandise */
+  cargoType: CargoTypeForPricing;
+
+  /** Poids unitaire en kg */
+  weight: number;
+
+  /** Prix unitaire calculé (pour 1 colis de cette ligne) */
+  unitPrice: number;
+
+  /** Total de la ligne = unitPrice × quantity */
+  lineTotal: number;
+
+  /** Résultat détaillé du calcul unitaire (volume, masse taxable, etc.) */
+  detail: QuotePricingResultDynamic;
+}
+
+/**
+ * Résultat global du calcul multi-packages
+ *
+ * Contient le détail par ligne + les agrégats globaux
+ * (poids total, nombre total de colis, prix total).
+ */
+export interface MultiPackageResult {
+  /** Détail du calcul pour chaque ligne de colis */
+  lines: PackageLineResult[];
+
+  /** Nombre total de colis (somme des quantités) */
+  totalPackageCount: number;
+
+  /** Poids total en kg (somme de weight × quantity pour chaque ligne) */
+  totalWeight: number;
+
+  /** Prix total AVANT surcharge priorité (somme des lineTotal après surcharge cargo) */
+  totalBeforePriority: number;
+
+  /** Prix total FINAL après toutes les surcharges */
+  totalPrice: number;
+
+  /** Devise (EUR) */
+  devise: string;
+
+  /** Route utilisée */
+  route: {
+    origine: string;
+    destination: string;
+    axe: string;
+  };
+
+  /** Mode de transport */
+  modeTransport: TransportMode;
+
+  /** Priorité appliquée */
+  priorite: PriorityType;
+
+  /** Type de marchandise dominant (le plus fréquent parmi les colis) */
+  dominantCargoType: CargoTypeForPricing;
+}
+
+/**
+ * === FONCTION PRINCIPALE : Calculer le prix pour PLUSIEURS colis ===
+ *
+ * Orchestre le calcul de prix pour un devis multi-colis :
+ * 1. Itère sur chaque ligne de colis
+ * 2. Calcule le prix UNITAIRE via calculerPrixDevisDynamic() (inclut surcharge cargo)
+ * 3. Multiplie par la quantité pour obtenir le total de la ligne
+ * 4. Somme tous les totaux de ligne pour le prix global
+ *
+ * NOTE IMPORTANTE sur la priorité :
+ * La surcharge priorité est appliquée UNE SEULE FOIS sur le total global,
+ * pas individuellement par colis. Chaque appel à calculerPrixDevisDynamic()
+ * utilise priorite='STANDARD' pour calculer le prix unitaire (sans surcharge priorité),
+ * puis la priorité est appliquée au total final.
+ *
+ * @param input - Liste des colis + paramètres globaux (route, mode, priorité)
+ * @returns Résultat détaillé avec prix par ligne et totaux globaux
+ *
+ * @example
+ * ```typescript
+ * const result = await calculerPrixMultiPackages({
+ *   packages: [
+ *     { quantity: 1, cargoType: 'FRAGILE', weight: 2, length: 30, width: 20, height: 5, description: 'Tablette' },
+ *     { quantity: 3, cargoType: 'GENERAL', weight: 15, length: 60, width: 40, height: 40, description: 'Cartons' },
+ *   ],
+ *   modeTransport: 'AIR',
+ *   priorite: 'URGENT',
+ *   paysOrigine: 'FR',
+ *   paysDestination: 'BF',
+ * });
+ *
+ * // result.lines[0].unitPrice = prix pour 1 tablette (FRAGILE, 2kg)
+ * // result.lines[0].lineTotal = unitPrice × 1
+ * // result.lines[1].unitPrice = prix pour 1 carton (GENERAL, 15kg)
+ * // result.lines[1].lineTotal = unitPrice × 3
+ * // result.totalPrice = somme des lineTotal × coefficient priorité URGENT
+ * ```
+ */
+export async function calculerPrixMultiPackages(
+  input: MultiPackageInput
+): Promise<MultiPackageResult> {
+  // Validation : au moins un colis requis
+  if (!input.packages || input.packages.length === 0) {
+    throw new Error('Au moins un colis est requis pour le calcul');
+  }
+
+  const priorite = input.priorite || 'STANDARD';
+  const lines: PackageLineResult[] = [];
+  let totalBeforePriority = 0;
+  let totalWeight = 0;
+  let totalPackageCount = 0;
+
+  // Compteur pour déterminer le type de marchandise dominant
+  const cargoTypeCounts: Record<string, number> = {};
+
+  // === Calcul ligne par ligne ===
+  for (const pkg of input.packages) {
+    // Calculer le prix UNITAIRE (1 colis) avec priorité STANDARD
+    // La surcharge priorité sera appliquée au total global, pas par colis
+    const detail = await calculerPrixDevisDynamic({
+      poidsReel: pkg.weight,
+      longueur: pkg.length || 0,
+      largeur: pkg.width || 0,
+      hauteur: pkg.height || 0,
+      modeTransport: input.modeTransport,
+      priorite: 'STANDARD', // Pas de surcharge priorité par colis
+      typeMarchandise: pkg.cargoType,
+      paysOrigine: input.paysOrigine,
+      paysDestination: input.paysDestination,
+    });
+
+    // Le prix unitaire inclut la surcharge cargo mais PAS la surcharge priorité
+    const unitPrice = detail.prixFinal;
+
+    // Total de la ligne = prix unitaire × quantité
+    const lineTotal = unitPrice * pkg.quantity;
+
+    lines.push({
+      description: pkg.description,
+      quantity: pkg.quantity,
+      cargoType: pkg.cargoType,
+      weight: pkg.weight,
+      unitPrice: Math.round(unitPrice * 100) / 100,
+      lineTotal: Math.round(lineTotal * 100) / 100,
+      detail,
+    });
+
+    // Accumuler les totaux
+    totalBeforePriority += lineTotal;
+    totalWeight += pkg.weight * pkg.quantity;
+    totalPackageCount += pkg.quantity;
+
+    // Compter les types de marchandise (pondéré par quantité)
+    const key = pkg.cargoType;
+    cargoTypeCounts[key] = (cargoTypeCounts[key] || 0) + pkg.quantity;
+  }
+
+  // === Application de la surcharge priorité sur le total global ===
+  // Récupérer le coefficient de priorité depuis la config (via le premier résultat)
+  // Note : on fait un appel "dummy" pour récupérer le coefficient si priorité != STANDARD
+  let coefficientPriorite = 1;
+  if (priorite !== 'STANDARD' && lines.length > 0) {
+    // Calculer avec la priorité demandée pour récupérer le coefficient
+    const refResult = await calculerPrixDevisDynamic({
+      poidsReel: lines[0].weight,
+      longueur: 0,
+      largeur: 0,
+      hauteur: 0,
+      modeTransport: input.modeTransport,
+      priorite: priorite,
+      typeMarchandise: 'GENERAL',
+      paysOrigine: input.paysOrigine,
+      paysDestination: input.paysDestination,
+    });
+    coefficientPriorite = refResult.coefficientPriorite;
+  }
+
+  // Prix total = somme des lignes × coefficient priorité
+  const totalPrice = totalBeforePriority * coefficientPriorite;
+
+  // Déterminer le type de marchandise dominant (le plus fréquent)
+  const dominantCargoType = (Object.entries(cargoTypeCounts)
+    .sort(([, a], [, b]) => b - a)[0]?.[0] || 'GENERAL') as CargoTypeForPricing;
+
+  // Normaliser les codes pays
+  const origineNorm = input.paysOrigine.toUpperCase();
+  const destinationNorm = input.paysDestination.toUpperCase();
+
+  return {
+    lines,
+    totalPackageCount,
+    totalWeight: Math.round(totalWeight * 100) / 100,
+    totalBeforePriority: Math.round(totalBeforePriority * 100) / 100,
+    totalPrice: Math.round(totalPrice * 100) / 100,
+    devise: 'EUR',
+    route: {
+      origine: origineNorm,
+      destination: destinationNorm,
+      axe: `${origineNorm} → ${destinationNorm}`,
+    },
+    modeTransport: input.modeTransport,
+    priorite,
+    dominantCargoType,
+  };
+}
+
 /**
  * === FONCTION UTILITAIRE : Formater le Résultat pour Affichage ===
  *

@@ -37,3 +37,6 @@ export { QuoteDeleteButton } from './quote-delete-button';
 
 // Bouton de soumission (client soumet son brouillon aux agents, DRAFT → SUBMITTED)
 export { QuoteSubmitButton } from './quote-submit-button';
+
+// Formulaire dynamique multi-colis (useFieldArray)
+export { PackageFieldArray } from './package-field-array';

@@ -49,6 +49,11 @@ export type Client = $Result.DefaultSelection<Prisma.$ClientPayload>
  */
 export type Shipment = $Result.DefaultSelection<Prisma.$ShipmentPayload>
 /**
+ * Model ShipmentPackage
+ * 
+ */
+export type ShipmentPackage = $Result.DefaultSelection<Prisma.$ShipmentPackagePayload>
+/**
  * Model PickupRequest
  * 
  */
@@ -83,6 +88,11 @@ export type ShipmentLog = $Result.DefaultSelection<Prisma.$ShipmentLogPayload>
  * 
  */
 export type Quote = $Result.DefaultSelection<Prisma.$QuotePayload>
+/**
+ * Model QuotePackage
+ * 
+ */
+export type QuotePackage = $Result.DefaultSelection<Prisma.$QuotePackagePayload>
 /**
  * Model QuoteLog
  * 
@@ -561,6 +571,16 @@ export class PrismaClient<
   get shipment(): Prisma.ShipmentDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.shipmentPackage`: Exposes CRUD operations for the **ShipmentPackage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ShipmentPackages
+    * const shipmentPackages = await prisma.shipmentPackage.findMany()
+    * ```
+    */
+  get shipmentPackage(): Prisma.ShipmentPackageDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.pickupRequest`: Exposes CRUD operations for the **PickupRequest** model.
     * Example usage:
     * ```ts
@@ -629,6 +649,16 @@ export class PrismaClient<
     * ```
     */
   get quote(): Prisma.QuoteDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.quotePackage`: Exposes CRUD operations for the **QuotePackage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more QuotePackages
+    * const quotePackages = await prisma.quotePackage.findMany()
+    * ```
+    */
+  get quotePackage(): Prisma.QuotePackageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.quoteLog`: Exposes CRUD operations for the **QuoteLog** model.
@@ -1167,6 +1197,7 @@ export namespace Prisma {
     Verification: 'Verification',
     Client: 'Client',
     Shipment: 'Shipment',
+    ShipmentPackage: 'ShipmentPackage',
     PickupRequest: 'PickupRequest',
     PickupLog: 'PickupLog',
     PurchaseRequest: 'PurchaseRequest',
@@ -1174,6 +1205,7 @@ export namespace Prisma {
     TrackingEvent: 'TrackingEvent',
     ShipmentLog: 'ShipmentLog',
     Quote: 'Quote',
+    QuotePackage: 'QuotePackage',
     QuoteLog: 'QuoteLog',
     Prospect: 'Prospect',
     Notification: 'Notification',
@@ -1201,7 +1233,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "verification" | "client" | "shipment" | "pickupRequest" | "pickupLog" | "purchaseRequest" | "purchaseLog" | "trackingEvent" | "shipmentLog" | "quote" | "quoteLog" | "prospect" | "notification" | "document" | "pricingConfig" | "countryDistance" | "transportRate" | "country" | "systemConfig"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "verification" | "client" | "shipment" | "shipmentPackage" | "pickupRequest" | "pickupLog" | "purchaseRequest" | "purchaseLog" | "trackingEvent" | "shipmentLog" | "quote" | "quotePackage" | "quoteLog" | "prospect" | "notification" | "document" | "pricingConfig" | "countryDistance" | "transportRate" | "country" | "systemConfig"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1723,6 +1755,80 @@ export namespace Prisma {
           }
         }
       }
+      ShipmentPackage: {
+        payload: Prisma.$ShipmentPackagePayload<ExtArgs>
+        fields: Prisma.ShipmentPackageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ShipmentPackageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ShipmentPackageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          findFirst: {
+            args: Prisma.ShipmentPackageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ShipmentPackageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          findMany: {
+            args: Prisma.ShipmentPackageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>[]
+          }
+          create: {
+            args: Prisma.ShipmentPackageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          createMany: {
+            args: Prisma.ShipmentPackageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ShipmentPackageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>[]
+          }
+          delete: {
+            args: Prisma.ShipmentPackageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          update: {
+            args: Prisma.ShipmentPackageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          deleteMany: {
+            args: Prisma.ShipmentPackageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ShipmentPackageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ShipmentPackageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>[]
+          }
+          upsert: {
+            args: Prisma.ShipmentPackageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShipmentPackagePayload>
+          }
+          aggregate: {
+            args: Prisma.ShipmentPackageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateShipmentPackage>
+          }
+          groupBy: {
+            args: Prisma.ShipmentPackageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ShipmentPackageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ShipmentPackageCountArgs<ExtArgs>
+            result: $Utils.Optional<ShipmentPackageCountAggregateOutputType> | number
+          }
+        }
+      }
       PickupRequest: {
         payload: Prisma.$PickupRequestPayload<ExtArgs>
         fields: Prisma.PickupRequestFieldRefs
@@ -2238,6 +2344,80 @@ export namespace Prisma {
           count: {
             args: Prisma.QuoteCountArgs<ExtArgs>
             result: $Utils.Optional<QuoteCountAggregateOutputType> | number
+          }
+        }
+      }
+      QuotePackage: {
+        payload: Prisma.$QuotePackagePayload<ExtArgs>
+        fields: Prisma.QuotePackageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.QuotePackageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.QuotePackageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          findFirst: {
+            args: Prisma.QuotePackageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.QuotePackageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          findMany: {
+            args: Prisma.QuotePackageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>[]
+          }
+          create: {
+            args: Prisma.QuotePackageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          createMany: {
+            args: Prisma.QuotePackageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.QuotePackageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>[]
+          }
+          delete: {
+            args: Prisma.QuotePackageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          update: {
+            args: Prisma.QuotePackageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          deleteMany: {
+            args: Prisma.QuotePackageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.QuotePackageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.QuotePackageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>[]
+          }
+          upsert: {
+            args: Prisma.QuotePackageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuotePackagePayload>
+          }
+          aggregate: {
+            args: Prisma.QuotePackageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuotePackage>
+          }
+          groupBy: {
+            args: Prisma.QuotePackageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<QuotePackageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.QuotePackageCountArgs<ExtArgs>
+            result: $Utils.Optional<QuotePackageCountAggregateOutputType> | number
           }
         }
       }
@@ -3010,6 +3190,7 @@ export namespace Prisma {
     verification?: VerificationOmit
     client?: ClientOmit
     shipment?: ShipmentOmit
+    shipmentPackage?: ShipmentPackageOmit
     pickupRequest?: PickupRequestOmit
     pickupLog?: PickupLogOmit
     purchaseRequest?: PurchaseRequestOmit
@@ -3017,6 +3198,7 @@ export namespace Prisma {
     trackingEvent?: TrackingEventOmit
     shipmentLog?: ShipmentLogOmit
     quote?: QuoteOmit
+    quotePackage?: QuotePackageOmit
     quoteLog?: QuoteLogOmit
     prospect?: ProspectOmit
     notification?: NotificationOmit
@@ -3397,6 +3579,7 @@ export namespace Prisma {
     documents: number
     pickupRequests: number
     logs: number
+    packages: number
   }
 
   export type ShipmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3404,6 +3587,7 @@ export namespace Prisma {
     documents?: boolean | ShipmentCountOutputTypeCountDocumentsArgs
     pickupRequests?: boolean | ShipmentCountOutputTypeCountPickupRequestsArgs
     logs?: boolean | ShipmentCountOutputTypeCountLogsArgs
+    packages?: boolean | ShipmentCountOutputTypeCountPackagesArgs
   }
 
   // Custom InputTypes
@@ -3443,6 +3627,13 @@ export namespace Prisma {
    */
   export type ShipmentCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ShipmentLogWhereInput
+  }
+
+  /**
+   * ShipmentCountOutputType without action
+   */
+  export type ShipmentCountOutputTypeCountPackagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShipmentPackageWhereInput
   }
 
 
@@ -3533,11 +3724,13 @@ export namespace Prisma {
   export type QuoteCountOutputType = {
     documents: number
     logs: number
+    packages: number
   }
 
   export type QuoteCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     documents?: boolean | QuoteCountOutputTypeCountDocumentsArgs
     logs?: boolean | QuoteCountOutputTypeCountLogsArgs
+    packages?: boolean | QuoteCountOutputTypeCountPackagesArgs
   }
 
   // Custom InputTypes
@@ -3563,6 +3756,13 @@ export namespace Prisma {
    */
   export type QuoteCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: QuoteLogWhereInput
+  }
+
+  /**
+   * QuoteCountOutputType without action
+   */
+  export type QuoteCountOutputTypeCountPackagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuotePackageWhereInput
   }
 
 
@@ -11488,6 +11688,7 @@ export namespace Prisma {
     pickupRequests?: boolean | Shipment$pickupRequestsArgs<ExtArgs>
     fromQuote?: boolean | Shipment$fromQuoteArgs<ExtArgs>
     logs?: boolean | Shipment$logsArgs<ExtArgs>
+    packages?: boolean | Shipment$packagesArgs<ExtArgs>
     _count?: boolean | ShipmentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["shipment"]>
 
@@ -11645,6 +11846,7 @@ export namespace Prisma {
     pickupRequests?: boolean | Shipment$pickupRequestsArgs<ExtArgs>
     fromQuote?: boolean | Shipment$fromQuoteArgs<ExtArgs>
     logs?: boolean | Shipment$logsArgs<ExtArgs>
+    packages?: boolean | Shipment$packagesArgs<ExtArgs>
     _count?: boolean | ShipmentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ShipmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11669,6 +11871,7 @@ export namespace Prisma {
       pickupRequests: Prisma.$PickupRequestPayload<ExtArgs>[]
       fromQuote: Prisma.$QuotePayload<ExtArgs> | null
       logs: Prisma.$ShipmentLogPayload<ExtArgs>[]
+      packages: Prisma.$ShipmentPackagePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12116,6 +12319,7 @@ export namespace Prisma {
     pickupRequests<T extends Shipment$pickupRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$pickupRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PickupRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     fromQuote<T extends Shipment$fromQuoteArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$fromQuoteArgs<ExtArgs>>): Prisma__QuoteClient<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     logs<T extends Shipment$logsArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    packages<T extends Shipment$packagesArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12737,6 +12941,30 @@ export namespace Prisma {
   }
 
   /**
+   * Shipment.packages
+   */
+  export type Shipment$packagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    where?: ShipmentPackageWhereInput
+    orderBy?: ShipmentPackageOrderByWithRelationInput | ShipmentPackageOrderByWithRelationInput[]
+    cursor?: ShipmentPackageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ShipmentPackageScalarFieldEnum | ShipmentPackageScalarFieldEnum[]
+  }
+
+  /**
    * Shipment without action
    */
   export type ShipmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12752,6 +12980,1209 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ShipmentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ShipmentPackage
+   */
+
+  export type AggregateShipmentPackage = {
+    _count: ShipmentPackageCountAggregateOutputType | null
+    _avg: ShipmentPackageAvgAggregateOutputType | null
+    _sum: ShipmentPackageSumAggregateOutputType | null
+    _min: ShipmentPackageMinAggregateOutputType | null
+    _max: ShipmentPackageMaxAggregateOutputType | null
+  }
+
+  export type ShipmentPackageAvgAggregateOutputType = {
+    quantity: number | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+  }
+
+  export type ShipmentPackageSumAggregateOutputType = {
+    quantity: number | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+  }
+
+  export type ShipmentPackageMinAggregateOutputType = {
+    id: string | null
+    shipmentId: string | null
+    description: string | null
+    quantity: number | null
+    cargoType: $Enums.CargoType | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ShipmentPackageMaxAggregateOutputType = {
+    id: string | null
+    shipmentId: string | null
+    description: string | null
+    quantity: number | null
+    cargoType: $Enums.CargoType | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ShipmentPackageCountAggregateOutputType = {
+    id: number
+    shipmentId: number
+    description: number
+    quantity: number
+    cargoType: number
+    weight: number
+    length: number
+    width: number
+    height: number
+    unitPrice: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ShipmentPackageAvgAggregateInputType = {
+    quantity?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+  }
+
+  export type ShipmentPackageSumAggregateInputType = {
+    quantity?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+  }
+
+  export type ShipmentPackageMinAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ShipmentPackageMaxAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ShipmentPackageCountAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ShipmentPackageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ShipmentPackage to aggregate.
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ShipmentPackages to fetch.
+     */
+    orderBy?: ShipmentPackageOrderByWithRelationInput | ShipmentPackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ShipmentPackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ShipmentPackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ShipmentPackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ShipmentPackages
+    **/
+    _count?: true | ShipmentPackageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ShipmentPackageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ShipmentPackageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ShipmentPackageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ShipmentPackageMaxAggregateInputType
+  }
+
+  export type GetShipmentPackageAggregateType<T extends ShipmentPackageAggregateArgs> = {
+        [P in keyof T & keyof AggregateShipmentPackage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateShipmentPackage[P]>
+      : GetScalarType<T[P], AggregateShipmentPackage[P]>
+  }
+
+
+
+
+  export type ShipmentPackageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShipmentPackageWhereInput
+    orderBy?: ShipmentPackageOrderByWithAggregationInput | ShipmentPackageOrderByWithAggregationInput[]
+    by: ShipmentPackageScalarFieldEnum[] | ShipmentPackageScalarFieldEnum
+    having?: ShipmentPackageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ShipmentPackageCountAggregateInputType | true
+    _avg?: ShipmentPackageAvgAggregateInputType
+    _sum?: ShipmentPackageSumAggregateInputType
+    _min?: ShipmentPackageMinAggregateInputType
+    _max?: ShipmentPackageMaxAggregateInputType
+  }
+
+  export type ShipmentPackageGroupByOutputType = {
+    id: string
+    shipmentId: string
+    description: string | null
+    quantity: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ShipmentPackageCountAggregateOutputType | null
+    _avg: ShipmentPackageAvgAggregateOutputType | null
+    _sum: ShipmentPackageSumAggregateOutputType | null
+    _min: ShipmentPackageMinAggregateOutputType | null
+    _max: ShipmentPackageMaxAggregateOutputType | null
+  }
+
+  type GetShipmentPackageGroupByPayload<T extends ShipmentPackageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ShipmentPackageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ShipmentPackageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ShipmentPackageGroupByOutputType[P]>
+            : GetScalarType<T[P], ShipmentPackageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ShipmentPackageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shipmentPackage"]>
+
+  export type ShipmentPackageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shipmentPackage"]>
+
+  export type ShipmentPackageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["shipmentPackage"]>
+
+  export type ShipmentPackageSelectScalar = {
+    id?: boolean
+    shipmentId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ShipmentPackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shipmentId" | "description" | "quantity" | "cargoType" | "weight" | "length" | "width" | "height" | "unitPrice" | "createdAt" | "updatedAt", ExtArgs["result"]["shipmentPackage"]>
+  export type ShipmentPackageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }
+  export type ShipmentPackageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }
+  export type ShipmentPackageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | ShipmentDefaultArgs<ExtArgs>
+  }
+
+  export type $ShipmentPackagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ShipmentPackage"
+    objects: {
+      shipment: Prisma.$ShipmentPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      shipmentId: string
+      description: string | null
+      quantity: number
+      cargoType: $Enums.CargoType
+      weight: number
+      length: number | null
+      width: number | null
+      height: number | null
+      unitPrice: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["shipmentPackage"]>
+    composites: {}
+  }
+
+  type ShipmentPackageGetPayload<S extends boolean | null | undefined | ShipmentPackageDefaultArgs> = $Result.GetResult<Prisma.$ShipmentPackagePayload, S>
+
+  type ShipmentPackageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ShipmentPackageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ShipmentPackageCountAggregateInputType | true
+    }
+
+  export interface ShipmentPackageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ShipmentPackage'], meta: { name: 'ShipmentPackage' } }
+    /**
+     * Find zero or one ShipmentPackage that matches the filter.
+     * @param {ShipmentPackageFindUniqueArgs} args - Arguments to find a ShipmentPackage
+     * @example
+     * // Get one ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ShipmentPackageFindUniqueArgs>(args: SelectSubset<T, ShipmentPackageFindUniqueArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ShipmentPackage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ShipmentPackageFindUniqueOrThrowArgs} args - Arguments to find a ShipmentPackage
+     * @example
+     * // Get one ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ShipmentPackageFindUniqueOrThrowArgs>(args: SelectSubset<T, ShipmentPackageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ShipmentPackage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageFindFirstArgs} args - Arguments to find a ShipmentPackage
+     * @example
+     * // Get one ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ShipmentPackageFindFirstArgs>(args?: SelectSubset<T, ShipmentPackageFindFirstArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ShipmentPackage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageFindFirstOrThrowArgs} args - Arguments to find a ShipmentPackage
+     * @example
+     * // Get one ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ShipmentPackageFindFirstOrThrowArgs>(args?: SelectSubset<T, ShipmentPackageFindFirstOrThrowArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ShipmentPackages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ShipmentPackages
+     * const shipmentPackages = await prisma.shipmentPackage.findMany()
+     * 
+     * // Get first 10 ShipmentPackages
+     * const shipmentPackages = await prisma.shipmentPackage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const shipmentPackageWithIdOnly = await prisma.shipmentPackage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ShipmentPackageFindManyArgs>(args?: SelectSubset<T, ShipmentPackageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ShipmentPackage.
+     * @param {ShipmentPackageCreateArgs} args - Arguments to create a ShipmentPackage.
+     * @example
+     * // Create one ShipmentPackage
+     * const ShipmentPackage = await prisma.shipmentPackage.create({
+     *   data: {
+     *     // ... data to create a ShipmentPackage
+     *   }
+     * })
+     * 
+     */
+    create<T extends ShipmentPackageCreateArgs>(args: SelectSubset<T, ShipmentPackageCreateArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ShipmentPackages.
+     * @param {ShipmentPackageCreateManyArgs} args - Arguments to create many ShipmentPackages.
+     * @example
+     * // Create many ShipmentPackages
+     * const shipmentPackage = await prisma.shipmentPackage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ShipmentPackageCreateManyArgs>(args?: SelectSubset<T, ShipmentPackageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ShipmentPackages and returns the data saved in the database.
+     * @param {ShipmentPackageCreateManyAndReturnArgs} args - Arguments to create many ShipmentPackages.
+     * @example
+     * // Create many ShipmentPackages
+     * const shipmentPackage = await prisma.shipmentPackage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ShipmentPackages and only return the `id`
+     * const shipmentPackageWithIdOnly = await prisma.shipmentPackage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ShipmentPackageCreateManyAndReturnArgs>(args?: SelectSubset<T, ShipmentPackageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ShipmentPackage.
+     * @param {ShipmentPackageDeleteArgs} args - Arguments to delete one ShipmentPackage.
+     * @example
+     * // Delete one ShipmentPackage
+     * const ShipmentPackage = await prisma.shipmentPackage.delete({
+     *   where: {
+     *     // ... filter to delete one ShipmentPackage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ShipmentPackageDeleteArgs>(args: SelectSubset<T, ShipmentPackageDeleteArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ShipmentPackage.
+     * @param {ShipmentPackageUpdateArgs} args - Arguments to update one ShipmentPackage.
+     * @example
+     * // Update one ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ShipmentPackageUpdateArgs>(args: SelectSubset<T, ShipmentPackageUpdateArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ShipmentPackages.
+     * @param {ShipmentPackageDeleteManyArgs} args - Arguments to filter ShipmentPackages to delete.
+     * @example
+     * // Delete a few ShipmentPackages
+     * const { count } = await prisma.shipmentPackage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ShipmentPackageDeleteManyArgs>(args?: SelectSubset<T, ShipmentPackageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ShipmentPackages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ShipmentPackages
+     * const shipmentPackage = await prisma.shipmentPackage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ShipmentPackageUpdateManyArgs>(args: SelectSubset<T, ShipmentPackageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ShipmentPackages and returns the data updated in the database.
+     * @param {ShipmentPackageUpdateManyAndReturnArgs} args - Arguments to update many ShipmentPackages.
+     * @example
+     * // Update many ShipmentPackages
+     * const shipmentPackage = await prisma.shipmentPackage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ShipmentPackages and only return the `id`
+     * const shipmentPackageWithIdOnly = await prisma.shipmentPackage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ShipmentPackageUpdateManyAndReturnArgs>(args: SelectSubset<T, ShipmentPackageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ShipmentPackage.
+     * @param {ShipmentPackageUpsertArgs} args - Arguments to update or create a ShipmentPackage.
+     * @example
+     * // Update or create a ShipmentPackage
+     * const shipmentPackage = await prisma.shipmentPackage.upsert({
+     *   create: {
+     *     // ... data to create a ShipmentPackage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ShipmentPackage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ShipmentPackageUpsertArgs>(args: SelectSubset<T, ShipmentPackageUpsertArgs<ExtArgs>>): Prisma__ShipmentPackageClient<$Result.GetResult<Prisma.$ShipmentPackagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ShipmentPackages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageCountArgs} args - Arguments to filter ShipmentPackages to count.
+     * @example
+     * // Count the number of ShipmentPackages
+     * const count = await prisma.shipmentPackage.count({
+     *   where: {
+     *     // ... the filter for the ShipmentPackages we want to count
+     *   }
+     * })
+    **/
+    count<T extends ShipmentPackageCountArgs>(
+      args?: Subset<T, ShipmentPackageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ShipmentPackageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ShipmentPackage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ShipmentPackageAggregateArgs>(args: Subset<T, ShipmentPackageAggregateArgs>): Prisma.PrismaPromise<GetShipmentPackageAggregateType<T>>
+
+    /**
+     * Group by ShipmentPackage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ShipmentPackageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ShipmentPackageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ShipmentPackageGroupByArgs['orderBy'] }
+        : { orderBy?: ShipmentPackageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ShipmentPackageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetShipmentPackageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ShipmentPackage model
+   */
+  readonly fields: ShipmentPackageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ShipmentPackage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ShipmentPackageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    shipment<T extends ShipmentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ShipmentDefaultArgs<ExtArgs>>): Prisma__ShipmentClient<$Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ShipmentPackage model
+   */
+  interface ShipmentPackageFieldRefs {
+    readonly id: FieldRef<"ShipmentPackage", 'String'>
+    readonly shipmentId: FieldRef<"ShipmentPackage", 'String'>
+    readonly description: FieldRef<"ShipmentPackage", 'String'>
+    readonly quantity: FieldRef<"ShipmentPackage", 'Int'>
+    readonly cargoType: FieldRef<"ShipmentPackage", 'CargoType'>
+    readonly weight: FieldRef<"ShipmentPackage", 'Float'>
+    readonly length: FieldRef<"ShipmentPackage", 'Float'>
+    readonly width: FieldRef<"ShipmentPackage", 'Float'>
+    readonly height: FieldRef<"ShipmentPackage", 'Float'>
+    readonly unitPrice: FieldRef<"ShipmentPackage", 'Float'>
+    readonly createdAt: FieldRef<"ShipmentPackage", 'DateTime'>
+    readonly updatedAt: FieldRef<"ShipmentPackage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ShipmentPackage findUnique
+   */
+  export type ShipmentPackageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter, which ShipmentPackage to fetch.
+     */
+    where: ShipmentPackageWhereUniqueInput
+  }
+
+  /**
+   * ShipmentPackage findUniqueOrThrow
+   */
+  export type ShipmentPackageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter, which ShipmentPackage to fetch.
+     */
+    where: ShipmentPackageWhereUniqueInput
+  }
+
+  /**
+   * ShipmentPackage findFirst
+   */
+  export type ShipmentPackageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter, which ShipmentPackage to fetch.
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ShipmentPackages to fetch.
+     */
+    orderBy?: ShipmentPackageOrderByWithRelationInput | ShipmentPackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ShipmentPackages.
+     */
+    cursor?: ShipmentPackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ShipmentPackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ShipmentPackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ShipmentPackages.
+     */
+    distinct?: ShipmentPackageScalarFieldEnum | ShipmentPackageScalarFieldEnum[]
+  }
+
+  /**
+   * ShipmentPackage findFirstOrThrow
+   */
+  export type ShipmentPackageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter, which ShipmentPackage to fetch.
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ShipmentPackages to fetch.
+     */
+    orderBy?: ShipmentPackageOrderByWithRelationInput | ShipmentPackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ShipmentPackages.
+     */
+    cursor?: ShipmentPackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ShipmentPackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ShipmentPackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ShipmentPackages.
+     */
+    distinct?: ShipmentPackageScalarFieldEnum | ShipmentPackageScalarFieldEnum[]
+  }
+
+  /**
+   * ShipmentPackage findMany
+   */
+  export type ShipmentPackageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter, which ShipmentPackages to fetch.
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ShipmentPackages to fetch.
+     */
+    orderBy?: ShipmentPackageOrderByWithRelationInput | ShipmentPackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ShipmentPackages.
+     */
+    cursor?: ShipmentPackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ShipmentPackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ShipmentPackages.
+     */
+    skip?: number
+    distinct?: ShipmentPackageScalarFieldEnum | ShipmentPackageScalarFieldEnum[]
+  }
+
+  /**
+   * ShipmentPackage create
+   */
+  export type ShipmentPackageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ShipmentPackage.
+     */
+    data: XOR<ShipmentPackageCreateInput, ShipmentPackageUncheckedCreateInput>
+  }
+
+  /**
+   * ShipmentPackage createMany
+   */
+  export type ShipmentPackageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ShipmentPackages.
+     */
+    data: ShipmentPackageCreateManyInput | ShipmentPackageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ShipmentPackage createManyAndReturn
+   */
+  export type ShipmentPackageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * The data used to create many ShipmentPackages.
+     */
+    data: ShipmentPackageCreateManyInput | ShipmentPackageCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ShipmentPackage update
+   */
+  export type ShipmentPackageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ShipmentPackage.
+     */
+    data: XOR<ShipmentPackageUpdateInput, ShipmentPackageUncheckedUpdateInput>
+    /**
+     * Choose, which ShipmentPackage to update.
+     */
+    where: ShipmentPackageWhereUniqueInput
+  }
+
+  /**
+   * ShipmentPackage updateMany
+   */
+  export type ShipmentPackageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ShipmentPackages.
+     */
+    data: XOR<ShipmentPackageUpdateManyMutationInput, ShipmentPackageUncheckedUpdateManyInput>
+    /**
+     * Filter which ShipmentPackages to update
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * Limit how many ShipmentPackages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ShipmentPackage updateManyAndReturn
+   */
+  export type ShipmentPackageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * The data used to update ShipmentPackages.
+     */
+    data: XOR<ShipmentPackageUpdateManyMutationInput, ShipmentPackageUncheckedUpdateManyInput>
+    /**
+     * Filter which ShipmentPackages to update
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * Limit how many ShipmentPackages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ShipmentPackage upsert
+   */
+  export type ShipmentPackageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ShipmentPackage to update in case it exists.
+     */
+    where: ShipmentPackageWhereUniqueInput
+    /**
+     * In case the ShipmentPackage found by the `where` argument doesn't exist, create a new ShipmentPackage with this data.
+     */
+    create: XOR<ShipmentPackageCreateInput, ShipmentPackageUncheckedCreateInput>
+    /**
+     * In case the ShipmentPackage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ShipmentPackageUpdateInput, ShipmentPackageUncheckedUpdateInput>
+  }
+
+  /**
+   * ShipmentPackage delete
+   */
+  export type ShipmentPackageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
+    /**
+     * Filter which ShipmentPackage to delete.
+     */
+    where: ShipmentPackageWhereUniqueInput
+  }
+
+  /**
+   * ShipmentPackage deleteMany
+   */
+  export type ShipmentPackageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ShipmentPackages to delete
+     */
+    where?: ShipmentPackageWhereInput
+    /**
+     * Limit how many ShipmentPackages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ShipmentPackage without action
+   */
+  export type ShipmentPackageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShipmentPackage
+     */
+    select?: ShipmentPackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShipmentPackage
+     */
+    omit?: ShipmentPackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentPackageInclude<ExtArgs> | null
   }
 
 
@@ -21288,6 +22719,7 @@ export namespace Prisma {
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
     documents?: boolean | Quote$documentsArgs<ExtArgs>
     logs?: boolean | Quote$logsArgs<ExtArgs>
+    packages?: boolean | Quote$packagesArgs<ExtArgs>
     _count?: boolean | QuoteCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
@@ -21478,6 +22910,7 @@ export namespace Prisma {
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
     documents?: boolean | Quote$documentsArgs<ExtArgs>
     logs?: boolean | Quote$logsArgs<ExtArgs>
+    packages?: boolean | Quote$packagesArgs<ExtArgs>
     _count?: boolean | QuoteCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type QuoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -21511,6 +22944,7 @@ export namespace Prisma {
       createdBy: Prisma.$UserPayload<ExtArgs> | null
       documents: Prisma.$DocumentPayload<ExtArgs>[]
       logs: Prisma.$QuoteLogPayload<ExtArgs>[]
+      packages: Prisma.$QuotePackagePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -21967,6 +23401,7 @@ export namespace Prisma {
     createdBy<T extends Quote$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Quote$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     documents<T extends Quote$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Quote$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     logs<T extends Quote$logsArgs<ExtArgs> = {}>(args?: Subset<T, Quote$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    packages<T extends Quote$packagesArgs<ExtArgs> = {}>(args?: Subset<T, Quote$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22624,6 +24059,30 @@ export namespace Prisma {
   }
 
   /**
+   * Quote.packages
+   */
+  export type Quote$packagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    where?: QuotePackageWhereInput
+    orderBy?: QuotePackageOrderByWithRelationInput | QuotePackageOrderByWithRelationInput[]
+    cursor?: QuotePackageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuotePackageScalarFieldEnum | QuotePackageScalarFieldEnum[]
+  }
+
+  /**
    * Quote without action
    */
   export type QuoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -22639,6 +24098,1209 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: QuoteInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model QuotePackage
+   */
+
+  export type AggregateQuotePackage = {
+    _count: QuotePackageCountAggregateOutputType | null
+    _avg: QuotePackageAvgAggregateOutputType | null
+    _sum: QuotePackageSumAggregateOutputType | null
+    _min: QuotePackageMinAggregateOutputType | null
+    _max: QuotePackageMaxAggregateOutputType | null
+  }
+
+  export type QuotePackageAvgAggregateOutputType = {
+    quantity: number | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+  }
+
+  export type QuotePackageSumAggregateOutputType = {
+    quantity: number | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+  }
+
+  export type QuotePackageMinAggregateOutputType = {
+    id: string | null
+    quoteId: string | null
+    description: string | null
+    quantity: number | null
+    cargoType: $Enums.CargoType | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type QuotePackageMaxAggregateOutputType = {
+    id: string | null
+    quoteId: string | null
+    description: string | null
+    quantity: number | null
+    cargoType: $Enums.CargoType | null
+    weight: number | null
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type QuotePackageCountAggregateOutputType = {
+    id: number
+    quoteId: number
+    description: number
+    quantity: number
+    cargoType: number
+    weight: number
+    length: number
+    width: number
+    height: number
+    unitPrice: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type QuotePackageAvgAggregateInputType = {
+    quantity?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+  }
+
+  export type QuotePackageSumAggregateInputType = {
+    quantity?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+  }
+
+  export type QuotePackageMinAggregateInputType = {
+    id?: true
+    quoteId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type QuotePackageMaxAggregateInputType = {
+    id?: true
+    quoteId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type QuotePackageCountAggregateInputType = {
+    id?: true
+    quoteId?: true
+    description?: true
+    quantity?: true
+    cargoType?: true
+    weight?: true
+    length?: true
+    width?: true
+    height?: true
+    unitPrice?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type QuotePackageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuotePackage to aggregate.
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuotePackages to fetch.
+     */
+    orderBy?: QuotePackageOrderByWithRelationInput | QuotePackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: QuotePackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuotePackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuotePackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned QuotePackages
+    **/
+    _count?: true | QuotePackageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: QuotePackageAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: QuotePackageSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: QuotePackageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: QuotePackageMaxAggregateInputType
+  }
+
+  export type GetQuotePackageAggregateType<T extends QuotePackageAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuotePackage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuotePackage[P]>
+      : GetScalarType<T[P], AggregateQuotePackage[P]>
+  }
+
+
+
+
+  export type QuotePackageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuotePackageWhereInput
+    orderBy?: QuotePackageOrderByWithAggregationInput | QuotePackageOrderByWithAggregationInput[]
+    by: QuotePackageScalarFieldEnum[] | QuotePackageScalarFieldEnum
+    having?: QuotePackageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: QuotePackageCountAggregateInputType | true
+    _avg?: QuotePackageAvgAggregateInputType
+    _sum?: QuotePackageSumAggregateInputType
+    _min?: QuotePackageMinAggregateInputType
+    _max?: QuotePackageMaxAggregateInputType
+  }
+
+  export type QuotePackageGroupByOutputType = {
+    id: string
+    quoteId: string
+    description: string | null
+    quantity: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length: number | null
+    width: number | null
+    height: number | null
+    unitPrice: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: QuotePackageCountAggregateOutputType | null
+    _avg: QuotePackageAvgAggregateOutputType | null
+    _sum: QuotePackageSumAggregateOutputType | null
+    _min: QuotePackageMinAggregateOutputType | null
+    _max: QuotePackageMaxAggregateOutputType | null
+  }
+
+  type GetQuotePackageGroupByPayload<T extends QuotePackageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<QuotePackageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof QuotePackageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], QuotePackageGroupByOutputType[P]>
+            : GetScalarType<T[P], QuotePackageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type QuotePackageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    quoteId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quotePackage"]>
+
+  export type QuotePackageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    quoteId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quotePackage"]>
+
+  export type QuotePackageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    quoteId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quotePackage"]>
+
+  export type QuotePackageSelectScalar = {
+    id?: boolean
+    quoteId?: boolean
+    description?: boolean
+    quantity?: boolean
+    cargoType?: boolean
+    weight?: boolean
+    length?: boolean
+    width?: boolean
+    height?: boolean
+    unitPrice?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type QuotePackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quoteId" | "description" | "quantity" | "cargoType" | "weight" | "length" | "width" | "height" | "unitPrice" | "createdAt" | "updatedAt", ExtArgs["result"]["quotePackage"]>
+  export type QuotePackageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }
+  export type QuotePackageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }
+  export type QuotePackageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    quote?: boolean | QuoteDefaultArgs<ExtArgs>
+  }
+
+  export type $QuotePackagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "QuotePackage"
+    objects: {
+      quote: Prisma.$QuotePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      quoteId: string
+      description: string | null
+      quantity: number
+      cargoType: $Enums.CargoType
+      weight: number
+      length: number | null
+      width: number | null
+      height: number | null
+      unitPrice: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["quotePackage"]>
+    composites: {}
+  }
+
+  type QuotePackageGetPayload<S extends boolean | null | undefined | QuotePackageDefaultArgs> = $Result.GetResult<Prisma.$QuotePackagePayload, S>
+
+  type QuotePackageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<QuotePackageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: QuotePackageCountAggregateInputType | true
+    }
+
+  export interface QuotePackageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['QuotePackage'], meta: { name: 'QuotePackage' } }
+    /**
+     * Find zero or one QuotePackage that matches the filter.
+     * @param {QuotePackageFindUniqueArgs} args - Arguments to find a QuotePackage
+     * @example
+     * // Get one QuotePackage
+     * const quotePackage = await prisma.quotePackage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends QuotePackageFindUniqueArgs>(args: SelectSubset<T, QuotePackageFindUniqueArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one QuotePackage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {QuotePackageFindUniqueOrThrowArgs} args - Arguments to find a QuotePackage
+     * @example
+     * // Get one QuotePackage
+     * const quotePackage = await prisma.quotePackage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends QuotePackageFindUniqueOrThrowArgs>(args: SelectSubset<T, QuotePackageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuotePackage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageFindFirstArgs} args - Arguments to find a QuotePackage
+     * @example
+     * // Get one QuotePackage
+     * const quotePackage = await prisma.quotePackage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends QuotePackageFindFirstArgs>(args?: SelectSubset<T, QuotePackageFindFirstArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuotePackage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageFindFirstOrThrowArgs} args - Arguments to find a QuotePackage
+     * @example
+     * // Get one QuotePackage
+     * const quotePackage = await prisma.quotePackage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends QuotePackageFindFirstOrThrowArgs>(args?: SelectSubset<T, QuotePackageFindFirstOrThrowArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more QuotePackages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all QuotePackages
+     * const quotePackages = await prisma.quotePackage.findMany()
+     * 
+     * // Get first 10 QuotePackages
+     * const quotePackages = await prisma.quotePackage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const quotePackageWithIdOnly = await prisma.quotePackage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends QuotePackageFindManyArgs>(args?: SelectSubset<T, QuotePackageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a QuotePackage.
+     * @param {QuotePackageCreateArgs} args - Arguments to create a QuotePackage.
+     * @example
+     * // Create one QuotePackage
+     * const QuotePackage = await prisma.quotePackage.create({
+     *   data: {
+     *     // ... data to create a QuotePackage
+     *   }
+     * })
+     * 
+     */
+    create<T extends QuotePackageCreateArgs>(args: SelectSubset<T, QuotePackageCreateArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many QuotePackages.
+     * @param {QuotePackageCreateManyArgs} args - Arguments to create many QuotePackages.
+     * @example
+     * // Create many QuotePackages
+     * const quotePackage = await prisma.quotePackage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends QuotePackageCreateManyArgs>(args?: SelectSubset<T, QuotePackageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many QuotePackages and returns the data saved in the database.
+     * @param {QuotePackageCreateManyAndReturnArgs} args - Arguments to create many QuotePackages.
+     * @example
+     * // Create many QuotePackages
+     * const quotePackage = await prisma.quotePackage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many QuotePackages and only return the `id`
+     * const quotePackageWithIdOnly = await prisma.quotePackage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends QuotePackageCreateManyAndReturnArgs>(args?: SelectSubset<T, QuotePackageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a QuotePackage.
+     * @param {QuotePackageDeleteArgs} args - Arguments to delete one QuotePackage.
+     * @example
+     * // Delete one QuotePackage
+     * const QuotePackage = await prisma.quotePackage.delete({
+     *   where: {
+     *     // ... filter to delete one QuotePackage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends QuotePackageDeleteArgs>(args: SelectSubset<T, QuotePackageDeleteArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one QuotePackage.
+     * @param {QuotePackageUpdateArgs} args - Arguments to update one QuotePackage.
+     * @example
+     * // Update one QuotePackage
+     * const quotePackage = await prisma.quotePackage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends QuotePackageUpdateArgs>(args: SelectSubset<T, QuotePackageUpdateArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more QuotePackages.
+     * @param {QuotePackageDeleteManyArgs} args - Arguments to filter QuotePackages to delete.
+     * @example
+     * // Delete a few QuotePackages
+     * const { count } = await prisma.quotePackage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends QuotePackageDeleteManyArgs>(args?: SelectSubset<T, QuotePackageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuotePackages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many QuotePackages
+     * const quotePackage = await prisma.quotePackage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends QuotePackageUpdateManyArgs>(args: SelectSubset<T, QuotePackageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuotePackages and returns the data updated in the database.
+     * @param {QuotePackageUpdateManyAndReturnArgs} args - Arguments to update many QuotePackages.
+     * @example
+     * // Update many QuotePackages
+     * const quotePackage = await prisma.quotePackage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more QuotePackages and only return the `id`
+     * const quotePackageWithIdOnly = await prisma.quotePackage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends QuotePackageUpdateManyAndReturnArgs>(args: SelectSubset<T, QuotePackageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one QuotePackage.
+     * @param {QuotePackageUpsertArgs} args - Arguments to update or create a QuotePackage.
+     * @example
+     * // Update or create a QuotePackage
+     * const quotePackage = await prisma.quotePackage.upsert({
+     *   create: {
+     *     // ... data to create a QuotePackage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the QuotePackage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends QuotePackageUpsertArgs>(args: SelectSubset<T, QuotePackageUpsertArgs<ExtArgs>>): Prisma__QuotePackageClient<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of QuotePackages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageCountArgs} args - Arguments to filter QuotePackages to count.
+     * @example
+     * // Count the number of QuotePackages
+     * const count = await prisma.quotePackage.count({
+     *   where: {
+     *     // ... the filter for the QuotePackages we want to count
+     *   }
+     * })
+    **/
+    count<T extends QuotePackageCountArgs>(
+      args?: Subset<T, QuotePackageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], QuotePackageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a QuotePackage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends QuotePackageAggregateArgs>(args: Subset<T, QuotePackageAggregateArgs>): Prisma.PrismaPromise<GetQuotePackageAggregateType<T>>
+
+    /**
+     * Group by QuotePackage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuotePackageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends QuotePackageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: QuotePackageGroupByArgs['orderBy'] }
+        : { orderBy?: QuotePackageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, QuotePackageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuotePackageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the QuotePackage model
+   */
+  readonly fields: QuotePackageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for QuotePackage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__QuotePackageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    quote<T extends QuoteDefaultArgs<ExtArgs> = {}>(args?: Subset<T, QuoteDefaultArgs<ExtArgs>>): Prisma__QuoteClient<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the QuotePackage model
+   */
+  interface QuotePackageFieldRefs {
+    readonly id: FieldRef<"QuotePackage", 'String'>
+    readonly quoteId: FieldRef<"QuotePackage", 'String'>
+    readonly description: FieldRef<"QuotePackage", 'String'>
+    readonly quantity: FieldRef<"QuotePackage", 'Int'>
+    readonly cargoType: FieldRef<"QuotePackage", 'CargoType'>
+    readonly weight: FieldRef<"QuotePackage", 'Float'>
+    readonly length: FieldRef<"QuotePackage", 'Float'>
+    readonly width: FieldRef<"QuotePackage", 'Float'>
+    readonly height: FieldRef<"QuotePackage", 'Float'>
+    readonly unitPrice: FieldRef<"QuotePackage", 'Float'>
+    readonly createdAt: FieldRef<"QuotePackage", 'DateTime'>
+    readonly updatedAt: FieldRef<"QuotePackage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * QuotePackage findUnique
+   */
+  export type QuotePackageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter, which QuotePackage to fetch.
+     */
+    where: QuotePackageWhereUniqueInput
+  }
+
+  /**
+   * QuotePackage findUniqueOrThrow
+   */
+  export type QuotePackageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter, which QuotePackage to fetch.
+     */
+    where: QuotePackageWhereUniqueInput
+  }
+
+  /**
+   * QuotePackage findFirst
+   */
+  export type QuotePackageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter, which QuotePackage to fetch.
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuotePackages to fetch.
+     */
+    orderBy?: QuotePackageOrderByWithRelationInput | QuotePackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuotePackages.
+     */
+    cursor?: QuotePackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuotePackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuotePackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuotePackages.
+     */
+    distinct?: QuotePackageScalarFieldEnum | QuotePackageScalarFieldEnum[]
+  }
+
+  /**
+   * QuotePackage findFirstOrThrow
+   */
+  export type QuotePackageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter, which QuotePackage to fetch.
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuotePackages to fetch.
+     */
+    orderBy?: QuotePackageOrderByWithRelationInput | QuotePackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuotePackages.
+     */
+    cursor?: QuotePackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuotePackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuotePackages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuotePackages.
+     */
+    distinct?: QuotePackageScalarFieldEnum | QuotePackageScalarFieldEnum[]
+  }
+
+  /**
+   * QuotePackage findMany
+   */
+  export type QuotePackageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter, which QuotePackages to fetch.
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuotePackages to fetch.
+     */
+    orderBy?: QuotePackageOrderByWithRelationInput | QuotePackageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing QuotePackages.
+     */
+    cursor?: QuotePackageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuotePackages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuotePackages.
+     */
+    skip?: number
+    distinct?: QuotePackageScalarFieldEnum | QuotePackageScalarFieldEnum[]
+  }
+
+  /**
+   * QuotePackage create
+   */
+  export type QuotePackageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * The data needed to create a QuotePackage.
+     */
+    data: XOR<QuotePackageCreateInput, QuotePackageUncheckedCreateInput>
+  }
+
+  /**
+   * QuotePackage createMany
+   */
+  export type QuotePackageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many QuotePackages.
+     */
+    data: QuotePackageCreateManyInput | QuotePackageCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * QuotePackage createManyAndReturn
+   */
+  export type QuotePackageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * The data used to create many QuotePackages.
+     */
+    data: QuotePackageCreateManyInput | QuotePackageCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuotePackage update
+   */
+  export type QuotePackageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * The data needed to update a QuotePackage.
+     */
+    data: XOR<QuotePackageUpdateInput, QuotePackageUncheckedUpdateInput>
+    /**
+     * Choose, which QuotePackage to update.
+     */
+    where: QuotePackageWhereUniqueInput
+  }
+
+  /**
+   * QuotePackage updateMany
+   */
+  export type QuotePackageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update QuotePackages.
+     */
+    data: XOR<QuotePackageUpdateManyMutationInput, QuotePackageUncheckedUpdateManyInput>
+    /**
+     * Filter which QuotePackages to update
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * Limit how many QuotePackages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuotePackage updateManyAndReturn
+   */
+  export type QuotePackageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * The data used to update QuotePackages.
+     */
+    data: XOR<QuotePackageUpdateManyMutationInput, QuotePackageUncheckedUpdateManyInput>
+    /**
+     * Filter which QuotePackages to update
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * Limit how many QuotePackages to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuotePackage upsert
+   */
+  export type QuotePackageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * The filter to search for the QuotePackage to update in case it exists.
+     */
+    where: QuotePackageWhereUniqueInput
+    /**
+     * In case the QuotePackage found by the `where` argument doesn't exist, create a new QuotePackage with this data.
+     */
+    create: XOR<QuotePackageCreateInput, QuotePackageUncheckedCreateInput>
+    /**
+     * In case the QuotePackage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<QuotePackageUpdateInput, QuotePackageUncheckedUpdateInput>
+  }
+
+  /**
+   * QuotePackage delete
+   */
+  export type QuotePackageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
+    /**
+     * Filter which QuotePackage to delete.
+     */
+    where: QuotePackageWhereUniqueInput
+  }
+
+  /**
+   * QuotePackage deleteMany
+   */
+  export type QuotePackageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuotePackages to delete
+     */
+    where?: QuotePackageWhereInput
+    /**
+     * Limit how many QuotePackages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuotePackage without action
+   */
+  export type QuotePackageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuotePackage
+     */
+    select?: QuotePackageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuotePackage
+     */
+    omit?: QuotePackageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuotePackageInclude<ExtArgs> | null
   }
 
 
@@ -33254,6 +35916,24 @@ export namespace Prisma {
   export type ShipmentScalarFieldEnum = (typeof ShipmentScalarFieldEnum)[keyof typeof ShipmentScalarFieldEnum]
 
 
+  export const ShipmentPackageScalarFieldEnum: {
+    id: 'id',
+    shipmentId: 'shipmentId',
+    description: 'description',
+    quantity: 'quantity',
+    cargoType: 'cargoType',
+    weight: 'weight',
+    length: 'length',
+    width: 'width',
+    height: 'height',
+    unitPrice: 'unitPrice',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ShipmentPackageScalarFieldEnum = (typeof ShipmentPackageScalarFieldEnum)[keyof typeof ShipmentPackageScalarFieldEnum]
+
+
   export const PickupRequestScalarFieldEnum: {
     id: 'id',
     trackingNumber: 'trackingNumber',
@@ -33458,6 +36138,24 @@ export namespace Prisma {
   };
 
   export type QuoteScalarFieldEnum = (typeof QuoteScalarFieldEnum)[keyof typeof QuoteScalarFieldEnum]
+
+
+  export const QuotePackageScalarFieldEnum: {
+    id: 'id',
+    quoteId: 'quoteId',
+    description: 'description',
+    quantity: 'quantity',
+    cargoType: 'cargoType',
+    weight: 'weight',
+    length: 'length',
+    width: 'width',
+    height: 'height',
+    unitPrice: 'unitPrice',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type QuotePackageScalarFieldEnum = (typeof QuotePackageScalarFieldEnum)[keyof typeof QuotePackageScalarFieldEnum]
 
 
   export const QuoteLogScalarFieldEnum: {
@@ -34561,6 +37259,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestListRelationFilter
     fromQuote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
     logs?: ShipmentLogListRelationFilter
+    packages?: ShipmentPackageListRelationFilter
   }
 
   export type ShipmentOrderByWithRelationInput = {
@@ -34615,6 +37314,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestOrderByRelationAggregateInput
     fromQuote?: QuoteOrderByWithRelationInput
     logs?: ShipmentLogOrderByRelationAggregateInput
+    packages?: ShipmentPackageOrderByRelationAggregateInput
   }
 
   export type ShipmentWhereUniqueInput = Prisma.AtLeast<{
@@ -34672,6 +37372,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestListRelationFilter
     fromQuote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
     logs?: ShipmentLogListRelationFilter
+    packages?: ShipmentPackageListRelationFilter
   }, "id" | "trackingNumber">
 
   export type ShipmentOrderByWithAggregationInput = {
@@ -34772,6 +37473,98 @@ export namespace Prisma {
     createdById?: StringWithAggregatesFilter<"Shipment"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Shipment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Shipment"> | Date | string
+  }
+
+  export type ShipmentPackageWhereInput = {
+    AND?: ShipmentPackageWhereInput | ShipmentPackageWhereInput[]
+    OR?: ShipmentPackageWhereInput[]
+    NOT?: ShipmentPackageWhereInput | ShipmentPackageWhereInput[]
+    id?: StringFilter<"ShipmentPackage"> | string
+    shipmentId?: StringFilter<"ShipmentPackage"> | string
+    description?: StringNullableFilter<"ShipmentPackage"> | string | null
+    quantity?: IntFilter<"ShipmentPackage"> | number
+    cargoType?: EnumCargoTypeFilter<"ShipmentPackage"> | $Enums.CargoType
+    weight?: FloatFilter<"ShipmentPackage"> | number
+    length?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    width?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    height?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    unitPrice?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    createdAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+    updatedAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+    shipment?: XOR<ShipmentScalarRelationFilter, ShipmentWhereInput>
+  }
+
+  export type ShipmentPackageOrderByWithRelationInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    description?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrderInput | SortOrder
+    width?: SortOrderInput | SortOrder
+    height?: SortOrderInput | SortOrder
+    unitPrice?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    shipment?: ShipmentOrderByWithRelationInput
+  }
+
+  export type ShipmentPackageWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ShipmentPackageWhereInput | ShipmentPackageWhereInput[]
+    OR?: ShipmentPackageWhereInput[]
+    NOT?: ShipmentPackageWhereInput | ShipmentPackageWhereInput[]
+    shipmentId?: StringFilter<"ShipmentPackage"> | string
+    description?: StringNullableFilter<"ShipmentPackage"> | string | null
+    quantity?: IntFilter<"ShipmentPackage"> | number
+    cargoType?: EnumCargoTypeFilter<"ShipmentPackage"> | $Enums.CargoType
+    weight?: FloatFilter<"ShipmentPackage"> | number
+    length?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    width?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    height?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    unitPrice?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    createdAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+    updatedAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+    shipment?: XOR<ShipmentScalarRelationFilter, ShipmentWhereInput>
+  }, "id">
+
+  export type ShipmentPackageOrderByWithAggregationInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    description?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrderInput | SortOrder
+    width?: SortOrderInput | SortOrder
+    height?: SortOrderInput | SortOrder
+    unitPrice?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ShipmentPackageCountOrderByAggregateInput
+    _avg?: ShipmentPackageAvgOrderByAggregateInput
+    _max?: ShipmentPackageMaxOrderByAggregateInput
+    _min?: ShipmentPackageMinOrderByAggregateInput
+    _sum?: ShipmentPackageSumOrderByAggregateInput
+  }
+
+  export type ShipmentPackageScalarWhereWithAggregatesInput = {
+    AND?: ShipmentPackageScalarWhereWithAggregatesInput | ShipmentPackageScalarWhereWithAggregatesInput[]
+    OR?: ShipmentPackageScalarWhereWithAggregatesInput[]
+    NOT?: ShipmentPackageScalarWhereWithAggregatesInput | ShipmentPackageScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ShipmentPackage"> | string
+    shipmentId?: StringWithAggregatesFilter<"ShipmentPackage"> | string
+    description?: StringNullableWithAggregatesFilter<"ShipmentPackage"> | string | null
+    quantity?: IntWithAggregatesFilter<"ShipmentPackage"> | number
+    cargoType?: EnumCargoTypeWithAggregatesFilter<"ShipmentPackage"> | $Enums.CargoType
+    weight?: FloatWithAggregatesFilter<"ShipmentPackage"> | number
+    length?: FloatNullableWithAggregatesFilter<"ShipmentPackage"> | number | null
+    width?: FloatNullableWithAggregatesFilter<"ShipmentPackage"> | number | null
+    height?: FloatNullableWithAggregatesFilter<"ShipmentPackage"> | number | null
+    unitPrice?: FloatNullableWithAggregatesFilter<"ShipmentPackage"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"ShipmentPackage"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ShipmentPackage"> | Date | string
   }
 
   export type PickupRequestWhereInput = {
@@ -35628,6 +38421,7 @@ export namespace Prisma {
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     documents?: DocumentListRelationFilter
     logs?: QuoteLogListRelationFilter
+    packages?: QuotePackageListRelationFilter
   }
 
   export type QuoteOrderByWithRelationInput = {
@@ -35691,6 +38485,7 @@ export namespace Prisma {
     createdBy?: UserOrderByWithRelationInput
     documents?: DocumentOrderByRelationAggregateInput
     logs?: QuoteLogOrderByRelationAggregateInput
+    packages?: QuotePackageOrderByRelationAggregateInput
   }
 
   export type QuoteWhereUniqueInput = Prisma.AtLeast<{
@@ -35757,6 +38552,7 @@ export namespace Prisma {
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     documents?: DocumentListRelationFilter
     logs?: QuoteLogListRelationFilter
+    packages?: QuotePackageListRelationFilter
   }, "id" | "quoteNumber" | "trackingToken" | "shipmentId">
 
   export type QuoteOrderByWithAggregationInput = {
@@ -35873,6 +38669,98 @@ export namespace Prisma {
     createdById?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
+  }
+
+  export type QuotePackageWhereInput = {
+    AND?: QuotePackageWhereInput | QuotePackageWhereInput[]
+    OR?: QuotePackageWhereInput[]
+    NOT?: QuotePackageWhereInput | QuotePackageWhereInput[]
+    id?: StringFilter<"QuotePackage"> | string
+    quoteId?: StringFilter<"QuotePackage"> | string
+    description?: StringNullableFilter<"QuotePackage"> | string | null
+    quantity?: IntFilter<"QuotePackage"> | number
+    cargoType?: EnumCargoTypeFilter<"QuotePackage"> | $Enums.CargoType
+    weight?: FloatFilter<"QuotePackage"> | number
+    length?: FloatNullableFilter<"QuotePackage"> | number | null
+    width?: FloatNullableFilter<"QuotePackage"> | number | null
+    height?: FloatNullableFilter<"QuotePackage"> | number | null
+    unitPrice?: FloatNullableFilter<"QuotePackage"> | number | null
+    createdAt?: DateTimeFilter<"QuotePackage"> | Date | string
+    updatedAt?: DateTimeFilter<"QuotePackage"> | Date | string
+    quote?: XOR<QuoteScalarRelationFilter, QuoteWhereInput>
+  }
+
+  export type QuotePackageOrderByWithRelationInput = {
+    id?: SortOrder
+    quoteId?: SortOrder
+    description?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrderInput | SortOrder
+    width?: SortOrderInput | SortOrder
+    height?: SortOrderInput | SortOrder
+    unitPrice?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    quote?: QuoteOrderByWithRelationInput
+  }
+
+  export type QuotePackageWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: QuotePackageWhereInput | QuotePackageWhereInput[]
+    OR?: QuotePackageWhereInput[]
+    NOT?: QuotePackageWhereInput | QuotePackageWhereInput[]
+    quoteId?: StringFilter<"QuotePackage"> | string
+    description?: StringNullableFilter<"QuotePackage"> | string | null
+    quantity?: IntFilter<"QuotePackage"> | number
+    cargoType?: EnumCargoTypeFilter<"QuotePackage"> | $Enums.CargoType
+    weight?: FloatFilter<"QuotePackage"> | number
+    length?: FloatNullableFilter<"QuotePackage"> | number | null
+    width?: FloatNullableFilter<"QuotePackage"> | number | null
+    height?: FloatNullableFilter<"QuotePackage"> | number | null
+    unitPrice?: FloatNullableFilter<"QuotePackage"> | number | null
+    createdAt?: DateTimeFilter<"QuotePackage"> | Date | string
+    updatedAt?: DateTimeFilter<"QuotePackage"> | Date | string
+    quote?: XOR<QuoteScalarRelationFilter, QuoteWhereInput>
+  }, "id">
+
+  export type QuotePackageOrderByWithAggregationInput = {
+    id?: SortOrder
+    quoteId?: SortOrder
+    description?: SortOrderInput | SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrderInput | SortOrder
+    width?: SortOrderInput | SortOrder
+    height?: SortOrderInput | SortOrder
+    unitPrice?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: QuotePackageCountOrderByAggregateInput
+    _avg?: QuotePackageAvgOrderByAggregateInput
+    _max?: QuotePackageMaxOrderByAggregateInput
+    _min?: QuotePackageMinOrderByAggregateInput
+    _sum?: QuotePackageSumOrderByAggregateInput
+  }
+
+  export type QuotePackageScalarWhereWithAggregatesInput = {
+    AND?: QuotePackageScalarWhereWithAggregatesInput | QuotePackageScalarWhereWithAggregatesInput[]
+    OR?: QuotePackageScalarWhereWithAggregatesInput[]
+    NOT?: QuotePackageScalarWhereWithAggregatesInput | QuotePackageScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"QuotePackage"> | string
+    quoteId?: StringWithAggregatesFilter<"QuotePackage"> | string
+    description?: StringNullableWithAggregatesFilter<"QuotePackage"> | string | null
+    quantity?: IntWithAggregatesFilter<"QuotePackage"> | number
+    cargoType?: EnumCargoTypeWithAggregatesFilter<"QuotePackage"> | $Enums.CargoType
+    weight?: FloatWithAggregatesFilter<"QuotePackage"> | number
+    length?: FloatNullableWithAggregatesFilter<"QuotePackage"> | number | null
+    width?: FloatNullableWithAggregatesFilter<"QuotePackage"> | number | null
+    height?: FloatNullableWithAggregatesFilter<"QuotePackage"> | number | null
+    unitPrice?: FloatNullableWithAggregatesFilter<"QuotePackage"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"QuotePackage"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"QuotePackage"> | Date | string
   }
 
   export type QuoteLogWhereInput = {
@@ -37387,6 +40275,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateInput = {
@@ -37438,6 +40327,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUpdateInput = {
@@ -37489,6 +40379,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateInput = {
@@ -37540,6 +40431,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentCreateManyInput = {
@@ -37673,6 +40565,110 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageCreateInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipment: ShipmentCreateNestedOneWithoutPackagesInput
+  }
+
+  export type ShipmentPackageUncheckedCreateInput = {
+    id?: string
+    shipmentId: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShipmentPackageUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipment?: ShipmentUpdateOneRequiredWithoutPackagesNestedInput
+  }
+
+  export type ShipmentPackageUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageCreateManyInput = {
+    id?: string
+    shipmentId: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShipmentPackageUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -38649,6 +41645,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateInput = {
@@ -38705,6 +41702,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUpdateInput = {
@@ -38761,6 +41759,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateInput = {
@@ -38817,6 +41816,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteCreateManyInput = {
@@ -38970,6 +41970,110 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageCreateInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quote: QuoteCreateNestedOneWithoutPackagesInput
+  }
+
+  export type QuotePackageUncheckedCreateInput = {
+    id?: string
+    quoteId: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type QuotePackageUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quote?: QuoteUpdateOneRequiredWithoutPackagesNestedInput
+  }
+
+  export type QuotePackageUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageCreateManyInput = {
+    id?: string
+    quoteId: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type QuotePackageUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteId?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -40591,6 +43695,16 @@ export namespace Prisma {
     isNot?: QuoteWhereInput | null
   }
 
+  export type ShipmentPackageListRelationFilter = {
+    every?: ShipmentPackageWhereInput
+    some?: ShipmentPackageWhereInput
+    none?: ShipmentPackageWhereInput
+  }
+
+  export type ShipmentPackageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ShipmentCountOrderByAggregateInput = {
     id?: SortOrder
     trackingNumber?: SortOrder
@@ -40825,6 +43939,74 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumShipmentStatusFilter<$PrismaModel>
     _max?: NestedEnumShipmentStatusFilter<$PrismaModel>
+  }
+
+  export type ShipmentScalarRelationFilter = {
+    is?: ShipmentWhereInput
+    isNot?: ShipmentWhereInput
+  }
+
+  export type ShipmentPackageCountOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ShipmentPackageAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+  }
+
+  export type ShipmentPackageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ShipmentPackageMinOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ShipmentPackageSumOrderByAggregateInput = {
+    quantity?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
   }
 
   export type EnumPickupTimeSlotFilter<$PrismaModel = never> = {
@@ -41317,11 +44499,6 @@ export namespace Prisma {
     _max?: NestedEnumPurchaseStatusNullableFilter<$PrismaModel>
   }
 
-  export type ShipmentScalarRelationFilter = {
-    is?: ShipmentWhereInput
-    isNot?: ShipmentWhereInput
-  }
-
   export type TrackingEventCountOrderByAggregateInput = {
     id?: SortOrder
     shipmentId?: SortOrder
@@ -41432,6 +44609,16 @@ export namespace Prisma {
     in?: $Enums.QuotePaymentMethod[] | ListEnumQuotePaymentMethodFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.QuotePaymentMethod[] | ListEnumQuotePaymentMethodFieldRefInput<$PrismaModel> | null
     not?: NestedEnumQuotePaymentMethodNullableFilter<$PrismaModel> | $Enums.QuotePaymentMethod | null
+  }
+
+  export type QuotePackageListRelationFilter = {
+    every?: QuotePackageWhereInput
+    some?: QuotePackageWhereInput
+    none?: QuotePackageWhereInput
+  }
+
+  export type QuotePackageOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type QuoteCountOrderByAggregateInput = {
@@ -41630,16 +44817,79 @@ export namespace Prisma {
     _max?: NestedEnumQuotePaymentMethodNullableFilter<$PrismaModel>
   }
 
+  export type QuoteScalarRelationFilter = {
+    is?: QuoteWhereInput
+    isNot?: QuoteWhereInput
+  }
+
+  export type QuotePackageCountOrderByAggregateInput = {
+    id?: SortOrder
+    quoteId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type QuotePackageAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+  }
+
+  export type QuotePackageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    quoteId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type QuotePackageMinOrderByAggregateInput = {
+    id?: SortOrder
+    quoteId?: SortOrder
+    description?: SortOrder
+    quantity?: SortOrder
+    cargoType?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type QuotePackageSumOrderByAggregateInput = {
+    quantity?: SortOrder
+    weight?: SortOrder
+    length?: SortOrder
+    width?: SortOrder
+    height?: SortOrder
+    unitPrice?: SortOrder
+  }
+
   export type EnumQuoteStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.QuoteStatus | EnumQuoteStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.QuoteStatus[] | ListEnumQuoteStatusFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.QuoteStatus[] | ListEnumQuoteStatusFieldRefInput<$PrismaModel> | null
     not?: NestedEnumQuoteStatusNullableFilter<$PrismaModel> | $Enums.QuoteStatus | null
-  }
-
-  export type QuoteScalarRelationFilter = {
-    is?: QuoteWhereInput
-    isNot?: QuoteWhereInput
   }
 
   export type QuoteLogCountOrderByAggregateInput = {
@@ -43512,6 +46762,13 @@ export namespace Prisma {
     connect?: ShipmentLogWhereUniqueInput | ShipmentLogWhereUniqueInput[]
   }
 
+  export type ShipmentPackageCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput> | ShipmentPackageCreateWithoutShipmentInput[] | ShipmentPackageUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: ShipmentPackageCreateOrConnectWithoutShipmentInput | ShipmentPackageCreateOrConnectWithoutShipmentInput[]
+    createMany?: ShipmentPackageCreateManyShipmentInputEnvelope
+    connect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+  }
+
   export type TrackingEventUncheckedCreateNestedManyWithoutShipmentInput = {
     create?: XOR<TrackingEventCreateWithoutShipmentInput, TrackingEventUncheckedCreateWithoutShipmentInput> | TrackingEventCreateWithoutShipmentInput[] | TrackingEventUncheckedCreateWithoutShipmentInput[]
     connectOrCreate?: TrackingEventCreateOrConnectWithoutShipmentInput | TrackingEventCreateOrConnectWithoutShipmentInput[]
@@ -43544,6 +46801,13 @@ export namespace Prisma {
     connectOrCreate?: ShipmentLogCreateOrConnectWithoutShipmentInput | ShipmentLogCreateOrConnectWithoutShipmentInput[]
     createMany?: ShipmentLogCreateManyShipmentInputEnvelope
     connect?: ShipmentLogWhereUniqueInput | ShipmentLogWhereUniqueInput[]
+  }
+
+  export type ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput> | ShipmentPackageCreateWithoutShipmentInput[] | ShipmentPackageUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: ShipmentPackageCreateOrConnectWithoutShipmentInput | ShipmentPackageCreateOrConnectWithoutShipmentInput[]
+    createMany?: ShipmentPackageCreateManyShipmentInputEnvelope
+    connect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
   }
 
   export type EnumCargoTypeFieldUpdateOperationsInput = {
@@ -43681,6 +46945,20 @@ export namespace Prisma {
     deleteMany?: ShipmentLogScalarWhereInput | ShipmentLogScalarWhereInput[]
   }
 
+  export type ShipmentPackageUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput> | ShipmentPackageCreateWithoutShipmentInput[] | ShipmentPackageUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: ShipmentPackageCreateOrConnectWithoutShipmentInput | ShipmentPackageCreateOrConnectWithoutShipmentInput[]
+    upsert?: ShipmentPackageUpsertWithWhereUniqueWithoutShipmentInput | ShipmentPackageUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: ShipmentPackageCreateManyShipmentInputEnvelope
+    set?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    disconnect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    delete?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    connect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    update?: ShipmentPackageUpdateWithWhereUniqueWithoutShipmentInput | ShipmentPackageUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: ShipmentPackageUpdateManyWithWhereWithoutShipmentInput | ShipmentPackageUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: ShipmentPackageScalarWhereInput | ShipmentPackageScalarWhereInput[]
+  }
+
   export type TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput = {
     create?: XOR<TrackingEventCreateWithoutShipmentInput, TrackingEventUncheckedCreateWithoutShipmentInput> | TrackingEventCreateWithoutShipmentInput[] | TrackingEventUncheckedCreateWithoutShipmentInput[]
     connectOrCreate?: TrackingEventCreateOrConnectWithoutShipmentInput | TrackingEventCreateOrConnectWithoutShipmentInput[]
@@ -43745,6 +47023,34 @@ export namespace Prisma {
     update?: ShipmentLogUpdateWithWhereUniqueWithoutShipmentInput | ShipmentLogUpdateWithWhereUniqueWithoutShipmentInput[]
     updateMany?: ShipmentLogUpdateManyWithWhereWithoutShipmentInput | ShipmentLogUpdateManyWithWhereWithoutShipmentInput[]
     deleteMany?: ShipmentLogScalarWhereInput | ShipmentLogScalarWhereInput[]
+  }
+
+  export type ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput> | ShipmentPackageCreateWithoutShipmentInput[] | ShipmentPackageUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: ShipmentPackageCreateOrConnectWithoutShipmentInput | ShipmentPackageCreateOrConnectWithoutShipmentInput[]
+    upsert?: ShipmentPackageUpsertWithWhereUniqueWithoutShipmentInput | ShipmentPackageUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: ShipmentPackageCreateManyShipmentInputEnvelope
+    set?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    disconnect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    delete?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    connect?: ShipmentPackageWhereUniqueInput | ShipmentPackageWhereUniqueInput[]
+    update?: ShipmentPackageUpdateWithWhereUniqueWithoutShipmentInput | ShipmentPackageUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: ShipmentPackageUpdateManyWithWhereWithoutShipmentInput | ShipmentPackageUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: ShipmentPackageScalarWhereInput | ShipmentPackageScalarWhereInput[]
+  }
+
+  export type ShipmentCreateNestedOneWithoutPackagesInput = {
+    create?: XOR<ShipmentCreateWithoutPackagesInput, ShipmentUncheckedCreateWithoutPackagesInput>
+    connectOrCreate?: ShipmentCreateOrConnectWithoutPackagesInput
+    connect?: ShipmentWhereUniqueInput
+  }
+
+  export type ShipmentUpdateOneRequiredWithoutPackagesNestedInput = {
+    create?: XOR<ShipmentCreateWithoutPackagesInput, ShipmentUncheckedCreateWithoutPackagesInput>
+    connectOrCreate?: ShipmentCreateOrConnectWithoutPackagesInput
+    upsert?: ShipmentUpsertWithoutPackagesInput
+    connect?: ShipmentWhereUniqueInput
+    update?: XOR<XOR<ShipmentUpdateToOneWithWhereWithoutPackagesInput, ShipmentUpdateWithoutPackagesInput>, ShipmentUncheckedUpdateWithoutPackagesInput>
   }
 
   export type UserCreateNestedOneWithoutUserPickupsInput = {
@@ -44243,6 +47549,13 @@ export namespace Prisma {
     connect?: QuoteLogWhereUniqueInput | QuoteLogWhereUniqueInput[]
   }
 
+  export type QuotePackageCreateNestedManyWithoutQuoteInput = {
+    create?: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput> | QuotePackageCreateWithoutQuoteInput[] | QuotePackageUncheckedCreateWithoutQuoteInput[]
+    connectOrCreate?: QuotePackageCreateOrConnectWithoutQuoteInput | QuotePackageCreateOrConnectWithoutQuoteInput[]
+    createMany?: QuotePackageCreateManyQuoteInputEnvelope
+    connect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+  }
+
   export type DocumentUncheckedCreateNestedManyWithoutQuoteInput = {
     create?: XOR<DocumentCreateWithoutQuoteInput, DocumentUncheckedCreateWithoutQuoteInput> | DocumentCreateWithoutQuoteInput[] | DocumentUncheckedCreateWithoutQuoteInput[]
     connectOrCreate?: DocumentCreateOrConnectWithoutQuoteInput | DocumentCreateOrConnectWithoutQuoteInput[]
@@ -44255,6 +47568,13 @@ export namespace Prisma {
     connectOrCreate?: QuoteLogCreateOrConnectWithoutQuoteInput | QuoteLogCreateOrConnectWithoutQuoteInput[]
     createMany?: QuoteLogCreateManyQuoteInputEnvelope
     connect?: QuoteLogWhereUniqueInput | QuoteLogWhereUniqueInput[]
+  }
+
+  export type QuotePackageUncheckedCreateNestedManyWithoutQuoteInput = {
+    create?: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput> | QuotePackageCreateWithoutQuoteInput[] | QuotePackageUncheckedCreateWithoutQuoteInput[]
+    connectOrCreate?: QuotePackageCreateOrConnectWithoutQuoteInput | QuotePackageCreateOrConnectWithoutQuoteInput[]
+    createMany?: QuotePackageCreateManyQuoteInputEnvelope
+    connect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
   }
 
   export type QuoteUpdatetransportModeInput = {
@@ -44368,6 +47688,20 @@ export namespace Prisma {
     deleteMany?: QuoteLogScalarWhereInput | QuoteLogScalarWhereInput[]
   }
 
+  export type QuotePackageUpdateManyWithoutQuoteNestedInput = {
+    create?: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput> | QuotePackageCreateWithoutQuoteInput[] | QuotePackageUncheckedCreateWithoutQuoteInput[]
+    connectOrCreate?: QuotePackageCreateOrConnectWithoutQuoteInput | QuotePackageCreateOrConnectWithoutQuoteInput[]
+    upsert?: QuotePackageUpsertWithWhereUniqueWithoutQuoteInput | QuotePackageUpsertWithWhereUniqueWithoutQuoteInput[]
+    createMany?: QuotePackageCreateManyQuoteInputEnvelope
+    set?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    disconnect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    delete?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    connect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    update?: QuotePackageUpdateWithWhereUniqueWithoutQuoteInput | QuotePackageUpdateWithWhereUniqueWithoutQuoteInput[]
+    updateMany?: QuotePackageUpdateManyWithWhereWithoutQuoteInput | QuotePackageUpdateManyWithWhereWithoutQuoteInput[]
+    deleteMany?: QuotePackageScalarWhereInput | QuotePackageScalarWhereInput[]
+  }
+
   export type DocumentUncheckedUpdateManyWithoutQuoteNestedInput = {
     create?: XOR<DocumentCreateWithoutQuoteInput, DocumentUncheckedCreateWithoutQuoteInput> | DocumentCreateWithoutQuoteInput[] | DocumentUncheckedCreateWithoutQuoteInput[]
     connectOrCreate?: DocumentCreateOrConnectWithoutQuoteInput | DocumentCreateOrConnectWithoutQuoteInput[]
@@ -44394,6 +47728,34 @@ export namespace Prisma {
     update?: QuoteLogUpdateWithWhereUniqueWithoutQuoteInput | QuoteLogUpdateWithWhereUniqueWithoutQuoteInput[]
     updateMany?: QuoteLogUpdateManyWithWhereWithoutQuoteInput | QuoteLogUpdateManyWithWhereWithoutQuoteInput[]
     deleteMany?: QuoteLogScalarWhereInput | QuoteLogScalarWhereInput[]
+  }
+
+  export type QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput = {
+    create?: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput> | QuotePackageCreateWithoutQuoteInput[] | QuotePackageUncheckedCreateWithoutQuoteInput[]
+    connectOrCreate?: QuotePackageCreateOrConnectWithoutQuoteInput | QuotePackageCreateOrConnectWithoutQuoteInput[]
+    upsert?: QuotePackageUpsertWithWhereUniqueWithoutQuoteInput | QuotePackageUpsertWithWhereUniqueWithoutQuoteInput[]
+    createMany?: QuotePackageCreateManyQuoteInputEnvelope
+    set?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    disconnect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    delete?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    connect?: QuotePackageWhereUniqueInput | QuotePackageWhereUniqueInput[]
+    update?: QuotePackageUpdateWithWhereUniqueWithoutQuoteInput | QuotePackageUpdateWithWhereUniqueWithoutQuoteInput[]
+    updateMany?: QuotePackageUpdateManyWithWhereWithoutQuoteInput | QuotePackageUpdateManyWithWhereWithoutQuoteInput[]
+    deleteMany?: QuotePackageScalarWhereInput | QuotePackageScalarWhereInput[]
+  }
+
+  export type QuoteCreateNestedOneWithoutPackagesInput = {
+    create?: XOR<QuoteCreateWithoutPackagesInput, QuoteUncheckedCreateWithoutPackagesInput>
+    connectOrCreate?: QuoteCreateOrConnectWithoutPackagesInput
+    connect?: QuoteWhereUniqueInput
+  }
+
+  export type QuoteUpdateOneRequiredWithoutPackagesNestedInput = {
+    create?: XOR<QuoteCreateWithoutPackagesInput, QuoteUncheckedCreateWithoutPackagesInput>
+    connectOrCreate?: QuoteCreateOrConnectWithoutPackagesInput
+    upsert?: QuoteUpsertWithoutPackagesInput
+    connect?: QuoteWhereUniqueInput
+    update?: XOR<XOR<QuoteUpdateToOneWithWhereWithoutPackagesInput, QuoteUpdateWithoutPackagesInput>, QuoteUncheckedUpdateWithoutPackagesInput>
   }
 
   export type QuoteCreateNestedOneWithoutLogsInput = {
@@ -45415,6 +48777,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutCreatedByInput = {
@@ -45465,6 +48828,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutCreatedByInput = {
@@ -46201,6 +49565,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutTreatmentAgentInput = {
@@ -46256,6 +49621,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutTreatmentAgentInput = {
@@ -46419,6 +49785,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutUserInput = {
@@ -46474,6 +49841,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutUserInput = {
@@ -46539,6 +49907,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutCreatedByInput = {
@@ -46594,6 +49963,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutCreatedByInput = {
@@ -46659,6 +50029,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutPaymentReceivedByInput = {
@@ -46714,6 +50085,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutPaymentReceivedByInput = {
@@ -46774,6 +50146,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutPaymentReceivedByInput = {
@@ -46824,6 +50197,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutPaymentReceivedByInput = {
@@ -48087,6 +51461,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutClientInput = {
@@ -48137,6 +51512,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutClientInput = {
@@ -48202,6 +51578,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutClientInput = {
@@ -48257,6 +51634,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutClientInput = {
@@ -49044,6 +52422,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutShipmentInput = {
@@ -49099,6 +52478,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutShipmentInput = {
@@ -49135,6 +52515,44 @@ export namespace Prisma {
 
   export type ShipmentLogCreateManyShipmentInputEnvelope = {
     data: ShipmentLogCreateManyShipmentInput | ShipmentLogCreateManyShipmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ShipmentPackageCreateWithoutShipmentInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShipmentPackageUncheckedCreateWithoutShipmentInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShipmentPackageCreateOrConnectWithoutShipmentInput = {
+    where: ShipmentPackageWhereUniqueInput
+    create: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type ShipmentPackageCreateManyShipmentInputEnvelope = {
+    data: ShipmentPackageCreateManyShipmentInput | ShipmentPackageCreateManyShipmentInput[]
     skipDuplicates?: boolean
   }
 
@@ -49471,6 +52889,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutShipmentInput = {
@@ -49526,6 +52945,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type ShipmentLogUpsertWithWhereUniqueWithoutShipmentInput = {
@@ -49542,6 +52962,260 @@ export namespace Prisma {
   export type ShipmentLogUpdateManyWithWhereWithoutShipmentInput = {
     where: ShipmentLogScalarWhereInput
     data: XOR<ShipmentLogUpdateManyMutationInput, ShipmentLogUncheckedUpdateManyWithoutShipmentInput>
+  }
+
+  export type ShipmentPackageUpsertWithWhereUniqueWithoutShipmentInput = {
+    where: ShipmentPackageWhereUniqueInput
+    update: XOR<ShipmentPackageUpdateWithoutShipmentInput, ShipmentPackageUncheckedUpdateWithoutShipmentInput>
+    create: XOR<ShipmentPackageCreateWithoutShipmentInput, ShipmentPackageUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type ShipmentPackageUpdateWithWhereUniqueWithoutShipmentInput = {
+    where: ShipmentPackageWhereUniqueInput
+    data: XOR<ShipmentPackageUpdateWithoutShipmentInput, ShipmentPackageUncheckedUpdateWithoutShipmentInput>
+  }
+
+  export type ShipmentPackageUpdateManyWithWhereWithoutShipmentInput = {
+    where: ShipmentPackageScalarWhereInput
+    data: XOR<ShipmentPackageUpdateManyMutationInput, ShipmentPackageUncheckedUpdateManyWithoutShipmentInput>
+  }
+
+  export type ShipmentPackageScalarWhereInput = {
+    AND?: ShipmentPackageScalarWhereInput | ShipmentPackageScalarWhereInput[]
+    OR?: ShipmentPackageScalarWhereInput[]
+    NOT?: ShipmentPackageScalarWhereInput | ShipmentPackageScalarWhereInput[]
+    id?: StringFilter<"ShipmentPackage"> | string
+    shipmentId?: StringFilter<"ShipmentPackage"> | string
+    description?: StringNullableFilter<"ShipmentPackage"> | string | null
+    quantity?: IntFilter<"ShipmentPackage"> | number
+    cargoType?: EnumCargoTypeFilter<"ShipmentPackage"> | $Enums.CargoType
+    weight?: FloatFilter<"ShipmentPackage"> | number
+    length?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    width?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    height?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    unitPrice?: FloatNullableFilter<"ShipmentPackage"> | number | null
+    createdAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+    updatedAt?: DateTimeFilter<"ShipmentPackage"> | Date | string
+  }
+
+  export type ShipmentCreateWithoutPackagesInput = {
+    id?: string
+    trackingNumber: string
+    originAddress: string
+    originCity: string
+    originPostalCode: string
+    originCountry: string
+    originContact?: string | null
+    originEmail?: string | null
+    originPhone?: string | null
+    destinationAddress: string
+    destinationCity: string
+    destinationPostalCode: string
+    destinationCountry: string
+    destinationContact?: string | null
+    destinationEmail?: string | null
+    destinationPhone?: string | null
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    packageCount: number
+    value?: number | null
+    currency?: string
+    description: string
+    specialInstructions?: string | null
+    transportMode?: ShipmentCreatetransportModeInput | $Enums.TransportMode[]
+    priority?: $Enums.Priority
+    isDangerous?: boolean
+    isFragile?: boolean
+    requestedPickupDate?: Date | string | null
+    actualPickupDate?: Date | string | null
+    estimatedDeliveryDate?: Date | string | null
+    actualDeliveryDate?: Date | string | null
+    status?: $Enums.ShipmentStatus
+    estimatedCost?: number | null
+    actualCost?: number | null
+    paymentReceivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    client?: ClientCreateNestedOneWithoutShipmentsInput
+    paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
+    createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
+    documents?: DocumentCreateNestedManyWithoutShipmentInput
+    pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
+    fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
+    logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+  }
+
+  export type ShipmentUncheckedCreateWithoutPackagesInput = {
+    id?: string
+    trackingNumber: string
+    clientId?: string | null
+    originAddress: string
+    originCity: string
+    originPostalCode: string
+    originCountry: string
+    originContact?: string | null
+    originEmail?: string | null
+    originPhone?: string | null
+    destinationAddress: string
+    destinationCity: string
+    destinationPostalCode: string
+    destinationCountry: string
+    destinationContact?: string | null
+    destinationEmail?: string | null
+    destinationPhone?: string | null
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    packageCount: number
+    value?: number | null
+    currency?: string
+    description: string
+    specialInstructions?: string | null
+    transportMode?: ShipmentCreatetransportModeInput | $Enums.TransportMode[]
+    priority?: $Enums.Priority
+    isDangerous?: boolean
+    isFragile?: boolean
+    requestedPickupDate?: Date | string | null
+    actualPickupDate?: Date | string | null
+    estimatedDeliveryDate?: Date | string | null
+    actualDeliveryDate?: Date | string | null
+    status?: $Enums.ShipmentStatus
+    estimatedCost?: number | null
+    actualCost?: number | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
+    pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
+    fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
+    logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type ShipmentCreateOrConnectWithoutPackagesInput = {
+    where: ShipmentWhereUniqueInput
+    create: XOR<ShipmentCreateWithoutPackagesInput, ShipmentUncheckedCreateWithoutPackagesInput>
+  }
+
+  export type ShipmentUpsertWithoutPackagesInput = {
+    update: XOR<ShipmentUpdateWithoutPackagesInput, ShipmentUncheckedUpdateWithoutPackagesInput>
+    create: XOR<ShipmentCreateWithoutPackagesInput, ShipmentUncheckedCreateWithoutPackagesInput>
+    where?: ShipmentWhereInput
+  }
+
+  export type ShipmentUpdateToOneWithWhereWithoutPackagesInput = {
+    where?: ShipmentWhereInput
+    data: XOR<ShipmentUpdateWithoutPackagesInput, ShipmentUncheckedUpdateWithoutPackagesInput>
+  }
+
+  export type ShipmentUpdateWithoutPackagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    trackingNumber?: StringFieldUpdateOperationsInput | string
+    originAddress?: StringFieldUpdateOperationsInput | string
+    originCity?: StringFieldUpdateOperationsInput | string
+    originPostalCode?: StringFieldUpdateOperationsInput | string
+    originCountry?: StringFieldUpdateOperationsInput | string
+    originContact?: NullableStringFieldUpdateOperationsInput | string | null
+    originEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: StringFieldUpdateOperationsInput | string
+    destinationCity?: StringFieldUpdateOperationsInput | string
+    destinationPostalCode?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    destinationContact?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    packageCount?: IntFieldUpdateOperationsInput | number
+    value?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: ShipmentUpdatetransportModeInput | $Enums.TransportMode[]
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    isDangerous?: BoolFieldUpdateOperationsInput | boolean
+    isFragile?: BoolFieldUpdateOperationsInput | boolean
+    requestedPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    estimatedDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
+    estimatedCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneWithoutShipmentsNestedInput
+    paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
+    documents?: DocumentUpdateManyWithoutShipmentNestedInput
+    pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
+    fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
+    logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type ShipmentUncheckedUpdateWithoutPackagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    trackingNumber?: StringFieldUpdateOperationsInput | string
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    originAddress?: StringFieldUpdateOperationsInput | string
+    originCity?: StringFieldUpdateOperationsInput | string
+    originPostalCode?: StringFieldUpdateOperationsInput | string
+    originCountry?: StringFieldUpdateOperationsInput | string
+    originContact?: NullableStringFieldUpdateOperationsInput | string | null
+    originEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: StringFieldUpdateOperationsInput | string
+    destinationCity?: StringFieldUpdateOperationsInput | string
+    destinationPostalCode?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    destinationContact?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    packageCount?: IntFieldUpdateOperationsInput | number
+    value?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: ShipmentUpdatetransportModeInput | $Enums.TransportMode[]
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    isDangerous?: BoolFieldUpdateOperationsInput | boolean
+    isFragile?: BoolFieldUpdateOperationsInput | boolean
+    requestedPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    estimatedDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
+    estimatedCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
+    pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
+    fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
+    logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type UserCreateWithoutUserPickupsInput = {
@@ -49667,6 +53341,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutPickupRequestsInput = {
@@ -49717,6 +53392,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutPickupRequestsInput = {
@@ -50070,6 +53746,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutPickupRequestsInput = {
@@ -50120,6 +53797,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type DocumentUpsertWithWhereUniqueWithoutPickupRequestInput = {
@@ -51556,6 +55234,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutTrackingEventsInput = {
@@ -51606,6 +55285,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutTrackingEventsInput = {
@@ -51747,6 +55427,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutTrackingEventsInput = {
@@ -51797,6 +55478,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type UserUpsertWithoutPerformedTrackingEventsInput = {
@@ -51928,6 +55610,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutLogsInput = {
@@ -51978,6 +55661,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutLogsInput = {
@@ -52119,6 +55803,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutLogsInput = {
@@ -52169,6 +55854,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type UserUpsertWithoutShipmentLogsInput = {
@@ -52538,6 +56224,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutFromQuoteInput = {
@@ -52588,6 +56275,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutFromQuoteInput = {
@@ -52820,6 +56508,44 @@ export namespace Prisma {
 
   export type QuoteLogCreateManyQuoteInputEnvelope = {
     data: QuoteLogCreateManyQuoteInput | QuoteLogCreateManyQuoteInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuotePackageCreateWithoutQuoteInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type QuotePackageUncheckedCreateWithoutQuoteInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type QuotePackageCreateOrConnectWithoutQuoteInput = {
+    where: QuotePackageWhereUniqueInput
+    create: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput>
+  }
+
+  export type QuotePackageCreateManyQuoteInputEnvelope = {
+    data: QuotePackageCreateManyQuoteInput | QuotePackageCreateManyQuoteInput[]
     skipDuplicates?: boolean
   }
 
@@ -53144,6 +56870,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutFromQuoteInput = {
@@ -53194,6 +56921,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type UserUpsertWithoutConfirmedQuotePaymentsInput = {
@@ -53390,6 +57118,280 @@ export namespace Prisma {
     data: XOR<QuoteLogUpdateManyMutationInput, QuoteLogUncheckedUpdateManyWithoutQuoteInput>
   }
 
+  export type QuotePackageUpsertWithWhereUniqueWithoutQuoteInput = {
+    where: QuotePackageWhereUniqueInput
+    update: XOR<QuotePackageUpdateWithoutQuoteInput, QuotePackageUncheckedUpdateWithoutQuoteInput>
+    create: XOR<QuotePackageCreateWithoutQuoteInput, QuotePackageUncheckedCreateWithoutQuoteInput>
+  }
+
+  export type QuotePackageUpdateWithWhereUniqueWithoutQuoteInput = {
+    where: QuotePackageWhereUniqueInput
+    data: XOR<QuotePackageUpdateWithoutQuoteInput, QuotePackageUncheckedUpdateWithoutQuoteInput>
+  }
+
+  export type QuotePackageUpdateManyWithWhereWithoutQuoteInput = {
+    where: QuotePackageScalarWhereInput
+    data: XOR<QuotePackageUpdateManyMutationInput, QuotePackageUncheckedUpdateManyWithoutQuoteInput>
+  }
+
+  export type QuotePackageScalarWhereInput = {
+    AND?: QuotePackageScalarWhereInput | QuotePackageScalarWhereInput[]
+    OR?: QuotePackageScalarWhereInput[]
+    NOT?: QuotePackageScalarWhereInput | QuotePackageScalarWhereInput[]
+    id?: StringFilter<"QuotePackage"> | string
+    quoteId?: StringFilter<"QuotePackage"> | string
+    description?: StringNullableFilter<"QuotePackage"> | string | null
+    quantity?: IntFilter<"QuotePackage"> | number
+    cargoType?: EnumCargoTypeFilter<"QuotePackage"> | $Enums.CargoType
+    weight?: FloatFilter<"QuotePackage"> | number
+    length?: FloatNullableFilter<"QuotePackage"> | number | null
+    width?: FloatNullableFilter<"QuotePackage"> | number | null
+    height?: FloatNullableFilter<"QuotePackage"> | number | null
+    unitPrice?: FloatNullableFilter<"QuotePackage"> | number | null
+    createdAt?: DateTimeFilter<"QuotePackage"> | Date | string
+    updatedAt?: DateTimeFilter<"QuotePackage"> | Date | string
+  }
+
+  export type QuoteCreateWithoutPackagesInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    paymentReceivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutUserQuotesInput
+    client?: ClientCreateNestedOneWithoutQuotesInput
+    prospect?: ProspectCreateNestedOneWithoutQuotesInput
+    treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
+    shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
+    paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
+    createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    documents?: DocumentCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteUncheckedCreateWithoutPackagesInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    userId?: string | null
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    clientId?: string | null
+    prospectId?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    treatmentAgentId?: string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    shipmentId?: string | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteCreateOrConnectWithoutPackagesInput = {
+    where: QuoteWhereUniqueInput
+    create: XOR<QuoteCreateWithoutPackagesInput, QuoteUncheckedCreateWithoutPackagesInput>
+  }
+
+  export type QuoteUpsertWithoutPackagesInput = {
+    update: XOR<QuoteUpdateWithoutPackagesInput, QuoteUncheckedUpdateWithoutPackagesInput>
+    create: XOR<QuoteCreateWithoutPackagesInput, QuoteUncheckedCreateWithoutPackagesInput>
+    where?: QuoteWhereInput
+  }
+
+  export type QuoteUpdateToOneWithWhereWithoutPackagesInput = {
+    where?: QuoteWhereInput
+    data: XOR<QuoteUpdateWithoutPackagesInput, QuoteUncheckedUpdateWithoutPackagesInput>
+  }
+
+  export type QuoteUpdateWithoutPackagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutUserQuotesNestedInput
+    client?: ClientUpdateOneWithoutQuotesNestedInput
+    prospect?: ProspectUpdateOneWithoutQuotesNestedInput
+    treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
+    shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
+    paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    documents?: DocumentUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateWithoutPackagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    prospectId?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentAgentId?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+  }
+
   export type QuoteCreateWithoutLogsInput = {
     id?: string
     quoteNumber: string
@@ -53443,6 +57445,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutLogsInput = {
@@ -53498,6 +57501,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutLogsInput = {
@@ -53644,6 +57648,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutLogsInput = {
@@ -53699,6 +57704,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type UserUpsertWithoutQuoteLogsInput = {
@@ -53910,6 +57916,7 @@ export namespace Prisma {
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutProspectInput = {
@@ -53965,6 +57972,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutProspectInput = {
@@ -54122,6 +58130,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentUncheckedCreateWithoutDocumentsInput = {
@@ -54172,6 +58181,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
     logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
   }
 
   export type ShipmentCreateOrConnectWithoutDocumentsInput = {
@@ -54232,6 +58242,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutDocumentsInput = {
@@ -54287,6 +58298,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutDocumentsInput = {
@@ -54734,6 +58746,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutDocumentsInput = {
@@ -54784,6 +58797,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type QuoteUpsertWithoutDocumentsInput = {
@@ -54850,6 +58864,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutDocumentsInput = {
@@ -54905,6 +58920,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type PickupRequestUpsertWithoutDocumentsInput = {
@@ -56374,6 +60390,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutCreatedByInput = {
@@ -56424,6 +60441,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateManyWithoutCreatedByInput = {
@@ -57305,6 +61323,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutTreatmentAgentInput = {
@@ -57360,6 +61379,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutTreatmentAgentInput = {
@@ -57585,6 +61605,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutUserInput = {
@@ -57640,6 +61661,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutUserInput = {
@@ -57748,6 +61770,7 @@ export namespace Prisma {
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutCreatedByInput = {
@@ -57803,6 +61826,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutCreatedByInput = {
@@ -57911,6 +61935,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutPaymentReceivedByInput = {
@@ -57966,6 +61991,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutPaymentReceivedByInput = {
@@ -58069,6 +62095,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutPaymentReceivedByInput = {
@@ -58119,6 +62146,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateManyWithoutPaymentReceivedByInput = {
@@ -58506,6 +62534,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateWithoutClientInput = {
@@ -58556,6 +62585,7 @@ export namespace Prisma {
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
     logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
   }
 
   export type ShipmentUncheckedUpdateManyWithoutClientInput = {
@@ -58656,6 +62686,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutClientInput = {
@@ -58711,6 +62742,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutClientInput = {
@@ -59148,6 +63180,20 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type ShipmentPackageCreateManyShipmentInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type TrackingEventUpdateWithoutShipmentInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
@@ -59390,6 +63436,48 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageUncheckedUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentPackageUncheckedUpdateManyWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type DocumentCreateManyPickupRequestInput = {
@@ -59653,6 +63741,20 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type QuotePackageCreateManyQuoteInput = {
+    id?: string
+    description?: string | null
+    quantity?: number
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    unitPrice?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type DocumentUpdateWithoutQuoteInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -59738,6 +63840,48 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageUpdateWithoutQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageUncheckedUpdateWithoutQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuotePackageUncheckedUpdateManyWithoutQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    unitPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type QuoteCreateManyProspectInput = {
@@ -59846,6 +63990,7 @@ export namespace Prisma {
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutProspectInput = {
@@ -59901,6 +64046,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutProspectInput = {

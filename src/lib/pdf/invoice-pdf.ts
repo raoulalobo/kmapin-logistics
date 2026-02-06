@@ -18,7 +18,7 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { type PlatformPDFConfig } from './quote-pdf';
+import { type PlatformPDFConfig, type PackagePDFData } from './quote-pdf';
 
 /**
  * Configuration par défaut si non fournie
@@ -84,6 +84,26 @@ export interface QuoteInvoicePDFData {
     };
   };
 
+  // Expéditeur (adresse et contact d'origine) — optionnel, snapshot du devis
+  origin?: {
+    address?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    contactName?: string | null;
+    contactPhone?: string | null;
+    contactEmail?: string | null;
+  };
+
+  // Destinataire (adresse et contact de destination) — optionnel, snapshot du devis
+  destination?: {
+    address?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    contactName?: string | null;
+    contactPhone?: string | null;
+    contactEmail?: string | null;
+  };
+
   // Montants
   estimatedCost: number;
   currency: string;
@@ -93,6 +113,9 @@ export interface QuoteInvoicePDFData {
 
   // Notes
   agentComment?: string | null;
+
+  /** Liste des colis détaillés (multi-colis) — si fourni et > 1, affiche un tableau détaillé */
+  packages?: PackagePDFData[];
 }
 
 /**
@@ -367,6 +390,67 @@ export function generateInvoicePDF(
 }
 
 /**
+ * Traduit un code pays ISO 3166-1 alpha-2 en nom français
+ *
+ * Couvre les pays fréquents en logistique Afrique de l'Ouest / Europe.
+ * Fallback : retourne le code brut si non trouvé.
+ *
+ * @param code - Code ISO du pays (ex: "CM", "BF", "FR")
+ * @returns Nom complet en français (ex: "Cameroun", "Burkina Faso", "France")
+ */
+function translateCountryCode(code: string | null | undefined): string {
+  if (!code) return 'Non défini';
+  const countries: Record<string, string> = {
+    // Afrique de l'Ouest et Centrale
+    BF: 'Burkina Faso',
+    CM: 'Cameroun',
+    CI: 'Côte d\'Ivoire',
+    SN: 'Sénégal',
+    ML: 'Mali',
+    NE: 'Niger',
+    TG: 'Togo',
+    BJ: 'Bénin',
+    GH: 'Ghana',
+    NG: 'Nigeria',
+    GN: 'Guinée',
+    GA: 'Gabon',
+    CG: 'Congo',
+    CD: 'RD Congo',
+    TD: 'Tchad',
+    CF: 'Centrafrique',
+    // Afrique du Nord
+    MA: 'Maroc',
+    DZ: 'Algérie',
+    TN: 'Tunisie',
+    EG: 'Égypte',
+    // Europe
+    FR: 'France',
+    BE: 'Belgique',
+    DE: 'Allemagne',
+    ES: 'Espagne',
+    IT: 'Italie',
+    GB: 'Royaume-Uni',
+    NL: 'Pays-Bas',
+    PT: 'Portugal',
+    CH: 'Suisse',
+    LU: 'Luxembourg',
+    // Autres
+    US: 'États-Unis',
+    CN: 'Chine',
+    TR: 'Turquie',
+    AE: 'Émirats Arabes Unis',
+    SA: 'Arabie Saoudite',
+    IN: 'Inde',
+    JP: 'Japon',
+    BR: 'Brésil',
+    ZA: 'Afrique du Sud',
+    KE: 'Kenya',
+    ET: 'Éthiopie',
+  };
+  return countries[code.toUpperCase()] || code;
+}
+
+/**
  * Traduit le type de cargo en français
  */
 function translateCargoType(cargoType: string): string {
@@ -386,7 +470,8 @@ function translateCargoType(cargoType: string): string {
 /**
  * Traduit les modes de transport en français
  */
-function translateTransportModes(modes: string[]): string {
+function translateTransportModes(modes: string[] | undefined | null): string {
+  if (!modes || modes.length === 0) return 'Non défini';
   const translations: Record<string, string> = {
     ROAD: 'Routier',
     SEA: 'Maritime',
@@ -615,8 +700,8 @@ export function generateInvoiceFromQuotePDF(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
 
-  // Ligne 1 : Origine → Destination
-  doc.text(`Trajet : ${data.expedition.originCountry} → ${data.expedition.destinationCountry}`, 25, yPos);
+  // Ligne 1 : Origine → Destination (noms complets des pays)
+  doc.text(`Trajet : ${translateCountryCode(data.expedition.originCountry)} → ${translateCountryCode(data.expedition.destinationCountry)}`, 25, yPos);
   yPos += 6;
 
   // Ligne 2 : Transport
@@ -635,19 +720,158 @@ export function generateInvoiceFromQuotePDF(
   }
   doc.text(weightLine, 25, yPos);
 
-  yPos += 15;
+  yPos += 10;
+
+  // ========================================
+  // EXPÉDITEUR ET DESTINATAIRE (côte à côte)
+  // ========================================
+  // Affichés uniquement si au moins un des deux a des données renseignées
+  const hasOrigin = data.origin && (data.origin.contactName || data.origin.address || data.origin.city);
+  const hasDestination = data.destination && (data.destination.contactName || data.destination.address || data.destination.city);
+
+  if (hasOrigin || hasDestination) {
+    // Sauvegarder yPos de départ pour aligner les deux colonnes
+    const sectionStartY = yPos;
+    const colLeft = 25;     // Colonne gauche : Expéditeur
+    const colRight = pageWidth / 2 + 5; // Colonne droite : Destinataire
+
+    // --- Colonne gauche : EXPÉDITEUR ---
+    if (hasOrigin && data.origin) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...primaryColor);
+      doc.text('EXPÉDITEUR', colLeft, yPos);
+      yPos += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...textColor);
+
+      if (data.origin.contactName) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(data.origin.contactName, colLeft, yPos);
+        doc.setFont('helvetica', 'normal');
+        yPos += 4;
+      }
+      if (data.origin.address) {
+        doc.text(data.origin.address, colLeft, yPos);
+        yPos += 4;
+      }
+      // Ville, code postal, pays
+      const originLocation = [data.origin.postalCode, data.origin.city].filter(Boolean).join(' ');
+      if (originLocation) {
+        doc.text(originLocation, colLeft, yPos);
+        yPos += 4;
+      }
+      doc.text(translateCountryCode(data.expedition.originCountry), colLeft, yPos);
+      yPos += 4;
+
+      if (data.origin.contactPhone) {
+        doc.text(`Tél: ${data.origin.contactPhone}`, colLeft, yPos);
+        yPos += 4;
+      }
+      if (data.origin.contactEmail) {
+        doc.text(`Email: ${data.origin.contactEmail}`, colLeft, yPos);
+        yPos += 4;
+      }
+    }
+
+    // Hauteur maximale atteinte par la colonne gauche
+    const leftEndY = yPos;
+
+    // --- Colonne droite : DESTINATAIRE ---
+    yPos = sectionStartY; // Revenir en haut pour la colonne droite
+
+    if (hasDestination && data.destination) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...primaryColor);
+      doc.text('DESTINATAIRE', colRight, yPos);
+      yPos += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...textColor);
+
+      if (data.destination.contactName) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(data.destination.contactName, colRight, yPos);
+        doc.setFont('helvetica', 'normal');
+        yPos += 4;
+      }
+      if (data.destination.address) {
+        doc.text(data.destination.address, colRight, yPos);
+        yPos += 4;
+      }
+      const destLocation = [data.destination.postalCode, data.destination.city].filter(Boolean).join(' ');
+      if (destLocation) {
+        doc.text(destLocation, colRight, yPos);
+        yPos += 4;
+      }
+      doc.text(translateCountryCode(data.expedition.destinationCountry), colRight, yPos);
+      yPos += 4;
+
+      if (data.destination.contactPhone) {
+        doc.text(`Tél: ${data.destination.contactPhone}`, colRight, yPos);
+        yPos += 4;
+      }
+      if (data.destination.contactEmail) {
+        doc.text(`Email: ${data.destination.contactEmail}`, colRight, yPos);
+        yPos += 4;
+      }
+    }
+
+    // Prendre le max des deux colonnes pour positionner la suite
+    yPos = Math.max(leftEndY, yPos) + 5;
+  }
+
+  yPos += 5;
 
   // ========================================
   // TABLEAU DES PRESTATIONS
   // ========================================
-  const tableData = [
-    [
-      `Service d'expédition ${data.expedition.originCountry} → ${data.expedition.destinationCountry}`,
-      '1',
-      `${data.estimatedCost.toFixed(2)} ${data.currency}`,
-      `${data.estimatedCost.toFixed(2)} ${data.currency}`,
-    ],
-  ];
+  // Affichage conditionnel : multi-colis détaillé ou ligne unique
+  const hasMultiplePackages = data.packages && data.packages.length > 1;
+
+  let tableData: string[][];
+
+  if (hasMultiplePackages && data.packages) {
+    // Multi-colis : une ligne par type de colis avec prix unitaire et montant
+    // Si les unitPrice sont null (anciens devis), on distribue estimatedCost proportionnellement au poids
+    const allHavePrice = data.packages.every((pkg) => pkg.unitPrice != null && pkg.unitPrice > 0);
+    const totalWeightQty = data.packages.reduce((sum, pkg) => sum + pkg.weight * pkg.quantity, 0);
+
+    tableData = data.packages.map((pkg) => {
+      const desc = pkg.description || translateCargoType(pkg.cargoType);
+      // Priorité : unitPrice sauvegardé > fallback proportionnel au poids
+      let unitPrice: number;
+      if (allHavePrice) {
+        unitPrice = pkg.unitPrice!;
+      } else {
+        // Distribution proportionnelle : (poids colis / poids total) × estimatedCost / quantité
+        unitPrice = totalWeightQty > 0
+          ? (pkg.weight / totalWeightQty) * data.estimatedCost
+          : 0;
+      }
+      const amount = unitPrice * pkg.quantity;
+      return [
+        `${desc} (${pkg.weight}kg${pkg.length && pkg.width && pkg.height ? `, ${pkg.length}×${pkg.width}×${pkg.height}cm` : ''})`,
+        String(pkg.quantity),
+        `${unitPrice.toFixed(2)} ${data.currency}`,
+        `${amount.toFixed(2)} ${data.currency}`,
+      ];
+    });
+  } else {
+    // Colis unique ou anciens devis : une seule ligne globale
+    tableData = [
+      [
+        `Service d'expédition ${translateCountryCode(data.expedition.originCountry)} → ${translateCountryCode(data.expedition.destinationCountry)}`,
+        '1',
+        `${data.estimatedCost.toFixed(2)} ${data.currency}`,
+        `${data.estimatedCost.toFixed(2)} ${data.currency}`,
+      ],
+    ];
+  }
 
   autoTable(doc, {
     startY: yPos,

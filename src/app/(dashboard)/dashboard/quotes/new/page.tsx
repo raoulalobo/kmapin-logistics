@@ -55,6 +55,7 @@ import {
   type TransportModeOption,
   type PriorityOption,
 } from '@/modules/pricing-config';
+import { PackageFieldArray } from '@/components/quotes';
 
 export default function NewQuotePage() {
   const router = useRouter();
@@ -116,13 +117,25 @@ export default function NewQuotePage() {
       clientId: isClient ? userClientId : '',
       originCountry: 'FR',
       destinationCountry: '',
+      // Champs plats conservés comme agrégats (calculés depuis packages[])
       cargoType: 'GENERAL' as CargoType,
-      // Champs numériques : undefined permet d'avoir un champ vide par défaut
-      // au lieu de 0 qui bloque l'utilisateur
-      weight: undefined as unknown as number,
+      weight: 0,
       length: undefined as unknown as number,
       width: undefined as unknown as number,
       height: undefined as unknown as number,
+      // Colis détaillés — source de vérité pour la marchandise
+      // Une ligne par défaut avec des valeurs vides (l'utilisateur remplit)
+      packages: [
+        {
+          description: '',
+          quantity: 1,
+          cargoType: 'GENERAL' as CargoType,
+          weight: undefined as unknown as number,
+          length: undefined as unknown as number,
+          width: undefined as unknown as number,
+          height: undefined as unknown as number,
+        },
+      ],
       // Adresses expéditeur (optionnelles)
       originAddress: '',
       originCity: '',
@@ -232,18 +245,17 @@ export default function NewQuotePage() {
   };
 
   // Watcher pour recalculer le prix automatiquement
-  // Inclut la priorité pour que le prix se mette à jour quand elle change
-  const watchedFields = form.watch([
-    'originCountry',
-    'destinationCountry',
-    'cargoType',
-    'weight',
-    'length',
-    'width',
-    'height',
-    'transportMode',
-    'priority',
-  ]);
+  // Surveille les packages (colis détaillés) + route + transport + priorité
+  // NOTE : form.watch('packages') retourne une référence d'array qui ne change pas
+  // quand les propriétés internes changent (ex: weight d'un colis).
+  // On sérialise en JSON pour forcer une comparaison par VALEUR au lieu de par référence.
+  const watchedOrigin = form.watch('originCountry');
+  const watchedDestination = form.watch('destinationCountry');
+  const watchedPackages = form.watch('packages');
+  const watchedTransportMode = form.watch('transportMode');
+  const watchedPriority = form.watch('priority');
+  // Clé de dépendance sérialisée — change dès qu'un champ interne de packages change
+  const packagesKey = JSON.stringify(watchedPackages);
 
   /**
    * Mettre à jour le champ estimatedCost quand la devise change
@@ -256,19 +268,20 @@ export default function NewQuotePage() {
   }, [selectedCurrency, estimatedPrice]);
 
   /**
-   * Calculer automatiquement le prix estimé
-   * Utilise la même logique que le calculateur de la homepage
+   * Calculer automatiquement le prix estimé à partir des packages
+   *
+   * Itère sur chaque package, calcule le prix via calculateQuoteEstimateV2Action,
+   * et somme les résultats. Calcule aussi les agrégats (poids total, cargoType dominant).
    */
   useEffect(() => {
     async function calculatePrice() {
       const values = form.getValues();
+      const packages = values.packages || [];
 
-      // Vérifier que les champs obligatoires sont remplis
+      // Vérifier que les champs globaux sont remplis
       if (
         !values.originCountry ||
         !values.destinationCountry ||
-        !values.weight ||
-        values.weight <= 0 ||
         !values.transportMode ||
         values.transportMode.length === 0
       ) {
@@ -276,50 +289,118 @@ export default function NewQuotePage() {
         return;
       }
 
+      // Vérifier qu'au moins un package a un poids valide
+      const validPackages = packages.filter(
+        (pkg: { weight?: number }) => pkg.weight && pkg.weight > 0
+      );
+      if (validPackages.length === 0) {
+        setEstimatedPrice(null);
+        return;
+      }
+
       setIsCalculating(true);
 
       try {
-        // Préparer les données pour le calculateur
-        // Utilise la priorité sélectionnée par l'utilisateur (ou STANDARD par défaut)
-        const estimateData = {
-          originCountry: values.originCountry,
-          destinationCountry: values.destinationCountry,
-          cargoType: values.cargoType,
-          weight: values.weight,
-          length: values.length || 0,
-          width: values.width || 0,
-          height: values.height || 0,
-          transportMode: values.transportMode,
-          priority: (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
-        };
+        // Calculer le prix pour chaque package individuellement
+        // puis sommer (le calcul complet multi-packages sera fait côté serveur)
+        let totalPrice = 0;
 
-        // Calculer le prix avec la Server Action
-        const result = await calculateQuoteEstimateV2Action(estimateData);
+        for (const pkg of validPackages) {
+          const estimateData = {
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: pkg.cargoType || 'GENERAL',
+            weight: pkg.weight,
+            length: pkg.length || 0,
+            width: pkg.width || 0,
+            height: pkg.height || 0,
+            transportMode: values.transportMode,
+            // Priorité STANDARD par package, la surcharge priorité sera ajoutée au total
+            priority: 'STANDARD' as const,
+          };
 
-        if (result.success && result.data) {
-          const calculatedPrice = result.data.estimatedCost;
-          setEstimatedPrice(calculatedPrice);
+          const result = await calculateQuoteEstimateV2Action(estimateData);
 
-          // Mettre à jour le champ estimatedCost automatiquement
-          form.setValue('estimatedCost', calculatedPrice);
-        } else {
-          setEstimatedPrice(null);
-          toast.error('Impossible de calculer le prix', {
-            description: result.error || 'Vérifiez les paramètres saisis',
-          });
+          if (result.success && result.data) {
+            // Multiplier le prix unitaire par la quantité de ce package
+            const quantity = pkg.quantity || 1;
+            totalPrice += result.data.estimatedCost * quantity;
+          }
         }
+
+        // Appliquer la surcharge priorité sur le total global
+        // Pour récupérer le coefficient, on fait un calcul de référence
+        const priority = (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+        if (priority !== 'STANDARD' && totalPrice > 0) {
+          // Calcul de référence pour obtenir le ratio de surcharge priorité
+          const refBase = await calculateQuoteEstimateV2Action({
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: 'GENERAL',
+            weight: 1,
+            length: 0,
+            width: 0,
+            height: 0,
+            transportMode: values.transportMode,
+            priority: 'STANDARD',
+          });
+          const refWithPriority = await calculateQuoteEstimateV2Action({
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: 'GENERAL',
+            weight: 1,
+            length: 0,
+            width: 0,
+            height: 0,
+            transportMode: values.transportMode,
+            priority,
+          });
+
+          if (refBase.success && refWithPriority.success && refBase.data && refWithPriority.data) {
+            // Calculer le coefficient de priorité depuis les deux résultats
+            const coeffPriorite = refBase.data.estimatedCost > 0
+              ? refWithPriority.data.estimatedCost / refBase.data.estimatedCost
+              : 1;
+            totalPrice = totalPrice * coeffPriorite;
+          }
+        }
+
+        // Calculer les agrégats depuis les packages
+        // Poids total = somme de (weight × quantity) pour chaque package
+        const totalWeight = validPackages.reduce(
+          (sum: number, pkg: { weight: number; quantity?: number }) =>
+            sum + pkg.weight * (pkg.quantity || 1),
+          0
+        );
+
+        // Type dominant = le type le plus fréquent (pondéré par quantité)
+        const typeCounts: Record<string, number> = {};
+        for (const pkg of validPackages) {
+          const type = pkg.cargoType || 'GENERAL';
+          typeCounts[type] = (typeCounts[type] || 0) + (pkg.quantity || 1);
+        }
+        const dominantType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || 'GENERAL';
+
+        // Mettre à jour les champs agrégats sur le formulaire (pour le serveur)
+        form.setValue('weight', totalWeight);
+        form.setValue('cargoType', dominantType as CargoType);
+
+        const finalPrice = Math.round(totalPrice * 100) / 100;
+        setEstimatedPrice(finalPrice);
+        form.setValue('estimatedCost', finalPrice);
       } catch (error) {
-        console.error('Erreur calcul prix:', error);
+        console.error('Erreur calcul prix multi-packages:', error);
         setEstimatedPrice(null);
       } finally {
         setIsCalculating(false);
       }
     }
 
-    // Déclencher le calcul avec un debounce
-    const timeoutId = setTimeout(calculatePrice, 500);
+    // Déclencher le calcul avec un debounce (700ms car multi-packages = plus d'appels)
+    const timeoutId = setTimeout(calculatePrice, 700);
     return () => clearTimeout(timeoutId);
-  }, watchedFields);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedOrigin, watchedDestination, packagesKey, watchedTransportMode, watchedPriority]);
 
   /**
    * Soumission du formulaire
@@ -349,10 +430,16 @@ export default function NewQuotePage() {
       formData.append('cargoType', data.cargoType);
       formData.append('weight', data.weight.toString());
 
-      // Dimensions (optionnelles)
+      // Dimensions agrégats (optionnelles — conservées pour rétrocompatibilité)
       if (data.length) formData.append('length', data.length.toString());
       if (data.width) formData.append('width', data.width.toString());
       if (data.height) formData.append('height', data.height.toString());
+
+      // Sérialiser les packages (colis détaillés) en JSON
+      // Le serveur les extraira et créera les QuotePackage associés
+      if (data.packages && data.packages.length > 0) {
+        formData.append('packages', JSON.stringify(data.packages));
+      }
 
       // Adresses expéditeur (optionnelles)
       if (data.originAddress) formData.append('originAddress', data.originAddress);
@@ -372,6 +459,9 @@ export default function NewQuotePage() {
 
       // Transport mode (array)
       data.transportMode.forEach(mode => formData.append('transportMode', mode));
+
+      // Priorité de livraison (utilisée par le moteur de pricing serveur pour le calcul des surcharges)
+      formData.append('priority', data.priority || 'STANDARD');
 
       formData.append('estimatedCost', data.estimatedCost.toString());
       formData.append('currency', data.currency);
@@ -769,170 +859,30 @@ export default function NewQuotePage() {
             </CardContent>
           </Card>
 
-          {/* Marchandise */}
+          {/* Colis (Packages) — Section multi-colis dynamique */}
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Détails de la marchandise</CardTitle>
+              <CardTitle>Détails des colis</CardTitle>
               <CardDescription>
-                Informations sur le contenu à transporter
+                Ajoutez un ou plusieurs types de colis. Chaque ligne représente un type de colis
+                avec sa quantité, son type de marchandise, son poids et ses dimensions.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="cargoType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type de marchandise *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="GENERAL">Marchandise générale</SelectItem>
-                        <SelectItem value="FOOD">Alimentaire</SelectItem>
-                        <SelectItem value="ELECTRONICS">Électronique</SelectItem>
-                        <SelectItem value="PHARMACEUTICALS">Pharmaceutique</SelectItem>
-                        <SelectItem value="CHEMICALS">Produits chimiques</SelectItem>
-                        <SelectItem value="CONSTRUCTION">Construction</SelectItem>
-                        <SelectItem value="TEXTILES">Textiles</SelectItem>
-                        <SelectItem value="AUTOMOTIVE">Automobile</SelectItem>
-                        <SelectItem value="MACHINERY">Machines</SelectItem>
-                        <SelectItem value="PERISHABLE">Périssable</SelectItem>
-                        <SelectItem value="HAZARDOUS">Dangereux</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Composant dynamique pour ajouter/supprimer des lignes de colis */}
+              <PackageFieldArray control={form.control} />
+            </CardContent>
+          </Card>
 
-              <FormField
-                control={form.control}
-                name="weight"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Poids (kg) *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        placeholder="Ex: 150"
-                        // Afficher vide si undefined/null/0, sinon la valeur
-                        value={field.value ?? ''}
-                        onChange={e => {
-                          // Permettre le champ vide (undefined) pour une meilleure UX
-                          const val = e.target.value;
-                          field.onChange(val === '' ? undefined : parseFloat(val));
-                        }}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Poids total de la marchandise en kilogrammes
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Dimensions (optionnelles) */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Dimensions (optionnelles)
-                </label>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="length"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Longueur (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="Ex: 100"
-                            value={field.value ?? ''}
-                            onChange={e => {
-                              const val = e.target.value;
-                              field.onChange(val === '' ? undefined : parseFloat(val));
-                            }}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="width"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Largeur (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="Ex: 80"
-                            value={field.value ?? ''}
-                            onChange={e => {
-                              const val = e.target.value;
-                              field.onChange(val === '' ? undefined : parseFloat(val));
-                            }}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="height"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-muted-foreground">Hauteur (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="1"
-                            placeholder="Ex: 60"
-                            value={field.value ?? ''}
-                            onChange={e => {
-                              const val = e.target.value;
-                              field.onChange(val === '' ? undefined : parseFloat(val));
-                            }}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Les dimensions permettent un calcul plus précis du prix (volume = L × l × h)
-                </p>
-              </div>
-
+          {/* Transport et Priorité */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Transport</CardTitle>
+              <CardDescription>
+                Mode de transport et priorité de livraison
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <FormField
                 control={form.control}
                 name="transportMode"

@@ -1,8 +1,8 @@
 /**
- * Page Édition de Devis
+ * Page Édition de Devis (avec support multi-colis)
  *
- * Permet au CLIENT de modifier son devis tant qu'il est en statut DRAFT.
- * Une fois envoyé (SENT), le devis est verrouillé et ne peut plus être modifié.
+ * Permet de modifier un devis existant avec le support des colis détaillés (packages).
+ * Utilise le composant PackageFieldArray pour la gestion dynamique des lignes de colis.
  *
  * Règles métier :
  * - Le CLIENT propriétaire peut modifier son devis en DRAFT
@@ -10,9 +10,9 @@
  *   pour ajuster les prix, routes, cargo avant envoi au client
  *
  * Architecture :
- * - EditQuotePage : Composant principal qui charge les données
+ * - EditQuotePage : Composant principal qui charge les données via getQuoteAction
  * - QuoteEditForm : Composant formulaire qui reçoit les données en props
- *   (séparé pour garantir que useForm est initialisé avec les bonnes valeurs)
+ *   (séparé pour garantir que useForm est initialisé avec les bonnes defaultValues)
  *
  * @module app/(dashboard)/dashboard/quotes/[id]/edit
  */
@@ -51,6 +51,7 @@ import { CountrySelect } from '@/components/countries/country-select';
 import { FormErrorSummary } from '@/components/ui/form-error-summary';
 import { useFormValidation } from '@/hooks/use-form-validation';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PackageFieldArray } from '@/components/quotes';
 
 import { quoteSchema, type QuoteFormData, getQuoteAction, updateQuoteAction } from '@/modules/quotes';
 import { CargoType, TransportMode } from '@/lib/db/enums';
@@ -68,13 +69,6 @@ import {
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Type pour les données du devis chargées depuis l'API
- */
-/**
- * Type pour les données du devis chargées depuis l'API
- * Note: validUntil peut être un objet Date (Prisma) ou une string ISO (après sérialisation)
- */
-/**
  * Type des priorités disponibles pour la livraison
  * - STANDARD : Délai normal, aucun supplément
  * - NORMAL : Légèrement accéléré, +10%
@@ -83,6 +77,25 @@ import {
  */
 type PriorityType = 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
 
+/**
+ * Type pour un colis chargé depuis la base de données (QuotePackage)
+ * Correspond au modèle Prisma QuotePackage avec les champs nécessaires au formulaire
+ */
+interface PackageData {
+  id: string;
+  description: string | null;
+  quantity: number;
+  cargoType: string;
+  weight: number;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+}
+
+/**
+ * Type pour les données du devis chargées depuis getQuoteAction
+ * Inclut maintenant les packages (colis détaillés) en plus des champs plats agrégés
+ */
 interface QuoteData {
   id: string;
   quoteNumber: string;
@@ -107,13 +120,13 @@ interface QuoteData {
   destinationContactPhone: string | null;
   destinationContactEmail: string | null;
   transportMode: string[];
-  // Priorité de livraison : affecte le prix (+10% à +50%) et le délai
   priority: PriorityType | null;
   estimatedCost: number;
   currency: string;
-  // Prisma retourne Date, mais après sérialisation JSON c'est une string
   validUntil: Date | string;
   status: string;
+  // Colis détaillés (QuotePackage[]) — source de vérité pour la marchandise
+  packages?: PackageData[];
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -121,12 +134,11 @@ interface QuoteData {
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Composant formulaire d'édition de devis
+ * Composant formulaire d'édition de devis avec support multi-colis
  *
  * Séparé du composant principal pour garantir que useForm()
  * est initialisé avec les bonnes valeurs dès le départ.
- * Cela évite les problèmes de synchronisation avec les composants
- * Select de Radix UI qui ne réagissent pas bien au form.reset().
+ * Les packages existants sont pré-remplis dans le useFieldArray.
  */
 function QuoteEditForm({
   quoteData,
@@ -161,20 +173,51 @@ function QuoteEditForm({
     loadOptions();
   }, []);
 
-  // Formulaire initialisé avec les données du devis
-  // Les valeurs sont disponibles dès le premier rendu
+  /**
+   * Construire les defaultValues des packages depuis les données existantes
+   *
+   * Si le devis a des packages en DB → pré-remplir avec ces packages
+   * Si le devis n'a pas de packages (ancien devis) → créer un package unique
+   *   depuis les champs plats (cargoType, weight, length, width, height)
+   * Cela garantit la rétrocompatibilité avec les devis créés avant le multi-colis
+   */
+  const defaultPackages = quoteData.packages && quoteData.packages.length > 0
+    ? quoteData.packages.map((pkg) => ({
+        description: pkg.description || '',
+        quantity: pkg.quantity,
+        cargoType: pkg.cargoType as CargoType,
+        weight: pkg.weight,
+        length: pkg.length || undefined,
+        width: pkg.width || undefined,
+        height: pkg.height || undefined,
+      }))
+    : [{
+        // Fallback pour les anciens devis sans packages : reconstruire depuis les champs plats
+        description: '',
+        quantity: 1,
+        cargoType: quoteData.cargoType as CargoType,
+        weight: Number(quoteData.weight),
+        length: quoteData.length ? Number(quoteData.length) : undefined,
+        width: quoteData.width ? Number(quoteData.width) : undefined,
+        height: quoteData.height ? Number(quoteData.height) : undefined,
+      }];
+
+  // Formulaire initialisé avec les données du devis existant
+  // Les valeurs sont disponibles dès le premier rendu grâce à la séparation composant
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
       clientId: quoteData.clientId || '',
       originCountry: quoteData.originCountry,
       destinationCountry: quoteData.destinationCountry,
+      // Champs agrégats (calculés depuis packages[], conservés pour rétrocompatibilité)
       cargoType: quoteData.cargoType as CargoType,
       weight: Number(quoteData.weight),
-      // Dimensions : undefined si null/0 pour avoir des champs vides
       length: quoteData.length ? Number(quoteData.length) : undefined,
       width: quoteData.width ? Number(quoteData.width) : undefined,
       height: quoteData.height ? Number(quoteData.height) : undefined,
+      // Colis détaillés — source de vérité pour la marchandise
+      packages: defaultPackages,
       // Adresses expéditeur
       originAddress: quoteData.originAddress || '',
       originCity: quoteData.originCity || '',
@@ -195,7 +238,6 @@ function QuoteEditForm({
       estimatedCost: Number(quoteData.estimatedCost),
       currency: quoteData.currency,
       // Prisma retourne un objet Date, mais Zod attend une chaîne ISO 8601
-      // On convertit donc la Date en string avec toISOString()
       validUntil: quoteData.validUntil instanceof Date
         ? quoteData.validUntil.toISOString()
         : typeof quoteData.validUntil === 'string'
@@ -206,7 +248,7 @@ function QuoteEditForm({
     },
   });
 
-  // Hook de validation
+  // Hook de validation améliorée (toast + scroll + focus)
   const { onSubmitWithValidation, errorMessages } = useFormValidation(form, {
     toastTitle: 'Formulaire incomplet',
     fieldLabels: {
@@ -222,10 +264,10 @@ function QuoteEditForm({
     },
   });
 
-  // Devise sélectionnée
+  // Devise sélectionnée pour la conversion d'affichage
   const selectedCurrency = form.watch('currency');
 
-  // Taux de conversion
+  // Taux de conversion approximatifs depuis EUR
   const conversionRates: Record<string, number> = {
     EUR: 1,
     USD: 1.09,
@@ -249,19 +291,18 @@ function QuoteEditForm({
     return currencySymbols[currency] || currency;
   };
 
-  // Watcher pour recalculer le prix
-  // Surveille tous les champs qui affectent le calcul du tarif
-  const watchedFields = form.watch([
-    'originCountry',
-    'destinationCountry',
-    'cargoType',
-    'weight',
-    'length',
-    'width',
-    'height',
-    'transportMode',
-    'priority', // Ajouté : la priorité affecte le prix (+10% à +50%)
-  ]);
+  // ── Watchers pour recalculer le prix automatiquement ──
+  // Surveille les packages (colis détaillés) + route + transport + priorité
+  // NOTE : form.watch('packages') retourne une référence d'array qui ne change pas
+  // quand les propriétés internes changent (ex: weight d'un colis).
+  // On sérialise en JSON pour forcer une comparaison par VALEUR au lieu de par référence.
+  const watchedOrigin = form.watch('originCountry');
+  const watchedDestination = form.watch('destinationCountry');
+  const watchedPackages = form.watch('packages');
+  const watchedTransportMode = form.watch('transportMode');
+  const watchedPriority = form.watch('priority');
+  // Clé de dépendance sérialisée — change dès qu'un champ interne de packages change
+  const packagesKey = JSON.stringify(watchedPackages);
 
   // Mise à jour du prix quand la devise change
   useEffect(() => {
@@ -272,66 +313,143 @@ function QuoteEditForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCurrency, estimatedPrice]);
 
-  // Calcul automatique du prix quand les champs changent
+  /**
+   * Calculer automatiquement le prix estimé à partir des packages
+   *
+   * Même logique que le formulaire de création (new/page.tsx) :
+   * 1. Itère sur chaque package, calcule le prix via calculateQuoteEstimateV2Action
+   * 2. Multiplie par la quantité de chaque package
+   * 3. Somme les résultats
+   * 4. Applique la surcharge priorité sur le total global
+   * 5. Met à jour les agrégats (poids total, cargoType dominant)
+   */
   useEffect(() => {
     async function calculatePrice() {
       const values = form.getValues();
+      const packages = values.packages || [];
 
-      // Vérifier que les champs obligatoires sont remplis
+      // Vérifier que les champs globaux sont remplis
       if (
         !values.originCountry ||
         !values.destinationCountry ||
-        !values.weight ||
-        values.weight <= 0 ||
         !values.transportMode ||
         values.transportMode.length === 0
       ) {
         return;
       }
 
+      // Vérifier qu'au moins un package a un poids valide
+      const validPackages = packages.filter(
+        (pkg: { weight?: number }) => pkg.weight && pkg.weight > 0
+      );
+      if (validPackages.length === 0) {
+        return;
+      }
+
       setIsCalculating(true);
 
       try {
-        // Préparer les données pour le calculateur
-        // La priorité est récupérée du formulaire pour un calcul précis
-        const estimateData = {
-          originCountry: values.originCountry,
-          destinationCountry: values.destinationCountry,
-          cargoType: values.cargoType,
-          weight: values.weight,
-          length: values.length || 0,
-          width: values.width || 0,
-          height: values.height || 0,
-          transportMode: values.transportMode,
-          // Utilise la priorité sélectionnée par l'utilisateur
-          priority: (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
-        };
+        // Calculer le prix pour chaque package individuellement puis sommer
+        let totalPrice = 0;
 
-        // Calculer le prix avec la Server Action
-        const result = await calculateQuoteEstimateV2Action(estimateData);
+        for (const pkg of validPackages) {
+          const estimateData = {
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: pkg.cargoType || 'GENERAL',
+            weight: pkg.weight,
+            length: pkg.length || 0,
+            width: pkg.width || 0,
+            height: pkg.height || 0,
+            transportMode: values.transportMode,
+            // Priorité STANDARD par package, la surcharge priorité sera ajoutée au total
+            priority: 'STANDARD' as const,
+          };
 
-        if (result.success && result.data) {
-          const calculatedPrice = result.data.estimatedCost;
-          setEstimatedPrice(calculatedPrice);
-          // Mettre à jour le champ estimatedCost automatiquement
-          form.setValue('estimatedCost', calculatedPrice);
+          const result = await calculateQuoteEstimateV2Action(estimateData);
+
+          if (result.success && result.data) {
+            // Multiplier le prix unitaire par la quantité de ce package
+            const quantity = pkg.quantity || 1;
+            totalPrice += result.data.estimatedCost * quantity;
+          }
         }
+
+        // Appliquer la surcharge priorité sur le total global
+        // Pour récupérer le coefficient, on fait un calcul de référence
+        const priority = (values.priority || 'STANDARD') as PriorityType;
+        if (priority !== 'STANDARD' && totalPrice > 0) {
+          const refBase = await calculateQuoteEstimateV2Action({
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: 'GENERAL',
+            weight: 1,
+            length: 0,
+            width: 0,
+            height: 0,
+            transportMode: values.transportMode,
+            priority: 'STANDARD',
+          });
+          const refWithPriority = await calculateQuoteEstimateV2Action({
+            originCountry: values.originCountry,
+            destinationCountry: values.destinationCountry,
+            cargoType: 'GENERAL',
+            weight: 1,
+            length: 0,
+            width: 0,
+            height: 0,
+            transportMode: values.transportMode,
+            priority,
+          });
+
+          if (refBase.success && refWithPriority.success && refBase.data && refWithPriority.data) {
+            const coeffPriorite = refBase.data.estimatedCost > 0
+              ? refWithPriority.data.estimatedCost / refBase.data.estimatedCost
+              : 1;
+            totalPrice = totalPrice * coeffPriorite;
+          }
+        }
+
+        // Calculer les agrégats depuis les packages
+        // Poids total = somme de (weight × quantity) pour chaque package
+        const totalWeight = validPackages.reduce(
+          (sum: number, pkg: { weight: number; quantity?: number }) =>
+            sum + pkg.weight * (pkg.quantity || 1),
+          0
+        );
+
+        // Type dominant = le type le plus fréquent (pondéré par quantité)
+        const typeCounts: Record<string, number> = {};
+        for (const pkg of validPackages) {
+          const type = pkg.cargoType || 'GENERAL';
+          typeCounts[type] = (typeCounts[type] || 0) + (pkg.quantity || 1);
+        }
+        const dominantType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || 'GENERAL';
+
+        // Mettre à jour les champs agrégats sur le formulaire (pour le serveur)
+        form.setValue('weight', totalWeight);
+        form.setValue('cargoType', dominantType as CargoType);
+
+        const finalPrice = Math.round(totalPrice * 100) / 100;
+        setEstimatedPrice(finalPrice);
+        form.setValue('estimatedCost', finalPrice);
       } catch (error) {
-        console.error('Erreur calcul prix:', error);
+        console.error('Erreur calcul prix multi-packages:', error);
       } finally {
         setIsCalculating(false);
       }
     }
 
-    // Déclencher le calcul avec un debounce de 500ms
-    const timeoutId = setTimeout(calculatePrice, 500);
+    // Déclencher le calcul avec un debounce (700ms car multi-packages = plus d'appels)
+    const timeoutId = setTimeout(calculatePrice, 700);
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...watchedFields]);
+  }, [watchedOrigin, watchedDestination, packagesKey, watchedTransportMode, watchedPriority]);
 
   /**
    * Soumission du formulaire - Mise à jour du devis
    * Convertit les données du formulaire en FormData pour l'action serveur
+   * Inclut la sérialisation des packages en JSON
    */
   async function onSubmit(data: QuoteFormData) {
     try {
@@ -344,10 +462,16 @@ function QuoteEditForm({
       formData.append('cargoType', data.cargoType);
       formData.append('weight', data.weight.toString());
 
-      // Dimensions (optionnelles)
+      // Dimensions agrégats (optionnelles — conservées pour rétrocompatibilité)
       if (data.length) formData.append('length', data.length.toString());
       if (data.width) formData.append('width', data.width.toString());
       if (data.height) formData.append('height', data.height.toString());
+
+      // Sérialiser les packages (colis détaillés) en JSON
+      // Le serveur les extraira, supprimera les anciens QuotePackage, et créera les nouveaux
+      if (data.packages && data.packages.length > 0) {
+        formData.append('packages', JSON.stringify(data.packages));
+      }
 
       // Adresses expéditeur (optionnelles)
       if (data.originAddress) formData.append('originAddress', data.originAddress);
@@ -365,7 +489,7 @@ function QuoteEditForm({
       if (data.destinationContactPhone) formData.append('destinationContactPhone', data.destinationContactPhone);
       if (data.destinationContactEmail) formData.append('destinationContactEmail', data.destinationContactEmail);
 
-      // Transport mode (array)
+      // Transport mode (array — chaque mode ajouté séparément pour FormData.getAll())
       data.transportMode.forEach(mode => formData.append('transportMode', mode));
 
       // Priorité de livraison
@@ -453,7 +577,6 @@ function QuoteEditForm({
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ADRESSE EXPÉDITEUR */}
-        {/* Adresse complète de l'expéditeur pour un traitement plus rapide */}
         {/* ════════════════════════════════════════════════════════════════ */}
         <Card className="dashboard-card">
           <CardHeader>
@@ -580,7 +703,6 @@ function QuoteEditForm({
 
         {/* ════════════════════════════════════════════════════════════════ */}
         {/* ADRESSE DESTINATAIRE */}
-        {/* Adresse complète du destinataire pour un traitement plus rapide */}
         {/* ════════════════════════════════════════════════════════════════ */}
         <Card className="dashboard-card">
           <CardHeader>
@@ -705,156 +827,36 @@ function QuoteEditForm({
           </CardContent>
         </Card>
 
-        {/* Marchandise */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* COLIS DÉTAILLÉS (Packages) — Section multi-colis dynamique */}
+        {/* Remplace l'ancienne section "Détails de la marchandise" */}
+        {/* ════════════════════════════════════════════════════════════════ */}
         <Card className="dashboard-card">
           <CardHeader>
-            <CardTitle>Détails de la marchandise</CardTitle>
-            <CardDescription>Informations sur le contenu à transporter</CardDescription>
+            <CardTitle>Détails des colis</CardTitle>
+            <CardDescription>
+              Ajoutez un ou plusieurs types de colis. Chaque ligne représente un type de colis
+              avec sa quantité, son type de marchandise, son poids et ses dimensions.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="cargoType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type de marchandise *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="GENERAL">Marchandise générale</SelectItem>
-                      <SelectItem value="FOOD">Alimentaire</SelectItem>
-                      <SelectItem value="ELECTRONICS">Électronique</SelectItem>
-                      <SelectItem value="PHARMACEUTICALS">Pharmaceutique</SelectItem>
-                      <SelectItem value="CHEMICALS">Produits chimiques</SelectItem>
-                      <SelectItem value="CONSTRUCTION">Construction</SelectItem>
-                      <SelectItem value="TEXTILES">Textiles</SelectItem>
-                      <SelectItem value="AUTOMOTIVE">Automobile</SelectItem>
-                      <SelectItem value="MACHINERY">Machines</SelectItem>
-                      <SelectItem value="PERISHABLE">Périssable</SelectItem>
-                      <SelectItem value="HAZARDOUS">Dangereux</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Composant dynamique useFieldArray pour ajouter/supprimer des lignes de colis */}
+            <PackageFieldArray control={form.control} />
+          </CardContent>
+        </Card>
 
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Poids (kg) *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      placeholder="Ex: 150"
-                      value={field.value ?? ''}
-                      onChange={e => {
-                        const val = e.target.value;
-                        field.onChange(val === '' ? undefined : parseFloat(val));
-                      }}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                    />
-                  </FormControl>
-                  <FormDescription>Poids total en kilogrammes</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Dimensions */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Dimensions (optionnelles)</label>
-              <div className="grid gap-4 md:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="length"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-muted-foreground">Longueur (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="Ex: 100"
-                          value={field.value ?? ''}
-                          onChange={e => {
-                            const val = e.target.value;
-                            field.onChange(val === '' ? undefined : parseFloat(val));
-                          }}
-                          onBlur={field.onBlur}
-                          name={field.name}
-                          ref={field.ref}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="width"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-muted-foreground">Largeur (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="Ex: 80"
-                          value={field.value ?? ''}
-                          onChange={e => {
-                            const val = e.target.value;
-                            field.onChange(val === '' ? undefined : parseFloat(val));
-                          }}
-                          onBlur={field.onBlur}
-                          name={field.name}
-                          ref={field.ref}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="height"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-muted-foreground">Hauteur (cm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="Ex: 60"
-                          value={field.value ?? ''}
-                          onChange={e => {
-                            const val = e.target.value;
-                            field.onChange(val === '' ? undefined : parseFloat(val));
-                          }}
-                          onBlur={field.onBlur}
-                          name={field.name}
-                          ref={field.ref}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* TRANSPORT ET PRIORITÉ */}
+        {/* Séparé des colis car ce sont des paramètres globaux du devis */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle>Transport</CardTitle>
+            <CardDescription>
+              Mode de transport et priorité de livraison
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
               name="transportMode"
@@ -889,16 +891,15 @@ function QuoteEditForm({
                       )}
                     </SelectContent>
                   </Select>
+                  <FormDescription>
+                    Le mode de transport affecte le prix et le délai de livraison
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* ────────────────────────────────────────────────────────────── */}
-            {/* PRIORITÉ DE LIVRAISON */}
-            {/* Affecte le prix final et le délai de livraison estimé */}
-            {/* STANDARD (×1.0), NORMAL (+10%), EXPRESS (+50%), URGENT (+30%) */}
-            {/* ────────────────────────────────────────────────────────────── */}
+            {/* Priorité de livraison — Affecte le prix (+10% à +50%) et le délai */}
             <FormField
               control={form.control}
               name="priority"
@@ -943,11 +944,14 @@ function QuoteEditForm({
           </CardContent>
         </Card>
 
-        {/* Tarification */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* TARIFICATION */}
+        {/* Prix calculé automatiquement depuis les packages */}
+        {/* ════════════════════════════════════════════════════════════════ */}
         <Card className="dashboard-card">
           <CardHeader>
             <CardTitle>Tarification</CardTitle>
-            <CardDescription>Montant calculé automatiquement</CardDescription>
+            <CardDescription>Montant calculé automatiquement depuis les colis</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {estimatedPrice !== null && (
@@ -980,7 +984,9 @@ function QuoteEditForm({
                         className="bg-muted cursor-not-allowed"
                       />
                     </FormControl>
-                    <FormDescription>Montant calculé automatiquement</FormDescription>
+                    <FormDescription>
+                      {isCalculating ? 'Calcul en cours...' : 'Montant calculé automatiquement (non modifiable)'}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -1047,9 +1053,9 @@ function QuoteEditForm({
 /**
  * Page d'édition d'un devis
  *
- * Charge le devis existant et affiche le formulaire d'édition
- * une fois les données disponibles. Cette séparation garantit
- * que le formulaire est initialisé avec les bonnes valeurs.
+ * Charge le devis existant via getQuoteAction puis affiche le formulaire d'édition
+ * une fois les données disponibles. Cette séparation (EditQuotePage → QuoteEditForm)
+ * garantit que useForm() reçoit les bonnes defaultValues dès le premier rendu.
  */
 export default function EditQuotePage({
   params,
@@ -1153,7 +1159,7 @@ export default function EditQuotePage({
     );
   }
 
-  // Devis non trouvé (ne devrait pas arriver car on gère l'erreur)
+  // Devis non trouvé
   if (!quoteData) {
     return null;
   }
@@ -1176,7 +1182,7 @@ export default function EditQuotePage({
 
       <Separator />
 
-      {/* Formulaire - Rendu seulement quand les données sont disponibles */}
+      {/* Formulaire — Rendu seulement quand les données sont disponibles */}
       <QuoteEditForm quoteData={quoteData} quoteId={id} />
     </div>
   );

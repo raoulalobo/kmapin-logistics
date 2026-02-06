@@ -12,6 +12,7 @@
  */
 
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Configuration de la plateforme pour les PDF
@@ -47,6 +48,21 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 /**
+ * Détails d'un colis pour le PDF
+ * Correspond à QuotePackage en base de données
+ */
+export interface PackagePDFData {
+  description?: string | null;
+  quantity: number;
+  cargoType: string;
+  weight: number;
+  length?: number | null;
+  width?: number | null;
+  height?: number | null;
+  unitPrice?: number | null;
+}
+
+/**
  * Type pour les données de devis nécessaires au PDF
  */
 export interface QuotePDFData {
@@ -74,6 +90,8 @@ export interface QuotePDFData {
   estimatedCost: number;
   currency: string;
   status: string;
+  /** Liste des colis détaillés (multi-colis) — si fourni et > 1, affiche un tableau */
+  packages?: PackagePDFData[];
 }
 
 /**
@@ -91,6 +109,28 @@ function translateCargoType(type: string): string {
     OTHER: 'Autre',
   };
   return translations[type] || type;
+}
+
+/**
+ * Traduit un code pays ISO 3166-1 alpha-2 en nom français
+ *
+ * @param code - Code ISO du pays (ex: "CM", "BF", "FR")
+ * @returns Nom complet en français (ex: "Cameroun", "Burkina Faso", "France")
+ */
+function translateCountryCode(code: string | null | undefined): string {
+  if (!code) return 'Non défini';
+  const countries: Record<string, string> = {
+    BF: 'Burkina Faso', CM: 'Cameroun', CI: 'Côte d\'Ivoire', SN: 'Sénégal',
+    ML: 'Mali', NE: 'Niger', TG: 'Togo', BJ: 'Bénin', GH: 'Ghana', NG: 'Nigeria',
+    GN: 'Guinée', GA: 'Gabon', CG: 'Congo', CD: 'RD Congo', TD: 'Tchad', CF: 'Centrafrique',
+    MA: 'Maroc', DZ: 'Algérie', TN: 'Tunisie', EG: 'Égypte',
+    FR: 'France', BE: 'Belgique', DE: 'Allemagne', ES: 'Espagne', IT: 'Italie',
+    GB: 'Royaume-Uni', NL: 'Pays-Bas', PT: 'Portugal', CH: 'Suisse', LU: 'Luxembourg',
+    US: 'États-Unis', CN: 'Chine', TR: 'Turquie', AE: 'Émirats Arabes Unis',
+    SA: 'Arabie Saoudite', IN: 'Inde', JP: 'Japon', BR: 'Brésil',
+    ZA: 'Afrique du Sud', KE: 'Kenya', ET: 'Éthiopie',
+  };
+  return countries[code.toUpperCase()] || code;
 }
 
 /**
@@ -261,7 +301,7 @@ export function generateQuotePDF(
   doc.setFont('helvetica', 'bold');
   doc.text('Route :', 25, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${data.originCountry} → ${data.destinationCountry}`, 50, yPos);
+  doc.text(`${translateCountryCode(data.originCountry)} → ${translateCountryCode(data.destinationCountry)}`, 50, yPos);
   yPos += 8;
 
   // Mode de transport
@@ -272,27 +312,98 @@ export function generateQuotePDF(
   doc.text(modes, 50, yPos);
   yPos += 8;
 
-  // Type de cargo
-  doc.setFont('helvetica', 'bold');
-  doc.text('Type de cargo :', 25, yPos);
-  doc.setFont('helvetica', 'normal');
-  doc.text(translateCargoType(data.cargoType), 50, yPos);
-  yPos += 8;
+  // Affichage conditionnel multi-colis vs colis unique
+  const hasMultiplePackages = data.packages && data.packages.length > 1;
 
-  // Poids
-  doc.setFont('helvetica', 'bold');
-  doc.text('Poids :', 25, yPos);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`${data.weight.toLocaleString('fr-FR')} kg`, 50, yPos);
-  yPos += 8;
-
-  // Volume (si présent)
-  if (data.volume) {
+  if (hasMultiplePackages && data.packages) {
+    // ── MULTI-COLIS : Tableau détaillé des colis ──
     doc.setFont('helvetica', 'bold');
-    doc.text('Volume :', 25, yPos);
+    doc.text('Détail des colis :', 25, yPos);
+    yPos += 4;
+
+    // Construire les données du tableau colis
+    // Colonnes : #, Description, Qté, Type, Poids unit., Dimensions, Poids total
+    const packagesTableData = data.packages.map((pkg, index) => {
+      const dims = (pkg.length && pkg.width && pkg.height)
+        ? `${pkg.length}×${pkg.width}×${pkg.height} cm`
+        : '—';
+      const totalWeight = (pkg.weight * pkg.quantity).toLocaleString('fr-FR');
+      return [
+        String(index + 1),
+        pkg.description || translateCargoType(pkg.cargoType),
+        String(pkg.quantity),
+        translateCargoType(pkg.cargoType),
+        `${pkg.weight.toLocaleString('fr-FR')} kg`,
+        dims,
+        `${totalWeight} kg`,
+      ];
+    });
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'Description', 'Qté', 'Type', 'Poids unit.', 'Dimensions', 'Poids total']],
+      body: packagesTableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: primaryColor,
+        textColor: [255, 255, 255],
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'left',
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: textColor,
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 10 },
+        1: { cellWidth: 'auto' },
+        2: { halign: 'center', cellWidth: 15 },
+        3: { cellWidth: 30 },
+        4: { halign: 'right', cellWidth: 25 },
+        5: { cellWidth: 35 },
+        6: { halign: 'right', cellWidth: 25 },
+      },
+      margin: { left: 25, right: 25 },
+      // Pied de tableau avec totaux
+      foot: [[
+        '', 'TOTAL', String(data.packages.reduce((s, p) => s + p.quantity, 0)), '', '',  '',
+        `${data.weight.toLocaleString('fr-FR')} kg`,
+      ]],
+      footStyles: {
+        fillColor: lightGray,
+        textColor: textColor,
+        fontSize: 8,
+        fontStyle: 'bold',
+      },
+    });
+
+    // Récupérer la position Y après le tableau
+    yPos = (doc as any).lastAutoTable.finalY + 5;
+  } else {
+    // ── COLIS UNIQUE : Affichage simple (rétrocompatibilité) ──
+    // Type de cargo
+    doc.setFont('helvetica', 'bold');
+    doc.text('Type de cargo :', 25, yPos);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${data.volume.toLocaleString('fr-FR')} m³`, 50, yPos);
+    doc.text(translateCargoType(data.cargoType), 50, yPos);
     yPos += 8;
+
+    // Poids
+    doc.setFont('helvetica', 'bold');
+    doc.text('Poids :', 25, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${data.weight.toLocaleString('fr-FR')} kg`, 50, yPos);
+    yPos += 8;
+
+    // Volume (si présent)
+    if (data.volume) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Volume :', 25, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${data.volume.toLocaleString('fr-FR')} m³`, 50, yPos);
+      yPos += 8;
+    }
   }
 
   // Priorité de livraison

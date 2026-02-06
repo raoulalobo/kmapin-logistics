@@ -352,6 +352,33 @@ function renderMetadata(
   if (!metadata) return null;
 
   switch (eventType) {
+    // Création du devis avec résumé colis (enrichi multi-colis)
+    case QuoteLogEventType.CREATED:
+      return (
+        <div className="text-sm text-muted-foreground">
+          {metadata.source && (
+            <p>
+              Source :{' '}
+              <strong>
+                {metadata.source === 'calculator'
+                  ? 'Calculateur'
+                  : metadata.source === 'prospect'
+                    ? 'Prospect'
+                    : 'Dashboard'}
+              </strong>
+            </p>
+          )}
+          {metadata.packageCount && (
+            <p>
+              {metadata.packageCount as number} colis défini{(metadata.packageCount as number) > 1 ? 's' : ''}
+            </p>
+          )}
+          {metadata.packagesSummary && (
+            <p className="text-xs">{metadata.packagesSummary as string}</p>
+          )}
+        </div>
+      );
+
     // Rattachement au compte utilisateur
     case QuoteLogEventType.ATTACHED_TO_ACCOUNT:
       return (
@@ -385,6 +412,12 @@ function renderMetadata(
           {metadata.paymentMethod && (
             <p>
               Mode de paiement : <strong>{formatPaymentMethod(metadata.paymentMethod as string)}</strong>
+            </p>
+          )}
+          {/* Nombre de colis transférés vers l'expédition (enrichi multi-colis) */}
+          {metadata.packageCount && (
+            <p>
+              {metadata.packageCount as number} colis transféré{(metadata.packageCount as number) > 1 ? 's' : ''}
             </p>
           )}
         </div>
@@ -446,6 +479,7 @@ function renderMetadata(
         currency: 'Devise',
         validUntil: 'Date de validité',
         status: 'Statut',
+        packages: 'Colis',
       };
       return (
         <div className="text-sm text-muted-foreground">

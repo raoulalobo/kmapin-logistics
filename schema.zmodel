@@ -463,6 +463,7 @@ model Shipment {
   pickupRequests PickupRequest[]
   fromQuote      Quote?          @relation("QuoteToShipment") // Devis à l'origine de cette expédition (colis)
   logs           ShipmentLog[]   // Historique complet des événements (changements de statut, etc.)
+  packages       ShipmentPackage[] // Colis détaillés de l'expédition (multi-colis)
 
   // ════════════════════════════════════════════
   // 🔐 ACCESS POLICIES
@@ -496,6 +497,49 @@ model Shipment {
   @@index([createdAt])
   @@index([originEmail])       // Index pour recherche par email expéditeur
   @@index([destinationEmail])  // Index pour recherche par email destinataire
+}
+
+/**
+ * ShipmentPackage — Colis individuel d'une expédition
+ *
+ * Créé lors de la validation d'un devis (copie des QuotePackage)
+ * ou manuellement lors de la création directe d'une expédition.
+ *
+ * Même structure que QuotePackage pour faciliter la copie devis → expédition.
+ * Les access policies suivent celles du Shipment parent.
+ */
+model ShipmentPackage {
+  id          String    @id @default(cuid())
+  shipmentId  String
+  shipment    Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  description String?           // Ex: "Tablette Samsung", "Cartons vêtements"
+  quantity    Int       @default(1)  // Nombre de colis identiques dans cette ligne
+  cargoType   CargoType         // Type de marchandise spécifique à ce colis
+  weight      Float             // Poids unitaire en kg
+  length      Float?            // Longueur en cm
+  width       Float?            // Largeur en cm
+  height      Float?            // Hauteur en cm
+  unitPrice   Float?            // Prix unitaire calculé (snapshot)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 🔐 Access Policies — héritées du Shipment parent
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer, lire et modifier les packages
+  @@allow('create,read,update', auth().role == OPERATIONS_MANAGER)
+
+  // Les finance managers peuvent lire les packages
+  @@allow('read', auth().role == FINANCE_MANAGER)
+
+  // Les clients peuvent lire les packages de leurs expéditions
+  @@allow('read', shipment.clientId != null && auth().clientId == shipment.clientId && auth().role == CLIENT)
+
+  @@deny('all', true)
+  @@index([shipmentId])
 }
 
 enum CargoType {
@@ -1389,6 +1433,7 @@ model Quote {
 
   documents          Document[]
   logs               QuoteLog[]      // Historique complet des événements (changements de statut, etc.)
+  packages           QuotePackage[]  // Colis détaillés du devis (multi-colis)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
@@ -1434,6 +1479,60 @@ model Quote {
   @@index([destinationContactEmail]) // Recherche par email destinataire
   @@index([originCity])              // Filtrage par ville origine
   @@index([destinationCity])         // Filtrage par ville destination
+}
+
+/**
+ * QuotePackage — Colis individuel d'un devis
+ *
+ * Chaque devis peut contenir plusieurs colis hétérogènes.
+ * Exemple : 1 tablette fragile (0.5 kg) + 3 cartons de vêtements (15 kg chacun)
+ *
+ * Le prix est calculé par colis puis sommé pour obtenir le total du devis.
+ * Le champ `unitPrice` capture le prix calculé au moment de la création (snapshot).
+ * Le champ `quantity` permet de regrouper des colis identiques (ex: "3 cartons de 15 kg").
+ *
+ * Les access policies sont héritées du Quote parent via la relation `quote`.
+ */
+model QuotePackage {
+  id          String    @id @default(cuid())
+  quoteId     String
+  quote       Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  description String?           // Ex: "Tablette Samsung", "Cartons vêtements"
+  quantity    Int       @default(1)  // Nombre de colis identiques dans cette ligne
+  cargoType   CargoType         // Type de marchandise spécifique à ce colis
+  weight      Float             // Poids unitaire en kg
+  length      Float?            // Longueur en cm
+  width       Float?            // Largeur en cm
+  height      Float?            // Hauteur en cm
+  unitPrice   Float?            // Prix unitaire calculé (snapshot au moment du calcul)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 🔐 Access Policies — héritées du Quote parent
+  // Création publique (même logique que Quote pour les formulaires sans connexion)
+  @@allow('create', true)
+
+  // Les admins peuvent tout faire
+  @@allow('all', auth().role == ADMIN)
+
+  // Les operations managers peuvent créer + lire/modifier les packages des devis SUBMITTED+
+  // Ou ceux de leurs propres DRAFT
+  @@allow('create', auth().role == OPERATIONS_MANAGER)
+  @@allow('read,update', auth().role == OPERATIONS_MANAGER && (quote.status != DRAFT || quote.createdById == auth().id))
+
+  // Les finance managers peuvent lire les packages des devis SUBMITTED+
+  @@allow('read', auth().role == FINANCE_MANAGER && quote.status != DRAFT)
+
+  // Les clients peuvent gérer les packages de leurs propres devis
+  @@allow('read,create,update,delete', quote.clientId != null && auth().clientId == quote.clientId && auth().role == CLIENT)
+
+  // Le propriétaire du devis (userId) peut gérer ses packages
+  @@allow('read,update,delete', quote.userId != null && auth().id == quote.userId)
+
+  @@deny('all', true)
+  @@index([quoteId])
 }
 
 enum QuoteStatus {

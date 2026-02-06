@@ -40,7 +40,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
@@ -123,7 +122,6 @@ export function QuoteAgentActions({
   // Dialog "Valider"
   const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
   const [validateComment, setValidateComment] = useState('');
-  const [packageCount, setPackageCount] = useState(1);
   const [cargoDescription, setCargoDescription] = useState('');
 
   // Dialog "Annuler"
@@ -177,9 +175,9 @@ export function QuoteAgentActions({
    */
   function handleValidateTreatment() {
     startTransition(async () => {
+      // packageCount est calculé automatiquement côté serveur depuis les QuotePackage
       const result = await validateQuoteTreatmentAction(quoteId, {
         comment: validateComment || null,
-        packageCount: packageCount,
         cargoDescription: cargoDescription || undefined,
       });
 
@@ -248,7 +246,6 @@ export function QuoteAgentActions({
   /** Réinitialiser le formulaire de validation */
   function resetValidateForm() {
     setValidateComment('');
-    setPackageCount(1);
     setCargoDescription('');
   }
 
@@ -481,19 +478,6 @@ export function QuoteAgentActions({
                 </div>
 
                 <Separator />
-
-                {/* Nombre de colis */}
-                <div className="space-y-2">
-                  <Label htmlFor="package-count">Nombre de colis</Label>
-                  <Input
-                    id="package-count"
-                    type="number"
-                    min={1}
-                    value={packageCount}
-                    onChange={(e) => setPackageCount(parseInt(e.target.value) || 1)}
-                    disabled={isPending}
-                  />
-                </div>
 
                 {/* Description de la marchandise (optionnelle mais min 5 caractères si renseignée) */}
                 <div className="space-y-2">
