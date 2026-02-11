@@ -13,7 +13,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Prisma** + **Zenstack** pour ORM et Access Control (RBAC)
 - **Better Auth** pour l'authentification
 - **TanStack Query** pour state management serveur
+- **Zustand** + **Immer** pour state management client (UI, formulaires complexes)
+- **Zod v4** pour validation de données (client + serveur)
 - **shadcn/ui** + **TailwindCSS** pour l'interface
+- **Resend** + **React Email** pour l'envoi d'emails transactionnels
 - **Backblaze B2** pour le stockage de fichiers
 - **Inngest** pour les jobs asynchrones
 
@@ -305,3 +308,298 @@ Le projet est configuré pour **Vercel** :
 - [Better Auth Documentation](https://www.better-auth.com/docs)
 - [shadcn/ui Components](https://ui.shadcn.com)
 - [Prisma Documentation](https://www.prisma.io/docs)
+- [Zustand Documentation](https://zustand.docs.pmnd.rs/)
+- [Zod v4 Documentation](https://zod.dev)
+- [React Email Documentation](https://react.email/docs)
+- [Resend Documentation](https://resend.com/docs)
+
+---
+
+## Skills Agent (Claude Code)
+
+Le projet dispose de **9 skills** installés dans `.claude/skills/` (symlinks vers `.agents/skills/`). Ces skills fournissent des guidelines automatiques selon le contexte de travail.
+
+### Liste des skills installés
+
+| Skill | Quand le consulter |
+|-------|-------------------|
+| `plan-management` | Création/modification de fichiers dans `.claude/plans/` — nommage descriptif, permission obligatoire, relations entre plans |
+| `next-best-practices` | Écriture de code Next.js — App Router, RSC, metadata, optimisation images, route handlers |
+| `vercel-react-best-practices` | Composants React — éviter waterfalls, optimiser bundle, Server Components, re-renders |
+| `vercel-composition-patterns` | Refactoring composants — compound components, state lifting, dependency injection |
+| `better-auth-best-practices` | Configuration auth — sessions, plugins (2FA, org, passkey), pièges courants |
+| `supabase-postgres-best-practices` | Optimisation DB — requêtes, indexes, connexions, RLS, locking |
+| `frontend-design` | Design UI — direction esthétique claire, éviter "AI slop", typographie, animations |
+| `ui-ux-pro-max` | Design system — 50 styles, 97 palettes, 57 font pairings, checklist pré-livraison |
+| `agent-browser` | Tests navigateur — automatisation, scraping, capture screenshots |
+
+### Commande d'installation d'un skill
+
+```bash
+# Installer un skill depuis un repo GitHub (flag -y pour non-interactif)
+npx skills add https://github.com/<org>/<repo> --skill <skill-name> -y
+
+# Exemples utilisés dans ce projet :
+npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-best-practices -y
+npx skills add https://github.com/better-auth/skills --skill better-auth-best-practices -y
+npx skills add https://github.com/vercel-labs/next-skills --skill next-best-practices -y
+```
+
+### Règle de gestion des plans
+
+Conformément au skill `plan-management`, chaque fichier de plan dans `.claude/plans/` doit :
+- Avoir un **nom descriptif** en kebab-case (ex: `plan-stack-skills-guidelines.md`)
+- Suivre le **template obligatoire** (Contexte, Objectif, Plans en relation, Architecture, Étapes, Vérification)
+- Obtenir la **permission utilisateur** avant création, écrasement ou suppression
+
+---
+
+## Guidelines Zustand + Immer
+
+### Quand utiliser Zustand (vs TanStack Query)
+
+| Cas d'usage | Outil |
+|-------------|-------|
+| Données serveur (listes, détails, pagination) | **TanStack Query** (déjà en place) |
+| État UI global (sidebar, modals, thème, toasts) | **Zustand** |
+| État formulaire complexe multi-étapes | **Zustand** + Immer |
+| État éphémère local à un composant | **useState** classique |
+
+### Conventions de nommage
+
+- Fichiers stores : `src/lib/store/use-<domaine>-store.ts`
+- Hook export : `use<Domaine>Store` (ex: `useUiStore`, `useQuoteFormStore`)
+- Actions préfixées par verbe : `setSidebarOpen`, `addNotification`, `resetForm`
+
+### Pattern de base avec Immer
+
+```typescript
+// src/lib/store/use-ui-store.ts
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+
+interface UiState {
+  sidebarOpen: boolean;
+  // Actions
+  setSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
+}
+
+// Immer permet de muter directement le state dans les actions
+// Au lieu de : set((state) => ({ ...state, sidebarOpen: true }))
+// On écrit : set((state) => { state.sidebarOpen = true })
+export const useUiStore = create<UiState>()(
+  immer((set) => ({
+    sidebarOpen: true,
+    setSidebarOpen: (open) => set((state) => { state.sidebarOpen = open }),
+    toggleSidebar: () => set((state) => { state.sidebarOpen = !state.sidebarOpen }),
+  }))
+);
+```
+
+### Règles d'utilisation
+
+- **JAMAIS** stocker des données serveur dans Zustand — utiliser TanStack Query
+- **Toujours** utiliser le middleware `immer` pour les stores avec état imbriqué
+- **Sélecteurs atomiques** : `useUiStore((s) => s.sidebarOpen)` plutôt que `useUiStore()` (évite re-renders inutiles)
+- **Pas de logique async** dans les stores — les appels API restent dans les Server Actions
+
+---
+
+## Guidelines Zod v4
+
+### Différences clés avec Zod v3
+
+Le projet utilise **Zod v4** (`^4.1.13`). Points d'attention :
+
+| Zod v3 (ancien) | Zod v4 (actuel) |
+|------------------|------------------|
+| `z.string().min(1, { message: "..." })` | `z.string().min(1, "...")` (message inline simplifié) |
+| `z.object({}).strict()` | `z.object({}).strict()` (inchangé) |
+| `z.enum(["A", "B"])` | `z.enum(["A", "B"])` (inchangé) |
+| `zodResolver(schema)` | `zodResolver(schema)` (compatible via `@hookform/resolvers`) |
+| Erreurs TS `required_error` | **Connu** — erreurs TS2353 pré-existantes, non bloquantes |
+
+### Conventions du projet
+
+- Schémas dans `modules/[feature]/schemas/[feature].schema.ts`
+- Nommer les schémas : `create<Feature>Schema`, `update<Feature>Schema`
+- Réutiliser le même schéma côté client (validation formulaire) ET serveur (Server Action)
+- Pattern extraction de type : `type CreateShipment = z.infer<typeof createShipmentSchema>`
+
+### Exemple complet
+
+```typescript
+// modules/quotes/schemas/quote.schema.ts
+import { z } from 'zod';
+
+// Schéma d'un package individuel
+export const packageSchema = z.object({
+  description: z.string().optional(),
+  quantity: z.number().int().min(1, "Minimum 1"),
+  cargoType: z.enum(["GENERAL", "FRAGILE", "DANGEROUS", "PERISHABLE", "OVERSIZED"]),
+  weight: z.number().positive("Le poids doit être positif"),
+  length: z.number().positive().optional(),
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
+});
+
+// Extraction du type pour usage dans les composants
+export type PackageInput = z.infer<typeof packageSchema>;
+```
+
+---
+
+## Guidelines Zenstack (Access Control)
+
+### Principes fondamentaux
+
+- **Source de vérité** : `schema.zmodel` (JAMAIS modifier `prisma/schema.prisma` directement)
+- **Client Enhanced** : `getEnhancedPrismaFromSession(session)` dans TOUTES les Server Actions
+- **Client Standard** : `prisma` uniquement pour scripts, seeds, migrations
+
+### Workflow de modification
+
+```bash
+# 1. Modifier schema.zmodel
+# 2. Générer les clients (Zenstack + Prisma)
+npm run db:generate
+# 3. Pousser le schéma vers la DB
+npm run db:push
+```
+
+### Patterns access policies
+
+```zmodel
+// Lecture : tout le monde authentifié
+@@allow('read', auth() != null)
+
+// CRUD complet pour les admins
+@@allow('all', auth().role == ADMIN)
+
+// Lecture filtrée par company pour les clients
+@@allow('read', auth().role == CLIENT && auth().companyId == companyId)
+
+// Cascade sur relation parent
+// Les policies du QuotePackage héritent du Quote via la relation
+@@allow('read', auth().role == CLIENT && quote.clientId == auth().clientId)
+```
+
+### Pièges courants
+
+- Oublier `npm run db:generate` après modification → les types TypeScript ne correspondent pas
+- Utiliser `prisma` au lieu de `getEnhancedPrisma()` → bypass des access policies
+- Ne pas inclure `auth()` dans les policies → accès refusé partout
+
+---
+
+## Guidelines Better Auth
+
+### Configuration actuelle
+
+- Email/Password avec vérification obligatoire
+- OAuth (Google, Microsoft)
+- Session enrichie avec `role` et `companyId` (via `additionalFields`)
+- Helpers : `getSession()`, `requireAuth()`, `requireAdmin()`
+
+### Patterns importants
+
+```typescript
+// Récupérer la session dans un Server Component ou Server Action
+const session = await getSession();
+// session.user contient : id, email, name, role, companyId
+
+// Protéger une Server Action (throw si non authentifié)
+const session = await requireAuth();
+
+// Protéger une route admin (throw si pas ADMIN)
+const session = await requireAdmin();
+```
+
+### Variables d'environnement
+
+```env
+BETTER_AUTH_SECRET=<générer avec openssl rand -base64 32>
+BETTER_AUTH_URL=http://localhost:3000
+# OAuth (optionnel)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+MICROSOFT_CLIENT_ID=
+MICROSOFT_CLIENT_SECRET=
+```
+
+Consulter le skill `better-auth-best-practices` pour : plugins (2FA, passkey, organizations), gestion des sessions (DB vs secondaryStorage), et pièges courants.
+
+---
+
+## Guidelines Resend + React Email
+
+### Architecture email
+
+```
+src/
+├── lib/email/
+│   └── resend.ts              # Client Resend + fonction sendEmail()
+└── components/emails/
+    ├── base-layout.tsx         # Layout React Email partagé (header, footer, couleurs)
+    ├── welcome.tsx             # Template bienvenue
+    ├── quote-pdf.tsx           # Template envoi devis PDF
+    └── invitation.tsx          # Template invitation utilisateur
+```
+
+### Pattern d'envoi
+
+```typescript
+// 1. Importer le template React Email et le renderer
+import { render } from '@react-email/components';
+import { WelcomeEmail } from '@/components/emails/welcome';
+
+// 2. Générer le HTML depuis le composant React
+const html = await render(WelcomeEmail({ userName: 'Jean', quoteCount: 2 }));
+
+// 3. Envoyer via la fonction sendEmail existante
+await sendEmail({
+  to: 'client@example.com',
+  subject: 'Bienvenue sur Faso Fret',
+  html,
+});
+```
+
+### Convention des templates React Email
+
+- Chaque template est un composant React exporté par défaut
+- Props typées avec interface dédiée (ex: `WelcomeEmailProps`)
+- Utiliser `<BaseLayout>` pour le header/footer/couleurs partagés
+- La configuration plateforme (`platformFullName`, `primaryColor`) est passée via props
+
+### Mode développement vs production
+
+- `EMAIL_PROVIDER=console` : emails affichés dans la console (pas d'envoi réel)
+- `EMAIL_PROVIDER=resend` : envoi réel via Resend API
+- Variable requise : `RESEND_API_KEY`
+
+---
+
+## Méthodologie de Travail
+
+### Approche incrémentale et itérative
+
+Chaque feature ou refactoring suit ce cycle :
+
+1. **Planifier** : Créer un plan dans `.claude/plans/` (skill `plan-management`)
+2. **Implémenter par étape** : Une étape = un changement testable isolément
+3. **Tester** : Vérifier manuellement ou par tests automatisés après chaque étape
+4. **Valider** : L'utilisateur confirme avant de passer à l'étape suivante
+5. **Documenter** : Mettre à jour le plan avec le statut (FAIT / A FAIRE)
+
+### Consultation des skills
+
+| Tâche | Skills à consulter |
+|-------|-------------------|
+| Nouveau composant React | `vercel-react-best-practices` + `vercel-composition-patterns` |
+| Page / Route Next.js | `next-best-practices` |
+| Design / UI | `frontend-design` + `ui-ux-pro-max` |
+| Authentification / Sessions | `better-auth-best-practices` |
+| Requêtes DB / Schéma | `supabase-postgres-best-practices` |
+| Plans de travail | `plan-management` |
+| Tests navigateur | `agent-browser` |

@@ -8,7 +8,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Calculator, CalendarBlank, MagnifyingGlass } from '@phosphor-icons/react';
+import { Phone, Calculator, CalendarBlank, MagnifyingGlass, ListBullets } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
@@ -25,7 +25,7 @@ export function HeroSection() {
         {/* Contenu Hero */}
         <div className="relative h-full flex items-center">
           <div className="container mx-auto px-6">
-            <div className="max-w-3xl">
+            <div className="max-w-5xl">
               {/* Titre avec typing effect */}
               <AnimatedText
                 text="Votre partenaire logistique global"
@@ -64,6 +64,24 @@ export function HeroSection() {
                     <Link href="#calculateur" className="flex items-center gap-2">
                       <Calculator className="h-5 w-5" />
                       Faire un devis
+                    </Link>
+                  </Button>
+                </motion.div>
+
+                {/* Bouton Tarifs standards — lien vers la page /tarifs publique */}
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-[#003D82] hover:bg-[#002952] text-white h-14 px-8 text-lg font-semibold shadow-xl"
+                  >
+                    <Link href="/tarifs" className="flex items-center gap-2">
+                      <ListBullets className="h-5 w-5" />
+                      Tarifs standards
                     </Link>
                   </Button>
                 </motion.div>

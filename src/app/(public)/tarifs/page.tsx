@@ -5,13 +5,13 @@
  * avec filtres de recherche et de mode de transport.
  *
  * Route publique accessible à tous les visiteurs.
+ * Hérite du layout (public) qui fournit le HomepageHeader et le PublicFooter.
  *
- * @module app/tarifs
+ * @module app/(public)/tarifs
  */
 
 import { Metadata } from 'next';
 import { PricingTable } from '@/components/pricing-table';
-import { HomepageHeader } from '@/components/layouts/homepage-header';
 import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
@@ -46,22 +46,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * Page Tarifs Standards
  *
  * Server Component qui affiche le tableau de tarifs avec filtres.
- * Récupère la configuration système pour passer au header.
+ * Le header et le footer sont fournis par le layout parent (public).
  */
-export default async function TarifsPage() {
-  // Récupérer la configuration système pour le header dynamique
-  const config = await getSystemConfig();
-
+export default function TarifsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header avec navigation et nom de plateforme dynamique */}
-      <HomepageHeader
-        platformName={config.platformName}
-        platformFullName={config.platformFullName}
-        primaryColor={config.primaryColor}
-      />
-
-      {/* Container principal */}
+    <div className="bg-white">
+      {/* Container principal — mt-20 pour compenser le header sticky du layout */}
       <div className="container mx-auto px-4 py-12 mt-20">
         {/* En-tête de page */}
         <div className="text-center mb-12 space-y-4">
