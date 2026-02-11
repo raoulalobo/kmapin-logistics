@@ -106,15 +106,25 @@ export function PendingQuoteDetector() {
   }
 
   /**
-   * Rendu du modal
-   * Le composant PendingQuoteModal gère toute la logique
-   * d'affichage, de rattachement et de fermeture
+   * Rendu du modal — on ne propose que le devis le plus récent
+   *
+   * Tri par createdAt décroissant : le premier élément est le plus récent.
+   * On passe un tableau d'un seul élément au modal, les anciens devis
+   * sont ignorés et seront nettoyés par clearAllPendingQuotes().
+   *
+   * Exemple avec 3 devis calculés successivement :
+   * - pendingQuotes = [devis1 (10h), devis2 (11h), devis3 (12h)]
+   * - après tri + slice → [devis3 (12h)] → seul devis3 est proposé
    */
+  const latestQuoteOnly = [...pendingQuotes]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 1);
+
   return (
     <PendingQuoteModal
       open={showModal}
       onOpenChange={setShowModal}
-      pendingQuotes={pendingQuotes}
+      pendingQuotes={latestQuoteOnly}
       onSuccess={clearAllPendingQuotes}
       onDismiss={clearAllPendingQuotes}
     />

@@ -14,8 +14,6 @@
  */
 
 import type { Metadata } from 'next';
-import { Toaster } from 'sonner';
-
 import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 import { SystemConfigProvider } from '@/components/providers/system-config-provider';
 
@@ -43,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * Encapsule les pages login/register avec :
  * - SystemConfigProvider pour l'accès à la config dans les Client Components
- * - Toaster pour les notifications (erreurs de connexion, succès, etc.)
+ * - Le Toaster global (root layout) gère les notifications
  *
  * @param children - Pages d'authentification (login, register, forgot-password)
  */
@@ -59,7 +57,6 @@ export default async function AuthLayout({
   return (
     <SystemConfigProvider config={config}>
       {children}
-      <Toaster position="top-center" richColors />
     </SystemConfigProvider>
   );
 }
