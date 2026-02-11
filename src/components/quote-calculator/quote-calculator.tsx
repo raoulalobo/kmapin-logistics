@@ -1179,100 +1179,99 @@ export function QuoteCalculator() {
                     </table>
                   </div>
 
-                  {/* Sous-totaux et total */}
-                  <div className="space-y-3 max-w-md ml-auto">
+                  {/* Sous-totaux et total — pleine largeur sur mobile, max-w-md sur desktop */}
+                  <div className="space-y-3 sm:max-w-md sm:ml-auto">
                     {/* Sous-total (avant priorité) */}
                     <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
-                      <span className="text-gray-700 font-medium">Sous-total</span>
-                      <span className="font-bold text-gray-900">
+                      <span className="text-sm sm:text-base text-gray-700 font-medium">Sous-total</span>
+                      <span className="text-sm sm:text-base font-bold text-gray-900 whitespace-nowrap">
                         {result.totalBeforePriority.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                       </span>
                     </div>
 
                     {/* Surcharge priorité (si applicable) */}
                     {result.totalPrice !== result.totalBeforePriority && (
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-purple-50">
-                        <span className="text-purple-700 font-medium">
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-purple-50 gap-2">
+                        <span className="text-sm sm:text-base text-purple-700 font-medium">
                           Supplément priorité ({result.priorite})
                         </span>
-                        <span className="font-bold text-purple-900">
+                        <span className="text-sm sm:text-base font-bold text-purple-900 whitespace-nowrap">
                           +{(result.totalPrice - result.totalBeforePriority).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                         </span>
                       </div>
                     )}
 
                     {/* Total final */}
-                    <div className="border-t-2 border-[#003D82] pt-3 flex justify-between items-center p-4 rounded-lg bg-blue-50">
-                      <span className="text-lg font-bold text-gray-900">Total</span>
-                      <span className="text-2xl font-bold text-[#003D82]">
+                    <div className="border-t-2 border-[#003D82] pt-3 flex justify-between items-center p-3 sm:p-4 rounded-lg bg-blue-50">
+                      <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
+                      <span className="text-xl sm:text-2xl font-bold text-[#003D82] whitespace-nowrap">
                         {result.totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Actions conditionnelles selon l'état de connexion */}
-                <div className="space-y-4">
+                {/* Actions — tailles réduites sur mobile pour éviter les débordements */}
+                <div className="space-y-3">
                   {session?.user ? (
                     // Utilisateur connecté : Télécharger + Sauvegarder
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
                         onClick={handleDownloadPDF}
                         variant="outline"
-                        className="h-12 text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
+                        className="h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                       >
-                        <Download className="mr-2 h-5 w-5" />
-                        Télécharger PDF
+                        <Download className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="truncate">Télécharger PDF</span>
                       </Button>
                       <Button
                         onClick={handleSaveQuote}
-                        className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
+                        className="h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
                       >
-                        <FloppyDisk className="mr-2 h-5 w-5" />
-                        Sauvegarder
+                        <FloppyDisk className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="truncate">Sauvegarder</span>
                       </Button>
                     </div>
                   ) : (
                     // Utilisateur non-connecté : Télécharger + Email + Créer compte
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-3">
                         <Button
                           onClick={handleDownloadPDF}
                           variant="outline"
-                          className="h-12 text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
+                          className="h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                         >
-                          <Download className="mr-2 h-5 w-5" />
-                          Télécharger PDF
+                          <Download className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <span className="truncate">Télécharger PDF</span>
                         </Button>
                         <Button
                           onClick={() => setShowEmailModal(true)}
-                          className="h-12 text-base bg-[#003D82] hover:bg-[#002952] text-white"
+                          className="h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
-                          <Envelope className="mr-2 h-5 w-5" />
-                          Recevoir par email
+                          <Envelope className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <span className="truncate">Recevoir par email</span>
                         </Button>
                       </div>
                       <Button
-                        className="w-full h-12 text-base bg-gradient-to-r from-[#003D82] to-[#002952] hover:opacity-90 shadow-lg"
+                        className="w-full h-11 text-sm sm:text-base bg-gradient-to-r from-[#003D82] to-[#002952] hover:opacity-90 shadow-lg"
                         asChild
                       >
                         <Link href="/register">
-                          <UserPlus className="mr-2 h-5 w-5" />
-                          Créer un compte pour suivre mes expéditions
+                          <UserPlus className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <span className="truncate">Créer un compte pour suivre mes expéditions</span>
                         </Link>
                       </Button>
                     </>
                   )}
 
-                  {/* Bouton Fermer — visible et intuitif, surtout sur mobile
-                   * où la petite croix X en haut à droite est facile à rater */}
+                  {/* Bouton Fermer — visible et intuitif sur mobile */}
                   <Button
                     variant="outline"
                     onClick={() => setIsResultModalOpen(false)}
-                    className="w-full h-11 text-base"
+                    className="w-full h-11 text-sm sm:text-base"
                   >
-                    <X className="mr-2 h-4 w-4" />
-                    Fermer et revenir au calculateur
+                    <X className="mr-1.5 h-4 w-4 shrink-0" />
+                    Fermer
                   </Button>
                 </div>
               </div>
