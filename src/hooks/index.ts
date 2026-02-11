@@ -17,3 +17,4 @@ export {
   type PendingQuoteFormData,
   type PendingQuoteResult,
 } from './use-pending-quotes';
+export { useMediaQuery } from './use-media-query';

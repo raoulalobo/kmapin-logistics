@@ -1,8 +1,17 @@
 /**
- * ContactModal - Modal avec formulaire de contact
+ * ContactModal - Modal de contact responsive (Option B)
  *
- * Composant Client qui affiche un formulaire pour contacter l'entreprise
- * Les données sont enregistrées dans la table Prospect
+ * Dialog unique adapté mobile et desktop :
+ * - Mobile (<md) : scrollable, formulaire seul, boutons pleine largeur
+ * - Desktop (>=md) : layout 2 colonnes (coordonnées + formulaire)
+ *
+ * Les données sont enregistrées dans la table Prospect via createContactProspectAction.
+ *
+ * @example
+ * ```tsx
+ * const [isOpen, setIsOpen] = useState(false);
+ * <ContactModal open={isOpen} onOpenChange={setIsOpen} />
+ * ```
  */
 'use client';
 
@@ -20,7 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
@@ -33,23 +42,20 @@ import { contactFormSchema, type ContactFormData } from '@/modules/prospects/sch
 import { createContactProspectAction } from '@/modules/prospects/actions/prospect.actions';
 
 interface ContactModalProps {
-  /** État d'ouverture du modal */
+  /** Etat d'ouverture du modal */
   open: boolean;
   /** Fonction pour fermer le modal */
   onOpenChange: (open: boolean) => void;
 }
 
 /**
- * Modal de contact avec formulaire d'enregistrement
+ * ContactModal — Dialog responsive unique
  *
- * @param open - État d'ouverture du modal
- * @param onOpenChange - Callback pour changer l'état d'ouverture
- *
- * @example
- * ```tsx
- * const [isOpen, setIsOpen] = useState(false);
- * <ContactModal open={isOpen} onOpenChange={setIsOpen} />
- * ```
+ * Adaptations mobile :
+ * - max-h-[90dvh] + overflow-y-auto pour scroller si le contenu dépasse le viewport
+ * - Colonne coordonnées masquée sur mobile (visible md+)
+ * - Boutons empilés pleine largeur sur mobile, alignés à droite sur desktop
+ * - Textarea pour le champ "Objet" au lieu d'un Input
  */
 export function ContactModal({ open, onOpenChange }: ContactModalProps) {
   const [isPending, startTransition] = useTransition();
@@ -65,9 +71,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
     },
   });
 
-  /**
-   * Soumettre le formulaire de contact
-   */
+  /** Soumettre le formulaire de contact */
   async function onSubmit(data: ContactFormData) {
     startTransition(async () => {
       const result = await createContactProspectAction(data);
@@ -103,9 +107,16 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
         }
       }}
     >
-      <DialogContent className="max-w-5xl">
+      {/*
+       * DialogContent responsive :
+       * - max-w-5xl sur desktop pour le layout 2 colonnes
+       * - max-h-[90dvh] + overflow-y-auto pour scroller sur mobile
+       * - p-4 sur mobile, p-6 sur desktop
+       * dvh (dynamic viewport height) s'adapte à la barre d'adresse mobile
+       */}
+      <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900">
             Contactez-nous
           </DialogTitle>
           <DialogDescription className="text-gray-600">
@@ -114,9 +125,13 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
         </DialogHeader>
 
         {showForm ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-            {/* Colonne de gauche : Informations de contact */}
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 py-4">
+            {/*
+             * Colonne coordonnées — masquée sur mobile (hidden md:block)
+             * Sur mobile, les coordonnées sont déjà visibles dans la section contact
+             * de la page d'accueil. Pas besoin de les dupliquer dans le modal.
+             */}
+            <div className="hidden md:block space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Nos coordonnées
@@ -175,8 +190,12 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
               </div>
             </div>
 
-            {/* Colonne de droite : Formulaire de contact */}
-            <div className="border-l pl-8">
+            {/*
+             * Colonne formulaire
+             * - Sur desktop : bordure gauche + padding pour séparer des coordonnées
+             * - Sur mobile : pas de bordure, prend toute la largeur
+             */}
+            <div className="md:border-l md:pl-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Envoyez-nous un message
               </h3>
@@ -242,7 +261,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                     )}
                   />
 
-                  {/* Objet */}
+                  {/* Objet — Textarea multiligne pour texte libre */}
                   <FormField
                     control={form.control}
                     name="subject"
@@ -250,9 +269,11 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                       <FormItem>
                         <FormLabel>Objet de votre demande *</FormLabel>
                         <FormControl>
-                          <Input
+                          <Textarea
                             placeholder="Demande de devis, informations sur un service..."
                             disabled={isPending}
+                            rows={3}
+                            className="resize-none"
                             {...field}
                           />
                         </FormControl>
@@ -261,19 +282,23 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                     )}
                   />
 
-                  {/* Boutons */}
-                  <div className="flex justify-end gap-3 pt-4">
+                  {/*
+                   * Boutons — pleine largeur empilés sur mobile, alignés à droite sur desktop
+                   * flex-col-reverse : "Envoyer" apparaît en haut sur mobile (plus accessible)
+                   */}
+                  <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => onOpenChange(false)}
                       disabled={isPending}
+                      className="w-full sm:w-auto"
                     >
                       Annuler
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-[#003D82] hover:bg-[#002952]"
+                      className="bg-[#003D82] hover:bg-[#002952] w-full sm:w-auto"
                       disabled={isPending}
                     >
                       {isPending ? (
@@ -294,7 +319,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
             </div>
           </div>
         ) : (
-          // Message de confirmation après envoi
+          /* Message de confirmation après envoi */
           <div className="py-8 text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
               <PaperPlaneRight className="h-8 w-8 text-green-600" />
