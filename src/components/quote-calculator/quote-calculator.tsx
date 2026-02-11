@@ -39,6 +39,7 @@ import {
   UserPlus,
   Plus,
   Trash,
+  X,
 } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -1090,41 +1091,47 @@ export function QuoteCalculator() {
 
       {/* ═══════════════ MODAL DE RÉSULTAT MULTI-LIGNES ═══════════════ */}
       <Dialog open={isResultModalOpen} onOpenChange={setIsResultModalOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        {/*
+         * DialogContent responsive :
+         * - p-4 sur mobile (au lieu de p-6 par défaut) pour éviter l'excès de marge
+         * - max-h-[90dvh] avec dvh pour s'adapter à la barre d'adresse mobile
+         * - overflow-x-hidden pour éviter le débordement horizontal du tableau
+         */}
+        <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <DialogHeader>
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#003D82]">
-                <TrendUp className="h-6 w-6 text-white" />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-[#003D82]">
+                <TrendUp className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-2xl text-[#003D82]">Votre estimation personnalisée</DialogTitle>
-                <p className="text-base text-gray-600">
-                  Estimation indicative pour {result?.totalPackageCount || 0} colis ({result?.totalWeight || 0} kg)
+                <DialogTitle className="text-xl sm:text-2xl text-[#003D82]">Votre estimation</DialogTitle>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {result?.totalPackageCount || 0} colis - {result?.totalWeight || 0} kg
                 </p>
               </div>
             </div>
           </DialogHeader>
           {result && (
-            <CardContent className="p-8">
-              <div className="space-y-8">
+            <CardContent className="p-0 sm:p-4">
+              <div className="space-y-6 sm:space-y-8">
 
-                {/* Prix total - Grande carte */}
-                <div className="rounded-2xl bg-gradient-to-br from-[#003D82] to-[#002952] p-8 text-white shadow-xl">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
+                {/* Prix total — padding réduit sur mobile pour maximiser l'espace */}
+                <div className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#003D82] to-[#002952] p-5 sm:p-8 text-white shadow-xl">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                    <div className="space-y-2 text-center sm:text-left">
+                      <div className="flex items-center justify-center sm:justify-start gap-3">
                         <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
                           <Package className="h-5 w-5" />
                         </div>
-                        <div className="text-lg font-medium text-blue-100">Prix total estimé</div>
+                        <div className="text-base sm:text-lg font-medium text-blue-100">Prix total estimé</div>
                       </div>
-                      <div className="text-5xl font-bold">
+                      <div className="text-3xl sm:text-5xl font-bold">
                         {result.totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                       </div>
                     </div>
                     <div className="text-center">
                       <div className="text-blue-100 text-sm mb-1">Délai estimé</div>
-                      <div className="text-3xl font-semibold">
+                      <div className="text-2xl sm:text-3xl font-semibold">
                         {result.estimatedDeliveryDays} jour{result.estimatedDeliveryDays > 1 ? 's' : ''}
                       </div>
                     </div>
@@ -1138,32 +1145,32 @@ export function QuoteCalculator() {
                     Détail par colis
                   </h4>
 
-                  {/* Tableau responsive */}
-                  <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full text-sm">
+                  {/* Tableau — scroll horizontal sur mobile si contenu trop large */}
+                  <div className="border rounded-lg overflow-x-auto">
+                    <table className="w-full text-xs sm:text-sm min-w-[400px]">
                       <thead>
                         <tr className="bg-gray-50 border-b">
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Description</th>
-                          <th className="text-center py-3 px-3 font-semibold text-gray-700">Qté</th>
-                          <th className="text-left py-3 px-3 font-semibold text-gray-700 hidden sm:table-cell">Type</th>
-                          <th className="text-right py-3 px-3 font-semibold text-gray-700 hidden md:table-cell">Poids unit.</th>
-                          <th className="text-right py-3 px-3 font-semibold text-gray-700">Prix unit.</th>
-                          <th className="text-right py-3 px-4 font-semibold text-gray-700">Total</th>
+                          <th className="text-left py-2.5 px-2 sm:py-3 sm:px-4 font-semibold text-gray-700">Description</th>
+                          <th className="text-center py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700">Qté</th>
+                          <th className="text-left py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700 hidden sm:table-cell">Type</th>
+                          <th className="text-right py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700 hidden md:table-cell">Poids</th>
+                          <th className="text-right py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700">P.U.</th>
+                          <th className="text-right py-2.5 px-2 sm:py-3 sm:px-4 font-semibold text-gray-700">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {result.lines.map((line, idx) => (
                           <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="py-3 px-4 text-gray-900">{line.description || `Colis ${idx + 1}`}</td>
-                            <td className="py-3 px-3 text-center text-gray-700">{line.quantity}</td>
-                            <td className="py-3 px-3 text-gray-700 hidden sm:table-cell">
+                            <td className="py-2.5 px-2 sm:py-3 sm:px-4 text-gray-900">{line.description || `Colis ${idx + 1}`}</td>
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-center text-gray-700">{line.quantity}</td>
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-gray-700 hidden sm:table-cell">
                               {cargoTypeLabels[line.cargoType as CargoType] || line.cargoType}
                             </td>
-                            <td className="py-3 px-3 text-right text-gray-700 hidden md:table-cell">{line.weight} kg</td>
-                            <td className="py-3 px-3 text-right text-gray-700">
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 hidden md:table-cell">{line.weight} kg</td>
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700">
                               {line.unitPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                             </td>
-                            <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                            <td className="py-2.5 px-2 sm:py-3 sm:px-4 text-right font-semibold text-gray-900">
                               {line.lineTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                             </td>
                           </tr>
@@ -1256,6 +1263,17 @@ export function QuoteCalculator() {
                       </Button>
                     </>
                   )}
+
+                  {/* Bouton Fermer — visible et intuitif, surtout sur mobile
+                   * où la petite croix X en haut à droite est facile à rater */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsResultModalOpen(false)}
+                    className="w-full h-11 text-base"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Fermer et revenir au calculateur
+                  </Button>
                 </div>
               </div>
             </CardContent>
