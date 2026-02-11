@@ -215,7 +215,11 @@ export function usePendingQuotes() {
       );
 
       const newQuote: PendingQuote = {
-        id: crypto.randomUUID(),
+        // crypto.randomUUID() requiert un contexte sécurisé (HTTPS)
+        // Fallback avec Math.random pour le dev en HTTP local (ex: réseau LAN)
+        id: typeof crypto?.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         createdAt: now.toISOString(),
         expiresAt: expiresAt.toISOString(),
         formData,
