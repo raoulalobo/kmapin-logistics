@@ -1767,14 +1767,6 @@ export async function saveQuoteFromCalculatorAction(
     // Vérifier l'authentification
     const session = await requireAuth();
 
-    // Vérifier que l'utilisateur a une company
-    if (!session.user.clientId) {
-      return {
-        success: false,
-        error: 'Votre compte n\'est pas associé à une compagnie',
-      };
-    }
-
     // Valider les données
     const validatedData = quoteEstimateSchema.parse(data);
 
@@ -1800,11 +1792,17 @@ export async function saveQuoteFromCalculatorAction(
     tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
 
     // Créer le devis en DRAFT
+    // - userId : toujours renseigné (utilisateur connecté)
+    // - clientId : renseigné si l'utilisateur est rattaché à une entreprise, null sinon
+    // - isAttachedToAccount : true car créé par un utilisateur authentifié
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        clientId: session.user.clientId,
-        contactEmail: session.user.email, // Email de l'utilisateur connecté
+        userId: session.user.id,
+        clientId: session.user.clientId ?? null,
+        contactEmail: session.user.email,
+        contactName: session.user.name ?? null,
+        isAttachedToAccount: true,
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
