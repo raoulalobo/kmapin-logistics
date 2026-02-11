@@ -47,7 +47,7 @@ export function ParallaxBackground({
   return (
     <div
       ref={ref}
-      className="relative h-[85vh] min-h-[600px] overflow-hidden"
+      className="relative h-auto sm:h-[85vh] overflow-hidden"
     >
       {/* Image avec effet parallax */}
       <motion.div

@@ -22,21 +22,21 @@ export function HeroSection() {
         overlayGradient="from-gray-900/90 to-gray-900/70"
         parallaxSpeed={0.5}
       >
-        {/* Contenu Hero */}
-        <div className="relative h-full flex items-center">
+        {/* Contenu Hero — padding vertical sur mobile, centré sur desktop */}
+        <div className="relative h-full flex items-start sm:items-center py-20 sm:py-0">
           <div className="container mx-auto px-6">
             <div className="max-w-5xl">
-              {/* Titre avec typing effect */}
+              {/* Titre avec typing effect — tailles progressives pour responsive */}
               <AnimatedText
                 text="Votre partenaire logistique global"
                 as="h1"
-                className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight"
+                className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight"
                 delay={300}
               />
 
               {/* Sous-titre avec fade-in et slide-up */}
               <motion.p
-                className="text-2xl text-gray-200 mb-10 leading-relaxed"
+                className="text-lg sm:text-2xl md:text-3xl text-gray-200 mb-6 sm:mb-10 leading-relaxed"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.5 }}
@@ -44,9 +44,9 @@ export function HeroSection() {
                 Solutions logistiques sur mesure pour vos expéditions multi-modales
               </motion.p>
 
-              {/* Boutons CTA avec stagger animation */}
+              {/* Boutons CTA avec stagger animation — tailles adaptées au mobile */}
               <motion.div
-                className="flex flex-wrap gap-4"
+                className="flex flex-wrap gap-3 sm:gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 2 }}
@@ -59,10 +59,10 @@ export function HeroSection() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-[#003D82] hover:bg-[#002952] text-white h-14 px-8 text-lg font-semibold shadow-xl text-white"
+                    className="bg-[#003D82] hover:bg-[#002952] text-white h-11 px-5 text-sm sm:h-14 sm:px-8 sm:text-lg font-semibold shadow-xl"
                   >
                     <Link href="#calculateur" className="flex items-center gap-2">
-                      <Calculator className="h-5 w-5" />
+                      <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
                       Faire un devis
                     </Link>
                   </Button>
@@ -77,10 +77,10 @@ export function HeroSection() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-[#003D82] hover:bg-[#002952] text-white h-14 px-8 text-lg font-semibold shadow-xl"
+                    className="bg-[#003D82] hover:bg-[#002952] text-white h-11 px-5 text-sm sm:h-14 sm:px-8 sm:text-lg font-semibold shadow-xl"
                   >
                     <Link href="/tarifs" className="flex items-center gap-2">
-                      <ListBullets className="h-5 w-5" />
+                      <ListBullets className="h-4 w-4 sm:h-5 sm:w-5" />
                       Tarifs standards
                     </Link>
                   </Button>
@@ -95,10 +95,10 @@ export function HeroSection() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-11 px-5 text-sm sm:h-14 sm:px-8 sm:text-lg font-semibold"
                   >
                     <Link href="/pickups/request" className="flex items-center gap-2">
-                      <CalendarBlank className="h-5 w-5" />
+                      <CalendarBlank className="h-4 w-4 sm:h-5 sm:w-5" />
                       Demander un enlèvement
                     </Link>
                   </Button>
@@ -114,10 +114,10 @@ export function HeroSection() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-14 px-8 text-lg font-semibold"
+                    className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm h-11 px-5 text-sm sm:h-14 sm:px-8 sm:text-lg font-semibold"
                   >
                     <Link href="/tracking" className="flex items-center gap-2">
-                      <MagnifyingGlass className="h-5 w-5" weight="bold" />
+                      <MagnifyingGlass className="h-4 w-4 sm:h-5 sm:w-5" weight="bold" />
                       Suivi de colis
                     </Link>
                   </Button>
@@ -127,17 +127,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Barre bleue vide */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-[#003D82] py-4 text-white"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 2 }}
-        >
-          <div className="container mx-auto px-6">
-            {/* Barre vide - contenu supprimé */}
-          </div>
-        </motion.div>
       </ParallaxBackground>
 
       {/* Bouton Contact & Services flottant avec slide-in depuis la droite */}
