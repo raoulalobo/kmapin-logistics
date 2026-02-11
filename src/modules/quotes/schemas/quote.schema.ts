@@ -582,6 +582,122 @@ export const quoteEstimateSchema = z.object({
  */
 export type QuoteEstimateData = z.infer<typeof quoteEstimateSchema>;
 
+// ════════════════════════════════════════════════════════════════════════════
+// SCHÉMA ESTIMATION MULTI-PACKAGES (CALCULATEUR PUBLIC)
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Schéma de validation pour l'estimation de devis multi-colis (landing page)
+ *
+ * Contrairement à `quoteEstimateSchema` qui utilise des champs plats
+ * (weight, cargoType, length, width, height), ce schéma regroupe toutes les
+ * informations de marchandise dans un tableau `packages[]`.
+ *
+ * Chaque ligne de colis a ses propres caractéristiques (type, poids, dimensions)
+ * et une quantité pour les colis identiques regroupés sur une même ligne.
+ *
+ * Les champs de route (pays) et transport (mode, priorité) restent au niveau racine
+ * car ils s'appliquent globalement à l'ensemble du devis.
+ *
+ * @example
+ * // 1 tablette fragile de 2 kg + 3 cartons généraux de 15 kg
+ * {
+ *   originCountry: 'FR',
+ *   destinationCountry: 'BF',
+ *   transportMode: ['AIR'],
+ *   priority: 'STANDARD',
+ *   packages: [
+ *     { description: 'Tablette', quantity: 1, cargoType: 'FRAGILE', weight: 2, length: 30, width: 20, height: 5 },
+ *     { description: 'Cartons', quantity: 3, cargoType: 'GENERAL', weight: 15, length: 60, width: 40, height: 40 },
+ *   ],
+ * }
+ */
+export const quoteEstimateMultiPackageSchema = z.object({
+  // === Route (identique à quoteEstimateSchema) ===
+  originCountry: z
+    .string()
+    .min(2, "Le pays d'origine est requis")
+    .max(100, "Le pays d'origine est trop long"),
+
+  destinationCountry: z
+    .string()
+    .min(2, 'Le pays de destination est requis')
+    .max(100, 'Le pays de destination est trop long'),
+
+  // === Transport (identique à quoteEstimateSchema) ===
+  transportMode: z
+    .array(z.nativeEnum(TransportMode))
+    .min(1, 'Au moins un mode de transport est requis')
+    .max(4, 'Maximum 4 modes de transport'),
+
+  // === Priorité (identique à quoteEstimateSchema) ===
+  priority: z
+    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .default('STANDARD')
+    .optional(),
+
+  // === Colis détaillés (remplace weight, cargoType, length, width, height) ===
+  // Chaque ligne contient : description, quantité, type cargo, poids unitaire, dimensions
+  // Le prix est calculé par colis puis sommé pour le total du devis
+  packages: packagesArraySchema,
+});
+
+/**
+ * Type TypeScript inféré du schéma d'estimation multi-packages
+ * Utilisé dans le formulaire du calculateur public et la Server Action
+ */
+export type QuoteEstimateMultiPackageData = z.infer<typeof quoteEstimateMultiPackageSchema>;
+
+/**
+ * Type pour le résultat du calcul d'estimation multi-packages
+ *
+ * Étend MultiPackageResult avec le délai de livraison estimé.
+ * Utilisé dans le composant QuoteCalculator pour afficher le modal de résultat.
+ *
+ * @see MultiPackageResult dans pricing-calculator-dynamic.ts
+ */
+export type QuoteEstimateMultiPackageResult = {
+  /** Détail du calcul pour chaque ligne de colis */
+  lines: Array<{
+    /** Description du colis (si fournie) */
+    description?: string;
+    /** Quantité de colis identiques */
+    quantity: number;
+    /** Type de marchandise */
+    cargoType: string;
+    /** Poids unitaire en kg */
+    weight: number;
+    /** Prix unitaire calculé (pour 1 colis) */
+    unitPrice: number;
+    /** Total de la ligne = unitPrice × quantity */
+    lineTotal: number;
+  }>;
+  /** Nombre total de colis (somme des quantités) */
+  totalPackageCount: number;
+  /** Poids total en kg */
+  totalWeight: number;
+  /** Prix total AVANT surcharge priorité */
+  totalBeforePriority: number;
+  /** Prix total FINAL après toutes les surcharges */
+  totalPrice: number;
+  /** Devise (EUR) */
+  devise: string;
+  /** Route utilisée */
+  route: {
+    origine: string;
+    destination: string;
+    axe: string;
+  };
+  /** Mode de transport */
+  modeTransport: string;
+  /** Priorité appliquée */
+  priorite: string;
+  /** Type de marchandise dominant (le plus fréquent) */
+  dominantCargoType: string;
+  /** Délai de livraison estimé en jours */
+  estimatedDeliveryDays: number;
+};
+
 /**
  * Type pour le résultat du calcul d'estimation
  *
