@@ -1035,20 +1035,9 @@ export function QuoteCalculator() {
                       <span className={`text-sm font-semibold ${isSelected ? 'text-[#003D82]' : 'text-gray-700'}`}>
                         {option.label}
                       </span>
-                      <div className="text-center space-y-0.5">
-                        <span className={`text-xs font-medium ${
-                          option.percentageImpact === 'référence'
-                            ? 'text-gray-500'
-                            : option.percentageImpact.startsWith('+')
-                              ? 'text-orange-600'
-                              : 'text-green-600'
-                        }`}>
-                          {option.percentageImpact}
-                        </span>
-                        <span className="text-xs text-gray-400 block">
-                          {option.deliveryLabel}
-                        </span>
-                      </div>
+                      <span className="text-xs text-gray-400">
+                        {option.deliveryLabel}
+                      </span>
                     </button>
                   );
                 })}
@@ -1095,9 +1084,9 @@ export function QuoteCalculator() {
          * DialogContent responsive :
          * - p-4 sur mobile (au lieu de p-6 par défaut) pour éviter l'excès de marge
          * - max-h-[90dvh] avec dvh pour s'adapter à la barre d'adresse mobile
-         * - overflow-x-hidden pour éviter le débordement horizontal du tableau
+         * - Le tableau s'adapte naturellement (colonnes masquées sur mobile via hidden sm:table-cell)
          */}
-        <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <DialogHeader>
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-[#003D82]">
@@ -1147,7 +1136,7 @@ export function QuoteCalculator() {
 
                   {/* Tableau — scroll horizontal sur mobile si contenu trop large */}
                   <div className="border rounded-lg overflow-x-auto">
-                    <table className="w-full text-xs sm:text-sm min-w-[400px]">
+                    <table className="w-full text-xs sm:text-sm">
                       <thead>
                         <tr className="bg-gray-50 border-b">
                           <th className="text-left py-2.5 px-2 sm:py-3 sm:px-4 font-semibold text-gray-700">Description</th>
@@ -1215,7 +1204,7 @@ export function QuoteCalculator() {
                 <div className="space-y-3">
                   {session?.user ? (
                     // Utilisateur connecté : Télécharger + Sauvegarder
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Button
                         onClick={handleDownloadPDF}
                         variant="outline"
@@ -1235,7 +1224,7 @@ export function QuoteCalculator() {
                   ) : (
                     // Utilisateur non-connecté : Télécharger + Email + Créer compte
                     <>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Button
                           onClick={handleDownloadPDF}
                           variant="outline"
