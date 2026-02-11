@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Autoriser les images externes optimisées par next/image
+  // images.unsplash.com : photo d'entrepôt utilisée en arrière-plan de la section contact
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",

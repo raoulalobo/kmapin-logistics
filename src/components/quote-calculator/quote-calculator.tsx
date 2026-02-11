@@ -22,7 +22,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   CircleNotch,
   Calculator,
@@ -221,6 +221,9 @@ export function QuoteCalculator() {
 
   /** Query params pour pré-remplissage depuis /tarifs (origin, destination, mode) */
   const searchParams = useSearchParams();
+
+  /** Router Next.js pour redirection programmatique après sauvegarde devis */
+  const router = useRouter();
 
   // ═══════════════════════════════════════════════════════════════════════════
   // FORMULAIRE REACT HOOK FORM + USEFIELARRAY
@@ -728,6 +731,17 @@ export function QuoteCalculator() {
 
       if (response.success && response.data) {
         toast.success(`Devis ${response.data.quoteNumber} sauvegardé dans votre espace !`, { id: toastId });
+
+        // Fermer le modal de résultat avant la redirection
+        setIsResultModalOpen(false);
+
+        // Rediriger vers la liste des devis après un court délai
+        // pour permettre à l'utilisateur de voir le toast de succès
+        // La Server Action appelle déjà revalidatePath('/dashboard/quotes')
+        // donc la liste sera à jour à l'arrivée
+        setTimeout(() => {
+          router.push('/dashboard/quotes');
+        }, 1500);
       } else if (!response.success) {
         toast.error(response.error || 'Erreur lors de la sauvegarde', { id: toastId });
       }
