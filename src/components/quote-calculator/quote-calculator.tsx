@@ -440,10 +440,12 @@ export function QuoteCalculator() {
 
     try {
       // Import dynamique de jsPDF et autoTable pour éviter les problèmes SSR
+      // autoTable est importé comme fonction directe (pas en side-effect)
+      // pour garantir qu'il fonctionne avec l'import dynamique
       Promise.all([
         import('jspdf'),
         import('jspdf-autotable'),
-      ]).then(([{ default: jsPDF }]) => {
+      ]).then(([{ default: jsPDF }, { default: autoTable }]) => {
         const doc = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
@@ -575,9 +577,9 @@ export function QuoteCalculator() {
           `${formatNumberForPDF(line.lineTotal, 2)} EUR`,
         ]);
 
-        // Générer le tableau avec autoTable
-        // autoTable est importé comme side-effect et s'attache à l'instance jsPDF
-        (doc as any).autoTable({
+        // Générer le tableau avec autoTable — appel en fonction directe (pas via prototype)
+        // Pattern identique à src/lib/pdf/quote-pdf.ts et invoice-pdf.ts
+        autoTable(doc, {
           startY: yPos,
           margin: { left: 15, right: 15 },
           head: [['Description', 'Qté', 'Type', 'Poids unit.', 'Prix unit.', 'Total ligne']],
