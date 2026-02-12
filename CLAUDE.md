@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⛔ Règle d'or — BLOQUANTE (priorité maximale)
+
+**Aucune modification de code (Edit, Write) n'est autorisée** sans avoir complété ces étapes dans l'ordre :
+
+1. **Identifier** les skills concernés (cf. tableau "Consultation des skills" plus bas)
+2. **Invoquer** chaque skill pertinent avec l'outil `Skill` et lire ses règles
+3. **Créer un fichier plan** dans `.claude/plans/plan-<objectif>.md` via le skill `plan-management` (avec permission utilisateur)
+4. **Lire** les fichiers impactés (vérifier types, interfaces, dépendances)
+5. **Puis seulement** implémenter
+
+**Exception unique** : correction triviale touchant **1 seul fichier** ET **≤ 3 lignes modifiées** ET ne nécessitant aucune décision d'architecture. Dans ce cas, les étapes 1-3 peuvent être omises, mais l'étape 4 reste obligatoire.
+
+**Rappels critiques** :
+- Un plan fourni dans un message utilisateur ≠ un fichier plan dans `.claude/plans/`
+- Les skills ne s'invoquent **jamais implicitement** — toujours utiliser l'outil `Skill` explicitement
+- La perception de simplicité d'une tâche **ne justifie pas** de court-circuiter ce processus
+
 ## Projet
 
 **Faso Fret Logistics v2** - Plateforme de gestion logistique pour transport multi-modal (routier, maritime, aérien, ferroviaire).

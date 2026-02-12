@@ -15,10 +15,10 @@ import { CargoType, Priority, TransportMode } from '@/lib/db/enums';
  * Chaque mode doit avoir un multiplicateur > 0
  */
 export const transportMultipliersSchema = z.object({
-  ROAD: z.number().positive().min(0.1).max(10),
-  SEA: z.number().positive().min(0.1).max(10),
-  AIR: z.number().positive().min(0.1).max(10),
-  RAIL: z.number().positive().min(0.1).max(10),
+  ROAD: z.number().positive().min(0.1).max(100),
+  SEA: z.number().positive().min(0.1).max(100),
+  AIR: z.number().positive().min(0.1).max(100),
+  RAIL: z.number().positive().min(0.1).max(100),
 });
 
 /**

@@ -1062,6 +1062,7 @@ export default function PricingConfigPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
+                    max="100"
                     {...form.register('transportMultipliers.ROAD', { valueAsNumber: true })}
                   />
                 </div>
@@ -1073,6 +1074,7 @@ export default function PricingConfigPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
+                    max="100"
                     {...form.register('transportMultipliers.SEA', { valueAsNumber: true })}
                   />
                 </div>
@@ -1084,6 +1086,7 @@ export default function PricingConfigPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
+                    max="100"
                     {...form.register('transportMultipliers.AIR', { valueAsNumber: true })}
                   />
                 </div>
@@ -1095,6 +1098,7 @@ export default function PricingConfigPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
+                    max="100"
                     {...form.register('transportMultipliers.RAIL', { valueAsNumber: true })}
                   />
                 </div>
