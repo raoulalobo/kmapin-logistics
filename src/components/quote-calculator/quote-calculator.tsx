@@ -1100,8 +1100,8 @@ export function QuoteCalculator() {
          * - max-h-[90dvh] avec dvh pour s'adapter à la barre d'adresse mobile
          * - Le tableau s'adapte naturellement (colonnes masquées sur mobile via hidden sm:table-cell)
          */}
-        <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50">
-          <DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+          <DialogHeader className="min-w-0">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-[#003D82]">
                 <TrendUp className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -1115,7 +1115,7 @@ export function QuoteCalculator() {
             </div>
           </DialogHeader>
           {result && (
-            <CardContent className="p-0 sm:p-4">
+            <CardContent className="p-0 sm:p-4 min-w-0">
               <div className="space-y-6 sm:space-y-8">
 
                 {/* Prix total — padding réduit sur mobile pour maximiser l'espace */}
@@ -1157,8 +1157,8 @@ export function QuoteCalculator() {
                           <th className="text-center py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700">Qté</th>
                           <th className="text-left py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700 hidden sm:table-cell">Type</th>
                           <th className="text-right py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700 hidden md:table-cell">Poids</th>
-                          <th className="text-right py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700">P.U.</th>
-                          <th className="text-right py-2.5 px-2 sm:py-3 sm:px-4 font-semibold text-gray-700">Total</th>
+                          <th className="text-right py-2.5 px-1.5 sm:py-3 sm:px-3 font-semibold text-gray-700 whitespace-nowrap">P.U.</th>
+                          <th className="text-right py-2.5 px-2 sm:py-3 sm:px-4 font-semibold text-gray-700 whitespace-nowrap">Total</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1170,10 +1170,10 @@ export function QuoteCalculator() {
                               {cargoTypeLabels[line.cargoType as CargoType] || line.cargoType}
                             </td>
                             <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 hidden md:table-cell">{line.weight} kg</td>
-                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700">
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 whitespace-nowrap">
                               {line.unitPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                             </td>
-                            <td className="py-2.5 px-2 sm:py-3 sm:px-4 text-right font-semibold text-gray-900">
+                            <td className="py-2.5 px-2 sm:py-3 sm:px-4 text-right font-semibold text-gray-900 whitespace-nowrap">
                               {line.lineTotal.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                             </td>
                           </tr>
@@ -1185,7 +1185,7 @@ export function QuoteCalculator() {
                   {/* Sous-totaux et total — pleine largeur sur mobile, max-w-md sur desktop */}
                   <div className="space-y-3 sm:max-w-md sm:ml-auto">
                     {/* Sous-total (avant priorité) */}
-                    <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50 gap-4">
                       <span className="text-sm sm:text-base text-gray-700 font-medium">Sous-total</span>
                       <span className="text-sm sm:text-base font-bold text-gray-900 whitespace-nowrap">
                         {result.totalBeforePriority.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
@@ -1194,7 +1194,7 @@ export function QuoteCalculator() {
 
                     {/* Surcharge priorité (si applicable) */}
                     {result.totalPrice !== result.totalBeforePriority && (
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-purple-50 gap-2">
+                      <div className="flex justify-between items-center p-3 rounded-lg bg-purple-50 gap-4">
                         <span className="text-sm sm:text-base text-purple-700 font-medium">
                           Supplément priorité ({result.priorite})
                         </span>
@@ -1205,7 +1205,7 @@ export function QuoteCalculator() {
                     )}
 
                     {/* Total final */}
-                    <div className="border-t-2 border-[#003D82] pt-3 flex justify-between items-center p-3 sm:p-4 rounded-lg bg-blue-50">
+                    <div className="border-t-2 border-[#003D82] pt-3 flex justify-between items-center p-3 sm:p-4 rounded-lg bg-blue-50 gap-4">
                       <span className="text-base sm:text-lg font-bold text-gray-900">Total</span>
                       <span className="text-xl sm:text-2xl font-bold text-[#003D82] whitespace-nowrap">
                         {result.totalPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
@@ -1215,23 +1215,23 @@ export function QuoteCalculator() {
                 </div>
 
                 {/* Actions — tailles réduites sur mobile pour éviter les débordements */}
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {session?.user ? (
                     // Utilisateur connecté : Télécharger + Sauvegarder
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Button
                         onClick={handleDownloadPDF}
                         variant="outline"
-                        className="h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
+                        className="h-10 sm:h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                       >
-                        <Download className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <Download className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
                         <span className="truncate">Télécharger PDF</span>
                       </Button>
                       <Button
                         onClick={handleSaveQuote}
-                        className="h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
+                        className="h-10 sm:h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
                       >
-                        <FloppyDisk className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <FloppyDisk className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
                         <span className="truncate">Sauvegarder</span>
                       </Button>
                     </div>
@@ -1242,26 +1242,27 @@ export function QuoteCalculator() {
                         <Button
                           onClick={handleDownloadPDF}
                           variant="outline"
-                          className="h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
+                          className="h-10 sm:h-11 text-sm sm:text-base border-[#003D82] text-[#003D82] hover:bg-blue-50"
                         >
-                          <Download className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <Download className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
                           <span className="truncate">Télécharger PDF</span>
                         </Button>
                         <Button
                           onClick={() => setShowEmailModal(true)}
-                          className="h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
+                          className="h-10 sm:h-11 text-sm sm:text-base bg-[#003D82] hover:bg-[#002952] text-white"
                         >
-                          <Envelope className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <Envelope className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
                           <span className="truncate">Recevoir par email</span>
                         </Button>
                       </div>
                       <Button
-                        className="w-full h-11 text-sm sm:text-base bg-gradient-to-r from-[#003D82] to-[#002952] hover:opacity-90 shadow-lg"
+                        className="w-full h-10 sm:h-11 text-sm sm:text-base bg-gradient-to-r from-[#003D82] to-[#002952] hover:opacity-90 shadow-lg"
                         asChild
                       >
                         <Link href="/register">
-                          <UserPlus className="mr-1.5 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
-                          <span className="truncate">Créer un compte pour suivre mes expéditions</span>
+                          <UserPlus className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                          <span className="sm:hidden">Créer un compte</span>
+                          <span className="hidden sm:inline">Créer un compte pour suivre mes expéditions</span>
                         </Link>
                       </Button>
                     </>
@@ -1271,9 +1272,9 @@ export function QuoteCalculator() {
                   <Button
                     variant="outline"
                     onClick={() => setIsResultModalOpen(false)}
-                    className="w-full h-11 text-sm sm:text-base"
+                    className="w-full h-10 sm:h-11 text-sm sm:text-base"
                   >
-                    <X className="mr-1.5 h-4 w-4 shrink-0" />
+                    <X className="mr-1 h-4 w-4 shrink-0" />
                     Fermer
                   </Button>
                 </div>
