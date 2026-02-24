@@ -30068,29 +30068,12 @@ export namespace Prisma {
 
   export type AggregatePricingConfig = {
     _count: PricingConfigCountAggregateOutputType | null
-    _avg: PricingConfigAvgAggregateOutputType | null
-    _sum: PricingConfigSumAggregateOutputType | null
     _min: PricingConfigMinAggregateOutputType | null
     _max: PricingConfigMaxAggregateOutputType | null
   }
 
-  export type PricingConfigAvgAggregateOutputType = {
-    baseRatePerKg: number | null
-    defaultRatePerKg: number | null
-    defaultRatePerM3: number | null
-  }
-
-  export type PricingConfigSumAggregateOutputType = {
-    baseRatePerKg: number | null
-    defaultRatePerKg: number | null
-    defaultRatePerM3: number | null
-  }
-
   export type PricingConfigMinAggregateOutputType = {
     id: string | null
-    baseRatePerKg: number | null
-    defaultRatePerKg: number | null
-    defaultRatePerM3: number | null
     updatedById: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -30098,9 +30081,6 @@ export namespace Prisma {
 
   export type PricingConfigMaxAggregateOutputType = {
     id: string | null
-    baseRatePerKg: number | null
-    defaultRatePerKg: number | null
-    defaultRatePerM3: number | null
     updatedById: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -30108,9 +30088,6 @@ export namespace Prisma {
 
   export type PricingConfigCountAggregateOutputType = {
     id: number
-    baseRatePerKg: number
-    defaultRatePerKg: number
-    defaultRatePerM3: number
     transportMultipliers: number
     cargoTypeSurcharges: number
     prioritySurcharges: number
@@ -30124,23 +30101,8 @@ export namespace Prisma {
   }
 
 
-  export type PricingConfigAvgAggregateInputType = {
-    baseRatePerKg?: true
-    defaultRatePerKg?: true
-    defaultRatePerM3?: true
-  }
-
-  export type PricingConfigSumAggregateInputType = {
-    baseRatePerKg?: true
-    defaultRatePerKg?: true
-    defaultRatePerM3?: true
-  }
-
   export type PricingConfigMinAggregateInputType = {
     id?: true
-    baseRatePerKg?: true
-    defaultRatePerKg?: true
-    defaultRatePerM3?: true
     updatedById?: true
     createdAt?: true
     updatedAt?: true
@@ -30148,9 +30110,6 @@ export namespace Prisma {
 
   export type PricingConfigMaxAggregateInputType = {
     id?: true
-    baseRatePerKg?: true
-    defaultRatePerKg?: true
-    defaultRatePerM3?: true
     updatedById?: true
     createdAt?: true
     updatedAt?: true
@@ -30158,9 +30117,6 @@ export namespace Prisma {
 
   export type PricingConfigCountAggregateInputType = {
     id?: true
-    baseRatePerKg?: true
-    defaultRatePerKg?: true
-    defaultRatePerM3?: true
     transportMultipliers?: true
     cargoTypeSurcharges?: true
     prioritySurcharges?: true
@@ -30211,18 +30167,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: PricingConfigAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: PricingConfigSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: PricingConfigMinAggregateInputType
@@ -30253,17 +30197,12 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: PricingConfigCountAggregateInputType | true
-    _avg?: PricingConfigAvgAggregateInputType
-    _sum?: PricingConfigSumAggregateInputType
     _min?: PricingConfigMinAggregateInputType
     _max?: PricingConfigMaxAggregateInputType
   }
 
   export type PricingConfigGroupByOutputType = {
     id: string
-    baseRatePerKg: number
-    defaultRatePerKg: number
-    defaultRatePerM3: number
     transportMultipliers: JsonValue
     cargoTypeSurcharges: JsonValue
     prioritySurcharges: JsonValue
@@ -30274,8 +30213,6 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     _count: PricingConfigCountAggregateOutputType | null
-    _avg: PricingConfigAvgAggregateOutputType | null
-    _sum: PricingConfigSumAggregateOutputType | null
     _min: PricingConfigMinAggregateOutputType | null
     _max: PricingConfigMaxAggregateOutputType | null
   }
@@ -30296,9 +30233,6 @@ export namespace Prisma {
 
   export type PricingConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    baseRatePerKg?: boolean
-    defaultRatePerKg?: boolean
-    defaultRatePerM3?: boolean
     transportMultipliers?: boolean
     cargoTypeSurcharges?: boolean
     prioritySurcharges?: boolean
@@ -30313,9 +30247,6 @@ export namespace Prisma {
 
   export type PricingConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    baseRatePerKg?: boolean
-    defaultRatePerKg?: boolean
-    defaultRatePerM3?: boolean
     transportMultipliers?: boolean
     cargoTypeSurcharges?: boolean
     prioritySurcharges?: boolean
@@ -30330,9 +30261,6 @@ export namespace Prisma {
 
   export type PricingConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    baseRatePerKg?: boolean
-    defaultRatePerKg?: boolean
-    defaultRatePerM3?: boolean
     transportMultipliers?: boolean
     cargoTypeSurcharges?: boolean
     prioritySurcharges?: boolean
@@ -30347,9 +30275,6 @@ export namespace Prisma {
 
   export type PricingConfigSelectScalar = {
     id?: boolean
-    baseRatePerKg?: boolean
-    defaultRatePerKg?: boolean
-    defaultRatePerM3?: boolean
     transportMultipliers?: boolean
     cargoTypeSurcharges?: boolean
     prioritySurcharges?: boolean
@@ -30361,7 +30286,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PricingConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "baseRatePerKg" | "defaultRatePerKg" | "defaultRatePerM3" | "transportMultipliers" | "cargoTypeSurcharges" | "prioritySurcharges" | "deliverySpeedsPerMode" | "volumetricWeightRatios" | "useVolumetricWeightPerMode" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
+  export type PricingConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "transportMultipliers" | "cargoTypeSurcharges" | "prioritySurcharges" | "deliverySpeedsPerMode" | "volumetricWeightRatios" | "useVolumetricWeightPerMode" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["pricingConfig"]>
   export type PricingConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     updatedBy?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -30379,9 +30304,6 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      baseRatePerKg: number
-      defaultRatePerKg: number
-      defaultRatePerM3: number
       transportMultipliers: Prisma.JsonValue
       cargoTypeSurcharges: Prisma.JsonValue
       prioritySurcharges: Prisma.JsonValue
@@ -30816,9 +30738,6 @@ export namespace Prisma {
    */
   interface PricingConfigFieldRefs {
     readonly id: FieldRef<"PricingConfig", 'String'>
-    readonly baseRatePerKg: FieldRef<"PricingConfig", 'Float'>
-    readonly defaultRatePerKg: FieldRef<"PricingConfig", 'Float'>
-    readonly defaultRatePerM3: FieldRef<"PricingConfig", 'Float'>
     readonly transportMultipliers: FieldRef<"PricingConfig", 'Json'>
     readonly cargoTypeSurcharges: FieldRef<"PricingConfig", 'Json'>
     readonly prioritySurcharges: FieldRef<"PricingConfig", 'Json'>
@@ -36229,9 +36148,6 @@ export namespace Prisma {
 
   export const PricingConfigScalarFieldEnum: {
     id: 'id',
-    baseRatePerKg: 'baseRatePerKg',
-    defaultRatePerKg: 'defaultRatePerKg',
-    defaultRatePerM3: 'defaultRatePerM3',
     transportMultipliers: 'transportMultipliers',
     cargoTypeSurcharges: 'cargoTypeSurcharges',
     prioritySurcharges: 'prioritySurcharges',
@@ -39136,9 +39052,6 @@ export namespace Prisma {
     OR?: PricingConfigWhereInput[]
     NOT?: PricingConfigWhereInput | PricingConfigWhereInput[]
     id?: StringFilter<"PricingConfig"> | string
-    baseRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerM3?: FloatFilter<"PricingConfig"> | number
     transportMultipliers?: JsonFilter<"PricingConfig">
     cargoTypeSurcharges?: JsonFilter<"PricingConfig">
     prioritySurcharges?: JsonFilter<"PricingConfig">
@@ -39153,9 +39066,6 @@ export namespace Prisma {
 
   export type PricingConfigOrderByWithRelationInput = {
     id?: SortOrder
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
     transportMultipliers?: SortOrder
     cargoTypeSurcharges?: SortOrder
     prioritySurcharges?: SortOrder
@@ -39173,9 +39083,6 @@ export namespace Prisma {
     AND?: PricingConfigWhereInput | PricingConfigWhereInput[]
     OR?: PricingConfigWhereInput[]
     NOT?: PricingConfigWhereInput | PricingConfigWhereInput[]
-    baseRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerM3?: FloatFilter<"PricingConfig"> | number
     transportMultipliers?: JsonFilter<"PricingConfig">
     cargoTypeSurcharges?: JsonFilter<"PricingConfig">
     prioritySurcharges?: JsonFilter<"PricingConfig">
@@ -39190,9 +39097,6 @@ export namespace Prisma {
 
   export type PricingConfigOrderByWithAggregationInput = {
     id?: SortOrder
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
     transportMultipliers?: SortOrder
     cargoTypeSurcharges?: SortOrder
     prioritySurcharges?: SortOrder
@@ -39203,10 +39107,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PricingConfigCountOrderByAggregateInput
-    _avg?: PricingConfigAvgOrderByAggregateInput
     _max?: PricingConfigMaxOrderByAggregateInput
     _min?: PricingConfigMinOrderByAggregateInput
-    _sum?: PricingConfigSumOrderByAggregateInput
   }
 
   export type PricingConfigScalarWhereWithAggregatesInput = {
@@ -39214,9 +39116,6 @@ export namespace Prisma {
     OR?: PricingConfigScalarWhereWithAggregatesInput[]
     NOT?: PricingConfigScalarWhereWithAggregatesInput | PricingConfigScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"PricingConfig"> | string
-    baseRatePerKg?: FloatWithAggregatesFilter<"PricingConfig"> | number
-    defaultRatePerKg?: FloatWithAggregatesFilter<"PricingConfig"> | number
-    defaultRatePerM3?: FloatWithAggregatesFilter<"PricingConfig"> | number
     transportMultipliers?: JsonWithAggregatesFilter<"PricingConfig">
     cargoTypeSurcharges?: JsonWithAggregatesFilter<"PricingConfig">
     prioritySurcharges?: JsonWithAggregatesFilter<"PricingConfig">
@@ -42473,9 +42372,6 @@ export namespace Prisma {
 
   export type PricingConfigCreateInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -42489,9 +42385,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedCreateInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -42505,9 +42398,6 @@ export namespace Prisma {
 
   export type PricingConfigUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -42521,9 +42411,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -42537,9 +42424,6 @@ export namespace Prisma {
 
   export type PricingConfigCreateManyInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -42553,9 +42437,6 @@ export namespace Prisma {
 
   export type PricingConfigUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -42568,9 +42449,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -45163,9 +45041,6 @@ export namespace Prisma {
 
   export type PricingConfigCountOrderByAggregateInput = {
     id?: SortOrder
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
     transportMultipliers?: SortOrder
     cargoTypeSurcharges?: SortOrder
     prioritySurcharges?: SortOrder
@@ -45177,17 +45052,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
-  export type PricingConfigAvgOrderByAggregateInput = {
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
-  }
-
   export type PricingConfigMaxOrderByAggregateInput = {
     id?: SortOrder
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
     updatedById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -45195,18 +45061,9 @@ export namespace Prisma {
 
   export type PricingConfigMinOrderByAggregateInput = {
     id?: SortOrder
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
     updatedById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type PricingConfigSumOrderByAggregateInput = {
-    baseRatePerKg?: SortOrder
-    defaultRatePerKg?: SortOrder
-    defaultRatePerM3?: SortOrder
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -48970,9 +48827,6 @@ export namespace Prisma {
 
   export type PricingConfigCreateWithoutUpdatedByInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -48985,9 +48839,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedCreateWithoutUpdatedByInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -50515,9 +50366,6 @@ export namespace Prisma {
     OR?: PricingConfigScalarWhereInput[]
     NOT?: PricingConfigScalarWhereInput | PricingConfigScalarWhereInput[]
     id?: StringFilter<"PricingConfig"> | string
-    baseRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerKg?: FloatFilter<"PricingConfig"> | number
-    defaultRatePerM3?: FloatFilter<"PricingConfig"> | number
     transportMultipliers?: JsonFilter<"PricingConfig">
     cargoTypeSurcharges?: JsonFilter<"PricingConfig">
     prioritySurcharges?: JsonFilter<"PricingConfig">
@@ -59754,9 +59602,6 @@ export namespace Prisma {
 
   export type PricingConfigCreateManyUpdatedByInput = {
     id?: string
-    baseRatePerKg?: number
-    defaultRatePerKg?: number
-    defaultRatePerM3?: number
     transportMultipliers: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges: JsonNullValueInput | InputJsonValue
     prioritySurcharges: JsonNullValueInput | InputJsonValue
@@ -60599,9 +60444,6 @@ export namespace Prisma {
 
   export type PricingConfigUpdateWithoutUpdatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -60614,9 +60456,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedUpdateWithoutUpdatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue
@@ -60629,9 +60468,6 @@ export namespace Prisma {
 
   export type PricingConfigUncheckedUpdateManyWithoutUpdatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    baseRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerKg?: FloatFieldUpdateOperationsInput | number
-    defaultRatePerM3?: FloatFieldUpdateOperationsInput | number
     transportMultipliers?: JsonNullValueInput | InputJsonValue
     cargoTypeSurcharges?: JsonNullValueInput | InputJsonValue
     prioritySurcharges?: JsonNullValueInput | InputJsonValue

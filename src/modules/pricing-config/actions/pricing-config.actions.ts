@@ -40,7 +40,6 @@ type ActionResult<T> =
 export async function getCurrentPricingConfig(): Promise<
   ActionResult<{
     id: string;
-    baseRatePerKg: number;
     transportMultipliers: any;
     cargoTypeSurcharges: any;
     prioritySurcharges: any;

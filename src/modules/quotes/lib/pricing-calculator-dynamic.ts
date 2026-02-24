@@ -463,15 +463,12 @@ export async function calculerPrixDevisDynamic(
     }
     tarifsRouteUtilises = true;
   } else {
-    // ROUTE NON CONFIGURÉE : Utiliser les tarifs par défaut avec multiplicateur
-    const transportMultiplier = config.transportMultipliers[input.modeTransport] || 1.0;
-
-    // CORRECTION BUG : Utiliser ratePerM3 UNIQUEMENT pour le maritime (UP)
-    if (uniteMasseTaxable === 'UP') {
-      tarifParUnite = config.defaultRatePerM3 * transportMultiplier;
-    } else {
-      tarifParUnite = config.defaultRatePerKg * transportMultiplier;
-    }
+    // ROUTE NON CONFIGURÉE : Utiliser le tarif direct par mode (fallback)
+    // transportMultipliers contient des tarifs absolus :
+    //   - ROAD / AIR / RAIL → €/kg
+    //   - SEA               → €/m³ (Unité Payante)
+    // Exemple : AIR=15 €/kg → 5 kg = 75 € (pas de coefficient caché)
+    tarifParUnite = config.transportMultipliers[input.modeTransport] || 1.0;
     tarifsRouteUtilises = false;
 
     console.warn(

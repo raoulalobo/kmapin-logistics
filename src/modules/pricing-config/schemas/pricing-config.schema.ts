@@ -11,14 +11,18 @@ import { z } from 'zod';
 import { CargoType, Priority, TransportMode } from '@/lib/db/enums';
 
 /**
- * Schéma pour les multiplicateurs de transport
- * Chaque mode doit avoir un multiplicateur > 0
+ * Schéma pour les tarifs directs par mode de transport
+ * Chaque mode contient le tarif fallback appliqué si aucune route n'est configurée :
+ *   - ROAD / AIR / RAIL : €/kg
+ *   - SEA               : €/m³ (Unité Payante)
+ *
+ * max(10000) pour permettre des valeurs élevées côté SEA (ex: 120 €/m³)
  */
 export const transportMultipliersSchema = z.object({
-  ROAD: z.number().positive().min(0.1).max(100),
-  SEA: z.number().positive().min(0.1).max(100),
-  AIR: z.number().positive().min(0.1).max(100),
-  RAIL: z.number().positive().min(0.1).max(100),
+  ROAD: z.number().positive().min(0.1).max(10000),
+  SEA: z.number().positive().min(0.1).max(10000),
+  AIR: z.number().positive().min(0.1).max(10000),
+  RAIL: z.number().positive().min(0.1).max(10000),
 });
 
 /**
@@ -114,9 +118,6 @@ export const useVolumetricWeightPerModeSchema = z.object({
  * Utilisé pour la création et la mise à jour complète
  */
 export const pricingConfigSchema = z.object({
-  baseRatePerKg: z.number().positive().min(0.01).max(100),
-  defaultRatePerKg: z.number().positive().min(0.01).max(100),
-  defaultRatePerM3: z.number().positive().min(1).max(10000),
   transportMultipliers: transportMultipliersSchema,
   cargoTypeSurcharges: cargoTypeSurchargesSchema,
   prioritySurcharges: prioritySurchargesSchema,

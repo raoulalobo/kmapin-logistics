@@ -516,9 +516,6 @@ exports.Prisma.DocumentScalarFieldEnum = {
 
 exports.Prisma.PricingConfigScalarFieldEnum = {
   id: 'id',
-  baseRatePerKg: 'baseRatePerKg',
-  defaultRatePerKg: 'defaultRatePerKg',
-  defaultRatePerM3: 'defaultRatePerM3',
   transportMultipliers: 'transportMultipliers',
   cargoTypeSurcharges: 'cargoTypeSurcharges',
   prioritySurcharges: 'prioritySurcharges',

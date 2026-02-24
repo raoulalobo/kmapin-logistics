@@ -1906,7 +1906,9 @@ model Document {
  * Il ne doit exister qu'une seule instance de ce modèle (singleton).
  *
  * Structure des champs JSON :
- * - transportMultipliers : { ROAD: 1.0, SEA: 0.6, AIR: 3.0, RAIL: 0.8 }
+ * - transportMultipliers : { ROAD: 3, SEA: 120, AIR: 15, RAIL: 6 }
+ *   → Tarifs DIRECTS par mode (plus de coefficient appliqué à un taux de base)
+ *   → ROAD/AIR/RAIL en €/kg, SEA en €/m³ (Unité Payante)
  * - cargoTypeSurcharges : { GENERAL: 0, DANGEROUS: 0.5, PERISHABLE: 0.4, ... }
  * - prioritySurcharges : { STANDARD: 0, NORMAL: 0.1, EXPRESS: 0.5, URGENT: 0.3 }
  * - deliverySpeedsPerMode : {
@@ -1928,14 +1930,9 @@ model Document {
 model PricingConfig {
   id                   String   @id @default(cuid())
 
-  // Taux de base
-  baseRatePerKg        Float    @default(0.5) // € par kg (ANCIEN - conservé pour compatibilité)
-
-  // NOUVEAUX : Tarifs par défaut pour fallback (si route non configurée dans matrice)
-  defaultRatePerKg     Float    @default(1.0)   // € par kg
-  defaultRatePerM3     Float    @default(200.0) // € par m³
-
-  // Multiplicateurs par mode de transport (utilisés uniquement si route non configurée)
+  // Tarifs directs par mode de transport (fallback si route non configurée dans la matrice)
+  // ROAD/AIR/RAIL : €/kg  |  SEA : €/m³ (Unité Payante)
+  // Exemples : { ROAD: 3, SEA: 120, AIR: 15, RAIL: 6 }
   transportMultipliers Json     // { ROAD: Float, SEA: Float, AIR: Float, RAIL: Float }
 
   // Surcharges par type de cargo (coefficients multiplicateurs, ex: DANGEROUS: 0.5 = +50%)

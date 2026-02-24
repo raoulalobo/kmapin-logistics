@@ -20,15 +20,15 @@ import type {
  * Valeurs par défaut pour la configuration des prix
  * Utilisées si aucune configuration n'existe en base de données
  *
- * Basées sur les spécifications du document "calculs.pdf"
+ * transportMultipliers = tarifs DIRECTS par mode (plus de coefficient caché) :
+ *   - ROAD / AIR / RAIL : €/kg
+ *   - SEA               : €/m³ (Unité Payante)
+ * SEA = 120 est l'équivalent de l'ancien defaultRatePerM3(200) × multiplier(0.6)
  */
 export const DEFAULT_PRICING_CONFIG = {
-  baseRatePerKg: 0.5,           // ANCIEN (conservé pour compatibilité)
-  defaultRatePerKg: 1.0,        // NOUVEAU : Tarif par défaut pour fallback
-  defaultRatePerM3: 200.0,      // NOUVEAU : Tarif par défaut pour fallback
   transportMultipliers: {
     ROAD: 1.0,
-    SEA: 0.6,
+    SEA: 120.0,
     AIR: 3.0,
     RAIL: 0.8,
   } as TransportMultipliers,
@@ -82,12 +82,11 @@ export const DEFAULT_PRICING_CONFIG = {
 } as const;
 
 /**
- * Type pour la configuration complète
+ * Type pour la configuration complète des prix
+ * transportMultipliers contient les tarifs DIRECTS par mode :
+ *   ROAD/AIR/RAIL → €/kg | SEA → €/m³
  */
 export interface PricingConfigData {
-  baseRatePerKg: number;                        // ANCIEN (conservé)
-  defaultRatePerKg: number;                     // NOUVEAU : Tarif par défaut €/kg
-  defaultRatePerM3: number;                     // NOUVEAU : Tarif par défaut €/m³
   transportMultipliers: TransportMultipliers;
   cargoTypeSurcharges: CargoTypeSurcharges;
   prioritySurcharges: PrioritySurcharges;
@@ -118,9 +117,6 @@ export const getPricingConfig = unstable_cache(
 
       // Convertir les champs JSON en types TypeScript
       return {
-        baseRatePerKg: config.baseRatePerKg,
-        defaultRatePerKg: config.defaultRatePerKg,
-        defaultRatePerM3: config.defaultRatePerM3,
         transportMultipliers: config.transportMultipliers as TransportMultipliers,
         cargoTypeSurcharges: config.cargoTypeSurcharges as CargoTypeSurcharges,
         prioritySurcharges: config.prioritySurcharges as PrioritySurcharges,

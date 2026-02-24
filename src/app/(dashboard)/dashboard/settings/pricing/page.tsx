@@ -106,9 +106,6 @@ export default function PricingConfigPage() {
   // Form pour la configuration générale
   const form = useForm<any>({
     defaultValues: {
-      baseRatePerKg: 0.5,
-      defaultRatePerKg: 1.0,
-      defaultRatePerM3: 200.0,
       volumetricWeightRatios: {
         AIR: 167,
         ROAD: 333,
@@ -170,9 +167,6 @@ export default function PricingConfigPage() {
     const result = await getCurrentPricingConfig();
     if (result.success && result.data) {
       form.reset({
-        baseRatePerKg: result.data.baseRatePerKg,
-        defaultRatePerKg: result.data.defaultRatePerKg,
-        defaultRatePerM3: result.data.defaultRatePerM3,
         volumetricWeightRatios: result.data.volumetricWeightRatios,
         useVolumetricWeightPerMode: result.data.useVolumetricWeightPerMode,
         transportMultipliers: result.data.transportMultipliers,
@@ -374,12 +368,8 @@ export default function PricingConfigPage() {
       <Separator />
 
       {/* Onglets de configuration */}
-      <Tabs defaultValue="base" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="base">
-            <CurrencyEur className="h-4 w-4 mr-2" />
-            Taux de Base
-          </TabsTrigger>
+      <Tabs defaultValue="rates" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="rates">
             <Truck className="h-4 w-4 mr-2" />
             Tarifs Routes
@@ -410,81 +400,7 @@ export default function PricingConfigPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Onglet 1 : Taux de Base */}
-        <TabsContent value="base">
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Taux de Base</CardTitle>
-              <CardDescription>
-                Configurez les tarifs de base par défaut pour le calcul des devis
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="baseRatePerKg">Taux de base (€/kg)</Label>
-                  <Input
-                    id="baseRatePerKg"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...form.register('baseRatePerKg', { valueAsNumber: true })}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Prix de base historique (référence)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="defaultRatePerKg">Tarif par défaut (€/kg)</Label>
-                  <Input
-                    id="defaultRatePerKg"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...form.register('defaultRatePerKg', { valueAsNumber: true })}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Tarif appliqué par kg si aucune route spécifique
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="defaultRatePerM3">Tarif par défaut (€/m³)</Label>
-                  <Input
-                    id="defaultRatePerM3"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...form.register('defaultRatePerM3', { valueAsNumber: true })}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Tarif appliqué par m³ (maritime, volume)
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Info :</strong> Ces tarifs sont utilisés comme fallback quand aucun tarif spécifique
-                  n'est configuré pour une route dans la table TransportRate.
-                </p>
-              </div>
-
-              <Button
-                onClick={handleSaveConfig}
-                disabled={isLoading}
-                size="lg"
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
-              >
-                <FloppyDisk className="h-5 w-5" weight="fill" />
-                {isLoading ? 'Sauvegarde en cours...' : 'Sauvegarder'}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Onglet 2 : Tarifs par Routes */}
+        {/* Onglet 1 : Tarifs par Routes */}
         <TabsContent value="rates">
           <Card className="dashboard-card">
             <CardHeader>
@@ -719,7 +635,7 @@ export default function PricingConfigPage() {
               <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
                 <p className="text-sm text-amber-800">
                   <strong>Important :</strong> Les tarifs configurés ici ont la priorité absolue sur les tarifs par défaut.
-                  Si aucun tarif spécifique n'existe pour une route, le système utilisera les "Taux de Base" (defaultRatePerKg/defaultRatePerM3).
+                  Si aucun tarif spécifique n'existe pour une route, le système utilisera les tarifs de l'onglet "Transport" (€/kg ou €/m³ selon le mode).
                 </p>
               </div>
 
@@ -1044,68 +960,68 @@ export default function PricingConfigPage() {
           </Card>
         </TabsContent>
 
-        {/* Onglet 2 : Multiplicateurs Transport */}
+        {/* Onglet Transport : Tarifs par Mode */}
         <TabsContent value="transport">
           <Card className="dashboard-card">
             <CardHeader>
-              <CardTitle>Multiplicateurs par Mode de Transport</CardTitle>
+              <CardTitle>Tarifs par Mode de Transport</CardTitle>
               <CardDescription>
-                Facteurs multiplicatifs appliqués selon le mode de transport choisi
+                Tarif appliqué par mode quand aucune route spécifique n'est configurée
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="transport-road">Routier (ROAD)</Label>
+                  <Label htmlFor="transport-road">Routier - ROAD (€/kg)</Label>
                   <Input
                     id="transport-road"
                     type="number"
                     step="0.1"
                     min="0.1"
-                    max="100"
+                    max="10000"
                     {...form.register('transportMultipliers.ROAD', { valueAsNumber: true })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="transport-sea">Maritime (SEA)</Label>
+                  <Label htmlFor="transport-sea">Maritime - SEA (€/m³)</Label>
                   <Input
                     id="transport-sea"
                     type="number"
                     step="0.1"
                     min="0.1"
-                    max="100"
+                    max="10000"
                     {...form.register('transportMultipliers.SEA', { valueAsNumber: true })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="transport-air">Aérien (AIR)</Label>
+                  <Label htmlFor="transport-air">Aérien - AIR (€/kg)</Label>
                   <Input
                     id="transport-air"
                     type="number"
                     step="0.1"
                     min="0.1"
-                    max="100"
+                    max="10000"
                     {...form.register('transportMultipliers.AIR', { valueAsNumber: true })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="transport-rail">Ferroviaire (RAIL)</Label>
+                  <Label htmlFor="transport-rail">Ferroviaire - RAIL (€/kg)</Label>
                   <Input
                     id="transport-rail"
                     type="number"
                     step="0.1"
                     min="0.1"
-                    max="100"
+                    max="10000"
                     {...form.register('transportMultipliers.RAIL', { valueAsNumber: true })}
                   />
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Exemple : Un multiplicateur de 3.0 pour l'aérien signifie que le transport aérien coûte 3x plus cher que le taux de base
+                Exemple : AIR = 15 €/kg, ROAD = 3 €/kg, RAIL = 6 €/kg, SEA = 4 €/m³
               </p>
 
               <Button

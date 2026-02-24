@@ -736,9 +736,6 @@ model Document {
 
 model PricingConfig {
   id                         String   @id() @default(cuid())
-  baseRatePerKg              Float    @default(0.5)
-  defaultRatePerKg           Float    @default(1.0)
-  defaultRatePerM3           Float    @default(200.0)
   transportMultipliers       Json
   cargoTypeSurcharges        Json
   prioritySurcharges         Json
