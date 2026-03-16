@@ -55,7 +55,7 @@
     overflow-x: hidden !important;
     width: 100%;
     max-width: 100vw;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* Note : Le overflow pour le dashboard est géré via JavaScript
