@@ -128,7 +128,9 @@ export function Header({
   };
 
   return (
-    <header className="relative flex-shrink-0 z-40 flex h-16 items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 shadow-sm">
+    {/* sticky top-0 : garantit que le header reste visible même si un scroll
+         parasite se produit sur iOS Safari (au lieu de relative) */}
+    <header className="sticky top-0 flex-shrink-0 z-40 flex h-16 items-center gap-4 border-b border-slate-200 bg-slate-50 px-6 shadow-sm">
       {/* List hamburger mobile - Affiche la sidebar en Sheet */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>

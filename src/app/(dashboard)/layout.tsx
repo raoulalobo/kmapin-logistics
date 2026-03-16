@@ -69,7 +69,9 @@ export default async function DashboardLayout({
       {/* Composant qui force le style overflow sur html/body */}
       <DashboardOverflowFix />
 
-      <div className="flex h-screen w-full max-w-full overflow-hidden" data-dashboard-layout>
+      {/* h-dvh (100dvh) au lieu de h-screen (100vh) pour iOS Safari :
+           100dvh s'adapte dynamiquement à la barre d'adresse mobile */}
+      <div className="flex h-dvh w-full max-w-full overflow-hidden" data-dashboard-layout>
         {/* Sidebar - Masquée sur mobile, visible sur desktop */}
         <aside className="hidden md:flex md:w-64 md:flex-col md:flex-shrink-0">
           <Sidebar

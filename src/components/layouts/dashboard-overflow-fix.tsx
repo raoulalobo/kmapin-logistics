@@ -26,10 +26,12 @@ export function DashboardOverflowFix() {
     const bodyOriginalHeight = document.body.style.height;
 
     // Appliquer les styles pour le dashboard
+    // 100dvh (dynamic viewport height) au lieu de 100vh pour iOS Safari :
+    // s'adapte à la présence/absence de la barre d'adresse mobile
     document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.height = '100vh';
+    document.documentElement.style.height = '100dvh';
     document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
+    document.body.style.height = '100dvh';
 
     // Nettoyer au démontage (quand on quitte le dashboard)
     return () => {
