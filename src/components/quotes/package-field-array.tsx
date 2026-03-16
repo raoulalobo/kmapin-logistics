@@ -178,13 +178,12 @@ export function PackageFieldArray({ control }: PackageFieldArrayProps) {
                     <FormLabel className="text-xs">Quantité *</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="1"
-                        step="1"
+                        type="text"
+                        inputMode="numeric"
                         placeholder="1"
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'number' && !isNaN(field.value) ? field.value : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          const val = e.target.value.replace(/[^0-9]/g, '');
                           field.onChange(val === '' ? undefined : parseInt(val, 10));
                         }}
                         onBlur={field.onBlur}
@@ -235,13 +234,13 @@ export function PackageFieldArray({ control }: PackageFieldArrayProps) {
                     <FormLabel className="text-xs">Poids unitaire (kg) *</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="Ex: 15"
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'number' && !isNaN(field.value) ? field.value : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          // Autorise chiffres, point et virgule (pour saisie décimale)
+                          const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           field.onChange(val === '' ? undefined : parseFloat(val));
                         }}
                         onBlur={field.onBlur}
@@ -263,13 +262,13 @@ export function PackageFieldArray({ control }: PackageFieldArrayProps) {
                     <FormLabel className="text-xs">Longueur (cm)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="0"
-                        step="1"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="L"
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'number' && !isNaN(field.value) ? field.value : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          // Autorise chiffres, point et virgule (pour saisie décimale)
+                          const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           field.onChange(val === '' ? undefined : parseFloat(val));
                         }}
                         onBlur={field.onBlur}
@@ -291,13 +290,13 @@ export function PackageFieldArray({ control }: PackageFieldArrayProps) {
                     <FormLabel className="text-xs">Largeur (cm)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="0"
-                        step="1"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="l"
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'number' && !isNaN(field.value) ? field.value : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          // Autorise chiffres, point et virgule (pour saisie décimale)
+                          const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           field.onChange(val === '' ? undefined : parseFloat(val));
                         }}
                         onBlur={field.onBlur}
@@ -319,13 +318,13 @@ export function PackageFieldArray({ control }: PackageFieldArrayProps) {
                     <FormLabel className="text-xs">Hauteur (cm)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        min="0"
-                        step="1"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="H"
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'number' && !isNaN(field.value) ? field.value : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          // Autorise chiffres, point et virgule (pour saisie décimale)
+                          const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           field.onChange(val === '' ? undefined : parseFloat(val));
                         }}
                         onBlur={field.onBlur}
