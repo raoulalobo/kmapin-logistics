@@ -548,7 +548,13 @@ export function QuoteCalculator() {
         doc.setFont('helvetica', 'bold');
         doc.text('Priorité :', leftCol, yPos);
         doc.setFont('helvetica', 'normal');
-        doc.text(lastFormData.priority || 'STANDARD', valueCol, yPos);
+        // Traduire la priorité en français pour le PDF (ex: URGENT → "Urgent (+30%)")
+        const priorityLabels: Record<string, string> = {
+          STANDARD: 'Standard',
+          NORMAL: 'Normal (+10%)',
+          URGENT: 'Urgent (+30%)',
+        };
+        doc.text(priorityLabels[lastFormData.priority || 'STANDARD'] || lastFormData.priority || 'Standard', valueCol, yPos);
         yPos += 6;
 
         doc.setFont('helvetica', 'bold');
