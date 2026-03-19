@@ -8,7 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { List, Bell, SignOut, Gear } from '@phosphor-icons/react';
+import { List, SignOut, Gear } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,7 +25,6 @@ import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { logoutAction } from '@/app/(auth)/_actions/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import type { UserRole } from '@/generated/prisma';
-import { countPendingQuotesAction } from '@/modules/quotes';
 
 /**
  * Props du composant Header
@@ -63,7 +62,6 @@ export function Header({
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingQuotesCount, setPendingQuotesCount] = useState(0);
   // État contrôlé du menu mobile (Sheet) pour pouvoir le fermer programmatiquement
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -74,30 +72,6 @@ export function Header({
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  /**
-   * Charger le nombre de devis en attente de validation
-   * Uniquement pour les ADMIN et MANAGERS
-   */
-  useEffect(() => {
-    async function loadPendingQuotes() {
-      // Seuls les ADMIN et MANAGERS voient les notifications
-      if (userRole === 'CLIENT' || userRole === 'VIEWER') {
-        return;
-      }
-
-      const result = await countPendingQuotesAction();
-      if (result.success) {
-        setPendingQuotesCount(result.data);
-      }
-    }
-
-    loadPendingQuotes();
-
-    // Recharger toutes les 30 secondes
-    const interval = setInterval(loadPendingQuotes, 30000);
-    return () => clearInterval(interval);
-  }, [userRole]);
 
   /**
    * Handler pour la déconnexion
@@ -163,27 +137,7 @@ export function Header({
 
       {/* Actions rapides */}
       <div className="flex items-center gap-2">
-        {/* Notifications - Badge pour les devis en attente */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={() => router.push('/dashboard/quotes')}
-          title={pendingQuotesCount > 0 ? `${pendingQuotesCount} devis en attente de validation` : 'Notifications'}
-        >
-          <Bell className="h-5 w-5 text-[#003D82]" />
-          {/* Badge de notification dynamique */}
-          {pendingQuotesCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-              {pendingQuotesCount > 9 ? '9+' : pendingQuotesCount}
-            </span>
-          )}
-          <span className="sr-only">
-            {pendingQuotesCount > 0 ? `${pendingQuotesCount} notifications` : 'Notifications'}
-          </span>
-        </Button>
-
-        {/* List utilisateur */}
+        {/* Menu utilisateur */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
