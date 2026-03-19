@@ -511,7 +511,6 @@ export default function PricingConfigPage() {
                           setNewRate({ ...newRate, ratePerM3: parseFloat(e.target.value) || 0, ratePerKg: 0 })
                         }
                       />
-                      <p className="text-xs text-muted-foreground">UP = Unité Payante = max(tonnes, m³)</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -541,6 +540,11 @@ export default function PricingConfigPage() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Hint maritime affiché sous la grille pour ne pas casser l'alignement */}
+                {newRate.transportMode === 'SEA' && (
+                  <p className="text-xs text-muted-foreground -mt-1">UP = Unité Payante = max(tonnes, m³)</p>
+                )}
 
                 <div className="space-y-2">
                   <Label>Notes (optionnel)</Label>
