@@ -12,8 +12,6 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import {
   Package,
-  Envelope,
-  Globe,
   CircleNotch,
   Airplane,
   Boat,
@@ -438,14 +436,6 @@ export function HomepageHeader({
 
         {/* Actions - Boutons dynamiques selon l'état de connexion */}
         <div className="flex items-center space-x-4 lg:space-x-6">
-          {/* Icônes d'action - cachées sur mobile car présentes dans le menu */}
-          <button className="hidden sm:block text-gray-700 hover:text-gray-900">
-            <Envelope className="h-5 w-5" />
-          </button>
-          <button className="hidden sm:block text-gray-700 hover:text-gray-900">
-            <Globe className="h-5 w-5" />
-          </button>
-
           {/* Affichage conditionnel selon l'état de session - caché sur mobile (présent dans le menu burger) */}
           {isLoading ? (
             <Button disabled className="hidden lg:flex bg-[#003D82] text-white">
