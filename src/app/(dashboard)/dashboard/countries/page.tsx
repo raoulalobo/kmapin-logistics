@@ -6,7 +6,7 @@
  */
 
 import { Suspense } from 'react';
-import { requireAdmin } from '@/lib/auth/config';
+import { requireAuth, requireAdmin } from '@/lib/auth/config';
 import { listCountries } from '@/modules/countries';
 import { CountriesDataTable } from '@/components/countries/countries-data-table';
 import { CreateCountryButton } from '@/components/countries/create-country-button';
@@ -28,6 +28,7 @@ export const metadata = {
  * Réservé aux administrateurs uniquement
  */
 export default async function CountriesPage() {
+  const session = await requireAuth();
   // Vérifier que l'utilisateur est administrateur
   await requireAdmin();
 

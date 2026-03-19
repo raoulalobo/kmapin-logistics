@@ -10,6 +10,7 @@
  * - Liens vers les détails complets des expéditions
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { MapPin, Package, Airplane, Boat, Truck, Clock, ArrowRight, CheckCircle, House, Plus } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -51,6 +52,7 @@ function getStatusVariant(status: string): 'default' | 'secondary' | 'destructiv
 }
 
 export default async function TrackingPage() {
+  const session = await requireAuth();
   // Récupérer les expéditions actives et les statistiques
   const [shipments, stats] = await Promise.all([
     getActiveShipmentsWithTracking(),

@@ -12,6 +12,7 @@
  * Réutilise le module documents existant avec getAllDocumentsAction
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { FileText, Download, Eye, MagnifyingGlass, Funnel, File, Package, Receipt } from '@phosphor-icons/react/dist/ssr';
 import { Card } from '@/components/ui/card';
@@ -80,6 +81,7 @@ export default async function DocumentsPage({
 }: {
   searchParams: Promise<{ page?: string; type?: DocumentType; search?: string }>;
 }) {
+  const session = await requireAuth();
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const result = await getAllDocumentsAction({

@@ -12,6 +12,7 @@
  * @route /dashboard/quotes/[id]
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -120,6 +121,7 @@ export default async function QuoteDetailsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requireAuth();
   const { id } = await params;
 
   // Récupérer le devis

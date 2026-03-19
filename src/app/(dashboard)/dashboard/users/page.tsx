@@ -33,7 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { requireAdmin } from '@/lib/auth/config';
+import { requireAuth, requireAdmin } from '@/lib/auth/config';
 import { getUsersAction } from '@/modules/users';
 import { getRoleLabel, getRoleBadgeVariant } from '@/modules/users';
 import {
@@ -61,6 +61,7 @@ export default async function UsersPage({
     clientId?: string;
   }>;
 }) {
+  const session = await requireAuth();
   // Vérifier que l'utilisateur est admin
   await requireAdmin();
 

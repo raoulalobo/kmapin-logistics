@@ -9,6 +9,7 @@
  * - Boutons d'actions (modifier, supprimer)
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -37,6 +38,7 @@ export default async function ClientDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requireAuth();
   const { id } = await params;
   const result = await getClientAction(id);
 

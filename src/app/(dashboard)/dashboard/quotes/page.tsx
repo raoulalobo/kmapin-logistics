@@ -11,6 +11,7 @@
  * Utilise le module quotes existant avec getQuotesAction
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Eye, ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,6 +103,7 @@ export default async function QuotesPage({
 }: {
   searchParams: Promise<{ page?: string; status?: string; search?: string }>;
 }) {
+  const session = await requireAuth();
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const result = await getQuotesAction(

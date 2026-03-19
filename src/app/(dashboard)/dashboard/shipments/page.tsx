@@ -11,6 +11,7 @@
  * Utilise le module shipments existant avec getShipmentsAction
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { Plus, Package, MapPin, Calendar, TrendUp, CheckCircle, Clock } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,6 +56,7 @@ export default async function ShipmentsPage({
 }: {
   searchParams: Promise<{ page?: string; status?: string; search?: string }>;
 }) {
+  const session = await requireAuth();
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const result = await getShipmentsAction(

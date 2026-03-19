@@ -10,6 +10,7 @@
  * - Alertes et notifications
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -72,6 +73,7 @@ function KPICard({
 }
 
 export default async function ReportsPage() {
+  const session = await requireAuth();
   // Récupérer les statistiques depuis le module dashboard
   const stats = await getDashboardStats();
   const revenueChartData = await getRevenueChartData();

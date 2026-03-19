@@ -9,6 +9,7 @@
  * @route /dashboard/quotes
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { Plus, Eye, FileText, CheckCircle, XCircle, Clock, Download } from '@phosphor-icons/react/dist/ssr';
 
@@ -82,6 +83,7 @@ export default async function QuotesPage({
 }: {
   searchParams: Promise<{ page?: string; status?: string; search?: string }>;
 }) {
+  const session = await requireAuth();
   // Attendre les searchParams (Next.js 16)
   const params = await searchParams;
 

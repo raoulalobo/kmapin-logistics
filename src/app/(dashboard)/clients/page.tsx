@@ -7,6 +7,7 @@
  * - Statistiques par client (nombre d'expéditions, factures)
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { Plus, Eye, PencilSimple, Trash, Buildings } from '@phosphor-icons/react/dist/ssr';
 
@@ -45,6 +46,7 @@ import { getClientsAction } from '@/modules/clients';
  * et les affiche dans un tableau interactif
  */
 export default async function ClientsPage() {
+  const session = await requireAuth();
   // Récupérer les clients depuis le serveur
   const result = await getClientsAction({ page: 1, limit: 50 });
 

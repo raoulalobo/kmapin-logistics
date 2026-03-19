@@ -10,6 +10,7 @@
  * Utilise le module clients existant avec getClientsAction
  */
 
+import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
 import { Plus, Buildings, Envelope, Phone, MapPin, Package, CurrencyEur } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ export default async function ClientsPage({
 }: {
   searchParams: Promise<{ page?: string; search?: string }>;
 }) {
+  const session = await requireAuth();
   // Next.js 16 : searchParams est une Promise
   const params = await searchParams;
   const page = parseInt(params.page || '1');
