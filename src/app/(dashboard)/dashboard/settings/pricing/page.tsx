@@ -7,7 +7,6 @@
  * - Surcharges par type de cargo
  * - Surcharges par priorité
  * - Délais de livraison par mode
- * - Distances entre pays
  */
 
 'use client';
@@ -21,7 +20,6 @@ import {
   Truck,
   Package,
   Clock,
-  MapPin,
   FloppyDisk,
   Trash,
   Plus,
@@ -54,11 +52,7 @@ import {
 import {
   getCurrentPricingConfig,
   updatePricingConfig,
-  getAllCountryDistances,
-  upsertCountryDistance,
-  deleteCountryDistance,
   type PricingConfigInput,
-  type CountryDistanceInput,
 } from '@/modules/pricing-config';
 import {
   getTransportRates,
@@ -73,13 +67,6 @@ import { TransportMode } from '@/lib/db/enums';
 export default function PricingConfigPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [distances, setDistances] = useState<any[]>([]);
-  const [newDistance, setNewDistance] = useState({
-    originCountry: '',
-    destinationCountry: '',
-    distanceKm: 0,
-  });
-
   // États pour la gestion des tarifs de transport
   const [transportRates, setTransportRates] = useState<any[]>([]);
   const [isLoadingRates, setIsLoadingRates] = useState(false);
@@ -148,7 +135,6 @@ export default function PricingConfigPage() {
   // Charger la configuration au montage
   useEffect(() => {
     loadConfiguration();
-    loadDistances();
     loadTransportRates();
     loadActiveCountries();
   }, []);
@@ -175,13 +161,6 @@ export default function PricingConfigPage() {
     setIsFetching(false);
   }
 
-  async function loadDistances() {
-    const result = await getAllCountryDistances();
-    if (result.success) {
-      setDistances(result.data);
-    }
-  }
-
   async function handleSaveConfig() {
     setIsLoading(true);
     const values = form.getValues();
@@ -199,34 +178,6 @@ export default function PricingConfigPage() {
     }
 
     setIsLoading(false);
-  }
-
-  async function handleAddDistance() {
-    if (!newDistance.originCountry || !newDistance.destinationCountry || newDistance.distanceKm <= 0) {
-      toast.error('Veuillez remplir tous les champs');
-      return;
-    }
-
-    const result = await upsertCountryDistance(newDistance);
-
-    if (result.success) {
-      toast.success('Distance ajoutée avec succès');
-      setNewDistance({ originCountry: '', destinationCountry: '', distanceKm: 0 });
-      loadDistances();
-    } else {
-      toast.error(result.error || 'Erreur lors de l\'ajout');
-    }
-  }
-
-  async function handleDeleteDistance(originCountry: string, destinationCountry: string) {
-    const result = await deleteCountryDistance(originCountry, destinationCountry);
-
-    if (result.success) {
-      toast.success('Distance supprimée avec succès');
-      loadDistances();
-    } else {
-      toast.error(result.error || 'Erreur lors de la suppression');
-    }
   }
 
   // === FONCTIONS POUR LES TARIFS DE TRANSPORT ===
@@ -381,7 +332,7 @@ export default function PricingConfigPage() {
 
       {/* Onglets de configuration */}
       <Tabs defaultValue="rates" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="rates">
             <Truck className="h-4 w-4 mr-2" />
             Tarifs Routes
@@ -405,10 +356,6 @@ export default function PricingConfigPage() {
           <TabsTrigger value="delivery">
             <Clock className="h-4 w-4 mr-2" />
             Délais
-          </TabsTrigger>
-          <TabsTrigger value="distances">
-            <MapPin className="h-4 w-4 mr-2" />
-            Distances
           </TabsTrigger>
         </TabsList>
 
@@ -1317,117 +1264,6 @@ export default function PricingConfigPage() {
           </Card>
         </TabsContent>
 
-        {/* Onglet 6 : Distances */}
-        <TabsContent value="distances">
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Distances entre Pays</CardTitle>
-              <CardDescription>
-                Gérez les distances en kilomètres entre les différents pays (codes ISO à 2 lettres)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Formulaire d'ajout */}
-              <div className="border rounded-lg p-4 space-y-4">
-                <h3 className="font-semibold">Ajouter une nouvelle distance</h3>
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div className="space-y-2">
-                    <Label>Pays d'origine (code ISO)</Label>
-                    <Input
-                      placeholder="FR"
-                      maxLength={2}
-                      value={newDistance.originCountry}
-                      onChange={(e) =>
-                        setNewDistance({ ...newDistance, originCountry: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Pays de destination (code ISO)</Label>
-                    <Input
-                      placeholder="DE"
-                      maxLength={2}
-                      value={newDistance.destinationCountry}
-                      onChange={(e) =>
-                        setNewDistance({ ...newDistance, destinationCountry: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Distance (km)</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={newDistance.distanceKm || ''}
-                      onChange={(e) =>
-                        setNewDistance({ ...newDistance, distanceKm: parseInt(e.target.value) || 0 })
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button
-                      onClick={handleAddDistance}
-                      size="lg"
-                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-5 w-5" weight="fill" />
-                      Ajouter
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Table des distances */}
-              <div className="border rounded-lg">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Origine</TableHead>
-                      <TableHead>Destination</TableHead>
-                      <TableHead>Distance (km)</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {distances.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                          Aucune distance configurée
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      distances.map((distance) => (
-                        <TableRow key={distance.id}>
-                          <TableCell className="font-mono">{distance.originCountry}</TableCell>
-                          <TableCell className="font-mono">{distance.destinationCountry}</TableCell>
-                          <TableCell>{distance.distanceKm.toLocaleString()} km</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleDeleteDistance(distance.originCountry, distance.destinationCountry)
-                              }
-                            >
-                              <Trash className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                Utilisez des codes pays ISO à 2 lettres (ex: FR pour France, DE pour Allemagne, US pour États-Unis)
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
