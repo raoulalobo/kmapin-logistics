@@ -17,7 +17,8 @@
 import { requireAuth } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 import { generateInvoiceFromQuotePDF, type QuoteInvoicePDFData } from '@/lib/pdf/invoice-pdf';
-import { generateQuotePDF } from '@/lib/pdf/quote-pdf';
+import { generateQuotePDF, type PlatformPDFConfig } from '@/lib/pdf/quote-pdf';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 import type { ActionResponse } from '@/types';
 
 /**
@@ -115,8 +116,15 @@ export async function generateQuoteInvoicePDFAction(
       agentComment: quote.agentComment,
     };
 
-    // Générer le PDF
-    const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
+    // Récupérer la config plateforme pour le branding dynamique des PDFs
+    const systemConfig = await getSystemConfig();
+    const pdfConfig: PlatformPDFConfig = {
+      platformFullName: systemConfig.platformFullName,
+      primaryColor: systemConfig.primaryColor,
+    };
+
+    // Générer le PDF avec la config dynamique
+    const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
 
     // Convertir en base64 pour le transfert
     const pdfBase64 = pdfBuffer.toString('base64');
@@ -235,8 +243,15 @@ export async function generateShipmentInvoicePDFAction(
       agentComment: quote.agentComment,
     };
 
-    // Générer le PDF
-    const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
+    // Récupérer la config plateforme pour le branding dynamique des PDFs
+    const systemConfig = await getSystemConfig();
+    const pdfConfig: PlatformPDFConfig = {
+      platformFullName: systemConfig.platformFullName,
+      primaryColor: systemConfig.primaryColor,
+    };
+
+    // Générer le PDF avec la config dynamique
+    const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
 
     // Convertir en base64 pour le transfert
     const pdfBase64 = pdfBuffer.toString('base64');
@@ -325,8 +340,15 @@ export async function generateQuotePDFAction(
       status: quote.status,
     };
 
-    // Générer le PDF
-    const pdfBuffer = generateQuotePDF(pdfData);
+    // Récupérer la config plateforme pour le branding dynamique des PDFs
+    const systemConfig = await getSystemConfig();
+    const pdfConfig: PlatformPDFConfig = {
+      platformFullName: systemConfig.platformFullName,
+      primaryColor: systemConfig.primaryColor,
+    };
+
+    // Générer le PDF avec la config dynamique
+    const pdfBuffer = generateQuotePDF(pdfData, pdfConfig);
 
     // Convertir en base64 pour le transfert
     const pdfBase64 = pdfBuffer.toString('base64');

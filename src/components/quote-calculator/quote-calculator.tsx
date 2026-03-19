@@ -178,7 +178,31 @@ const DEFAULT_PACKAGE_LINE = {
   height: undefined as unknown as number,
 };
 
-export function QuoteCalculator() {
+/**
+ * Props pour le QuoteCalculator
+ * La config plateforme est injectée par le Server Component parent (page.tsx)
+ * pour personnaliser le branding du PDF (nom, contact, couleurs)
+ */
+export interface QuoteCalculatorProps {
+  /** Nom affiché en gros dans l'en-tête du PDF (ex: "FASO FRET") */
+  platformName: string;
+  /** Sous-titre / slogan sous le nom (ex: "Solutions Logistiques Internationales") */
+  platformSlogan: string;
+  /** Email de contact affiché dans l'en-tête et le footer du PDF */
+  contactEmail: string;
+  /** Téléphone de contact affiché dans l'en-tête et le footer du PDF */
+  contactPhone: string | null;
+  /** Adresse postale de la société */
+  companyAddress: string | null;
+  /** Ville du siège social */
+  companyCity: string | null;
+  /** Pays du siège social */
+  companyCountry: string;
+  /** Couleur primaire hex (ex: "#003D82") pour l'en-tête et les accents du PDF */
+  primaryColor: string;
+}
+
+export function QuoteCalculator(props: QuoteCalculatorProps) {
   // ═══════════════════════════════════════════════════════════════════════════
   // ÉTAT LOCAL
   // ═══════════════════════════════════════════════════════════════════════════
@@ -464,8 +488,16 @@ export function QuoteCalculator() {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
 
-        // Couleurs professionnelles
-        const primaryColor: [number, number, number] = [0, 61, 130];
+        // Conversion hex → RGB de la couleur primaire dynamique (depuis SystemConfig)
+        const hexToRgb = (hex: string): [number, number, number] => {
+          const clean = hex.replace('#', '');
+          return [
+            parseInt(clean.substring(0, 2), 16),
+            parseInt(clean.substring(2, 4), 16),
+            parseInt(clean.substring(4, 6), 16),
+          ];
+        };
+        const primaryColor: [number, number, number] = hexToRgb(props.primaryColor);
         const secondaryColor: [number, number, number] = [255, 152, 0];
         const textDark: [number, number, number] = [33, 33, 33];
         const textLight: [number, number, number] = [100, 100, 100];
@@ -483,16 +515,17 @@ export function QuoteCalculator() {
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
-        doc.text('FASO FRET', 15, 20);
+        doc.text(props.platformName.toUpperCase(), 15, 20);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc.text('Solutions Logistiques Internationales', 15, 27);
+        doc.text(props.platformSlogan, 15, 27);
 
-        // Coordonnées société
+        // Coordonnées société (dynamiques depuis SystemConfig)
         doc.setFontSize(8);
-        doc.text('Adresse : Ouagadougou, Burkina Faso', 15, 35);
-        doc.text('Tel : +226 XX XX XX XX', 15, 40);
-        doc.text('Email : contact@fasofret.com', 15, 45);
+        const addressParts = [props.companyAddress, props.companyCity, props.companyCountry].filter(Boolean);
+        doc.text(`Adresse : ${addressParts.join(', ') || 'Non renseignée'}`, 15, 35);
+        doc.text(`Tel : ${props.contactPhone || 'Non renseigné'}`, 15, 40);
+        doc.text(`Email : ${props.contactEmail}`, 15, 45);
 
         // N° Devis et Date (à droite)
         const quoteNumber = `DEV-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Date.now().toString().slice(-5)}`;
@@ -689,14 +722,17 @@ export function QuoteCalculator() {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(8);
         doc.setTextColor(...primaryColor);
-        doc.text('FASO FRET - Solutions Logistiques Professionnelles', pageWidth / 2, footerY + 15, { align: 'center' });
+        doc.text(`${props.platformName.toUpperCase()} - ${props.platformSlogan}`, pageWidth / 2, footerY + 15, { align: 'center' });
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7);
         doc.setTextColor(...textLight);
-        doc.text('www.fasofret.com | contact@fasofret.com | +226 XX XX XX XX', pageWidth / 2, footerY + 20, { align: 'center' });
+        const footerContactParts = [props.contactEmail, props.contactPhone].filter(Boolean);
+        doc.text(footerContactParts.join(' | '), pageWidth / 2, footerY + 20, { align: 'center' });
 
         // Télécharger le PDF
-        doc.save(`devis-fasofret-${quoteNumber}.pdf`);
+        // Nom du fichier basé sur le nom de la plateforme (slug kebab-case)
+        const platformSlug = props.platformName.toLowerCase().replace(/\s+/g, '-');
+        doc.save(`devis-${platformSlug}-${quoteNumber}.pdf`);
         toast.success('Devis téléchargé avec succès !');
       });
     } catch (error) {

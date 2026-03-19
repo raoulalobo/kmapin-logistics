@@ -81,7 +81,16 @@ export default async function House() {
                 </div>
               }
             >
-              <QuoteCalculator />
+              <QuoteCalculator
+                platformName={systemConfig.platformName}
+                platformSlogan={systemConfig.platformSlogan}
+                contactEmail={systemConfig.contactEmail}
+                contactPhone={systemConfig.contactPhone}
+                companyAddress={systemConfig.companyAddress}
+                companyCity={systemConfig.companyCity}
+                companyCountry={systemConfig.companyCountry}
+                primaryColor={systemConfig.primaryColor}
+              />
             </Suspense>
           </div>
         </section>
