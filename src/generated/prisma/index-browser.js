@@ -643,7 +643,7 @@ exports.CargoType = exports.$Enums.CargoType = {
 
 exports.Priority = exports.$Enums.Priority = {
   STANDARD: 'STANDARD',
-  EXPRESS: 'EXPRESS',
+  NORMAL: 'NORMAL',
   URGENT: 'URGENT'
 };
 
@@ -666,8 +666,7 @@ exports.ShipmentStatus = exports.$Enums.ShipmentStatus = {
 exports.TransportMode = exports.$Enums.TransportMode = {
   ROAD: 'ROAD',
   SEA: 'SEA',
-  AIR: 'AIR',
-  RAIL: 'RAIL'
+  AIR: 'AIR'
 };
 
 exports.PickupTimeSlot = exports.$Enums.PickupTimeSlot = {

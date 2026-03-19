@@ -6,7 +6,7 @@
  * │  Fonction                    │  Cas testés                              │
  * ├──────────────────────────────┼───────────────────────────────────────────┤
  * │  calculerVolume              │  calcul correct, dimensions nulles        │
- * │  calculerPrixDevisDynamic    │  AIR/ROAD/RAIL/SEA, sans dim, route,     │
+ * │  calculerPrixDevisDynamic    │  AIR/ROAD/SEA, sans dim, route,          │
  * │                              │  fallback, surcharge cargo, priorité      │
  * │  calculerPrixMultiPackages   │  multi-colis, priorité, colis vide        │
  * └──────────────────────────────┴───────────────────────────────────────────┘
@@ -46,15 +46,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  *   transportMultipliers = tarifs DIRECTS par mode (plus de coefficient caché) :
  *     AIR: 3.0 €/kg → 75 kg × 3.0 = 225 €
  *     ROAD: 1.0 €/kg
- *     RAIL: 0.8 €/kg
  *     SEA: 120.0 €/m³ (= ancien defaultRatePerM3(200) × 0.6 — même résultat numérique)
- *   volumetricWeightRatios = { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 }
- *   useVolumetricWeight   = { AIR: true, ROAD: true, SEA: false, RAIL: true }
+ *   volumetricWeightRatios = { AIR: 167, ROAD: 333, SEA: 1 }
+ *   useVolumetricWeight   = { AIR: true, ROAD: true, SEA: false }
  *   cargoTypeSurcharges   = { FRAGILE: 0.3, DANGEROUS: 0.5, GENERAL: 0 }
- *   prioritySurcharges    = { STANDARD: 0, NORMAL: 0.1, EXPRESS: 0.5, URGENT: 0.3 }
+ *   prioritySurcharges    = { STANDARD: 0, NORMAL: 0.1, URGENT: 0.3 }
  */
 const DEFAULT_CONFIG = vi.hoisted(() => ({
-  transportMultipliers: { ROAD: 1.0, SEA: 120.0, AIR: 3.0, RAIL: 0.8 },
+  transportMultipliers: { ROAD: 1.0, SEA: 120.0, AIR: 3.0 },
   cargoTypeSurcharges: {
     GENERAL: 0,
     DANGEROUS: 0.5,
@@ -65,15 +64,14 @@ const DEFAULT_CONFIG = vi.hoisted(() => ({
     PALLETIZED: 0.15,
     OTHER: 0.1,
   },
-  prioritySurcharges: { STANDARD: 0, NORMAL: 0.1, EXPRESS: 0.5, URGENT: 0.3 },
+  prioritySurcharges: { STANDARD: 0, NORMAL: 0.1, URGENT: 0.3 },
   deliverySpeedsPerMode: {
     ROAD: { min: 3, max: 7 },
     SEA: { min: 20, max: 45 },
     AIR: { min: 1, max: 3 },
-    RAIL: { min: 7, max: 14 },
   },
-  volumetricWeightRatios: { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 },
-  useVolumetricWeightPerMode: { AIR: true, ROAD: true, SEA: false, RAIL: true },
+  volumetricWeightRatios: { AIR: 167, ROAD: 333, SEA: 1 },
+  useVolumetricWeightPerMode: { AIR: true, ROAD: true, SEA: false },
 }));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,7 +90,6 @@ vi.mock('@/lib/db/enums', () => ({
     ROAD: 'ROAD',
     SEA: 'SEA',
     AIR: 'AIR',
-    RAIL: 'RAIL',
   },
   CargoType: {
     GENERAL: 'GENERAL',
@@ -258,26 +255,6 @@ describe('calculerPrixDevisDynamic — masse taxable par mode', () => {
 
       expect(r.poidsVolumetrique_kg).toBeCloseTo(159.84, 1);
       expect(r.masseTaxable).toBeCloseTo(159.84, 1);
-      expect(r.uniteMasseTaxable).toBe('kg');
-      expect(r.factureSurVolume).toBe(true);
-    });
-  });
-
-  // ─── RAIL ─────────────────────────────────────────────────────────────────
-  describe('RAIL — ratio ferroviaire (250 kg/m³)', () => {
-    /**
-     * PV = 0.48 × 250 = 120 kg
-     * masseTaxable = MAX(50, 120) = 120 kg → facturation au VOLUME
-     */
-    it('facture au volume pour 50 kg réel, 0.48 m³ (PV = 120 kg)', async () => {
-      const r = await calculerPrixDevisDynamic({
-        poidsReel: 50, ...DIMS_48,
-        modeTransport: 'RAIL', priorite: 'STANDARD',
-        paysOrigine: 'FR', paysDestination: 'BF',
-      });
-
-      expect(r.poidsVolumetrique_kg).toBeCloseTo(120, 1);
-      expect(r.masseTaxable).toBeCloseTo(120, 1);
       expect(r.uniteMasseTaxable).toBe('kg');
       expect(r.factureSurVolume).toBe(true);
     });
@@ -505,20 +482,20 @@ describe('calculerPrixDevisDynamic — surcharges', () => {
   });
 
   /**
-   * Combinaison FRAGILE + EXPRESS
+   * Combinaison FRAGILE + URGENT
    * coutBase = 300 €
    * surchargeCargo FRAGILE = 300 × 0.3 = 90 € → prix avant priorité = 390 €
-   * coefficient EXPRESS = ×1.5 → prixFinal = 390 × 1.5 = 585 €
+   * coefficient URGENT = ×1.3 → prixFinal = 390 × 1.3 = 507 €
    */
-  it('cumule surcharge FRAGILE et priorité EXPRESS (390 × 1.5 = 585 €)', async () => {
+  it('cumule surcharge FRAGILE et priorité URGENT (390 × 1.3 = 507 €)', async () => {
     const r = await calculerPrixDevisDynamic({
       poidsReel: 100, longueur: 0, largeur: 0, hauteur: 0,
-      modeTransport: 'AIR', priorite: 'EXPRESS', typeMarchandise: 'FRAGILE',
+      modeTransport: 'AIR', priorite: 'URGENT', typeMarchandise: 'FRAGILE',
       paysOrigine: 'FR', paysDestination: 'BF',
     });
 
-    expect(r.coefficientPriorite).toBe(1.5);
-    expect(r.prixFinal).toBeCloseTo(585.0, 2);
+    expect(r.coefficientPriorite).toBe(1.3);
+    expect(r.prixFinal).toBeCloseTo(507.0, 2);
   });
 
   /**

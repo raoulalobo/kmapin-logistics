@@ -318,7 +318,7 @@ export async function generateQuotePDFAction(
       cargoType: quote.cargoType,
       weight: quote.weight,
       volume: quote.volume,
-      // Priorité de livraison : STANDARD, NORMAL, EXPRESS, URGENT
+      // Priorité de livraison : STANDARD, NORMAL, URGENT
       priority: quote.priority,
       estimatedCost: quote.estimatedCost,
       currency: quote.currency,

@@ -72,10 +72,9 @@ import {
  * Type des priorités disponibles pour la livraison
  * - STANDARD : Délai normal, aucun supplément
  * - NORMAL : Légèrement accéléré, +10%
- * - EXPRESS : Livraison rapide, +50%
  * - URGENT : Prioritaire, +30%
  */
-type PriorityType = 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+type PriorityType = 'STANDARD' | 'NORMAL' | 'URGENT';
 
 /**
  * Type pour un colis chargé depuis la base de données (QuotePackage)
@@ -886,7 +885,6 @@ function QuoteEditForm({
                           <SelectItem value="ROAD">Routier</SelectItem>
                           <SelectItem value="SEA">Maritime</SelectItem>
                           <SelectItem value="AIR">Aérien</SelectItem>
-                          <SelectItem value="RAIL">Ferroviaire</SelectItem>
                         </>
                       )}
                     </SelectContent>
@@ -928,7 +926,6 @@ function QuoteEditForm({
                         <>
                           <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
                           <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
-                          <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
                           <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
                         </>
                       )}

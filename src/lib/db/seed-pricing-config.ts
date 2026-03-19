@@ -20,7 +20,6 @@ const PRICING_CONFIG_SEED = {
     ROAD: 1.0,
     SEA: 0.6,
     AIR: 3.0,
-    RAIL: 0.8,
   },
   cargoTypeSurcharges: {
     GENERAL: 0,
@@ -34,14 +33,13 @@ const PRICING_CONFIG_SEED = {
   },
   prioritySurcharges: {
     STANDARD: 0,
-    EXPRESS: 0.5,  // +50%
-    URGENT: 1.0,   // +100%
+    NORMAL: 0.1,   // +10%
+    URGENT: 0.3,   // +30%
   },
   deliverySpeedsPerMode: {
     ROAD: { min: 3, max: 7 },
     SEA: { min: 20, max: 45 },
     AIR: { min: 1, max: 3 },
-    RAIL: { min: 7, max: 14 },
   },
 };
 

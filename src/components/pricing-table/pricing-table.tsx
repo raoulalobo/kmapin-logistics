@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MagnifyingGlass, Truck, Boat, Airplane, Train, TrendUp, CircleNotch, Package } from '@phosphor-icons/react';
+import { MagnifyingGlass, Truck, Boat, Airplane, TrendUp, CircleNotch, Package } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,6 @@ const transportModeLabels: Record<TransportMode, { label: string; icon: any; col
   ROAD: { label: 'Routier', icon: Truck, color: 'text-blue-600' },
   SEA: { label: 'Maritime', icon: Boat, color: 'text-cyan-600' },
   AIR: { label: 'Aérien', icon: Airplane, color: 'text-purple-600' },
-  RAIL: { label: 'Ferroviaire', icon: Train, color: 'text-green-600' },
 };
 
 export function PricingTable() {

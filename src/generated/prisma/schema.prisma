@@ -43,12 +43,11 @@ enum TransportMode {
   ROAD
   SEA
   AIR
-  RAIL
 }
 
 enum Priority {
   STANDARD
-  EXPRESS
+  NORMAL
   URGENT
 }
 
@@ -740,8 +739,8 @@ model PricingConfig {
   cargoTypeSurcharges        Json
   prioritySurcharges         Json
   deliverySpeedsPerMode      Json
-  volumetricWeightRatios     Json     @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1,\"RAIL\":250}")
-  useVolumetricWeightPerMode Json     @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false,\"RAIL\":true}")
+  volumetricWeightRatios     Json     @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1}")
+  useVolumetricWeightPerMode Json     @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false}")
   updatedById                String
   updatedBy                  User     @relation(fields: [updatedById], references: [id])
   createdAt                  DateTime @default(now())

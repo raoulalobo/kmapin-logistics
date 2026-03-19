@@ -116,7 +116,6 @@ function formatTransportMode(mode: string): string {
     ROAD: 'Routier',
     SEA: 'Maritime',
     AIR: 'Aérien',
-    RAIL: 'Ferroviaire',
   };
 
   return modeMap[mode] || mode;
@@ -128,7 +127,7 @@ function formatTransportMode(mode: string): string {
 function formatPriority(priority: string): string {
   const priorityMap: Record<string, string> = {
     STANDARD: 'Standard',
-    EXPRESS: 'Express',
+    NORMAL: 'Normal',
     URGENT: 'Urgent',
   };
 

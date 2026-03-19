@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Tarifs Standards - Transport International | ${config.platformFullName}`,
     description:
-      'Consultez nos tarifs indicatifs pour le transport international multi-modal (routier, maritime, aérien, ferroviaire). Prix transparents par destination avec délais estimés.',
+      'Consultez nos tarifs indicatifs pour le transport international multi-modal (routier, maritime, aérien). Prix transparents par destination avec délais estimés.',
     keywords: [
       'tarifs transport',
       'prix logistique',
@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'fret routier',
       'fret maritime',
       'fret aérien',
-      'transport ferroviaire',
+      'transport logistique',
     ],
   };
 }
@@ -74,10 +74,6 @@ export default function TarifsPage() {
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-purple-500"></span>
               Aérien
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500"></span>
-              Ferroviaire
             </span>
           </div>
         </div>

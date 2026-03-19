@@ -13,8 +13,8 @@ import { CargoType, Priority, TransportMode } from '@/lib/db/enums';
 /**
  * Schéma pour les tarifs directs par mode de transport
  * Chaque mode contient le tarif fallback appliqué si aucune route n'est configurée :
- *   - ROAD / AIR / RAIL : €/kg
- *   - SEA               : €/m³ (Unité Payante)
+ *   - ROAD / AIR : €/kg
+ *   - SEA        : €/m³ (Unité Payante)
  *
  * max(10000) pour permettre des valeurs élevées côté SEA (ex: 120 €/m³)
  */
@@ -22,7 +22,6 @@ export const transportMultipliersSchema = z.object({
   ROAD: z.number().positive().min(0.1).max(10000),
   SEA: z.number().positive().min(0.1).max(10000),
   AIR: z.number().positive().min(0.1).max(10000),
-  RAIL: z.number().positive().min(0.1).max(10000),
 });
 
 /**
@@ -54,7 +53,6 @@ export const cargoTypeSurchargesSchema = z.object({
 export const prioritySurchargesSchema = z.object({
   STANDARD: z.number().min(-1).max(5),
   NORMAL: z.number().min(-1).max(5),   // Priorité normale (+10% dans le PDF)
-  EXPRESS: z.number().min(-1).max(5),
   URGENT: z.number().min(-1).max(5),
 });
 
@@ -76,7 +74,6 @@ export const deliverySpeedsPerModeSchema = z.object({
   ROAD: deliverySpeedSchema,
   SEA: deliverySpeedSchema,
   AIR: deliverySpeedSchema,
-  RAIL: deliverySpeedSchema,
 });
 
 /**
@@ -87,13 +84,11 @@ export const deliverySpeedsPerModeSchema = z.object({
  * - AIR: 167 kg/m³  (ratio 1/6 = 6000)
  * - ROAD: 333 kg/m³ (ratio 1/3 = 5000)
  * - SEA: 1 kg/m³    (ratio 1/1 = 1000, utilisé pour Unité Payante)
- * - RAIL: 250 kg/m³
  */
 export const volumetricWeightRatiosSchema = z.object({
   AIR: z.number().positive().min(1).max(1000),
   ROAD: z.number().positive().min(1).max(1000),
   SEA: z.number().positive().min(0.1).max(1000),
-  RAIL: z.number().positive().min(1).max(1000),
 });
 
 /**
@@ -104,13 +99,11 @@ export const volumetricWeightRatiosSchema = z.object({
  * - AIR: true  → Utilise le poids volumétrique
  * - ROAD: true → Utilise le poids volumétrique
  * - SEA: false → Maritime utilise "Poids ou Mesure" (Unité Payante)
- * - RAIL: true → Utilise le poids volumétrique
  */
 export const useVolumetricWeightPerModeSchema = z.object({
   AIR: z.boolean(),
   ROAD: z.boolean(),
   SEA: z.boolean(),
-  RAIL: z.boolean(),
 });
 
 /**

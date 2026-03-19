@@ -110,19 +110,16 @@ export default function PricingConfigPage() {
         AIR: 167,
         ROAD: 333,
         SEA: 1,
-        RAIL: 250,
       },
       useVolumetricWeightPerMode: {
         AIR: true,
         ROAD: true,
         SEA: false,
-        RAIL: true,
       },
       transportMultipliers: {
         ROAD: 1.0,
         SEA: 0.6,
         AIR: 3.0,
-        RAIL: 0.8,
       },
       cargoTypeSurcharges: {
         GENERAL: 0,
@@ -137,14 +134,13 @@ export default function PricingConfigPage() {
       prioritySurcharges: {
         STANDARD: 0,
         NORMAL: 0.1,
-        EXPRESS: 0.5,
+
         URGENT: 0.3,
       },
       deliverySpeedsPerMode: {
         ROAD: { min: 3, max: 7 },
         SEA: { min: 20, max: 45 },
         AIR: { min: 1, max: 3 },
-        RAIL: { min: 7, max: 14 },
       },
     },
   });
@@ -481,8 +477,7 @@ export default function PricingConfigPage() {
                         <SelectItem value="SEA">🌊 Maritime</SelectItem>
                         <SelectItem value="AIR">✈️ Aérien</SelectItem>
                         <SelectItem value="ROAD">🚛 Routier</SelectItem>
-                        <SelectItem value="RAIL">🚂 Ferroviaire</SelectItem>
-                      </SelectContent>
+                                      </SelectContent>
                     </Select>
                   </div>
 
@@ -578,7 +573,6 @@ export default function PricingConfigPage() {
                                 {rate.transportMode === 'SEA' && '🌊 Maritime'}
                                 {rate.transportMode === 'AIR' && '✈️ Aérien'}
                                 {rate.transportMode === 'ROAD' && '🚛 Routier'}
-                                {rate.transportMode === 'RAIL' && '🚂 Ferroviaire'}
                               </span>
                             </TableCell>
                             <TableCell className="text-right font-semibold">
@@ -679,8 +673,7 @@ export default function PricingConfigPage() {
                           value={
                             editingRate.transportMode === 'SEA' ? '🌊 Maritime' :
                             editingRate.transportMode === 'AIR' ? '✈️ Aérien' :
-                            editingRate.transportMode === 'ROAD' ? '🚛 Routier' :
-                            '🚂 Ferroviaire'
+                            '🚛 Routier'
                           }
                           disabled
                           className="bg-gray-50"
@@ -850,19 +843,8 @@ export default function PricingConfigPage() {
                     </p>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="volumetric-rail">Ferroviaire (RAIL)</Label>
-                    <Input
-                      id="volumetric-rail"
-                      type="number"
-                      step="1"
-                      min="1"
-                      {...form.register('volumetricWeightRatios.RAIL', { valueAsNumber: true })}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Standard : 250 kg/m³
-                    </p>
-                  </div>
+
+
                 </div>
               </div>
 
@@ -922,20 +904,8 @@ export default function PricingConfigPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between space-x-2 rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="use-volumetric-rail">Ferroviaire (RAIL)</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Facturer au MAX(poids réel, poids volumétrique)
-                      </p>
-                    </div>
-                    <input
-                      id="use-volumetric-rail"
-                      type="checkbox"
-                      className="h-5 w-5 rounded border-gray-300"
-                      {...form.register('useVolumetricWeightPerMode.RAIL')}
-                    />
-                  </div>
+
+
                 </div>
               </div>
 
@@ -1007,21 +977,12 @@ export default function PricingConfigPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="transport-rail">Ferroviaire - RAIL (€/kg)</Label>
-                  <Input
-                    id="transport-rail"
-                    type="number"
-                    step="0.1"
-                    min="0.1"
-                    max="10000"
-                    {...form.register('transportMultipliers.RAIL', { valueAsNumber: true })}
-                  />
-                </div>
+
+
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Exemple : AIR = 15 €/kg, ROAD = 3 €/kg, RAIL = 6 €/kg, SEA = 4 €/m³
+                Exemple : AIR = 15 €/kg, ROAD = 3 €/kg, SEA = 4 €/m³
               </p>
 
               <Button
@@ -1204,21 +1165,6 @@ export default function PricingConfigPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="priority-express">Express (EXPRESS)</Label>
-                  <Input
-                    id="priority-express"
-                    type="number"
-                    step="0.01"
-                    min="-1"
-                    max="5"
-                    {...form.register('prioritySurcharges.EXPRESS', { valueAsNumber: true })}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Livraison rapide (recommandé : 0.5 = +50%)
-                  </p>
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="priority-urgent">Urgent (URGENT)</Label>
                   <Input
                     id="priority-urgent"
@@ -1322,24 +1268,8 @@ export default function PricingConfigPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Ferroviaire (RAIL) - Min (jours)</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      {...form.register('deliverySpeedsPerMode.RAIL.min', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Ferroviaire (RAIL) - Max (jours)</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      {...form.register('deliverySpeedsPerMode.RAIL.max', { valueAsNumber: true })}
-                    />
-                  </div>
-                </div>
+
+
               </div>
 
               <p className="text-sm text-muted-foreground">

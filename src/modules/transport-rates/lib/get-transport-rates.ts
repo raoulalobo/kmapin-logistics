@@ -39,7 +39,7 @@ export interface TransportRateData {
  *
  * @param originCountryCode - Code pays ISO origine (ex: "FR")
  * @param destinationCountryCode - Code pays ISO destination (ex: "BF")
- * @param transportMode - Mode de transport (ROAD, SEA, AIR, RAIL)
+ * @param transportMode - Mode de transport (ROAD, SEA, AIR)
  * @returns Tarif trouvé ou null si non configuré
  *
  * @example

@@ -28,8 +28,8 @@ import { getPricingConfig, DEFAULT_PRICING_CONFIG } from '../lib/get-pricing-con
  * Type pour une option de mode de transport avec label formaté
  */
 export interface TransportModeOption {
-  /** Valeur technique (ROAD, SEA, AIR, RAIL) */
-  value: 'ROAD' | 'SEA' | 'AIR' | 'RAIL';
+  /** Valeur technique (ROAD, SEA, AIR) */
+  value: 'ROAD' | 'SEA' | 'AIR';
   /** Label simple (Routier, Maritime, etc.) */
   label: string;
   /** Label enrichi avec multiplicateur et délai */
@@ -60,7 +60,6 @@ const TRANSPORT_MODE_LABELS: Record<string, string> = {
   ROAD: 'Routier',
   SEA: 'Maritime',
   AIR: 'Aérien',
-  RAIL: 'Ferroviaire',
 };
 
 /**
@@ -130,7 +129,7 @@ export async function getTransportModeOptionsAction(): Promise<
     const referenceMultiplier = config.transportMultipliers.ROAD;
 
     // Construire les options pour chaque mode de transport
-    const modes: Array<'ROAD' | 'SEA' | 'AIR' | 'RAIL'> = ['ROAD', 'SEA', 'AIR', 'RAIL'];
+    const modes: Array<'ROAD' | 'SEA' | 'AIR'> = ['ROAD', 'SEA', 'AIR'];
 
     const options: TransportModeOption[] = modes.map((mode) => {
       const multiplier = config.transportMultipliers[mode];
@@ -204,16 +203,6 @@ export async function getTransportModeOptionsAction(): Promise<
         deliveryMax: 3,
         deliveryLabel: '1-3 jours',
       },
-      {
-        value: 'RAIL',
-        label: 'Ferroviaire',
-        labelWithDetails: 'Ferroviaire (-20% - 7-14 jours)',
-        multiplier: 0.8,
-        percentageImpact: '',
-        deliveryMin: 7,
-        deliveryMax: 14,
-        deliveryLabel: '7-14 jours',
-      },
     ];
 
     return { success: true, data: fallbackOptions };
@@ -233,8 +222,8 @@ export type { TransportModeOption };
  * Type pour une option de priorité de livraison avec label formaté
  */
 export interface PriorityOption {
-  /** Valeur technique (STANDARD, NORMAL, EXPRESS, URGENT) */
-  value: 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+  /** Valeur technique (STANDARD, NORMAL, URGENT) */
+  value: 'STANDARD' | 'NORMAL' | 'URGENT';
   /** Label simple (Standard, Normal, etc.) */
   label: string;
   /** Label enrichi avec supplément et description */
@@ -253,7 +242,6 @@ export interface PriorityOption {
 const PRIORITY_LABELS: Record<string, { label: string; description: string }> = {
   STANDARD: { label: 'Standard', description: 'délai normal' },
   NORMAL: { label: 'Normal', description: 'légèrement accéléré' },
-  EXPRESS: { label: 'Express', description: 'rapide' },
   URGENT: { label: 'Urgent', description: 'prioritaire' },
 };
 
@@ -290,14 +278,6 @@ function formatPrioritySurcharge(surcharge: number): string {
  *     percentageLabel: '0%',
  *     description: 'délai normal'
  *   },
- *   {
- *     value: 'EXPRESS',
- *     label: 'Express',
- *     labelWithDetails: 'Express (+50% - rapide)',
- *     surcharge: 0.5,
- *     percentageLabel: '+50%',
- *     description: 'rapide'
- *   },
  *   ...
  * ]
  */
@@ -309,10 +289,9 @@ export async function getPriorityOptionsAction(): Promise<
     const config = await getPricingConfig();
 
     // Construire les options pour chaque priorité
-    const priorities: Array<'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT'> = [
+    const priorities: Array<'STANDARD' | 'NORMAL' | 'URGENT'> = [
       'STANDARD',
       'NORMAL',
-      'EXPRESS',
       'URGENT',
     ];
 
@@ -361,14 +340,6 @@ export async function getPriorityOptionsAction(): Promise<
         surcharge: 0.1,
         percentageLabel: '+10%',
         description: 'légèrement accéléré',
-      },
-      {
-        value: 'EXPRESS',
-        label: 'Express',
-        labelWithDetails: 'Express (+50% - rapide)',
-        surcharge: 0.5,
-        percentageLabel: '+50%',
-        description: 'rapide',
       },
       {
         value: 'URGENT',

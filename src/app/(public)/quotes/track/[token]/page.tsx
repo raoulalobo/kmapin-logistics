@@ -80,7 +80,6 @@ const transportModeLabels: Record<TransportMode, string> = {
   ROAD: 'Routier',
   SEA: 'Maritime',
   AIR: 'Aérien',
-  RAIL: 'Ferroviaire',
 };
 
 /**

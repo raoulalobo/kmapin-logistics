@@ -557,12 +557,11 @@ enum TransportMode {
   ROAD
   SEA
   AIR
-  RAIL
 }
 
 enum Priority {
   STANDARD
-  EXPRESS
+  NORMAL
   URGENT
 }
 
@@ -1906,21 +1905,20 @@ model Document {
  * Il ne doit exister qu'une seule instance de ce modèle (singleton).
  *
  * Structure des champs JSON :
- * - transportMultipliers : { ROAD: 3, SEA: 120, AIR: 15, RAIL: 6 }
+ * - transportMultipliers : { ROAD: 3, SEA: 120, AIR: 15 }
  *   → Tarifs DIRECTS par mode (plus de coefficient appliqué à un taux de base)
- *   → ROAD/AIR/RAIL en €/kg, SEA en €/m³ (Unité Payante)
+ *   → ROAD/AIR en €/kg, SEA en €/m³ (Unité Payante)
  * - cargoTypeSurcharges : { GENERAL: 0, DANGEROUS: 0.5, PERISHABLE: 0.4, ... }
- * - prioritySurcharges : { STANDARD: 0, NORMAL: 0.1, EXPRESS: 0.5, URGENT: 0.3 }
+ * - prioritySurcharges : { STANDARD: 0, NORMAL: 0.1, URGENT: 0.3 }
  * - deliverySpeedsPerMode : {
  *     ROAD: { min: 3, max: 7 },
  *     SEA: { min: 20, max: 45 },
- *     AIR: { min: 1, max: 3 },
- *     RAIL: { min: 7, max: 14 }
+ *     AIR: { min: 1, max: 3 }
  *   }
- * - volumetricWeightRatios : { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 }
+ * - volumetricWeightRatios : { AIR: 167, ROAD: 333, SEA: 1 }
  *   → Définit combien de kg équivaut 1 m³ pour chaque mode
  *   → Basé sur les ratios du PDF : AIR (1/6 = 6000), ROAD (1/3 = 5000), SEA (1/1 = 1000)
- * - useVolumetricWeightPerMode : { AIR: true, ROAD: true, SEA: false, RAIL: true }
+ * - useVolumetricWeightPerMode : { AIR: true, ROAD: true, SEA: false }
  *   → Active/désactive le poids volumétrique par mode
  *   → Maritime (SEA) utilise "Poids ou Mesure" (Unité Payante) au lieu du poids volumétrique
  *
@@ -1931,15 +1929,15 @@ model PricingConfig {
   id                   String   @id @default(cuid())
 
   // Tarifs directs par mode de transport (fallback si route non configurée dans la matrice)
-  // ROAD/AIR/RAIL : €/kg  |  SEA : €/m³ (Unité Payante)
-  // Exemples : { ROAD: 3, SEA: 120, AIR: 15, RAIL: 6 }
-  transportMultipliers Json     // { ROAD: Float, SEA: Float, AIR: Float, RAIL: Float }
+  // ROAD/AIR : €/kg  |  SEA : €/m³ (Unité Payante)
+  // Exemples : { ROAD: 3, SEA: 120, AIR: 15 }
+  transportMultipliers Json     // { ROAD: Float, SEA: Float, AIR: Float }
 
   // Surcharges par type de cargo (coefficients multiplicateurs, ex: DANGEROUS: 0.5 = +50%)
   cargoTypeSurcharges  Json     // { GENERAL: Float, DANGEROUS: Float, PERISHABLE: Float, ... }
 
   // Surcharges par priorité (coefficients multiplicateurs, ex: NORMAL: 0.1 = +10%)
-  prioritySurcharges   Json     // { STANDARD: Float, NORMAL: Float, EXPRESS: Float, URGENT: Float }
+  prioritySurcharges   Json     // { STANDARD: Float, NORMAL: Float, URGENT: Float }
 
   // Délais de livraison par mode (en jours)
   deliverySpeedsPerMode Json    // { ROAD: {min, max}, SEA: {min, max}, ... }
@@ -1947,16 +1945,16 @@ model PricingConfig {
   // === NOUVEAUX CHAMPS POUR ALGORITHME PDF ===
 
   // Ratios de conversion poids volumétrique : combien de kg = 1 m³
-  // Exemple : { AIR: 167, ROAD: 333, SEA: 1, RAIL: 250 }
+  // Exemple : { AIR: 167, ROAD: 333, SEA: 1 }
   // AIR: 167 signifie que 1 m³ = 167 kg (ratio 1/6 = 6000)
   // ROAD: 333 signifie que 1 m³ = 333 kg (ratio 1/3 = 5000)
   // SEA: 1 signifie que 1 m³ = 1 tonne (ratio 1/1 = 1000)
-  volumetricWeightRatios Json @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1,\"RAIL\":250}")
+  volumetricWeightRatios Json @default("{\"AIR\":167,\"ROAD\":333,\"SEA\":1}")
 
   // Activation du poids volumétrique par mode de transport
-  // Exemple : { AIR: true, ROAD: true, SEA: false, RAIL: true }
+  // Exemple : { AIR: true, ROAD: true, SEA: false }
   // SEA: false car le maritime utilise "Poids ou Mesure" (Unité Payante)
-  useVolumetricWeightPerMode Json @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false,\"RAIL\":true}")
+  useVolumetricWeightPerMode Json @default("{\"AIR\":true,\"ROAD\":true,\"SEA\":false}")
 
   // Métadonnées
   updatedById          String
@@ -2043,7 +2041,7 @@ model TransportRate {
   // Clé de route
   originCountryCode      String        // Code pays ISO (ex: "FR")
   destinationCountryCode String        // Code pays ISO (ex: "BF")
-  transportMode          TransportMode // ROAD | SEA | AIR | RAIL
+  transportMode          TransportMode // ROAD | SEA | AIR
 
   // Tarifs de base (requis)
   ratePerKg              Float         // Tarif en €/kg
@@ -2052,7 +2050,7 @@ model TransportRate {
   // Surcharges personnalisées (optionnelles, JSON)
   // Si null, utilise les surcharges globales de PricingConfig
   cargoTypeSurcharges    Json?         // { GENERAL: 0, DANGEROUS: 0.3, ... }
-  prioritySurcharges     Json?         // { STANDARD: 0, EXPRESS: 0.5, ... }
+  prioritySurcharges     Json?         // { STANDARD: 0, NORMAL: 0.1, URGENT: 0.3, ... }
 
   // Métadonnées
   isActive               Boolean       @default(true) // Permet de désactiver une route

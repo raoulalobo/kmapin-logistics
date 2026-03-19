@@ -41,7 +41,7 @@ const EXPIRATION_DAYS = 7;
  * @property width - Largeur en centimètres (optionnel)
  * @property height - Hauteur en centimètres (optionnel)
  * @property transportMode - Mode(s) de transport sélectionné(s)
- * @property priority - Niveau de priorité (STANDARD, EXPRESS, URGENT)
+ * @property priority - Niveau de priorité (STANDARD, NORMAL, URGENT)
  */
 export interface PendingQuoteFormData {
   originCountry: string;

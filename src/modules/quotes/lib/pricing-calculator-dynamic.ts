@@ -22,7 +22,6 @@
  * │  AIR        │  167 kg/m³    │  IATA (1:6000)      │  1 m³ = 167 kg         │
  * │  ROAD       │  333 kg/m³    │  Standard (1:3000)  │  1 m³ = 333 kg         │
  * │  SEA        │  W/M          │  Unité Payante      │  MAX(tonnes, m³)       │
- * │  RAIL       │  250 kg/m³    │  Variable           │  1 m³ = 250 kg         │
  * └─────────────┴───────────────┴─────────────────────┴────────────────────────┘
  *
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -38,12 +37,11 @@
  * │ AIR   │ PV = Volume_m³ × 167 kg/m³      │ Ratio IATA 1:6000
  * │ ROAD  │ PV = Volume_m³ × 333 kg/m³      │ Ratio standard 1:3000
  * │ SEA   │ UP = MAX(Poids_tonnes, Volume)  │ Unité Payante (W/M)
- * │ RAIL  │ PV = Volume_m³ × 250 kg/m³      │ Estimation ferroviaire
  *
  * ÉTAPE 3 : Masse Taxable (Chargeable Weight)
  * ────────────────────────────────────────────────
- * │ AIR/ROAD/RAIL │ MT = MAX(Poids_réel, Poids_volumétrique)
- * │ SEA           │ MT = MAX(Poids_tonnes, Volume_m³) = Unité Payante
+ * │ AIR/ROAD │ MT = MAX(Poids_réel, Poids_volumétrique)
+ * │ SEA      │ MT = MAX(Poids_tonnes, Volume_m³) = Unité Payante
  *
  * ÉTAPE 4 : Tarif Applicable
  * ───────────────────────────────
@@ -70,7 +68,6 @@
  * ─────────────────────────────────
  * │ STANDARD │ ×1.0  │  0% │ Délai normal
  * │ NORMAL   │ ×1.1  │ +10%│ Légèrement accéléré
- * │ EXPRESS  │ ×1.5  │ +50%│ Rapide
  * │ URGENT   │ ×1.3  │ +30%│ Prioritaire
  *
  * ÉTAPE 8 : Prix Final
@@ -129,7 +126,7 @@
  * │ Ratios volumétriques   │ Constantes        │ BDD (PricingConfig)            │
  * │ Surcharges cargo       │ Non implémenté    │ BDD (PricingConfig)            │
  * │ Surcharges priorité    │ Constantes        │ BDD (PricingConfig)            │
- * │ Niveaux priorité       │ 3 (STD/NORM/URG)  │ 4 (STD/NORM/EXP/URG)           │
+ * │ Niveaux priorité       │ 3 (STD/NORM/URG)  │ 3 (STD/NORM/URG)               │
  * │ Performance            │ Immédiat          │ Async (cache 1h)               │
  * │ Modifiable par admin   │ Non               │ Oui (via dashboard)            │
  *
@@ -147,10 +144,9 @@ import { getTransportRate } from '@/modules/transport-rates';
  *
  * - STANDARD : Livraison normale (coefficient configuré, défaut: 0)
  * - NORMAL   : Livraison accélérée (coefficient configuré, défaut: +10%)
- * - EXPRESS  : Livraison rapide (coefficient configuré, défaut: +50%)
  * - URGENT   : Livraison express (coefficient configuré, défaut: +30%)
  */
-export type PriorityType = 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+export type PriorityType = 'STANDARD' | 'NORMAL' | 'URGENT';
 
 /**
  * Types de marchandise supportés pour les surcharges
@@ -400,9 +396,23 @@ export async function calculerPrixDevisDynamic(
 
   // === ÉTAPE 2 : Calcul du Volume (optionnel) ===
   // Si toutes les dimensions sont fournies (> 0), calculer le volume
-  // Sinon, considérer le volume comme 0 (dimensions non renseignées)
+  // Si aucune dimension n'est fournie (toutes à 0), on calcule au poids réel uniquement
+  // Si dimensions PARTIELLES (certaines > 0, d'autres ≤ 0), bloquer le calcul (spécification PDF)
+  const dims = [input.longueur, input.largeur, input.hauteur];
+  const dimsPositives = dims.filter((d) => d > 0).length;
+  const dimsTotal = dims.length; // 3
+
+  // Cas invalide : dimensions partielles (ex: longueur=50, largeur=0, hauteur=30)
+  // Au moins une dimension est fournie mais pas toutes → incohérence
+  if (dimsPositives > 0 && dimsPositives < dimsTotal) {
+    throw new Error(
+      'Dimensions incomplètes : si des dimensions sont fournies, les 3 (longueur, largeur, hauteur) doivent être > 0. ' +
+      `Reçu : longueur=${input.longueur}, largeur=${input.largeur}, hauteur=${input.hauteur}`
+    );
+  }
+
   let volume_m3 = 0;
-  if (input.longueur > 0 && input.largeur > 0 && input.hauteur > 0) {
+  if (dimsPositives === dimsTotal) {
     volume_m3 = calculerVolume(input.longueur, input.largeur, input.hauteur);
   }
 
@@ -424,7 +434,7 @@ export async function calculerPrixDevisDynamic(
     uniteMasseTaxable = 'UP';
     factureSurVolume = volume_m3 > poidsTonnes;
   } else if (useVolumetric) {
-    // Cas Aérien, Routier, Rail (avec poids volumétrique activé)
+    // Cas Aérien, Routier (avec poids volumétrique activé)
     masseTaxable = Math.max(input.poidsReel, poidsVolumetrique_kg);
     uniteMasseTaxable = 'kg';
     factureSurVolume = poidsVolumetrique_kg > input.poidsReel;
@@ -465,8 +475,8 @@ export async function calculerPrixDevisDynamic(
   } else {
     // ROUTE NON CONFIGURÉE : Utiliser le tarif direct par mode (fallback)
     // transportMultipliers contient des tarifs absolus :
-    //   - ROAD / AIR / RAIL → €/kg
-    //   - SEA               → €/m³ (Unité Payante)
+    //   - ROAD / AIR → €/kg
+    //   - SEA        → €/m³ (Unité Payante)
     // Exemple : AIR=15 €/kg → 5 kg = 75 € (pas de coefficient caché)
     tarifParUnite = config.transportMultipliers[input.modeTransport] || 1.0;
     tarifsRouteUtilises = false;

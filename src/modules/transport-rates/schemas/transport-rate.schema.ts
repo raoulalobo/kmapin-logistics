@@ -33,7 +33,7 @@ export const cargoTypeSurchargesSchema = z
 export const prioritySurchargesSchema = z
   .object({
     STANDARD: z.number().min(-5).max(5),
-    EXPRESS: z.number().min(-5).max(5),
+    NORMAL: z.number().min(-5).max(5),
     URGENT: z.number().min(-5).max(5),
   })
   .optional();
@@ -43,7 +43,7 @@ export const prioritySurchargesSchema = z
  *
  * Valide tous les champs requis pour créer une route tarifaire :
  * - Codes pays origine et destination (ISO 3166-1 alpha-2)
- * - Mode de transport (ROAD, SEA, AIR, RAIL)
+ * - Mode de transport (ROAD, SEA, AIR)
  * - Tarifs au kg et au m³
  * - Surcharges optionnelles personnalisées
  */

@@ -141,7 +141,6 @@ function translateTransportMode(mode: string): string {
     ROAD: 'Route',
     SEA: 'Maritime',
     AIR: 'Aérien',
-    RAIL: 'Ferroviaire',
   };
   return translations[mode] || mode;
 }
@@ -156,7 +155,6 @@ function translatePriority(priority: string | null | undefined): string {
   const translations: Record<string, string> = {
     STANDARD: 'Standard',
     NORMAL: 'Normal (+10%)',
-    EXPRESS: 'Express (+50%)',
     URGENT: 'Urgent (+30%)',
   };
   return translations[priority] || priority;

@@ -409,7 +409,7 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
     cargoType: quote.cargoType,
     weight: Number(quote.weight),
     volume: quote.volume ? Number(quote.volume) : null,
-    // Priorité de livraison (STANDARD, NORMAL, EXPRESS, URGENT)
+    // Priorité de livraison (STANDARD, NORMAL, URGENT)
     priority: quote.priority,
     estimatedCost: Number(quote.estimatedCost),
     currency: quote.currency,

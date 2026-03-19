@@ -108,7 +108,6 @@ function translateTransportMode(mode: TransportMode): string {
     [TransportMode.SEA]: 'Maritime',
     [TransportMode.AIR]: 'Aérien',
     [TransportMode.ROAD]: 'Routier',
-    [TransportMode.RAIL]: 'Ferroviaire',
   };
   return translations[mode];
 }

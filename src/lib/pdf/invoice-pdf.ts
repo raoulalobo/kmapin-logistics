@@ -476,7 +476,6 @@ function translateTransportModes(modes: string[] | undefined | null): string {
     ROAD: 'Routier',
     SEA: 'Maritime',
     AIR: 'Aérien',
-    RAIL: 'Ferroviaire',
   };
   return modes.map((m) => translations[m] || m).join(' + ');
 }

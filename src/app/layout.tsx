@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `${config.platformFullName} - Gestion de Fret Multi-Modal`,
     description:
       config.platformSlogan ||
-      'Plateforme de gestion logistique pour transport routier, maritime, aérien et ferroviaire',
+      'Plateforme de gestion logistique pour transport routier, maritime et aérien',
   };
 }
 

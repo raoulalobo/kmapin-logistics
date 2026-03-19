@@ -140,7 +140,6 @@ const RATIOS_CONVERSION: Record<TransportMode, number> = {
   AIR: 167,   // 1 m³ = 167 kg  (Ratio 1/6 = 6000)
   ROAD: 333,  // 1 m³ = 333 kg  (Ratio 1/3 = 5000)
   SEA: 1,     // 1 m³ = 1 tonne (Ratio 1/1 = 1000) - Cas spécial : Unité Payante
-  RAIL: 250,  // 1 m³ = 250 kg  (Ratio approximatif pour ferroviaire)
 };
 
 /**
@@ -207,7 +206,6 @@ const TARIF_DEFAUT_PAR_MODE: Record<TransportMode, number> = {
   AIR: 8.0,   // €/kg
   SEA: 400,   // €/m³
   ROAD: 150,  // €/tonne
-  RAIL: 100,  // €/tonne
 };
 
 /**
@@ -254,7 +252,6 @@ export function calculerVolume(
  * - Aérien  : PV = Volume_m3 × 167 kg
  * - Routier : PV = Volume_m3 × 333 kg
  * - Maritime: PV = Volume_m3 (en m³, pas converti en kg)
- * - Rail    : PV = Volume_m3 × 250 kg
  *
  * @param volume_m3 - Volume en mètres cubes
  * @param modeTransport - Mode de transport
@@ -321,7 +318,7 @@ export function determinerMasseTaxable(
       factureSurVolume: volume_m3 > poidsTonnes, // true si on facture au volume
     };
   } else {
-    // Cas Aérien, Routier, Rail : MAX(Poids Réel, Poids Volumétrique)
+    // Cas Aérien, Routier : MAX(Poids Réel, Poids Volumétrique)
     const masseTaxable = Math.max(poidsReel_kg, poidsVolumetrique);
 
     return {

@@ -53,7 +53,7 @@ const faqItems: FaqItem[] = [
   },
   {
     question: 'Comment calculer le coût de mon transport ?',
-    answer: 'Le coût dépend de plusieurs facteurs : poids et dimensions du colis, distance parcourue, mode de transport (routier, maritime, aérien, ferroviaire), type de marchandise, et services additionnels (assurance, douanes, livraison express). Utilisez notre calculateur de devis en ligne pour obtenir une estimation gratuite et instantanée.',
+    answer: 'Le coût dépend de plusieurs facteurs : poids et dimensions du colis, distance parcourue, mode de transport (routier, maritime, aérien), type de marchandise, et services additionnels (assurance, douanes, livraison express). Utilisez notre calculateur de devis en ligne pour obtenir une estimation gratuite et instantanée.',
     icon: CurrencyDollar,
   },
   {

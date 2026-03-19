@@ -71,7 +71,6 @@ const transportModeOptions = [
   { value: TransportMode.SEA, label: 'Maritime' },
   { value: TransportMode.AIR, label: 'Aérien' },
   { value: TransportMode.ROAD, label: 'Routier' },
-  { value: TransportMode.RAIL, label: 'Ferroviaire' },
 ] as const;
 
 /**

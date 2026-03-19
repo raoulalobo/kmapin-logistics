@@ -75,7 +75,7 @@ const COUNTRY_NAME_TO_ISO: Record<string, string> = {
  * 2. **Activation par Mode** : Le poids volumétrique peut être désactivé par mode
  *    (ex: Maritime utilise "Poids ou Mesure" au lieu du poids volumétrique)
  *
- * 3. **Priorités** : Support de 4 niveaux (STANDARD, NORMAL, EXPRESS, URGENT)
+ * 3. **Priorités** : Support de 3 niveaux (STANDARD, NORMAL, URGENT)
  *    avec coefficients configurables
  *
  * 4. **Tarifs** : Recherche dans TransportRate puis fallback vers tarifs par défaut
@@ -294,6 +294,23 @@ export async function calculateMultiPackageEstimateAction(
 
     // === Étape 6 : Mapper le résultat pour le composant client ===
     // On simplifie les données pour ne pas exposer les détails internes du calculateur
+    // Déterminer l'unité du tarif selon le mode de transport
+    // Maritime : €/UP (Unité Payante), autres modes : €/kg
+    const unitesTarif = primaryTransportMode === 'SEA' ? '€/UP' : '€/kg';
+
+    // Récupérer le tarif par unité depuis la première ligne (commun à toutes les lignes d'un même devis)
+    const tarifParUnite = multiResult.lines.length > 0
+      ? multiResult.lines[0].detail.tarifParUnite
+      : 0;
+
+    // Déterminer l'unité de masse taxable globale depuis la première ligne
+    const uniteMasseTaxable = multiResult.lines.length > 0
+      ? multiResult.lines[0].detail.uniteMasseTaxable
+      : 'kg';
+
+    // Vérifier si au moins un colis est facturé au volume
+    const factureSurVolume = multiResult.lines.some((line) => line.detail.factureSurVolume);
+
     const resultForClient: QuoteEstimateMultiPackageResult = {
       lines: multiResult.lines.map((line) => ({
         description: line.description,
@@ -302,6 +319,9 @@ export async function calculateMultiPackageEstimateAction(
         weight: line.weight,
         unitPrice: line.unitPrice,
         lineTotal: line.lineTotal,
+        // Champs maritime : propagés depuis le détail du calcul unitaire
+        factureSurVolume: line.detail.factureSurVolume,
+        uniteMasseTaxable: line.detail.uniteMasseTaxable,
       })),
       totalPackageCount: multiResult.totalPackageCount,
       totalWeight: multiResult.totalWeight,
@@ -313,6 +333,11 @@ export async function calculateMultiPackageEstimateAction(
       priorite: multiResult.priorite,
       dominantCargoType: multiResult.dominantCargoType,
       estimatedDeliveryDays,
+      // Champs globaux pour l'affichage maritime
+      uniteMasseTaxable,
+      factureSurVolume,
+      tarifParUnite,
+      unitesTarif,
     };
 
     return {
@@ -368,9 +393,6 @@ async function estimateDeliveryDays(
     switch (priority) {
       case 'NORMAL':
         baseDays = Math.ceil(baseDays * 0.8); // -20%
-        break;
-      case 'EXPRESS':
-        baseDays = Math.ceil(baseDays * 0.6); // -40%
         break;
       case 'URGENT':
         baseDays = Math.ceil(baseDays * 0.4); // -60%

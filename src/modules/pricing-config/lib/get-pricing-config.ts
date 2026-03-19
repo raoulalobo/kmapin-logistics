@@ -21,8 +21,8 @@ import type {
  * Utilisées si aucune configuration n'existe en base de données
  *
  * transportMultipliers = tarifs DIRECTS par mode (plus de coefficient caché) :
- *   - ROAD / AIR / RAIL : €/kg
- *   - SEA               : €/m³ (Unité Payante)
+ *   - ROAD / AIR : €/kg
+ *   - SEA        : €/m³ (Unité Payante)
  * SEA = 120 est l'équivalent de l'ancien defaultRatePerM3(200) × multiplier(0.6)
  */
 export const DEFAULT_PRICING_CONFIG = {
@@ -30,7 +30,6 @@ export const DEFAULT_PRICING_CONFIG = {
     ROAD: 1.0,
     SEA: 120.0,
     AIR: 3.0,
-    RAIL: 0.8,
   } as TransportMultipliers,
   cargoTypeSurcharges: {
     GENERAL: 0,
@@ -45,14 +44,12 @@ export const DEFAULT_PRICING_CONFIG = {
   prioritySurcharges: {
     STANDARD: 0,       // +0% (coefficient 1.0)
     NORMAL: 0.1,       // +10% (coefficient 1.1)
-    EXPRESS: 0.5,      // +50% (coefficient 1.5)
     URGENT: 0.3,       // +30% (coefficient 1.3)
   } as PrioritySurcharges,
   deliverySpeedsPerMode: {
     ROAD: { min: 3, max: 7 },
     SEA: { min: 20, max: 45 },
     AIR: { min: 1, max: 3 },
-    RAIL: { min: 7, max: 14 },
   } as DeliverySpeedsPerMode,
   /**
    * NOUVEAU : Ratios de conversion du poids volumétrique
@@ -60,13 +57,11 @@ export const DEFAULT_PRICING_CONFIG = {
    * - AIR: 167 kg/m³  (ratio 1/6 = 6000)
    * - ROAD: 333 kg/m³ (ratio 1/3 = 5000)
    * - SEA: 1 kg/m³    (ratio 1/1 = 1000)
-   * - RAIL: 250 kg/m³ (estimation)
    */
   volumetricWeightRatios: {
     AIR: 167,
     ROAD: 333,
     SEA: 1,
-    RAIL: 250,
   } as VolumetricWeightRatios,
   /**
    * NOUVEAU : Activation du poids volumétrique par mode
@@ -77,14 +72,13 @@ export const DEFAULT_PRICING_CONFIG = {
     AIR: true,
     ROAD: true,
     SEA: false,  // Maritime utilise "Poids ou Mesure" (Unité Payante)
-    RAIL: true,
   } as UseVolumetricWeightPerMode,
 } as const;
 
 /**
  * Type pour la configuration complète des prix
  * transportMultipliers contient les tarifs DIRECTS par mode :
- *   ROAD/AIR/RAIL → €/kg | SEA → €/m³
+ *   ROAD/AIR → €/kg | SEA → €/m³
  */
 export interface PricingConfigData {
   transportMultipliers: TransportMultipliers;

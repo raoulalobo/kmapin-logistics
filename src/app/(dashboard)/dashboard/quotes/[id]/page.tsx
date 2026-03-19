@@ -133,7 +133,6 @@ function formatTransportMode(mode: string): string {
     ROAD: 'Routier',
     SEA: 'Maritime',
     AIR: 'Aérien',
-    RAIL: 'Ferroviaire',
   };
 
   return modeMap[mode] || mode;
@@ -148,7 +147,6 @@ function formatPriority(priority: string | null | undefined): string {
   const priorityMap: Record<string, string> = {
     STANDARD: 'Standard',
     NORMAL: 'Normal (+10%)',
-    EXPRESS: 'Express (+50%)',
     URGENT: 'Urgent (+30%)',
   };
 
@@ -160,7 +158,7 @@ function formatPriority(priority: string | null | undefined): string {
  */
 function getPriorityVariant(priority: string | null | undefined): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (!priority || priority === 'STANDARD') return 'secondary';
-  if (priority === 'URGENT' || priority === 'EXPRESS') return 'destructive';
+  if (priority === 'URGENT') return 'destructive';
   return 'outline';
 }
 
@@ -548,6 +546,12 @@ export default async function QuoteDetailPage({
                 {quote.packages && quote.packages.length > 0
                   ? `${quote.packages.reduce((sum: number, p: { quantity: number }) => sum + p.quantity, 0)} colis — ${quote.weight} kg au total`
                   : 'Informations sur le contenu à transporter'}
+                {/* Note maritime : explication Unité Payante si mode SEA */}
+                {quote.transportMode?.includes('SEA') && (
+                  <span className="ml-2 text-xs text-blue-600 font-medium">
+                    (Maritime : facturation en Unités Payantes)
+                  </span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -636,6 +640,16 @@ export default async function QuoteDetailPage({
                       </tfoot>
                     </table>
                   </div>
+                  {/* Note explicative maritime — affichée uniquement si le mode inclut SEA */}
+                  {quote.transportMode?.includes('SEA') && (
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 mt-3">
+                      <p className="font-medium">Facturation maritime — Unité Payante (UP)</p>
+                      <p className="mt-1 text-blue-700">
+                        En maritime, la facturation utilise l&apos;Unité Payante : UP = max(poids en tonnes, volume en m³).
+                        Le transporteur facture sur la valeur la plus avantageuse pour lui.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 /* Fallback : affichage des champs plats (anciens devis sans packages) */

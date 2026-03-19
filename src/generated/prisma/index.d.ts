@@ -179,8 +179,7 @@ export type CargoType = (typeof CargoType)[keyof typeof CargoType]
 export const TransportMode: {
   ROAD: 'ROAD',
   SEA: 'SEA',
-  AIR: 'AIR',
-  RAIL: 'RAIL'
+  AIR: 'AIR'
 };
 
 export type TransportMode = (typeof TransportMode)[keyof typeof TransportMode]
@@ -188,7 +187,7 @@ export type TransportMode = (typeof TransportMode)[keyof typeof TransportMode]
 
 export const Priority: {
   STANDARD: 'STANDARD',
-  EXPRESS: 'EXPRESS',
+  NORMAL: 'NORMAL',
   URGENT: 'URGENT'
 };
 

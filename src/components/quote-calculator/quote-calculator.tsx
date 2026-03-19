@@ -31,7 +31,7 @@ import {
   Truck,
   Boat,
   Airplane,
-  Train,
+
   TrendUp,
   Download,
   Envelope,
@@ -91,7 +91,6 @@ const TRANSPORT_MODE_BASE_LABELS: Record<TransportMode, string> = {
   ROAD: 'Routier',
   SEA: 'Maritime',
   AIR: 'Aérien',
-  RAIL: 'Ferroviaire',
 };
 
 /**
@@ -102,7 +101,6 @@ const transportModeIcons: Record<TransportMode, React.ComponentType<{ className?
   ROAD: Truck,
   SEA: Boat,
   AIR: Airplane,
-  RAIL: Train,
 };
 
 /**
@@ -1008,7 +1006,7 @@ export function QuoteCalculator() {
               <Label htmlFor="priority" className="text-base font-semibold">Priorité de livraison</Label>
               <Select
                 defaultValue="STANDARD"
-                onValueChange={(value) => setValue('priority', value as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT')}
+                onValueChange={(value) => setValue('priority', value as 'STANDARD' | 'NORMAL' | 'URGENT')}
               >
                 <SelectTrigger id="priority" className="h-11">
                   <SelectValue />
@@ -1109,7 +1107,12 @@ export function QuoteCalculator() {
               <div>
                 <DialogTitle className="text-xl sm:text-2xl text-[#003D82]">Votre estimation</DialogTitle>
                 <p className="text-sm sm:text-base text-gray-600">
-                  {result?.totalPackageCount || 0} colis - {result?.totalWeight || 0} kg
+                  {result?.totalPackageCount || 0} colis — {result?.totalWeight || 0} kg
+                  {result?.factureSurVolume && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      Facturé au volume
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -1141,6 +1144,24 @@ export function QuoteCalculator() {
                   </div>
                 </div>
 
+                {/* Note maritime : explication Unité Payante si mode SEA */}
+                {result.modeTransport === 'SEA' && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:p-4 text-sm text-blue-800">
+                    <p className="font-medium">Mode Maritime — Unité Payante (UP)</p>
+                    <p className="mt-1 text-blue-700">
+                      En maritime, la facturation utilise l&apos;Unité Payante : UP = max(poids en tonnes, volume en m³).
+                      Le tarif appliqué est de <strong>{result.tarifParUnite?.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {result.unitesTarif}</strong>.
+                    </p>
+                  </div>
+                )}
+
+                {/* Tarif appliqué (pour tous les modes) */}
+                {result.tarifParUnite > 0 && result.modeTransport !== 'SEA' && (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                    Tarif appliqué : <strong>{result.tarifParUnite?.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {result.unitesTarif}</strong>
+                  </div>
+                )}
+
                 {/* Tableau détaillé des lignes */}
                 <div className="space-y-4">
                   <h4 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -1169,7 +1190,14 @@ export function QuoteCalculator() {
                             <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-gray-700 hidden sm:table-cell">
                               {cargoTypeLabels[line.cargoType as CargoType] || line.cargoType}
                             </td>
-                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 hidden md:table-cell">{line.weight} kg</td>
+                            <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 hidden md:table-cell">
+                              {line.weight} kg
+                              {line.factureSurVolume && (
+                                <span className="ml-1 inline-flex items-center rounded bg-amber-100 px-1 py-0.5 text-[10px] font-medium text-amber-700" title="Le poids volumétrique dépasse le poids réel">
+                                  vol.
+                                </span>
+                              )}
+                            </td>
                             <td className="py-2.5 px-1.5 sm:py-3 sm:px-3 text-right text-gray-700 whitespace-nowrap">
                               {line.unitPrice.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
                             </td>

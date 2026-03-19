@@ -60,21 +60,6 @@ export const STANDARD_RATES: StandardRate[] = [
     estimatedDaysMax: 4,
     currency: 'EUR',
   },
-  {
-    id: 'eu-de-rail-general',
-    origin: 'France',
-    originCode: 'FR',
-    destination: 'Allemagne',
-    destinationCode: 'DE',
-    transportMode: TransportMode.RAIL,
-    cargoType: CargoType.GENERAL,
-    pricePerKg: 0.38,
-    minPrice: 250,
-    maxPrice: 1800,
-    estimatedDaysMin: 3,
-    estimatedDaysMax: 5,
-    currency: 'EUR',
-  },
 
   // BELGIQUE
   {

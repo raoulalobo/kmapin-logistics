@@ -152,7 +152,7 @@ export default function NewQuotePage() {
       destinationContactEmail: '',
       transportMode: ['ROAD' as TransportMode],
       // Priorité de livraison (défaut: STANDARD)
-      priority: 'STANDARD' as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT',
+      priority: 'STANDARD' as 'STANDARD' | 'NORMAL' | 'URGENT',
       estimatedCost: 0,
       currency: 'EUR',
       validUntil: getDefaultValidUntil(),
@@ -330,7 +330,7 @@ export default function NewQuotePage() {
 
         // Appliquer la surcharge priorité sur le total global
         // Pour récupérer le coefficient, on fait un calcul de référence
-        const priority = (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'EXPRESS' | 'URGENT';
+        const priority = (values.priority || 'STANDARD') as 'STANDARD' | 'NORMAL' | 'URGENT';
         if (priority !== 'STANDARD' && totalPrice > 0) {
           // Calcul de référence pour obtenir le ratio de surcharge priorité
           const refBase = await calculateQuoteEstimateV2Action({
@@ -909,7 +909,6 @@ export default function NewQuotePage() {
                             <SelectItem value="ROAD">Routier</SelectItem>
                             <SelectItem value="SEA">Maritime</SelectItem>
                             <SelectItem value="AIR">Aérien</SelectItem>
-                            <SelectItem value="RAIL">Ferroviaire</SelectItem>
                           </>
                         )}
                       </SelectContent>
@@ -948,7 +947,6 @@ export default function NewQuotePage() {
                           <>
                             <SelectItem value="STANDARD">Standard (délai normal)</SelectItem>
                             <SelectItem value="NORMAL">Normal (+10% - légèrement accéléré)</SelectItem>
-                            <SelectItem value="EXPRESS">Express (+50% - rapide)</SelectItem>
                             <SelectItem value="URGENT">Urgent (+30% - prioritaire)</SelectItem>
                           </>
                         )}

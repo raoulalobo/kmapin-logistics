@@ -325,7 +325,7 @@ export async function createQuoteAction(
         width: pkg.width || undefined,
         height: pkg.height || undefined,
       })),
-      modeTransport: validatedData.transportMode[0] as 'ROAD' | 'SEA' | 'AIR' | 'RAIL',
+      modeTransport: validatedData.transportMode[0] as 'ROAD' | 'SEA' | 'AIR',
       priorite: (rawData.priority as PriorityType) || 'STANDARD',
       paysOrigine: validatedData.originCountry,
       paysDestination: validatedData.destinationCountry,
@@ -905,7 +905,7 @@ export async function updateQuoteAction(
         // Résout le problème de la distribution proportionnelle au poids qui ignorait
         // les surcharges cargo spécifiques (FRAGILE +30%, DANGEROUS +50%, etc.)
         // On utilise le mode de transport mis à jour s'il est fourni, sinon celui existant
-        const updateTransportMode = (validatedData.transportMode?.[0] || existingQuote.transportMode[0]) as 'ROAD' | 'SEA' | 'AIR' | 'RAIL';
+        const updateTransportMode = (validatedData.transportMode?.[0] || existingQuote.transportMode[0]) as 'ROAD' | 'SEA' | 'AIR';
         const updateOriginCountry = validatedData.originCountry || existingQuote.originCountry;
         const updateDestinationCountry = validatedData.destinationCountry || existingQuote.destinationCountry;
 
@@ -1571,7 +1571,6 @@ async function getDistance(origin: string, destination: string): Promise<number>
  *    - ROAD (Routier) : x1.0
  *    - SEA (Maritime) : x0.6 (moins cher)
  *    - AIR (Aérien) : x3.0 (plus cher)
- *    - RAIL (Ferroviaire) : x0.8 (économique)
  * 4. Supplément type de marchandise :
  *    - GENERAL : +0%
  *    - DANGEROUS (Dangereux) : +50%
@@ -1583,8 +1582,7 @@ async function getDistance(origin: string, destination: string): Promise<number>
  *    - OTHER : +10%
  * 5. Supplément priorité :
  *    - STANDARD : +0%
- *    - EXPRESS : +50%
- *    - URGENT : +100%
+ *    - URGENT : +30%
  * 6. Poids volumétrique : Si volume fourni, calculer poids volumétrique
  *    (volume_m3 * 200) et prendre le max entre poids réel et poids volumétrique
  *
@@ -1688,9 +1686,7 @@ export async function calculateQuoteEstimateAction(
     );
 
     // Ajuster selon la priorité
-    if (priority === 'EXPRESS') {
-      estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays * 0.7); // -30%
-    } else if (priority === 'URGENT') {
+    if (priority === 'URGENT') {
       estimatedDeliveryDays = Math.ceil(estimatedDeliveryDays * 0.5); // -50%
     }
 

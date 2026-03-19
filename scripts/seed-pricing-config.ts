@@ -7,7 +7,7 @@
  * Ce script crée une configuration singleton avec :
  * - Ratios de poids volumétrique (AIR: 167, ROAD: 333, SEA: 1)
  * - Activation du poids volumétrique par mode
- * - Surcharges de priorité (STANDARD: 0%, NORMAL: +10%, EXPRESS: +50%, URGENT: +30%)
+ * - Surcharges de priorité (STANDARD: 0%, NORMAL: +10%, URGENT: +30%)
  * - Surcharges de type de cargo
  * - Multiplicateurs de transport
  * - Délais de livraison par mode
@@ -41,7 +41,6 @@ const PRICING_CONFIG_SEED = {
     AIR: 167,
     ROAD: 333,
     SEA: 1,
-    RAIL: 250,
   },
 
   // === Activation du Poids Volumétrique par Mode ===
@@ -51,7 +50,6 @@ const PRICING_CONFIG_SEED = {
     AIR: true,
     ROAD: true,
     SEA: false,  // Maritime utilise "Poids ou Mesure" (Unité Payante)
-    RAIL: true,
   },
 
   // === Multiplicateurs par Mode de Transport ===
@@ -60,7 +58,6 @@ const PRICING_CONFIG_SEED = {
     ROAD: 1.0,
     SEA: 0.6,    // Maritime moins cher
     AIR: 3.0,    // Aérien plus cher
-    RAIL: 0.8,   // Ferroviaire économique
   },
 
   // === Surcharges par Type de Marchandise ===
@@ -80,12 +77,10 @@ const PRICING_CONFIG_SEED = {
   // Coefficients multiplicateurs selon le PDF :
   // - STANDARD : 0%   (coefficient 1.0)
   // - NORMAL   : +10% (coefficient 1.1)
-  // - EXPRESS  : +50% (coefficient 1.5)
   // - URGENT   : +30% (coefficient 1.3)
   prioritySurcharges: {
     STANDARD: 0,    // +0%
     NORMAL: 0.1,    // +10%
-    EXPRESS: 0.5,   // +50%
     URGENT: 0.3,    // +30%
   },
 
@@ -94,7 +89,6 @@ const PRICING_CONFIG_SEED = {
     ROAD: { min: 3, max: 7 },
     SEA: { min: 20, max: 45 },
     AIR: { min: 1, max: 3 },
-    RAIL: { min: 7, max: 14 },
   },
 };
 

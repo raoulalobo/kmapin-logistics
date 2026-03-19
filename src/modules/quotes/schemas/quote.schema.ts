@@ -293,10 +293,9 @@ export const quoteSchema = z.object({
   // Affecte le prix et le délai estimé
   // - STANDARD : Livraison normale (0%)
   // - NORMAL   : Livraison accélérée (+10%)
-  // - EXPRESS  : Livraison rapide (+50%)
   // - URGENT   : Livraison prioritaire (+30%)
   priority: z
-    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .enum(['STANDARD', 'NORMAL', 'URGENT'])
     .default('STANDARD')
     .optional(),
 
@@ -568,10 +567,9 @@ export const quoteEstimateSchema = z.object({
   // === Priorité (optionnelle) ===
   // STANDARD : Livraison normale (0%)
   // NORMAL   : Livraison accélérée (+10%)
-  // EXPRESS  : Livraison rapide (+50%)
   // URGENT   : Livraison express (+30%)
   priority: z
-    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .enum(['STANDARD', 'NORMAL', 'URGENT'])
     .default('STANDARD')
     .optional(),
 });
@@ -632,7 +630,7 @@ export const quoteEstimateMultiPackageSchema = z.object({
 
   // === Priorité (identique à quoteEstimateSchema) ===
   priority: z
-    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .enum(['STANDARD', 'NORMAL', 'URGENT'])
     .default('STANDARD')
     .optional(),
 
@@ -671,6 +669,10 @@ export type QuoteEstimateMultiPackageResult = {
     unitPrice: number;
     /** Total de la ligne = unitPrice × quantity */
     lineTotal: number;
+    /** Indicateur si le poids volumétrique a été utilisé au lieu du poids réel pour ce colis */
+    factureSurVolume: boolean;
+    /** Unité de la masse taxable pour ce colis ("kg" pour aérien/routier, "UP" pour maritime) */
+    uniteMasseTaxable: string;
   }>;
   /** Nombre total de colis (somme des quantités) */
   totalPackageCount: number;
@@ -696,6 +698,14 @@ export type QuoteEstimateMultiPackageResult = {
   dominantCargoType: string;
   /** Délai de livraison estimé en jours */
   estimatedDeliveryDays: number;
+  /** Unité de la masse taxable globale ("kg" pour aérien/routier, "UP" pour maritime) */
+  uniteMasseTaxable: string;
+  /** Indicateur global si au moins un colis est facturé au volume */
+  factureSurVolume: boolean;
+  /** Tarif par unité appliqué (€/kg ou €/UP selon le mode) */
+  tarifParUnite: number;
+  /** Label lisible de l'unité du tarif (ex: "€/kg", "€/UP") */
+  unitesTarif: string;
 };
 
 /**
@@ -719,7 +729,7 @@ export type QuoteEstimateResult = {
     baseCost: number;
     /** Supplément type de marchandise (DANGEROUS, FRAGILE, etc.) */
     cargoTypeSurcharge: number;
-    /** Supplément priorité (NORMAL, EXPRESS, URGENT) */
+    /** Supplément priorité (NORMAL, URGENT) */
     prioritySurcharge: number;
   };
   /** Délai de livraison estimé en jours */
@@ -1132,7 +1142,7 @@ export const createGuestQuoteSchema = z.object({
 
   /**
    * Mode(s) de transport souhaité(s)
-   * ROAD, RAIL, SEA, AIR (au moins 1, max 4)
+   * ROAD, SEA, AIR (au moins 1, max 3)
    */
   transportMode: z
     .array(z.nativeEnum(TransportMode))
@@ -1145,10 +1155,10 @@ export const createGuestQuoteSchema = z.object({
 
   /**
    * Priorité de livraison
-   * Affecte le coût estimé (+0%, +10%, +30%, +50%)
+   * Affecte le coût estimé (+0%, +10%, +30%)
    */
   priority: z
-    .enum(['STANDARD', 'NORMAL', 'EXPRESS', 'URGENT'])
+    .enum(['STANDARD', 'NORMAL', 'URGENT'])
     .default('STANDARD')
     .optional(),
 
