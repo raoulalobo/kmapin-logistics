@@ -246,8 +246,18 @@ export default function PricingConfigPage() {
   }
 
   async function handleCreateRate() {
-    if (!newRate.destinationCountryCode || newRate.ratePerKg <= 0 || newRate.ratePerM3 <= 0) {
-      toast.error('Veuillez remplir tous les champs obligatoires');
+    // Validation adaptée au mode : maritime = €/UP (via ratePerM3), autres = €/kg
+    const isSea = newRate.transportMode === 'SEA';
+    if (!newRate.destinationCountryCode) {
+      toast.error('Veuillez sélectionner un pays de destination');
+      return;
+    }
+    if (isSea && newRate.ratePerM3 <= 0) {
+      toast.error('Le tarif par UP (€/UP) doit être positif');
+      return;
+    }
+    if (!isSea && newRate.ratePerKg <= 0) {
+      toast.error('Le tarif par kg (€/kg) doit être positif');
       return;
     }
 
@@ -295,8 +305,14 @@ export default function PricingConfigPage() {
   async function handleSaveEdit() {
     if (!editingRate || !editingRate.id) return;
 
-    if (editingRate.ratePerKg <= 0 || editingRate.ratePerM3 <= 0) {
-      toast.error('Les tarifs doivent être positifs');
+    // Validation adaptée au mode : maritime = €/UP (via ratePerM3), autres = €/kg
+    const isSeaEdit = editingRate.transportMode === 'SEA';
+    if (isSeaEdit && editingRate.ratePerM3 <= 0) {
+      toast.error('Le tarif par UP (€/UP) doit être positif');
+      return;
+    }
+    if (!isSeaEdit && editingRate.ratePerKg <= 0) {
+      toast.error('Le tarif par kg (€/kg) doit être positif');
       return;
     }
 
@@ -481,33 +497,37 @@ export default function PricingConfigPage() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>€/kg *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      placeholder="0.80"
-                      value={newRate.ratePerKg || ''}
-                      onChange={(e) =>
-                        setNewRate({ ...newRate, ratePerKg: parseFloat(e.target.value) || 0 })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>€/m³ *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      placeholder="150.00"
-                      value={newRate.ratePerM3 || ''}
-                      onChange={(e) =>
-                        setNewRate({ ...newRate, ratePerM3: parseFloat(e.target.value) || 0 })
-                      }
-                    />
-                  </div>
+                  {/* Champ tarif conditionnel : €/UP pour maritime, €/kg pour les autres */}
+                  {newRate.transportMode === 'SEA' ? (
+                    <div className="space-y-2">
+                      <Label>€/UP *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        placeholder="465.00"
+                        value={newRate.ratePerM3 || ''}
+                        onChange={(e) =>
+                          setNewRate({ ...newRate, ratePerM3: parseFloat(e.target.value) || 0, ratePerKg: 0 })
+                        }
+                      />
+                      <p className="text-xs text-muted-foreground">UP = Unité Payante = max(tonnes, m³)</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label>€/kg *</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        placeholder="7.25"
+                        value={newRate.ratePerKg || ''}
+                        onChange={(e) =>
+                          setNewRate({ ...newRate, ratePerKg: parseFloat(e.target.value) || 0, ratePerM3: 0 })
+                        }
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-end">
                     <Button
@@ -553,8 +573,7 @@ export default function PricingConfigPage() {
                         <TableRow className="bg-gray-50">
                           <TableHead>Route</TableHead>
                           <TableHead>Mode</TableHead>
-                          <TableHead className="text-right">€/kg</TableHead>
-                          <TableHead className="text-right">€/m³</TableHead>
+                          <TableHead className="text-right">Tarif</TableHead>
                           <TableHead>Notes</TableHead>
                           <TableHead>Statut</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
@@ -575,11 +594,12 @@ export default function PricingConfigPage() {
                                 {rate.transportMode === 'ROAD' && '🚛 Routier'}
                               </span>
                             </TableCell>
+                            {/* Tarif contextuel : €/UP pour maritime, €/kg pour les autres */}
                             <TableCell className="text-right font-semibold">
-                              {rate.ratePerKg.toFixed(2)} €
-                            </TableCell>
-                            <TableCell className="text-right font-semibold">
-                              {rate.ratePerM3.toFixed(2)} €
+                              {rate.transportMode === 'SEA'
+                                ? `${rate.ratePerM3.toFixed(2)} €/UP`
+                                : `${rate.ratePerKg.toFixed(2)} €/kg`
+                              }
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
                               {rate.notes || '-'}
@@ -683,40 +703,44 @@ export default function PricingConfigPage() {
                         </p>
                       </div>
 
-                      {/* Tarifs (modifiables) */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-ratePerKg">Tarif par kg (€) *</Label>
-                          <Input
-                            id="edit-ratePerKg"
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={editingRate.ratePerKg}
-                            onChange={(e) =>
-                              setEditingRate({
-                                ...editingRate,
-                                ratePerKg: parseFloat(e.target.value) || 0,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-ratePerM3">Tarif par m³ (€) *</Label>
-                          <Input
-                            id="edit-ratePerM3"
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={editingRate.ratePerM3}
-                            onChange={(e) =>
-                              setEditingRate({
-                                ...editingRate,
-                                ratePerM3: parseFloat(e.target.value) || 0,
-                              })
-                            }
-                          />
-                        </div>
+                      {/* Tarif conditionnel : €/UP pour maritime, €/kg pour les autres */}
+                      <div className="space-y-2">
+                        {editingRate.transportMode === 'SEA' ? (
+                          <>
+                            <Label htmlFor="edit-ratePerM3">Tarif par UP (€/UP) *</Label>
+                            <Input
+                              id="edit-ratePerM3"
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={editingRate.ratePerM3}
+                              onChange={(e) =>
+                                setEditingRate({
+                                  ...editingRate,
+                                  ratePerM3: parseFloat(e.target.value) || 0,
+                                })
+                              }
+                            />
+                            <p className="text-xs text-muted-foreground">UP = Unité Payante = max(tonnes, m³)</p>
+                          </>
+                        ) : (
+                          <>
+                            <Label htmlFor="edit-ratePerKg">Tarif par kg (€/kg) *</Label>
+                            <Input
+                              id="edit-ratePerKg"
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={editingRate.ratePerKg}
+                              onChange={(e) =>
+                                setEditingRate({
+                                  ...editingRate,
+                                  ratePerKg: parseFloat(e.target.value) || 0,
+                                })
+                              }
+                            />
+                          </>
+                        )}
                       </div>
 
                       {/* Notes (modifiable) */}
