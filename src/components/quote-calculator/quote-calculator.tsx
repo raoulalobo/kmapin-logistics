@@ -1034,7 +1034,7 @@ export function QuoteCalculator() {
                 Mode de transport
               </Label>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 {transportModeOptions.map((option) => {
                   const isSelected = selectedTransportModes.includes(option.value);
                   const Icon = transportModeIcons[option.value];
