@@ -60,7 +60,7 @@ export default async function House() {
 
       <main>
         {/* Hero Section - Animé avec Parallax, Typing Effect et Gradient */}
-        <HeroSection />
+        <HeroSection platformSlogan={systemConfig.platformSlogan || 'Solutions logistiques sur mesure pour vos expéditions multi-modales'} />
 
         {/* Section Calculateur de devis */}
         <section id="calculateur" className="py-20 bg-gradient-to-b from-gray-50 to-white scroll-mt-20">

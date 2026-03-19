@@ -14,7 +14,16 @@ import { Button } from '@/components/ui/button';
 import { ParallaxBackground } from './parallax-background';
 import { AnimatedText } from './animated-text';
 
-export function HeroSection() {
+/**
+ * Props pour la HeroSection
+ * Le slogan est injecté depuis le Server Component parent (page.tsx → SystemConfig)
+ */
+interface HeroSectionProps {
+  /** Slogan/accroche dynamique affiché sous le titre principal */
+  platformSlogan: string;
+}
+
+export function HeroSection({ platformSlogan }: HeroSectionProps) {
   return (
     <section className="relative">
       <ParallaxBackground
@@ -41,7 +50,7 @@ export function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.5 }}
               >
-                Solutions logistiques sur mesure pour vos expéditions multi-modales
+                {platformSlogan}
               </motion.p>
 
               {/* Boutons CTA avec stagger animation — tailles adaptées au mobile */}
