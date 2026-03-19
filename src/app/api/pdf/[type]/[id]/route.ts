@@ -30,7 +30,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/config';
 import { prisma } from '@/lib/db';
 import { generateInvoiceFromQuotePDF, type QuoteInvoicePDFData } from '@/lib/pdf/invoice-pdf';
-import { generateQuotePDF } from '@/lib/pdf/quote-pdf';
+import { generateQuotePDF, type PlatformPDFConfig } from '@/lib/pdf/quote-pdf';
+import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
 
 /**
  * Forcer l'utilisation du runtime Node.js (requis pour Better Auth avec async_hooks)
@@ -68,14 +69,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Récupérer la config plateforme depuis la BDD (cachée 1h) pour le branding des PDFs
+    const systemConfig = await getSystemConfig();
+    const pdfConfig: PlatformPDFConfig = {
+      platformFullName: systemConfig.platformFullName,
+      primaryColor: systemConfig.primaryColor,
+    };
+
     // Générer le PDF selon le type
     switch (type) {
       case 'quote':
-        return await generateQuotePDFRoute(id, session);
+        return await generateQuotePDFRoute(id, session, pdfConfig);
       case 'shipment-invoice':
-        return await generateShipmentInvoicePDFRoute(id, session);
+        return await generateShipmentInvoicePDFRoute(id, session, pdfConfig);
       case 'quote-invoice':
-        return await generateQuoteInvoicePDFRoute(id, session);
+        return await generateQuoteInvoicePDFRoute(id, session, pdfConfig);
       default:
         return NextResponse.json({ error: 'Type non supporté' }, { status: 400 });
     }
@@ -105,7 +113,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * @param session - Session de l'utilisateur authentifié
  * @returns Response avec le PDF ou une erreur
  */
-async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any) {
+async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any, pdfConfig: PlatformPDFConfig) {
   // Récupérer le colis avec son devis source, le client et les packages multi-colis
   const shipment = await prisma.shipment.findUnique({
     where: { id: shipmentId },
@@ -214,8 +222,8 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any)
     })),
   };
 
-  // Générer le PDF
-  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
+  // Générer le PDF avec la config plateforme dynamique (nom, couleur)
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
 
   // Nom du fichier avec le numéro de suivi
   const filename = `facture-${shipment.trackingNumber}.pdf`;
@@ -241,7 +249,7 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any)
  * @param session - Session de l'utilisateur authentifié
  * @returns Response avec le PDF ou une erreur
  */
-async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
+async function generateQuoteInvoicePDFRoute(quoteId: string, session: any, pdfConfig: PlatformPDFConfig) {
   // Récupérer le devis avec le client, le colis éventuel et les packages multi-colis
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
@@ -335,8 +343,8 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
     })),
   };
 
-  // Générer le PDF
-  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData);
+  // Générer le PDF avec la config plateforme dynamique (nom, couleur)
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
 
   // Nom du fichier
   const filename = `facture-${quote.quoteNumber}.pdf`;
@@ -355,7 +363,7 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any) {
 /**
  * Générer le PDF d'un devis
  */
-async function generateQuotePDFRoute(quoteId: string, session: any) {
+async function generateQuotePDFRoute(quoteId: string, session: any, pdfConfig: PlatformPDFConfig) {
   // Récupérer le devis avec toutes les relations nécessaires
   // Le client peut être de type COMPANY (entreprise) ou INDIVIDUAL (particulier)
   // Les packages sont inclus pour le tableau multi-colis dans le PDF
@@ -428,8 +436,8 @@ async function generateQuotePDFRoute(quoteId: string, session: any) {
     })),
   };
 
-  // Générer le PDF
-  const pdfBuffer = generateQuotePDF(pdfData);
+  // Générer le PDF avec la config plateforme dynamique (nom, couleur)
+  const pdfBuffer = generateQuotePDF(pdfData, pdfConfig);
 
   // Nom du fichier
   const filename = `devis-${quote.quoteNumber}.pdf`;
