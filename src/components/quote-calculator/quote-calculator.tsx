@@ -233,13 +233,15 @@ export function QuoteCalculator() {
    * Initialise avec UNE seule ligne de colis par défaut
    */
   const defaultValues = useMemo(() => {
-    const origin = searchParams.get('origin');
-    const destination = searchParams.get('destination');
+    // Priorité aux codes ISO (originCode/destinationCode) car CountrySelect attend des codes ISO
+    // Fallback sur origin/destination (noms) pour compatibilité avec d'anciens liens
+    const origin = searchParams.get('originCode') || searchParams.get('origin') || '';
+    const destination = searchParams.get('destinationCode') || searchParams.get('destination') || '';
     const mode = searchParams.get('mode');
 
     return {
-      originCountry: origin || '',
-      destinationCountry: destination || '',
+      originCountry: origin,
+      destinationCountry: destination,
       transportMode: mode && Object.values(TransportMode).includes(mode as TransportMode)
         ? [mode as TransportMode]
         : [],
@@ -292,19 +294,24 @@ export function QuoteCalculator() {
    * Affiche les notifications de pré-remplissage après montage
    */
   useEffect(() => {
-    const origin = searchParams.get('origin');
-    const destination = searchParams.get('destination');
+    // Noms lisibles pour les toasts (ex: "France", "Burkina Faso")
+    const originName = searchParams.get('origin');
+    const destinationName = searchParams.get('destination');
+    // Codes ISO pour détecter si un pré-remplissage a eu lieu
+    const originCode = searchParams.get('originCode');
+    const destinationCode = searchParams.get('destinationCode');
     const mode = searchParams.get('mode');
 
     const timer = setTimeout(() => {
-      if (origin) toast.info(`Origine pré-remplie : ${origin}`);
-      if (destination) toast.info(`Destination pré-remplie : ${destination}`);
+      // Afficher le nom lisible dans le toast, mais vérifier la présence via code ou nom
+      if (originCode || originName) toast.info(`Origine pré-remplie : ${originName || originCode}`);
+      if (destinationCode || destinationName) toast.info(`Destination pré-remplie : ${destinationName || destinationCode}`);
       if (mode && Object.values(TransportMode).includes(mode as TransportMode)) {
         toast.info(`Mode de transport sélectionné : ${TRANSPORT_MODE_BASE_LABELS[mode as TransportMode]}`);
       }
 
       // Scroll smooth vers le calculateur si des params sont présents
-      if (origin || destination || mode) {
+      if (originCode || originName || destinationCode || destinationName || mode) {
         const element = document.getElementById('calculateur');
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
