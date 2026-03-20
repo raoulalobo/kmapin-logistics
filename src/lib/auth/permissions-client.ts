@@ -62,6 +62,9 @@ export const PERMISSIONS = {
 
     // Rapports opérationnels
     'reports:operations',
+
+    // Dépôts (lecture pour sélection dans formulaires)
+    'depots:read',
   ],
 
   /**
@@ -93,6 +96,9 @@ export const PERMISSIONS = {
     // Documents financiers
     'documents:read',
     'documents:upload',
+
+    // Dépôts (lecture pour sélection dans formulaires)
+    'depots:read',
   ],
 
   /**
@@ -146,6 +152,7 @@ export const PERMISSIONS = {
     'documents:read',
     'tracking:read',
     'reports:read',
+    'depots:read',
   ],
 } as const;
 

@@ -32,6 +32,7 @@ import { prisma } from '@/lib/db';
 import { generateInvoiceFromQuotePDF, type QuoteInvoicePDFData } from '@/lib/pdf/invoice-pdf';
 import { generateQuotePDF, type PlatformPDFConfig } from '@/lib/pdf/quote-pdf';
 import { getSystemConfig } from '@/modules/system-config/lib/get-system-config';
+import { getDefaultDepot } from '@/modules/depots/lib/get-default-depot';
 
 /**
  * Forcer l'utilisation du runtime Node.js (requis pour Better Auth avec async_hooks)
@@ -250,13 +251,18 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any,
  * @returns Response avec le PDF ou une erreur
  */
 async function generateQuoteInvoicePDFRoute(quoteId: string, session: any, pdfConfig: PlatformPDFConfig) {
-  // Récupérer le devis avec le client, le colis éventuel et les packages multi-colis
+  // Récupérer le devis avec le client, le colis éventuel, les packages et le dépôt
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
       client: true,
       shipment: true, // Pour récupérer le numéro de suivi si disponible
       packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
+      depot: {         // Dépôt associé (pour l'en-tête du PDF)
+        include: {
+          contacts: { where: { isPrimary: true }, take: 1 },
+        },
+      },
     },
   });
 
@@ -343,8 +349,42 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any, pdfCo
     })),
   };
 
-  // Générer le PDF avec la config plateforme dynamique (nom, couleur)
-  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
+  // Résoudre le dépôt avec fallback 3 niveaux (même logique que pour les devis)
+  let invoiceDepotConfig: PlatformPDFConfig['depot'] = null;
+  if (quote.depot) {
+    const primaryContact = quote.depot.contacts?.[0];
+    invoiceDepotConfig = {
+      name: quote.depot.name,
+      address: quote.depot.address,
+      city: quote.depot.city,
+      country: quote.depot.country,
+      postalCode: quote.depot.postalCode,
+      phone: quote.depot.phone,
+      email: quote.depot.email,
+      contactName: primaryContact?.name ?? null,
+      contactPhone: primaryContact?.phone ?? null,
+      contactRole: primaryContact?.role ?? null,
+    };
+  } else {
+    const defaultDepot = await getDefaultDepot();
+    if (defaultDepot) {
+      invoiceDepotConfig = {
+        name: defaultDepot.name,
+        address: defaultDepot.address,
+        city: defaultDepot.city,
+        country: defaultDepot.country,
+        postalCode: defaultDepot.postalCode,
+        phone: defaultDepot.phone,
+        email: defaultDepot.email,
+        contactName: defaultDepot.primaryContact?.name ?? null,
+        contactPhone: defaultDepot.primaryContact?.phone ?? null,
+        contactRole: defaultDepot.primaryContact?.role ?? null,
+      };
+    }
+  }
+
+  // Générer le PDF avec la config plateforme dynamique (nom, couleur, dépôt)
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, { ...pdfConfig, depot: invoiceDepotConfig });
 
   // Nom du fichier
   const filename = `facture-${quote.quoteNumber}.pdf`;
@@ -373,6 +413,11 @@ async function generateQuotePDFRoute(quoteId: string, session: any, pdfConfig: P
       client: true,   // Client (COMPANY ou INDIVIDUAL)
       createdBy: true,
       packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
+      depot: {         // Dépôt associé (pour l'en-tête du PDF)
+        include: {
+          contacts: { where: { isPrimary: true }, take: 1 },
+        },
+      },
     },
   });
 
@@ -436,8 +481,46 @@ async function generateQuotePDFRoute(quoteId: string, session: any, pdfConfig: P
     })),
   };
 
-  // Générer le PDF avec la config plateforme dynamique (nom, couleur)
-  const pdfBuffer = generateQuotePDF(pdfData, pdfConfig);
+  // Résoudre le dépôt avec fallback 3 niveaux :
+  // 1. Dépôt lié au devis → 2. Dépôt par défaut → 3. Aucun (SystemConfig seul)
+  let depotConfig: PlatformPDFConfig['depot'] = null;
+  if (quote.depot) {
+    // Niveau 1 : dépôt explicitement lié au devis
+    const primaryContact = quote.depot.contacts?.[0];
+    depotConfig = {
+      name: quote.depot.name,
+      address: quote.depot.address,
+      city: quote.depot.city,
+      country: quote.depot.country,
+      postalCode: quote.depot.postalCode,
+      phone: quote.depot.phone,
+      email: quote.depot.email,
+      contactName: primaryContact?.name ?? null,
+      contactPhone: primaryContact?.phone ?? null,
+      contactRole: primaryContact?.role ?? null,
+    };
+  } else {
+    // Niveau 2 : dépôt par défaut (isDefault=true)
+    const defaultDepot = await getDefaultDepot();
+    if (defaultDepot) {
+      depotConfig = {
+        name: defaultDepot.name,
+        address: defaultDepot.address,
+        city: defaultDepot.city,
+        country: defaultDepot.country,
+        postalCode: defaultDepot.postalCode,
+        phone: defaultDepot.phone,
+        email: defaultDepot.email,
+        contactName: defaultDepot.primaryContact?.name ?? null,
+        contactPhone: defaultDepot.primaryContact?.phone ?? null,
+        contactRole: defaultDepot.primaryContact?.role ?? null,
+      };
+    }
+    // Niveau 3 : pas de dépôt → depotConfig reste null → SystemConfig seul
+  }
+
+  // Générer le PDF avec la config plateforme dynamique (nom, couleur, dépôt)
+  const pdfBuffer = generateQuotePDF(pdfData, { ...pdfConfig, depot: depotConfig });
 
   // Nom du fichier
   const filename = `devis-${quote.quoteNumber}.pdf`;

@@ -200,6 +200,18 @@ export function generateInvoicePDF(
   doc.setFont('helvetica', 'normal');
   doc.text(config.platformFullName, 20, 33);
 
+  // Afficher le nom du dépôt dans le bandeau si disponible
+  if (config.depot) {
+    doc.setFontSize(8);
+    doc.text(`Dépôt : ${config.depot.name}`, pageWidth - 20, 25, { align: 'right' });
+    const depotAddr = `${config.depot.address}, ${config.depot.city}`;
+    doc.text(depotAddr, pageWidth - 20, 30, { align: 'right' });
+    if (config.depot.phone || config.depot.email) {
+      const contactLine = [config.depot.phone, config.depot.email].filter(Boolean).join(' | ');
+      doc.text(contactLine, pageWidth - 20, 35, { align: 'right' });
+    }
+  }
+
   yPos = 50;
 
   // ========================================
@@ -588,7 +600,23 @@ export function generateInvoiceFromQuotePDF(
   doc.setFont('helvetica', 'bold');
   doc.text('PAYÉ', pageWidth - 27.5, 23, { align: 'center' });
 
-  yPos = 50;
+  // Afficher les infos du dépôt sous le bandeau si disponible
+  let depotOffset = 0;
+  if (config.depot) {
+    doc.setTextColor(...textColor);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Dépôt : ${config.depot.name} — ${config.depot.address}, ${config.depot.city}`, 20, 45);
+    if (config.depot.phone || config.depot.email) {
+      const contactLine = [config.depot.phone, config.depot.email].filter(Boolean).join(' | ');
+      doc.text(contactLine, 20, 49);
+      depotOffset = 8;
+    } else {
+      depotOffset = 4;
+    }
+  }
+
+  yPos = 50 + depotOffset;
 
   // ========================================
   // INFORMATIONS CLIENT

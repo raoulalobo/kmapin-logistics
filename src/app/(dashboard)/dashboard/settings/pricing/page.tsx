@@ -455,7 +455,7 @@ export default function PricingConfigPage() {
                         placeholder="465.00"
                         value={newRate.ratePerM3 || ''}
                         onChange={(e) =>
-                          setNewRate({ ...newRate, ratePerM3: parseFloat(e.target.value) || 0, ratePerKg: 0 })
+                          setNewRate({ ...newRate, ratePerM3: e.target.value === '' ? 0 : parseFloat(e.target.value), ratePerKg: 0 })
                         }
                       />
                     </div>
@@ -469,7 +469,7 @@ export default function PricingConfigPage() {
                         placeholder="7.25"
                         value={newRate.ratePerKg || ''}
                         onChange={(e) =>
-                          setNewRate({ ...newRate, ratePerKg: parseFloat(e.target.value) || 0, ratePerM3: 0 })
+                          setNewRate({ ...newRate, ratePerKg: e.target.value === '' ? 0 : parseFloat(e.target.value), ratePerM3: 0 })
                         }
                       />
                     </div>
@@ -664,11 +664,11 @@ export default function PricingConfigPage() {
                               type="number"
                               step="0.01"
                               min="0.01"
-                              value={editingRate.ratePerM3}
+                              value={editingRate.ratePerM3 || ''}
                               onChange={(e) =>
                                 setEditingRate({
                                   ...editingRate,
-                                  ratePerM3: parseFloat(e.target.value) || 0,
+                                  ratePerM3: e.target.value === '' ? 0 : parseFloat(e.target.value),
                                 })
                               }
                             />
@@ -682,11 +682,11 @@ export default function PricingConfigPage() {
                               type="number"
                               step="0.01"
                               min="0.01"
-                              value={editingRate.ratePerKg}
+                              value={editingRate.ratePerKg || ''}
                               onChange={(e) =>
                                 setEditingRate({
                                   ...editingRate,
-                                  ratePerKg: parseFloat(e.target.value) || 0,
+                                  ratePerKg: e.target.value === '' ? 0 : parseFloat(e.target.value),
                                 })
                               }
                             />

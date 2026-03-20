@@ -23,6 +23,19 @@ export interface PlatformPDFConfig {
   platformFullName: string;
   /** Couleur primaire de la marque (format hexadécimal) */
   primaryColor: string;
+  /** Infos du dépôt associé (fallback : dépôt lié → dépôt par défaut → null) */
+  depot?: {
+    name: string;
+    address: string;
+    city: string;
+    country: string;
+    postalCode?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    contactName?: string | null;
+    contactPhone?: string | null;
+    contactRole?: string | null;
+  } | null;
 }
 
 /**
@@ -215,6 +228,18 @@ export function generateQuotePDF(
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(config.platformFullName, 20, 33);
+
+  // Afficher le nom du dépôt dans le bandeau si disponible
+  if (config.depot) {
+    doc.setFontSize(8);
+    doc.text(`Dépôt : ${config.depot.name}`, pageWidth - 20, 25, { align: 'right' });
+    const depotAddr = `${config.depot.address}, ${config.depot.city}`;
+    doc.text(depotAddr, pageWidth - 20, 30, { align: 'right' });
+    if (config.depot.phone || config.depot.email) {
+      const contactLine = [config.depot.phone, config.depot.email].filter(Boolean).join(' | ');
+      doc.text(contactLine, pageWidth - 20, 35, { align: 'right' });
+    }
+  }
 
   yPos = 50;
 

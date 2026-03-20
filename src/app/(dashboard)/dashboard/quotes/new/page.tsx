@@ -42,6 +42,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { ClientSelect } from '@/components/forms/client-select';
 import { CountrySelect } from '@/components/countries/country-select';
+import { DepotSelect } from '@/components/depots/depot-select';
 import { FormErrorSummary } from '@/components/ui/form-error-summary';
 import { useFormValidation } from '@/hooks/use-form-validation';
 
@@ -115,6 +116,8 @@ export default function NewQuotePage() {
     defaultValues: {
       // Si CLIENT : pré-remplir automatiquement avec son clientId, sinon laisser vide
       clientId: isClient ? userClientId : '',
+      // Dépôt : pré-sélectionné par le composant DepotSelect (dépôt par défaut)
+      depotId: undefined,
       originCountry: 'FR',
       destinationCountry: '',
       // Champs plats conservés comme agrégats (calculés depuis packages[])
@@ -425,6 +428,8 @@ export default function NewQuotePage() {
 
       // Ajouter tous les champs requis
       formData.append('clientId', data.clientId);
+      // Dépôt associé (optionnel)
+      if (data.depotId) formData.append('depotId', data.depotId);
       formData.append('originCountry', data.originCountry);
       formData.append('destinationCountry', data.destinationCountry);
       formData.append('cargoType', data.cargoType);
@@ -549,6 +554,37 @@ export default function NewQuotePage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Dépôt Faso Fret */}
+          <Card className="dashboard-card">
+            <CardHeader>
+              <CardTitle>Dépôt</CardTitle>
+              <CardDescription>
+                Dépôt Faso Fret qui traitera ce devis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="depotId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dépôt</FormLabel>
+                    <FormControl>
+                      <DepotSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Le dépôt par défaut est pré-sélectionné. Il apparaîtra dans l&apos;en-tête du PDF.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
 
           {/* Route */}
           <Card className="dashboard-card">

@@ -2,62 +2,68 @@
 
 ## 1. Nommage descriptif obligatoire
 
-- Le nom du fichier doit decrire l'objectif du plan en kebab-case
-- Format : `plan-<objectif>.md`
-- Le nom doit etre lisible et comprehensible sans ouvrir le fichier
+- Format : `plan-<objectif>.md` en kebab-case
+- Le nom doit decrire l'objectif sans ouvrir le fichier
 
-### Exemples
+| Bon | Mauvais |
+|-----|---------|
+| `plan-image-crop-upload.md` | `indexed-humming-milner.md` |
+| `plan-auth-better-auth.md` | `vivid-sniffing-glacier.md` |
+| `plan-fix-modal-mobile-overflow.md` | `plan-2024-01-15.md` |
+| `plan-migration-react-email.md` | `todo.md` |
 
-| Bon                                | Mauvais                        |
-| ---------------------------------- | ------------------------------ |
-| `plan-image-crop-upload.md`        | `indexed-humming-milner.md`    |
-| `plan-auth-better-auth.md`        | `vivid-sniffing-glacier.md`    |
-| `plan-recherche-carte-leaflet.md` | `iterative-beaming-pillow.md`  |
-| `plan-stripe-connect-paiement.md` | `plan-2024-01-15.md`           |
+## 2. Permission obligatoire
 
-## 2. Permission obligatoire avant toute action
-
-**REGLE ABSOLUE** : Toujours demander la permission a l'utilisateur avant :
+**REGLE ABSOLUE** : Demander la permission a l'utilisateur avant :
 - Creer un nouveau fichier de plan
 - Ecraser un fichier de plan existant
 - Supprimer un fichier de plan
 
-Aucune exception. Meme si la tache semble evidente, demander confirmation.
+**Exception** : La mise a jour de statut (cocher `[x]`, ajouter un commit hash, mettre a jour les fichiers modifies) d'un plan **deja en cours** ne necessite PAS de permission. C'est du tracking, pas une decision.
 
 ### Comment demander
 
-Presenter a l'utilisateur :
+Presenter :
 - Le **nom propose** pour le fichier
-- L'**objectif** du plan en 1-2 phrases
-- Si c'est une **mise a jour** d'un plan existant : preciser lequel et pourquoi
-- Si c'est un **nouveau plan** : preciser qu'aucun plan existant ne couvre ce sujet
+- L'**objectif** en 1-2 phrases
+- Si **mise a jour** : preciser quel plan et pourquoi
+- Si **nouveau** : confirmer qu'aucun plan existant ne couvre ce sujet
 
-Attendre une reponse affirmative avant de proceder.
-
-## 3. Ecraser vs Creer un nouveau fichier
+## 3. Ecraser vs Creer
 
 ### Meme objectif → Ecraser (apres permission)
 
-Si le nouveau plan concerne **le meme sujet** qu'un plan existant (mise a jour,
-correction, evolution), proposer d'ecraser l'ancien fichier.
-
-Exemple : `plan-image-crop-upload.md` existe deja et on veut ajouter le support
-du crop carre → proposer d'ecraser ce fichier.
+Le nouveau plan concerne le meme sujet qu'un plan existant (mise a jour, correction, evolution).
 
 ### Objectif different → Nouveau fichier (apres permission)
 
-Si le plan concerne un **sujet different**, toujours creer un nouveau fichier.
-Ne jamais ajouter un plan sans rapport dans un fichier existant.
-
-Exemple : un plan sur le paiement Stripe n'a rien a voir avec le plan d'upload
-d'images → creer `plan-stripe-connect-paiement.md`.
+Le plan concerne un sujet different. Ne jamais melanger des sujets dans un meme fichier.
 
 ## 4. Emplacement
 
-Tous les fichiers de plan sont stockes dans :
-
 ```
-.claude/plans/
+.claude/plans/          # Plans actifs
+.claude/plans/archive/  # Plans termines (toutes les etapes [x])
 ```
 
-Ne pas creer de sous-dossiers. Tous les plans sont au meme niveau.
+Pas de sous-dossiers autres que `archive/`.
+
+## 5. Archivage automatique
+
+Quand toutes les checkboxes d'un plan sont cochees `[x]` :
+
+1. Creer `.claude/plans/archive/` si inexistant
+2. Deplacer le fichier dans `archive/`
+3. Informer l'utilisateur : "Plan `plan-xxx.md` archive (toutes les etapes terminees)"
+
+Un plan archive peut etre restaure manuellement si besoin.
+
+## 6. Mise a jour du tracking code
+
+Apres chaque etape implementee, mettre a jour le plan avec :
+- Cocher la checkbox `[x]`
+- Ajouter les fichiers modifies/crees
+- Ajouter le hash du commit (si commit effectue)
+- Ajouter une description courte du changement
+
+Cette mise a jour se fait **sans demander permission** (cf. regle 2, exception).

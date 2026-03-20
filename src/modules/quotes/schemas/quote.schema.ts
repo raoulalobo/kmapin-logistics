@@ -178,6 +178,11 @@ export const quoteSchema = z.object({
     .string()
     .cuid('ID de compagnie invalide'),
 
+  // === Dépôt (optionnel) ===
+  // Dépôt Faso Fret associé au devis (pour l'en-tête du PDF)
+  // Si non fourni, le dépôt par défaut sera utilisé
+  depotId: z.string().cuid('ID de dépôt invalide').optional(),
+
   // === Route ===
   originCountry: z
     .string()
