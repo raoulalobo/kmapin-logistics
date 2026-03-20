@@ -35,6 +35,7 @@ export const checkPendingPayments = inngest.createFunction(
         where: {
           status: 'VALIDATED',
           paymentReceivedAt: null,
+          deletedAt: null, // Exclure les devis soft-deleted des vérifications
         },
         include: {
           client: true,
@@ -200,9 +201,10 @@ export const generateWeeklyReport = inngest.createFunction(
         },
       });
 
-      // Revenu total (devis dont le paiement a été reçu durant la période)
+      // Revenu total (devis dont le paiement a été reçu durant la période, hors soft-deleted)
       const quotesWithPayment = await prisma.quote.findMany({
         where: {
+          deletedAt: null,
           paymentReceivedAt: {
             gte: dates.start,
             lte: dates.end,

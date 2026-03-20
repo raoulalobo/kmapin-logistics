@@ -138,6 +138,16 @@ export type Country = $Result.DefaultSelection<Prisma.$CountryPayload>
  * 
  */
 export type SystemConfig = $Result.DefaultSelection<Prisma.$SystemConfigPayload>
+/**
+ * Model Depot
+ * 
+ */
+export type Depot = $Result.DefaultSelection<Prisma.$DepotPayload>
+/**
+ * Model DepotContact
+ * 
+ */
+export type DepotContact = $Result.DefaultSelection<Prisma.$DepotContactPayload>
 
 /**
  * Enums
@@ -748,6 +758,26 @@ export class PrismaClient<
     * ```
     */
   get systemConfig(): Prisma.SystemConfigDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.depot`: Exposes CRUD operations for the **Depot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Depots
+    * const depots = await prisma.depot.findMany()
+    * ```
+    */
+  get depot(): Prisma.DepotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.depotContact`: Exposes CRUD operations for the **DepotContact** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DepotContacts
+    * const depotContacts = await prisma.depotContact.findMany()
+    * ```
+    */
+  get depotContact(): Prisma.DepotContactDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1213,7 +1243,9 @@ export namespace Prisma {
     CountryDistance: 'CountryDistance',
     TransportRate: 'TransportRate',
     Country: 'Country',
-    SystemConfig: 'SystemConfig'
+    SystemConfig: 'SystemConfig',
+    Depot: 'Depot',
+    DepotContact: 'DepotContact'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1232,7 +1264,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "verification" | "client" | "shipment" | "shipmentPackage" | "pickupRequest" | "pickupLog" | "purchaseRequest" | "purchaseLog" | "trackingEvent" | "shipmentLog" | "quote" | "quotePackage" | "quoteLog" | "prospect" | "notification" | "document" | "pricingConfig" | "countryDistance" | "transportRate" | "country" | "systemConfig"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "verification" | "client" | "shipment" | "shipmentPackage" | "pickupRequest" | "pickupLog" | "purchaseRequest" | "purchaseLog" | "trackingEvent" | "shipmentLog" | "quote" | "quotePackage" | "quoteLog" | "prospect" | "notification" | "document" | "pricingConfig" | "countryDistance" | "transportRate" | "country" | "systemConfig" | "depot" | "depotContact"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3086,6 +3118,154 @@ export namespace Prisma {
           }
         }
       }
+      Depot: {
+        payload: Prisma.$DepotPayload<ExtArgs>
+        fields: Prisma.DepotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DepotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DepotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          findFirst: {
+            args: Prisma.DepotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DepotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          findMany: {
+            args: Prisma.DepotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>[]
+          }
+          create: {
+            args: Prisma.DepotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          createMany: {
+            args: Prisma.DepotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DepotCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>[]
+          }
+          delete: {
+            args: Prisma.DepotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          update: {
+            args: Prisma.DepotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          deleteMany: {
+            args: Prisma.DepotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DepotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DepotUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>[]
+          }
+          upsert: {
+            args: Prisma.DepotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotPayload>
+          }
+          aggregate: {
+            args: Prisma.DepotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDepot>
+          }
+          groupBy: {
+            args: Prisma.DepotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DepotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DepotCountArgs<ExtArgs>
+            result: $Utils.Optional<DepotCountAggregateOutputType> | number
+          }
+        }
+      }
+      DepotContact: {
+        payload: Prisma.$DepotContactPayload<ExtArgs>
+        fields: Prisma.DepotContactFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DepotContactFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DepotContactFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          findFirst: {
+            args: Prisma.DepotContactFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DepotContactFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          findMany: {
+            args: Prisma.DepotContactFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>[]
+          }
+          create: {
+            args: Prisma.DepotContactCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          createMany: {
+            args: Prisma.DepotContactCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DepotContactCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>[]
+          }
+          delete: {
+            args: Prisma.DepotContactDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          update: {
+            args: Prisma.DepotContactUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          deleteMany: {
+            args: Prisma.DepotContactDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DepotContactUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DepotContactUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>[]
+          }
+          upsert: {
+            args: Prisma.DepotContactUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DepotContactPayload>
+          }
+          aggregate: {
+            args: Prisma.DepotContactAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDepotContact>
+          }
+          groupBy: {
+            args: Prisma.DepotContactGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DepotContactGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DepotContactCountArgs<ExtArgs>
+            result: $Utils.Optional<DepotContactCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3207,6 +3387,8 @@ export namespace Prisma {
     transportRate?: TransportRateOmit
     country?: CountryOmit
     systemConfig?: SystemConfigOmit
+    depot?: DepotOmit
+    depotContact?: DepotContactOmit
   }
 
   /* Types for Logging */
@@ -3308,6 +3490,7 @@ export namespace Prisma {
     createdQuotes: number
     confirmedQuotePayments: number
     confirmedShipmentPayments: number
+    deletedQuotes: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3332,6 +3515,7 @@ export namespace Prisma {
     createdQuotes?: boolean | UserCountOutputTypeCountCreatedQuotesArgs
     confirmedQuotePayments?: boolean | UserCountOutputTypeCountConfirmedQuotePaymentsArgs
     confirmedShipmentPayments?: boolean | UserCountOutputTypeCountConfirmedShipmentPaymentsArgs
+    deletedQuotes?: boolean | UserCountOutputTypeCountDeletedQuotesArgs
   }
 
   // Custom InputTypes
@@ -3490,6 +3674,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountConfirmedShipmentPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ShipmentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDeletedQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteWhereInput
   }
 
 
@@ -3797,6 +3988,55 @@ export namespace Prisma {
 
 
   /**
+   * Count Type DepotCountOutputType
+   */
+
+  export type DepotCountOutputType = {
+    contacts: number
+    quotes: number
+    shipments: number
+  }
+
+  export type DepotCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    contacts?: boolean | DepotCountOutputTypeCountContactsArgs
+    quotes?: boolean | DepotCountOutputTypeCountQuotesArgs
+    shipments?: boolean | DepotCountOutputTypeCountShipmentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DepotCountOutputType without action
+   */
+  export type DepotCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotCountOutputType
+     */
+    select?: DepotCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DepotCountOutputType without action
+   */
+  export type DepotCountOutputTypeCountContactsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DepotContactWhereInput
+  }
+
+  /**
+   * DepotCountOutputType without action
+   */
+  export type DepotCountOutputTypeCountQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteWhereInput
+  }
+
+  /**
+   * DepotCountOutputType without action
+   */
+  export type DepotCountOutputTypeCountShipmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShipmentWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -4031,6 +4271,7 @@ export namespace Prisma {
     createdQuotes?: boolean | User$createdQuotesArgs<ExtArgs>
     confirmedQuotePayments?: boolean | User$confirmedQuotePaymentsArgs<ExtArgs>
     confirmedShipmentPayments?: boolean | User$confirmedShipmentPaymentsArgs<ExtArgs>
+    deletedQuotes?: boolean | User$deletedQuotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -4103,6 +4344,7 @@ export namespace Prisma {
     createdQuotes?: boolean | User$createdQuotesArgs<ExtArgs>
     confirmedQuotePayments?: boolean | User$confirmedQuotePaymentsArgs<ExtArgs>
     confirmedShipmentPayments?: boolean | User$confirmedShipmentPaymentsArgs<ExtArgs>
+    deletedQuotes?: boolean | User$deletedQuotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4138,6 +4380,7 @@ export namespace Prisma {
       createdQuotes: Prisma.$QuotePayload<ExtArgs>[]
       confirmedQuotePayments: Prisma.$QuotePayload<ExtArgs>[]
       confirmedShipmentPayments: Prisma.$ShipmentPayload<ExtArgs>[]
+      deletedQuotes: Prisma.$QuotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4568,6 +4811,7 @@ export namespace Prisma {
     createdQuotes<T extends User$createdQuotesArgs<ExtArgs> = {}>(args?: Subset<T, User$createdQuotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     confirmedQuotePayments<T extends User$confirmedQuotePaymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$confirmedQuotePaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     confirmedShipmentPayments<T extends User$confirmedShipmentPaymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$confirmedShipmentPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    deletedQuotes<T extends User$deletedQuotesArgs<ExtArgs> = {}>(args?: Subset<T, User$deletedQuotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5543,6 +5787,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ShipmentScalarFieldEnum | ShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * User.deletedQuotes
+   */
+  export type User$deletedQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Quote
+     */
+    select?: QuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Quote
+     */
+    omit?: QuoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteInclude<ExtArgs> | null
+    where?: QuoteWhereInput
+    orderBy?: QuoteOrderByWithRelationInput | QuoteOrderByWithRelationInput[]
+    cursor?: QuoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteScalarFieldEnum | QuoteScalarFieldEnum[]
   }
 
   /**
@@ -11230,6 +11498,7 @@ export namespace Prisma {
     createdById: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    depotId: string | null
   }
 
   export type ShipmentMaxAggregateOutputType = {
@@ -11275,6 +11544,7 @@ export namespace Prisma {
     createdById: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    depotId: string | null
   }
 
   export type ShipmentCountAggregateOutputType = {
@@ -11321,6 +11591,7 @@ export namespace Prisma {
     createdById: number
     createdAt: number
     updatedAt: number
+    depotId: number
     _all: number
   }
 
@@ -11390,6 +11661,7 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    depotId?: true
   }
 
   export type ShipmentMaxAggregateInputType = {
@@ -11435,6 +11707,7 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    depotId?: true
   }
 
   export type ShipmentCountAggregateInputType = {
@@ -11481,6 +11754,7 @@ export namespace Prisma {
     createdById?: true
     createdAt?: true
     updatedAt?: true
+    depotId?: true
     _all?: true
   }
 
@@ -11614,6 +11888,7 @@ export namespace Prisma {
     createdById: string
     createdAt: Date
     updatedAt: Date
+    depotId: string | null
     _count: ShipmentCountAggregateOutputType | null
     _avg: ShipmentAvgAggregateOutputType | null
     _sum: ShipmentSumAggregateOutputType | null
@@ -11679,9 +11954,11 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    depotId?: boolean
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
     trackingEvents?: boolean | Shipment$trackingEventsArgs<ExtArgs>
     documents?: boolean | Shipment$documentsArgs<ExtArgs>
     pickupRequests?: boolean | Shipment$pickupRequestsArgs<ExtArgs>
@@ -11735,9 +12012,11 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    depotId?: boolean
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
   }, ExtArgs["result"]["shipment"]>
 
   export type ShipmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -11784,9 +12063,11 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    depotId?: boolean
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
   }, ExtArgs["result"]["shipment"]>
 
   export type ShipmentSelectScalar = {
@@ -11833,13 +12114,15 @@ export namespace Prisma {
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    depotId?: boolean
   }
 
-  export type ShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "trackingNumber" | "clientId" | "originAddress" | "originCity" | "originPostalCode" | "originCountry" | "originContact" | "originEmail" | "originPhone" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationCountry" | "destinationContact" | "destinationEmail" | "destinationPhone" | "cargoType" | "weight" | "length" | "width" | "height" | "packageCount" | "value" | "currency" | "description" | "specialInstructions" | "transportMode" | "priority" | "isDangerous" | "isFragile" | "requestedPickupDate" | "actualPickupDate" | "estimatedDeliveryDate" | "actualDeliveryDate" | "status" | "estimatedCost" | "actualCost" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["shipment"]>
+  export type ShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "trackingNumber" | "clientId" | "originAddress" | "originCity" | "originPostalCode" | "originCountry" | "originContact" | "originEmail" | "originPhone" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationCountry" | "destinationContact" | "destinationEmail" | "destinationPhone" | "cargoType" | "weight" | "length" | "width" | "height" | "packageCount" | "value" | "currency" | "description" | "specialInstructions" | "transportMode" | "priority" | "isDangerous" | "isFragile" | "requestedPickupDate" | "actualPickupDate" | "estimatedDeliveryDate" | "actualDeliveryDate" | "status" | "estimatedCost" | "actualCost" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "createdAt" | "updatedAt" | "depotId", ExtArgs["result"]["shipment"]>
   export type ShipmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
     trackingEvents?: boolean | Shipment$trackingEventsArgs<ExtArgs>
     documents?: boolean | Shipment$documentsArgs<ExtArgs>
     pickupRequests?: boolean | Shipment$pickupRequestsArgs<ExtArgs>
@@ -11852,11 +12135,13 @@ export namespace Prisma {
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
   }
   export type ShipmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | Shipment$clientArgs<ExtArgs>
     paymentReceivedBy?: boolean | Shipment$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | UserDefaultArgs<ExtArgs>
+    depot?: boolean | Shipment$depotArgs<ExtArgs>
   }
 
   export type $ShipmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11865,6 +12150,7 @@ export namespace Prisma {
       client: Prisma.$ClientPayload<ExtArgs> | null
       paymentReceivedBy: Prisma.$UserPayload<ExtArgs> | null
       createdBy: Prisma.$UserPayload<ExtArgs>
+      depot: Prisma.$DepotPayload<ExtArgs> | null
       trackingEvents: Prisma.$TrackingEventPayload<ExtArgs>[]
       documents: Prisma.$DocumentPayload<ExtArgs>[]
       pickupRequests: Prisma.$PickupRequestPayload<ExtArgs>[]
@@ -11916,6 +12202,7 @@ export namespace Prisma {
       createdById: string
       createdAt: Date
       updatedAt: Date
+      depotId: string | null
     }, ExtArgs["result"]["shipment"]>
     composites: {}
   }
@@ -12313,6 +12600,7 @@ export namespace Prisma {
     client<T extends Shipment$clientArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$clientArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     paymentReceivedBy<T extends Shipment$paymentReceivedByArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$paymentReceivedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    depot<T extends Shipment$depotArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$depotArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     trackingEvents<T extends Shipment$trackingEventsArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$trackingEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TrackingEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends Shipment$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pickupRequests<T extends Shipment$pickupRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Shipment$pickupRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PickupRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12391,6 +12679,7 @@ export namespace Prisma {
     readonly createdById: FieldRef<"Shipment", 'String'>
     readonly createdAt: FieldRef<"Shipment", 'DateTime'>
     readonly updatedAt: FieldRef<"Shipment", 'DateTime'>
+    readonly depotId: FieldRef<"Shipment", 'String'>
   }
     
 
@@ -12822,6 +13111,25 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * Shipment.depot
+   */
+  export type Shipment$depotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    where?: DepotWhereInput
   }
 
   /**
@@ -22208,6 +22516,9 @@ export namespace Prisma {
     paymentReceivedAt: Date | null
     paymentReceivedById: string | null
     createdById: string | null
+    deletedAt: Date | null
+    deletedById: string | null
+    depotId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -22261,6 +22572,9 @@ export namespace Prisma {
     paymentReceivedAt: Date | null
     paymentReceivedById: string | null
     createdById: string | null
+    deletedAt: Date | null
+    deletedById: string | null
+    depotId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -22315,6 +22629,9 @@ export namespace Prisma {
     paymentReceivedAt: number
     paymentReceivedById: number
     createdById: number
+    deletedAt: number
+    deletedById: number
+    depotId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -22386,6 +22703,9 @@ export namespace Prisma {
     paymentReceivedAt?: true
     paymentReceivedById?: true
     createdById?: true
+    deletedAt?: true
+    deletedById?: true
+    depotId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -22439,6 +22759,9 @@ export namespace Prisma {
     paymentReceivedAt?: true
     paymentReceivedById?: true
     createdById?: true
+    deletedAt?: true
+    deletedById?: true
+    depotId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -22493,6 +22816,9 @@ export namespace Prisma {
     paymentReceivedAt?: true
     paymentReceivedById?: true
     createdById?: true
+    deletedAt?: true
+    deletedById?: true
+    depotId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -22634,6 +22960,9 @@ export namespace Prisma {
     paymentReceivedAt: Date | null
     paymentReceivedById: string | null
     createdById: string | null
+    deletedAt: Date | null
+    deletedById: string | null
+    depotId: string | null
     createdAt: Date
     updatedAt: Date
     _count: QuoteCountAggregateOutputType | null
@@ -22707,6 +23036,9 @@ export namespace Prisma {
     paymentReceivedAt?: boolean
     paymentReceivedById?: boolean
     createdById?: boolean
+    deletedAt?: boolean
+    deletedById?: boolean
+    depotId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Quote$userArgs<ExtArgs>
@@ -22716,6 +23048,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
     documents?: boolean | Quote$documentsArgs<ExtArgs>
     logs?: boolean | Quote$logsArgs<ExtArgs>
     packages?: boolean | Quote$packagesArgs<ExtArgs>
@@ -22772,6 +23106,9 @@ export namespace Prisma {
     paymentReceivedAt?: boolean
     paymentReceivedById?: boolean
     createdById?: boolean
+    deletedAt?: boolean
+    deletedById?: boolean
+    depotId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Quote$userArgs<ExtArgs>
@@ -22781,6 +23118,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
   export type QuoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -22833,6 +23172,9 @@ export namespace Prisma {
     paymentReceivedAt?: boolean
     paymentReceivedById?: boolean
     createdById?: boolean
+    deletedAt?: boolean
+    deletedById?: boolean
+    depotId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Quote$userArgs<ExtArgs>
@@ -22842,6 +23184,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
   export type QuoteSelectScalar = {
@@ -22894,11 +23238,14 @@ export namespace Prisma {
     paymentReceivedAt?: boolean
     paymentReceivedById?: boolean
     createdById?: boolean
+    deletedAt?: boolean
+    deletedById?: boolean
+    depotId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quoteNumber" | "trackingToken" | "tokenExpiresAt" | "userId" | "isAttachedToAccount" | "contactEmail" | "contactPhone" | "contactName" | "clientId" | "prospectId" | "originCountry" | "destinationCountry" | "transportMode" | "cargoType" | "weight" | "length" | "width" | "height" | "originAddress" | "originCity" | "originPostalCode" | "originContactName" | "originContactPhone" | "originContactEmail" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationContactName" | "destinationContactPhone" | "destinationContactEmail" | "estimatedCost" | "validUntil" | "currency" | "status" | "submittedAt" | "acceptedAt" | "rejectedAt" | "paymentMethod" | "agentComment" | "treatmentStartedAt" | "treatmentValidatedAt" | "treatmentAgentId" | "cancelledAt" | "cancelReason" | "shipmentId" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
+  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quoteNumber" | "trackingToken" | "tokenExpiresAt" | "userId" | "isAttachedToAccount" | "contactEmail" | "contactPhone" | "contactName" | "clientId" | "prospectId" | "originCountry" | "destinationCountry" | "transportMode" | "cargoType" | "weight" | "length" | "width" | "height" | "originAddress" | "originCity" | "originPostalCode" | "originContactName" | "originContactPhone" | "originContactEmail" | "destinationAddress" | "destinationCity" | "destinationPostalCode" | "destinationContactName" | "destinationContactPhone" | "destinationContactEmail" | "estimatedCost" | "validUntil" | "currency" | "status" | "submittedAt" | "acceptedAt" | "rejectedAt" | "paymentMethod" | "agentComment" | "treatmentStartedAt" | "treatmentValidatedAt" | "treatmentAgentId" | "cancelledAt" | "cancelReason" | "shipmentId" | "paymentReceivedAt" | "paymentReceivedById" | "createdById" | "deletedAt" | "deletedById" | "depotId" | "createdAt" | "updatedAt", ExtArgs["result"]["quote"]>
   export type QuoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Quote$userArgs<ExtArgs>
     client?: boolean | Quote$clientArgs<ExtArgs>
@@ -22907,6 +23254,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
     documents?: boolean | Quote$documentsArgs<ExtArgs>
     logs?: boolean | Quote$logsArgs<ExtArgs>
     packages?: boolean | Quote$packagesArgs<ExtArgs>
@@ -22920,6 +23269,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
   }
   export type QuoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Quote$userArgs<ExtArgs>
@@ -22929,6 +23280,8 @@ export namespace Prisma {
     shipment?: boolean | Quote$shipmentArgs<ExtArgs>
     paymentReceivedBy?: boolean | Quote$paymentReceivedByArgs<ExtArgs>
     createdBy?: boolean | Quote$createdByArgs<ExtArgs>
+    deletedBy?: boolean | Quote$deletedByArgs<ExtArgs>
+    depot?: boolean | Quote$depotArgs<ExtArgs>
   }
 
   export type $QuotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -22941,6 +23294,8 @@ export namespace Prisma {
       shipment: Prisma.$ShipmentPayload<ExtArgs> | null
       paymentReceivedBy: Prisma.$UserPayload<ExtArgs> | null
       createdBy: Prisma.$UserPayload<ExtArgs> | null
+      deletedBy: Prisma.$UserPayload<ExtArgs> | null
+      depot: Prisma.$DepotPayload<ExtArgs> | null
       documents: Prisma.$DocumentPayload<ExtArgs>[]
       logs: Prisma.$QuoteLogPayload<ExtArgs>[]
       packages: Prisma.$QuotePackagePayload<ExtArgs>[]
@@ -22995,6 +23350,9 @@ export namespace Prisma {
       paymentReceivedAt: Date | null
       paymentReceivedById: string | null
       createdById: string | null
+      deletedAt: Date | null
+      deletedById: string | null
+      depotId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["quote"]>
@@ -23398,6 +23756,8 @@ export namespace Prisma {
     shipment<T extends Quote$shipmentArgs<ExtArgs> = {}>(args?: Subset<T, Quote$shipmentArgs<ExtArgs>>): Prisma__ShipmentClient<$Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     paymentReceivedBy<T extends Quote$paymentReceivedByArgs<ExtArgs> = {}>(args?: Subset<T, Quote$paymentReceivedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends Quote$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Quote$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    deletedBy<T extends Quote$deletedByArgs<ExtArgs> = {}>(args?: Subset<T, Quote$deletedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    depot<T extends Quote$depotArgs<ExtArgs> = {}>(args?: Subset<T, Quote$depotArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     documents<T extends Quote$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Quote$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     logs<T extends Quote$logsArgs<ExtArgs> = {}>(args?: Subset<T, Quote$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     packages<T extends Quote$packagesArgs<ExtArgs> = {}>(args?: Subset<T, Quote$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -23479,6 +23839,9 @@ export namespace Prisma {
     readonly paymentReceivedAt: FieldRef<"Quote", 'DateTime'>
     readonly paymentReceivedById: FieldRef<"Quote", 'String'>
     readonly createdById: FieldRef<"Quote", 'String'>
+    readonly deletedAt: FieldRef<"Quote", 'DateTime'>
+    readonly deletedById: FieldRef<"Quote", 'String'>
+    readonly depotId: FieldRef<"Quote", 'String'>
     readonly createdAt: FieldRef<"Quote", 'DateTime'>
     readonly updatedAt: FieldRef<"Quote", 'DateTime'>
   }
@@ -24007,6 +24370,44 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * Quote.deletedBy
+   */
+  export type Quote$deletedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * Quote.depot
+   */
+  export type Quote$depotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    where?: DepotWhereInput
   }
 
   /**
@@ -35679,6 +36080,2359 @@ export namespace Prisma {
 
 
   /**
+   * Model Depot
+   */
+
+  export type AggregateDepot = {
+    _count: DepotCountAggregateOutputType | null
+    _min: DepotMinAggregateOutputType | null
+    _max: DepotMaxAggregateOutputType | null
+  }
+
+  export type DepotMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    code: string | null
+    description: string | null
+    address: string | null
+    city: string | null
+    country: string | null
+    postalCode: string | null
+    phone: string | null
+    email: string | null
+    isDefault: boolean | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DepotMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    code: string | null
+    description: string | null
+    address: string | null
+    city: string | null
+    country: string | null
+    postalCode: string | null
+    phone: string | null
+    email: string | null
+    isDefault: boolean | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DepotCountAggregateOutputType = {
+    id: number
+    name: number
+    code: number
+    description: number
+    address: number
+    city: number
+    country: number
+    postalCode: number
+    phone: number
+    email: number
+    isDefault: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DepotMinAggregateInputType = {
+    id?: true
+    name?: true
+    code?: true
+    description?: true
+    address?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    phone?: true
+    email?: true
+    isDefault?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DepotMaxAggregateInputType = {
+    id?: true
+    name?: true
+    code?: true
+    description?: true
+    address?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    phone?: true
+    email?: true
+    isDefault?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DepotCountAggregateInputType = {
+    id?: true
+    name?: true
+    code?: true
+    description?: true
+    address?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    phone?: true
+    email?: true
+    isDefault?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DepotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Depot to aggregate.
+     */
+    where?: DepotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Depots to fetch.
+     */
+    orderBy?: DepotOrderByWithRelationInput | DepotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DepotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Depots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Depots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Depots
+    **/
+    _count?: true | DepotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DepotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DepotMaxAggregateInputType
+  }
+
+  export type GetDepotAggregateType<T extends DepotAggregateArgs> = {
+        [P in keyof T & keyof AggregateDepot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDepot[P]>
+      : GetScalarType<T[P], AggregateDepot[P]>
+  }
+
+
+
+
+  export type DepotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DepotWhereInput
+    orderBy?: DepotOrderByWithAggregationInput | DepotOrderByWithAggregationInput[]
+    by: DepotScalarFieldEnum[] | DepotScalarFieldEnum
+    having?: DepotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DepotCountAggregateInputType | true
+    _min?: DepotMinAggregateInputType
+    _max?: DepotMaxAggregateInputType
+  }
+
+  export type DepotGroupByOutputType = {
+    id: string
+    name: string
+    code: string
+    description: string | null
+    address: string
+    city: string
+    country: string
+    postalCode: string | null
+    phone: string | null
+    email: string | null
+    isDefault: boolean
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: DepotCountAggregateOutputType | null
+    _min: DepotMinAggregateOutputType | null
+    _max: DepotMaxAggregateOutputType | null
+  }
+
+  type GetDepotGroupByPayload<T extends DepotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DepotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DepotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DepotGroupByOutputType[P]>
+            : GetScalarType<T[P], DepotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DepotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    code?: boolean
+    description?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    phone?: boolean
+    email?: boolean
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    contacts?: boolean | Depot$contactsArgs<ExtArgs>
+    quotes?: boolean | Depot$quotesArgs<ExtArgs>
+    shipments?: boolean | Depot$shipmentsArgs<ExtArgs>
+    _count?: boolean | DepotCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["depot"]>
+
+  export type DepotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    code?: boolean
+    description?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    phone?: boolean
+    email?: boolean
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["depot"]>
+
+  export type DepotSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    code?: boolean
+    description?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    phone?: boolean
+    email?: boolean
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["depot"]>
+
+  export type DepotSelectScalar = {
+    id?: boolean
+    name?: boolean
+    code?: boolean
+    description?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    phone?: boolean
+    email?: boolean
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DepotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "code" | "description" | "address" | "city" | "country" | "postalCode" | "phone" | "email" | "isDefault" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["depot"]>
+  export type DepotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    contacts?: boolean | Depot$contactsArgs<ExtArgs>
+    quotes?: boolean | Depot$quotesArgs<ExtArgs>
+    shipments?: boolean | Depot$shipmentsArgs<ExtArgs>
+    _count?: boolean | DepotCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DepotIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DepotIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $DepotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Depot"
+    objects: {
+      contacts: Prisma.$DepotContactPayload<ExtArgs>[]
+      quotes: Prisma.$QuotePayload<ExtArgs>[]
+      shipments: Prisma.$ShipmentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      code: string
+      description: string | null
+      address: string
+      city: string
+      country: string
+      postalCode: string | null
+      phone: string | null
+      email: string | null
+      isDefault: boolean
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["depot"]>
+    composites: {}
+  }
+
+  type DepotGetPayload<S extends boolean | null | undefined | DepotDefaultArgs> = $Result.GetResult<Prisma.$DepotPayload, S>
+
+  type DepotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DepotFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DepotCountAggregateInputType | true
+    }
+
+  export interface DepotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Depot'], meta: { name: 'Depot' } }
+    /**
+     * Find zero or one Depot that matches the filter.
+     * @param {DepotFindUniqueArgs} args - Arguments to find a Depot
+     * @example
+     * // Get one Depot
+     * const depot = await prisma.depot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DepotFindUniqueArgs>(args: SelectSubset<T, DepotFindUniqueArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Depot that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DepotFindUniqueOrThrowArgs} args - Arguments to find a Depot
+     * @example
+     * // Get one Depot
+     * const depot = await prisma.depot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DepotFindUniqueOrThrowArgs>(args: SelectSubset<T, DepotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Depot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotFindFirstArgs} args - Arguments to find a Depot
+     * @example
+     * // Get one Depot
+     * const depot = await prisma.depot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DepotFindFirstArgs>(args?: SelectSubset<T, DepotFindFirstArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Depot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotFindFirstOrThrowArgs} args - Arguments to find a Depot
+     * @example
+     * // Get one Depot
+     * const depot = await prisma.depot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DepotFindFirstOrThrowArgs>(args?: SelectSubset<T, DepotFindFirstOrThrowArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Depots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Depots
+     * const depots = await prisma.depot.findMany()
+     * 
+     * // Get first 10 Depots
+     * const depots = await prisma.depot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const depotWithIdOnly = await prisma.depot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DepotFindManyArgs>(args?: SelectSubset<T, DepotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Depot.
+     * @param {DepotCreateArgs} args - Arguments to create a Depot.
+     * @example
+     * // Create one Depot
+     * const Depot = await prisma.depot.create({
+     *   data: {
+     *     // ... data to create a Depot
+     *   }
+     * })
+     * 
+     */
+    create<T extends DepotCreateArgs>(args: SelectSubset<T, DepotCreateArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Depots.
+     * @param {DepotCreateManyArgs} args - Arguments to create many Depots.
+     * @example
+     * // Create many Depots
+     * const depot = await prisma.depot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DepotCreateManyArgs>(args?: SelectSubset<T, DepotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Depots and returns the data saved in the database.
+     * @param {DepotCreateManyAndReturnArgs} args - Arguments to create many Depots.
+     * @example
+     * // Create many Depots
+     * const depot = await prisma.depot.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Depots and only return the `id`
+     * const depotWithIdOnly = await prisma.depot.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DepotCreateManyAndReturnArgs>(args?: SelectSubset<T, DepotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Depot.
+     * @param {DepotDeleteArgs} args - Arguments to delete one Depot.
+     * @example
+     * // Delete one Depot
+     * const Depot = await prisma.depot.delete({
+     *   where: {
+     *     // ... filter to delete one Depot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DepotDeleteArgs>(args: SelectSubset<T, DepotDeleteArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Depot.
+     * @param {DepotUpdateArgs} args - Arguments to update one Depot.
+     * @example
+     * // Update one Depot
+     * const depot = await prisma.depot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DepotUpdateArgs>(args: SelectSubset<T, DepotUpdateArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Depots.
+     * @param {DepotDeleteManyArgs} args - Arguments to filter Depots to delete.
+     * @example
+     * // Delete a few Depots
+     * const { count } = await prisma.depot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DepotDeleteManyArgs>(args?: SelectSubset<T, DepotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Depots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Depots
+     * const depot = await prisma.depot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DepotUpdateManyArgs>(args: SelectSubset<T, DepotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Depots and returns the data updated in the database.
+     * @param {DepotUpdateManyAndReturnArgs} args - Arguments to update many Depots.
+     * @example
+     * // Update many Depots
+     * const depot = await prisma.depot.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Depots and only return the `id`
+     * const depotWithIdOnly = await prisma.depot.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DepotUpdateManyAndReturnArgs>(args: SelectSubset<T, DepotUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Depot.
+     * @param {DepotUpsertArgs} args - Arguments to update or create a Depot.
+     * @example
+     * // Update or create a Depot
+     * const depot = await prisma.depot.upsert({
+     *   create: {
+     *     // ... data to create a Depot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Depot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DepotUpsertArgs>(args: SelectSubset<T, DepotUpsertArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Depots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotCountArgs} args - Arguments to filter Depots to count.
+     * @example
+     * // Count the number of Depots
+     * const count = await prisma.depot.count({
+     *   where: {
+     *     // ... the filter for the Depots we want to count
+     *   }
+     * })
+    **/
+    count<T extends DepotCountArgs>(
+      args?: Subset<T, DepotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DepotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Depot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DepotAggregateArgs>(args: Subset<T, DepotAggregateArgs>): Prisma.PrismaPromise<GetDepotAggregateType<T>>
+
+    /**
+     * Group by Depot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DepotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DepotGroupByArgs['orderBy'] }
+        : { orderBy?: DepotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DepotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDepotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Depot model
+   */
+  readonly fields: DepotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Depot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DepotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    contacts<T extends Depot$contactsArgs<ExtArgs> = {}>(args?: Subset<T, Depot$contactsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quotes<T extends Depot$quotesArgs<ExtArgs> = {}>(args?: Subset<T, Depot$quotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    shipments<T extends Depot$shipmentsArgs<ExtArgs> = {}>(args?: Subset<T, Depot$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Depot model
+   */
+  interface DepotFieldRefs {
+    readonly id: FieldRef<"Depot", 'String'>
+    readonly name: FieldRef<"Depot", 'String'>
+    readonly code: FieldRef<"Depot", 'String'>
+    readonly description: FieldRef<"Depot", 'String'>
+    readonly address: FieldRef<"Depot", 'String'>
+    readonly city: FieldRef<"Depot", 'String'>
+    readonly country: FieldRef<"Depot", 'String'>
+    readonly postalCode: FieldRef<"Depot", 'String'>
+    readonly phone: FieldRef<"Depot", 'String'>
+    readonly email: FieldRef<"Depot", 'String'>
+    readonly isDefault: FieldRef<"Depot", 'Boolean'>
+    readonly isActive: FieldRef<"Depot", 'Boolean'>
+    readonly createdAt: FieldRef<"Depot", 'DateTime'>
+    readonly updatedAt: FieldRef<"Depot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Depot findUnique
+   */
+  export type DepotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter, which Depot to fetch.
+     */
+    where: DepotWhereUniqueInput
+  }
+
+  /**
+   * Depot findUniqueOrThrow
+   */
+  export type DepotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter, which Depot to fetch.
+     */
+    where: DepotWhereUniqueInput
+  }
+
+  /**
+   * Depot findFirst
+   */
+  export type DepotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter, which Depot to fetch.
+     */
+    where?: DepotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Depots to fetch.
+     */
+    orderBy?: DepotOrderByWithRelationInput | DepotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Depots.
+     */
+    cursor?: DepotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Depots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Depots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Depots.
+     */
+    distinct?: DepotScalarFieldEnum | DepotScalarFieldEnum[]
+  }
+
+  /**
+   * Depot findFirstOrThrow
+   */
+  export type DepotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter, which Depot to fetch.
+     */
+    where?: DepotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Depots to fetch.
+     */
+    orderBy?: DepotOrderByWithRelationInput | DepotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Depots.
+     */
+    cursor?: DepotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Depots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Depots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Depots.
+     */
+    distinct?: DepotScalarFieldEnum | DepotScalarFieldEnum[]
+  }
+
+  /**
+   * Depot findMany
+   */
+  export type DepotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter, which Depots to fetch.
+     */
+    where?: DepotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Depots to fetch.
+     */
+    orderBy?: DepotOrderByWithRelationInput | DepotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Depots.
+     */
+    cursor?: DepotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Depots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Depots.
+     */
+    skip?: number
+    distinct?: DepotScalarFieldEnum | DepotScalarFieldEnum[]
+  }
+
+  /**
+   * Depot create
+   */
+  export type DepotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Depot.
+     */
+    data: XOR<DepotCreateInput, DepotUncheckedCreateInput>
+  }
+
+  /**
+   * Depot createMany
+   */
+  export type DepotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Depots.
+     */
+    data: DepotCreateManyInput | DepotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Depot createManyAndReturn
+   */
+  export type DepotCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * The data used to create many Depots.
+     */
+    data: DepotCreateManyInput | DepotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Depot update
+   */
+  export type DepotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Depot.
+     */
+    data: XOR<DepotUpdateInput, DepotUncheckedUpdateInput>
+    /**
+     * Choose, which Depot to update.
+     */
+    where: DepotWhereUniqueInput
+  }
+
+  /**
+   * Depot updateMany
+   */
+  export type DepotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Depots.
+     */
+    data: XOR<DepotUpdateManyMutationInput, DepotUncheckedUpdateManyInput>
+    /**
+     * Filter which Depots to update
+     */
+    where?: DepotWhereInput
+    /**
+     * Limit how many Depots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Depot updateManyAndReturn
+   */
+  export type DepotUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * The data used to update Depots.
+     */
+    data: XOR<DepotUpdateManyMutationInput, DepotUncheckedUpdateManyInput>
+    /**
+     * Filter which Depots to update
+     */
+    where?: DepotWhereInput
+    /**
+     * Limit how many Depots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Depot upsert
+   */
+  export type DepotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Depot to update in case it exists.
+     */
+    where: DepotWhereUniqueInput
+    /**
+     * In case the Depot found by the `where` argument doesn't exist, create a new Depot with this data.
+     */
+    create: XOR<DepotCreateInput, DepotUncheckedCreateInput>
+    /**
+     * In case the Depot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DepotUpdateInput, DepotUncheckedUpdateInput>
+  }
+
+  /**
+   * Depot delete
+   */
+  export type DepotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+    /**
+     * Filter which Depot to delete.
+     */
+    where: DepotWhereUniqueInput
+  }
+
+  /**
+   * Depot deleteMany
+   */
+  export type DepotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Depots to delete
+     */
+    where?: DepotWhereInput
+    /**
+     * Limit how many Depots to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Depot.contacts
+   */
+  export type Depot$contactsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    where?: DepotContactWhereInput
+    orderBy?: DepotContactOrderByWithRelationInput | DepotContactOrderByWithRelationInput[]
+    cursor?: DepotContactWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DepotContactScalarFieldEnum | DepotContactScalarFieldEnum[]
+  }
+
+  /**
+   * Depot.quotes
+   */
+  export type Depot$quotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Quote
+     */
+    select?: QuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Quote
+     */
+    omit?: QuoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteInclude<ExtArgs> | null
+    where?: QuoteWhereInput
+    orderBy?: QuoteOrderByWithRelationInput | QuoteOrderByWithRelationInput[]
+    cursor?: QuoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteScalarFieldEnum | QuoteScalarFieldEnum[]
+  }
+
+  /**
+   * Depot.shipments
+   */
+  export type Depot$shipmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shipment
+     */
+    select?: ShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Shipment
+     */
+    omit?: ShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShipmentInclude<ExtArgs> | null
+    where?: ShipmentWhereInput
+    orderBy?: ShipmentOrderByWithRelationInput | ShipmentOrderByWithRelationInput[]
+    cursor?: ShipmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ShipmentScalarFieldEnum | ShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * Depot without action
+   */
+  export type DepotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Depot
+     */
+    select?: DepotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Depot
+     */
+    omit?: DepotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DepotContact
+   */
+
+  export type AggregateDepotContact = {
+    _count: DepotContactCountAggregateOutputType | null
+    _min: DepotContactMinAggregateOutputType | null
+    _max: DepotContactMaxAggregateOutputType | null
+  }
+
+  export type DepotContactMinAggregateOutputType = {
+    id: string | null
+    depotId: string | null
+    name: string | null
+    role: string | null
+    email: string | null
+    phone: string | null
+    isPrimary: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DepotContactMaxAggregateOutputType = {
+    id: string | null
+    depotId: string | null
+    name: string | null
+    role: string | null
+    email: string | null
+    phone: string | null
+    isPrimary: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DepotContactCountAggregateOutputType = {
+    id: number
+    depotId: number
+    name: number
+    role: number
+    email: number
+    phone: number
+    isPrimary: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DepotContactMinAggregateInputType = {
+    id?: true
+    depotId?: true
+    name?: true
+    role?: true
+    email?: true
+    phone?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DepotContactMaxAggregateInputType = {
+    id?: true
+    depotId?: true
+    name?: true
+    role?: true
+    email?: true
+    phone?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DepotContactCountAggregateInputType = {
+    id?: true
+    depotId?: true
+    name?: true
+    role?: true
+    email?: true
+    phone?: true
+    isPrimary?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DepotContactAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DepotContact to aggregate.
+     */
+    where?: DepotContactWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DepotContacts to fetch.
+     */
+    orderBy?: DepotContactOrderByWithRelationInput | DepotContactOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DepotContactWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DepotContacts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DepotContacts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DepotContacts
+    **/
+    _count?: true | DepotContactCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DepotContactMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DepotContactMaxAggregateInputType
+  }
+
+  export type GetDepotContactAggregateType<T extends DepotContactAggregateArgs> = {
+        [P in keyof T & keyof AggregateDepotContact]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDepotContact[P]>
+      : GetScalarType<T[P], AggregateDepotContact[P]>
+  }
+
+
+
+
+  export type DepotContactGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DepotContactWhereInput
+    orderBy?: DepotContactOrderByWithAggregationInput | DepotContactOrderByWithAggregationInput[]
+    by: DepotContactScalarFieldEnum[] | DepotContactScalarFieldEnum
+    having?: DepotContactScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DepotContactCountAggregateInputType | true
+    _min?: DepotContactMinAggregateInputType
+    _max?: DepotContactMaxAggregateInputType
+  }
+
+  export type DepotContactGroupByOutputType = {
+    id: string
+    depotId: string
+    name: string
+    role: string | null
+    email: string | null
+    phone: string | null
+    isPrimary: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: DepotContactCountAggregateOutputType | null
+    _min: DepotContactMinAggregateOutputType | null
+    _max: DepotContactMaxAggregateOutputType | null
+  }
+
+  type GetDepotContactGroupByPayload<T extends DepotContactGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DepotContactGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DepotContactGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DepotContactGroupByOutputType[P]>
+            : GetScalarType<T[P], DepotContactGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DepotContactSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    depotId?: boolean
+    name?: boolean
+    role?: boolean
+    email?: boolean
+    phone?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["depotContact"]>
+
+  export type DepotContactSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    depotId?: boolean
+    name?: boolean
+    role?: boolean
+    email?: boolean
+    phone?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["depotContact"]>
+
+  export type DepotContactSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    depotId?: boolean
+    name?: boolean
+    role?: boolean
+    email?: boolean
+    phone?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["depotContact"]>
+
+  export type DepotContactSelectScalar = {
+    id?: boolean
+    depotId?: boolean
+    name?: boolean
+    role?: boolean
+    email?: boolean
+    phone?: boolean
+    isPrimary?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DepotContactOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "depotId" | "name" | "role" | "email" | "phone" | "isPrimary" | "createdAt" | "updatedAt", ExtArgs["result"]["depotContact"]>
+  export type DepotContactInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }
+  export type DepotContactIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }
+  export type DepotContactIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    depot?: boolean | DepotDefaultArgs<ExtArgs>
+  }
+
+  export type $DepotContactPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DepotContact"
+    objects: {
+      depot: Prisma.$DepotPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      depotId: string
+      name: string
+      role: string | null
+      email: string | null
+      phone: string | null
+      isPrimary: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["depotContact"]>
+    composites: {}
+  }
+
+  type DepotContactGetPayload<S extends boolean | null | undefined | DepotContactDefaultArgs> = $Result.GetResult<Prisma.$DepotContactPayload, S>
+
+  type DepotContactCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DepotContactFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DepotContactCountAggregateInputType | true
+    }
+
+  export interface DepotContactDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DepotContact'], meta: { name: 'DepotContact' } }
+    /**
+     * Find zero or one DepotContact that matches the filter.
+     * @param {DepotContactFindUniqueArgs} args - Arguments to find a DepotContact
+     * @example
+     * // Get one DepotContact
+     * const depotContact = await prisma.depotContact.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DepotContactFindUniqueArgs>(args: SelectSubset<T, DepotContactFindUniqueArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DepotContact that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DepotContactFindUniqueOrThrowArgs} args - Arguments to find a DepotContact
+     * @example
+     * // Get one DepotContact
+     * const depotContact = await prisma.depotContact.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DepotContactFindUniqueOrThrowArgs>(args: SelectSubset<T, DepotContactFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DepotContact that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactFindFirstArgs} args - Arguments to find a DepotContact
+     * @example
+     * // Get one DepotContact
+     * const depotContact = await prisma.depotContact.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DepotContactFindFirstArgs>(args?: SelectSubset<T, DepotContactFindFirstArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DepotContact that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactFindFirstOrThrowArgs} args - Arguments to find a DepotContact
+     * @example
+     * // Get one DepotContact
+     * const depotContact = await prisma.depotContact.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DepotContactFindFirstOrThrowArgs>(args?: SelectSubset<T, DepotContactFindFirstOrThrowArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DepotContacts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DepotContacts
+     * const depotContacts = await prisma.depotContact.findMany()
+     * 
+     * // Get first 10 DepotContacts
+     * const depotContacts = await prisma.depotContact.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const depotContactWithIdOnly = await prisma.depotContact.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DepotContactFindManyArgs>(args?: SelectSubset<T, DepotContactFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DepotContact.
+     * @param {DepotContactCreateArgs} args - Arguments to create a DepotContact.
+     * @example
+     * // Create one DepotContact
+     * const DepotContact = await prisma.depotContact.create({
+     *   data: {
+     *     // ... data to create a DepotContact
+     *   }
+     * })
+     * 
+     */
+    create<T extends DepotContactCreateArgs>(args: SelectSubset<T, DepotContactCreateArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DepotContacts.
+     * @param {DepotContactCreateManyArgs} args - Arguments to create many DepotContacts.
+     * @example
+     * // Create many DepotContacts
+     * const depotContact = await prisma.depotContact.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DepotContactCreateManyArgs>(args?: SelectSubset<T, DepotContactCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DepotContacts and returns the data saved in the database.
+     * @param {DepotContactCreateManyAndReturnArgs} args - Arguments to create many DepotContacts.
+     * @example
+     * // Create many DepotContacts
+     * const depotContact = await prisma.depotContact.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DepotContacts and only return the `id`
+     * const depotContactWithIdOnly = await prisma.depotContact.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DepotContactCreateManyAndReturnArgs>(args?: SelectSubset<T, DepotContactCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DepotContact.
+     * @param {DepotContactDeleteArgs} args - Arguments to delete one DepotContact.
+     * @example
+     * // Delete one DepotContact
+     * const DepotContact = await prisma.depotContact.delete({
+     *   where: {
+     *     // ... filter to delete one DepotContact
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DepotContactDeleteArgs>(args: SelectSubset<T, DepotContactDeleteArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DepotContact.
+     * @param {DepotContactUpdateArgs} args - Arguments to update one DepotContact.
+     * @example
+     * // Update one DepotContact
+     * const depotContact = await prisma.depotContact.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DepotContactUpdateArgs>(args: SelectSubset<T, DepotContactUpdateArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DepotContacts.
+     * @param {DepotContactDeleteManyArgs} args - Arguments to filter DepotContacts to delete.
+     * @example
+     * // Delete a few DepotContacts
+     * const { count } = await prisma.depotContact.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DepotContactDeleteManyArgs>(args?: SelectSubset<T, DepotContactDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DepotContacts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DepotContacts
+     * const depotContact = await prisma.depotContact.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DepotContactUpdateManyArgs>(args: SelectSubset<T, DepotContactUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DepotContacts and returns the data updated in the database.
+     * @param {DepotContactUpdateManyAndReturnArgs} args - Arguments to update many DepotContacts.
+     * @example
+     * // Update many DepotContacts
+     * const depotContact = await prisma.depotContact.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DepotContacts and only return the `id`
+     * const depotContactWithIdOnly = await prisma.depotContact.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DepotContactUpdateManyAndReturnArgs>(args: SelectSubset<T, DepotContactUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DepotContact.
+     * @param {DepotContactUpsertArgs} args - Arguments to update or create a DepotContact.
+     * @example
+     * // Update or create a DepotContact
+     * const depotContact = await prisma.depotContact.upsert({
+     *   create: {
+     *     // ... data to create a DepotContact
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DepotContact we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DepotContactUpsertArgs>(args: SelectSubset<T, DepotContactUpsertArgs<ExtArgs>>): Prisma__DepotContactClient<$Result.GetResult<Prisma.$DepotContactPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DepotContacts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactCountArgs} args - Arguments to filter DepotContacts to count.
+     * @example
+     * // Count the number of DepotContacts
+     * const count = await prisma.depotContact.count({
+     *   where: {
+     *     // ... the filter for the DepotContacts we want to count
+     *   }
+     * })
+    **/
+    count<T extends DepotContactCountArgs>(
+      args?: Subset<T, DepotContactCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DepotContactCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DepotContact.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DepotContactAggregateArgs>(args: Subset<T, DepotContactAggregateArgs>): Prisma.PrismaPromise<GetDepotContactAggregateType<T>>
+
+    /**
+     * Group by DepotContact.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DepotContactGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DepotContactGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DepotContactGroupByArgs['orderBy'] }
+        : { orderBy?: DepotContactGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DepotContactGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDepotContactGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DepotContact model
+   */
+  readonly fields: DepotContactFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DepotContact.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DepotContactClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    depot<T extends DepotDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DepotDefaultArgs<ExtArgs>>): Prisma__DepotClient<$Result.GetResult<Prisma.$DepotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DepotContact model
+   */
+  interface DepotContactFieldRefs {
+    readonly id: FieldRef<"DepotContact", 'String'>
+    readonly depotId: FieldRef<"DepotContact", 'String'>
+    readonly name: FieldRef<"DepotContact", 'String'>
+    readonly role: FieldRef<"DepotContact", 'String'>
+    readonly email: FieldRef<"DepotContact", 'String'>
+    readonly phone: FieldRef<"DepotContact", 'String'>
+    readonly isPrimary: FieldRef<"DepotContact", 'Boolean'>
+    readonly createdAt: FieldRef<"DepotContact", 'DateTime'>
+    readonly updatedAt: FieldRef<"DepotContact", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DepotContact findUnique
+   */
+  export type DepotContactFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter, which DepotContact to fetch.
+     */
+    where: DepotContactWhereUniqueInput
+  }
+
+  /**
+   * DepotContact findUniqueOrThrow
+   */
+  export type DepotContactFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter, which DepotContact to fetch.
+     */
+    where: DepotContactWhereUniqueInput
+  }
+
+  /**
+   * DepotContact findFirst
+   */
+  export type DepotContactFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter, which DepotContact to fetch.
+     */
+    where?: DepotContactWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DepotContacts to fetch.
+     */
+    orderBy?: DepotContactOrderByWithRelationInput | DepotContactOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DepotContacts.
+     */
+    cursor?: DepotContactWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DepotContacts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DepotContacts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DepotContacts.
+     */
+    distinct?: DepotContactScalarFieldEnum | DepotContactScalarFieldEnum[]
+  }
+
+  /**
+   * DepotContact findFirstOrThrow
+   */
+  export type DepotContactFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter, which DepotContact to fetch.
+     */
+    where?: DepotContactWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DepotContacts to fetch.
+     */
+    orderBy?: DepotContactOrderByWithRelationInput | DepotContactOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DepotContacts.
+     */
+    cursor?: DepotContactWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DepotContacts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DepotContacts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DepotContacts.
+     */
+    distinct?: DepotContactScalarFieldEnum | DepotContactScalarFieldEnum[]
+  }
+
+  /**
+   * DepotContact findMany
+   */
+  export type DepotContactFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter, which DepotContacts to fetch.
+     */
+    where?: DepotContactWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DepotContacts to fetch.
+     */
+    orderBy?: DepotContactOrderByWithRelationInput | DepotContactOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DepotContacts.
+     */
+    cursor?: DepotContactWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DepotContacts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DepotContacts.
+     */
+    skip?: number
+    distinct?: DepotContactScalarFieldEnum | DepotContactScalarFieldEnum[]
+  }
+
+  /**
+   * DepotContact create
+   */
+  export type DepotContactCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DepotContact.
+     */
+    data: XOR<DepotContactCreateInput, DepotContactUncheckedCreateInput>
+  }
+
+  /**
+   * DepotContact createMany
+   */
+  export type DepotContactCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DepotContacts.
+     */
+    data: DepotContactCreateManyInput | DepotContactCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DepotContact createManyAndReturn
+   */
+  export type DepotContactCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * The data used to create many DepotContacts.
+     */
+    data: DepotContactCreateManyInput | DepotContactCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DepotContact update
+   */
+  export type DepotContactUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DepotContact.
+     */
+    data: XOR<DepotContactUpdateInput, DepotContactUncheckedUpdateInput>
+    /**
+     * Choose, which DepotContact to update.
+     */
+    where: DepotContactWhereUniqueInput
+  }
+
+  /**
+   * DepotContact updateMany
+   */
+  export type DepotContactUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DepotContacts.
+     */
+    data: XOR<DepotContactUpdateManyMutationInput, DepotContactUncheckedUpdateManyInput>
+    /**
+     * Filter which DepotContacts to update
+     */
+    where?: DepotContactWhereInput
+    /**
+     * Limit how many DepotContacts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DepotContact updateManyAndReturn
+   */
+  export type DepotContactUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * The data used to update DepotContacts.
+     */
+    data: XOR<DepotContactUpdateManyMutationInput, DepotContactUncheckedUpdateManyInput>
+    /**
+     * Filter which DepotContacts to update
+     */
+    where?: DepotContactWhereInput
+    /**
+     * Limit how many DepotContacts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DepotContact upsert
+   */
+  export type DepotContactUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DepotContact to update in case it exists.
+     */
+    where: DepotContactWhereUniqueInput
+    /**
+     * In case the DepotContact found by the `where` argument doesn't exist, create a new DepotContact with this data.
+     */
+    create: XOR<DepotContactCreateInput, DepotContactUncheckedCreateInput>
+    /**
+     * In case the DepotContact was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DepotContactUpdateInput, DepotContactUncheckedUpdateInput>
+  }
+
+  /**
+   * DepotContact delete
+   */
+  export type DepotContactDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+    /**
+     * Filter which DepotContact to delete.
+     */
+    where: DepotContactWhereUniqueInput
+  }
+
+  /**
+   * DepotContact deleteMany
+   */
+  export type DepotContactDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DepotContacts to delete
+     */
+    where?: DepotContactWhereInput
+    /**
+     * Limit how many DepotContacts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DepotContact without action
+   */
+  export type DepotContactDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DepotContact
+     */
+    select?: DepotContactSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DepotContact
+     */
+    omit?: DepotContactOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DepotContactInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -35828,7 +38582,8 @@ export namespace Prisma {
     paymentReceivedById: 'paymentReceivedById',
     createdById: 'createdById',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    depotId: 'depotId'
   };
 
   export type ShipmentScalarFieldEnum = (typeof ShipmentScalarFieldEnum)[keyof typeof ShipmentScalarFieldEnum]
@@ -36051,6 +38806,9 @@ export namespace Prisma {
     paymentReceivedAt: 'paymentReceivedAt',
     paymentReceivedById: 'paymentReceivedById',
     createdById: 'createdById',
+    deletedAt: 'deletedAt',
+    deletedById: 'deletedById',
+    depotId: 'depotId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -36232,6 +38990,41 @@ export namespace Prisma {
   };
 
   export type SystemConfigScalarFieldEnum = (typeof SystemConfigScalarFieldEnum)[keyof typeof SystemConfigScalarFieldEnum]
+
+
+  export const DepotScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    code: 'code',
+    description: 'description',
+    address: 'address',
+    city: 'city',
+    country: 'country',
+    postalCode: 'postalCode',
+    phone: 'phone',
+    email: 'email',
+    isDefault: 'isDefault',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DepotScalarFieldEnum = (typeof DepotScalarFieldEnum)[keyof typeof DepotScalarFieldEnum]
+
+
+  export const DepotContactScalarFieldEnum: {
+    id: 'id',
+    depotId: 'depotId',
+    name: 'name',
+    role: 'role',
+    email: 'email',
+    phone: 'phone',
+    isPrimary: 'isPrimary',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DepotContactScalarFieldEnum = (typeof DepotContactScalarFieldEnum)[keyof typeof DepotContactScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -36615,6 +39408,7 @@ export namespace Prisma {
     createdQuotes?: QuoteListRelationFilter
     confirmedQuotePayments?: QuoteListRelationFilter
     confirmedShipmentPayments?: ShipmentListRelationFilter
+    deletedQuotes?: QuoteListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -36652,6 +39446,7 @@ export namespace Prisma {
     createdQuotes?: QuoteOrderByRelationAggregateInput
     confirmedQuotePayments?: QuoteOrderByRelationAggregateInput
     confirmedShipmentPayments?: ShipmentOrderByRelationAggregateInput
+    deletedQuotes?: QuoteOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -36692,6 +39487,7 @@ export namespace Prisma {
     createdQuotes?: QuoteListRelationFilter
     confirmedQuotePayments?: QuoteListRelationFilter
     confirmedShipmentPayments?: ShipmentListRelationFilter
+    deletedQuotes?: QuoteListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -37166,9 +39962,11 @@ export namespace Prisma {
     createdById?: StringFilter<"Shipment"> | string
     createdAt?: DateTimeFilter<"Shipment"> | Date | string
     updatedAt?: DateTimeFilter<"Shipment"> | Date | string
+    depotId?: StringNullableFilter<"Shipment"> | string | null
     client?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
     paymentReceivedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    depot?: XOR<DepotNullableScalarRelationFilter, DepotWhereInput> | null
     trackingEvents?: TrackingEventListRelationFilter
     documents?: DocumentListRelationFilter
     pickupRequests?: PickupRequestListRelationFilter
@@ -37221,9 +40019,11 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    depotId?: SortOrderInput | SortOrder
     client?: ClientOrderByWithRelationInput
     paymentReceivedBy?: UserOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
+    depot?: DepotOrderByWithRelationInput
     trackingEvents?: TrackingEventOrderByRelationAggregateInput
     documents?: DocumentOrderByRelationAggregateInput
     pickupRequests?: PickupRequestOrderByRelationAggregateInput
@@ -37279,9 +40079,11 @@ export namespace Prisma {
     createdById?: StringFilter<"Shipment"> | string
     createdAt?: DateTimeFilter<"Shipment"> | Date | string
     updatedAt?: DateTimeFilter<"Shipment"> | Date | string
+    depotId?: StringNullableFilter<"Shipment"> | string | null
     client?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
     paymentReceivedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdBy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    depot?: XOR<DepotNullableScalarRelationFilter, DepotWhereInput> | null
     trackingEvents?: TrackingEventListRelationFilter
     documents?: DocumentListRelationFilter
     pickupRequests?: PickupRequestListRelationFilter
@@ -37334,6 +40136,7 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    depotId?: SortOrderInput | SortOrder
     _count?: ShipmentCountOrderByAggregateInput
     _avg?: ShipmentAvgOrderByAggregateInput
     _max?: ShipmentMaxOrderByAggregateInput
@@ -37388,6 +40191,7 @@ export namespace Prisma {
     createdById?: StringWithAggregatesFilter<"Shipment"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Shipment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Shipment"> | Date | string
+    depotId?: StringNullableWithAggregatesFilter<"Shipment"> | string | null
   }
 
   export type ShipmentPackageWhereInput = {
@@ -38325,6 +41129,9 @@ export namespace Prisma {
     paymentReceivedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentReceivedById?: StringNullableFilter<"Quote"> | string | null
     createdById?: StringNullableFilter<"Quote"> | string | null
+    deletedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
+    deletedById?: StringNullableFilter<"Quote"> | string | null
+    depotId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -38334,6 +41141,8 @@ export namespace Prisma {
     shipment?: XOR<ShipmentNullableScalarRelationFilter, ShipmentWhereInput> | null
     paymentReceivedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    deletedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    depot?: XOR<DepotNullableScalarRelationFilter, DepotWhereInput> | null
     documents?: DocumentListRelationFilter
     logs?: QuoteLogListRelationFilter
     packages?: QuotePackageListRelationFilter
@@ -38389,6 +41198,9 @@ export namespace Prisma {
     paymentReceivedAt?: SortOrderInput | SortOrder
     paymentReceivedById?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    deletedById?: SortOrderInput | SortOrder
+    depotId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -38398,6 +41210,8 @@ export namespace Prisma {
     shipment?: ShipmentOrderByWithRelationInput
     paymentReceivedBy?: UserOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
+    deletedBy?: UserOrderByWithRelationInput
+    depot?: DepotOrderByWithRelationInput
     documents?: DocumentOrderByRelationAggregateInput
     logs?: QuoteLogOrderByRelationAggregateInput
     packages?: QuotePackageOrderByRelationAggregateInput
@@ -38456,6 +41270,9 @@ export namespace Prisma {
     paymentReceivedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentReceivedById?: StringNullableFilter<"Quote"> | string | null
     createdById?: StringNullableFilter<"Quote"> | string | null
+    deletedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
+    deletedById?: StringNullableFilter<"Quote"> | string | null
+    depotId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -38465,6 +41282,8 @@ export namespace Prisma {
     shipment?: XOR<ShipmentNullableScalarRelationFilter, ShipmentWhereInput> | null
     paymentReceivedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    deletedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    depot?: XOR<DepotNullableScalarRelationFilter, DepotWhereInput> | null
     documents?: DocumentListRelationFilter
     logs?: QuoteLogListRelationFilter
     packages?: QuotePackageListRelationFilter
@@ -38520,6 +41339,9 @@ export namespace Prisma {
     paymentReceivedAt?: SortOrderInput | SortOrder
     paymentReceivedById?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    deletedById?: SortOrderInput | SortOrder
+    depotId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: QuoteCountOrderByAggregateInput
@@ -38582,6 +41404,9 @@ export namespace Prisma {
     paymentReceivedAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
     paymentReceivedById?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     createdById?: StringNullableWithAggregatesFilter<"Quote"> | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
+    deletedById?: StringNullableWithAggregatesFilter<"Quote"> | string | null
+    depotId?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
   }
@@ -39490,6 +42315,187 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"SystemConfig"> | Date | string
   }
 
+  export type DepotWhereInput = {
+    AND?: DepotWhereInput | DepotWhereInput[]
+    OR?: DepotWhereInput[]
+    NOT?: DepotWhereInput | DepotWhereInput[]
+    id?: StringFilter<"Depot"> | string
+    name?: StringFilter<"Depot"> | string
+    code?: StringFilter<"Depot"> | string
+    description?: StringNullableFilter<"Depot"> | string | null
+    address?: StringFilter<"Depot"> | string
+    city?: StringFilter<"Depot"> | string
+    country?: StringFilter<"Depot"> | string
+    postalCode?: StringNullableFilter<"Depot"> | string | null
+    phone?: StringNullableFilter<"Depot"> | string | null
+    email?: StringNullableFilter<"Depot"> | string | null
+    isDefault?: BoolFilter<"Depot"> | boolean
+    isActive?: BoolFilter<"Depot"> | boolean
+    createdAt?: DateTimeFilter<"Depot"> | Date | string
+    updatedAt?: DateTimeFilter<"Depot"> | Date | string
+    contacts?: DepotContactListRelationFilter
+    quotes?: QuoteListRelationFilter
+    shipments?: ShipmentListRelationFilter
+  }
+
+  export type DepotOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    code?: SortOrder
+    description?: SortOrderInput | SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    isDefault?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    contacts?: DepotContactOrderByRelationAggregateInput
+    quotes?: QuoteOrderByRelationAggregateInput
+    shipments?: ShipmentOrderByRelationAggregateInput
+  }
+
+  export type DepotWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    AND?: DepotWhereInput | DepotWhereInput[]
+    OR?: DepotWhereInput[]
+    NOT?: DepotWhereInput | DepotWhereInput[]
+    name?: StringFilter<"Depot"> | string
+    description?: StringNullableFilter<"Depot"> | string | null
+    address?: StringFilter<"Depot"> | string
+    city?: StringFilter<"Depot"> | string
+    country?: StringFilter<"Depot"> | string
+    postalCode?: StringNullableFilter<"Depot"> | string | null
+    phone?: StringNullableFilter<"Depot"> | string | null
+    email?: StringNullableFilter<"Depot"> | string | null
+    isDefault?: BoolFilter<"Depot"> | boolean
+    isActive?: BoolFilter<"Depot"> | boolean
+    createdAt?: DateTimeFilter<"Depot"> | Date | string
+    updatedAt?: DateTimeFilter<"Depot"> | Date | string
+    contacts?: DepotContactListRelationFilter
+    quotes?: QuoteListRelationFilter
+    shipments?: ShipmentListRelationFilter
+  }, "id" | "code">
+
+  export type DepotOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    code?: SortOrder
+    description?: SortOrderInput | SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    isDefault?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DepotCountOrderByAggregateInput
+    _max?: DepotMaxOrderByAggregateInput
+    _min?: DepotMinOrderByAggregateInput
+  }
+
+  export type DepotScalarWhereWithAggregatesInput = {
+    AND?: DepotScalarWhereWithAggregatesInput | DepotScalarWhereWithAggregatesInput[]
+    OR?: DepotScalarWhereWithAggregatesInput[]
+    NOT?: DepotScalarWhereWithAggregatesInput | DepotScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Depot"> | string
+    name?: StringWithAggregatesFilter<"Depot"> | string
+    code?: StringWithAggregatesFilter<"Depot"> | string
+    description?: StringNullableWithAggregatesFilter<"Depot"> | string | null
+    address?: StringWithAggregatesFilter<"Depot"> | string
+    city?: StringWithAggregatesFilter<"Depot"> | string
+    country?: StringWithAggregatesFilter<"Depot"> | string
+    postalCode?: StringNullableWithAggregatesFilter<"Depot"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"Depot"> | string | null
+    email?: StringNullableWithAggregatesFilter<"Depot"> | string | null
+    isDefault?: BoolWithAggregatesFilter<"Depot"> | boolean
+    isActive?: BoolWithAggregatesFilter<"Depot"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Depot"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Depot"> | Date | string
+  }
+
+  export type DepotContactWhereInput = {
+    AND?: DepotContactWhereInput | DepotContactWhereInput[]
+    OR?: DepotContactWhereInput[]
+    NOT?: DepotContactWhereInput | DepotContactWhereInput[]
+    id?: StringFilter<"DepotContact"> | string
+    depotId?: StringFilter<"DepotContact"> | string
+    name?: StringFilter<"DepotContact"> | string
+    role?: StringNullableFilter<"DepotContact"> | string | null
+    email?: StringNullableFilter<"DepotContact"> | string | null
+    phone?: StringNullableFilter<"DepotContact"> | string | null
+    isPrimary?: BoolFilter<"DepotContact"> | boolean
+    createdAt?: DateTimeFilter<"DepotContact"> | Date | string
+    updatedAt?: DateTimeFilter<"DepotContact"> | Date | string
+    depot?: XOR<DepotScalarRelationFilter, DepotWhereInput>
+  }
+
+  export type DepotContactOrderByWithRelationInput = {
+    id?: SortOrder
+    depotId?: SortOrder
+    name?: SortOrder
+    role?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    depot?: DepotOrderByWithRelationInput
+  }
+
+  export type DepotContactWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DepotContactWhereInput | DepotContactWhereInput[]
+    OR?: DepotContactWhereInput[]
+    NOT?: DepotContactWhereInput | DepotContactWhereInput[]
+    depotId?: StringFilter<"DepotContact"> | string
+    name?: StringFilter<"DepotContact"> | string
+    role?: StringNullableFilter<"DepotContact"> | string | null
+    email?: StringNullableFilter<"DepotContact"> | string | null
+    phone?: StringNullableFilter<"DepotContact"> | string | null
+    isPrimary?: BoolFilter<"DepotContact"> | boolean
+    createdAt?: DateTimeFilter<"DepotContact"> | Date | string
+    updatedAt?: DateTimeFilter<"DepotContact"> | Date | string
+    depot?: XOR<DepotScalarRelationFilter, DepotWhereInput>
+  }, "id">
+
+  export type DepotContactOrderByWithAggregationInput = {
+    id?: SortOrder
+    depotId?: SortOrder
+    name?: SortOrder
+    role?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DepotContactCountOrderByAggregateInput
+    _max?: DepotContactMaxOrderByAggregateInput
+    _min?: DepotContactMinOrderByAggregateInput
+  }
+
+  export type DepotContactScalarWhereWithAggregatesInput = {
+    AND?: DepotContactScalarWhereWithAggregatesInput | DepotContactScalarWhereWithAggregatesInput[]
+    OR?: DepotContactScalarWhereWithAggregatesInput[]
+    NOT?: DepotContactScalarWhereWithAggregatesInput | DepotContactScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DepotContact"> | string
+    depotId?: StringWithAggregatesFilter<"DepotContact"> | string
+    name?: StringWithAggregatesFilter<"DepotContact"> | string
+    role?: StringNullableWithAggregatesFilter<"DepotContact"> | string | null
+    email?: StringNullableWithAggregatesFilter<"DepotContact"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"DepotContact"> | string | null
+    isPrimary?: BoolWithAggregatesFilter<"DepotContact"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"DepotContact"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DepotContact"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     email: string
@@ -39524,6 +42530,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -39560,6 +42567,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUpdateInput = {
@@ -39596,6 +42604,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -39632,6 +42641,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -40168,6 +43178,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -40220,6 +43231,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -40272,6 +43284,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -40324,6 +43337,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -40376,6 +43390,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
   }
 
   export type ShipmentUpdateManyMutationInput = {
@@ -40465,6 +43480,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ShipmentPackageCreateInput = {
@@ -41532,6 +44548,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -41541,6 +44558,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -41596,6 +44615,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -41646,6 +44668,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -41655,6 +44678,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -41710,6 +44735,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -41767,6 +44795,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41814,6 +44845,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41868,6 +44900,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -42885,6 +45920,220 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DepotCreateInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactCreateNestedManyWithoutDepotInput
+    quotes?: QuoteCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotUncheckedCreateInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactUncheckedCreateNestedManyWithoutDepotInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentUncheckedCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUpdateManyWithoutDepotNestedInput
+    quotes?: QuoteUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUpdateManyWithoutDepotNestedInput
+  }
+
+  export type DepotUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUncheckedUpdateManyWithoutDepotNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUncheckedUpdateManyWithoutDepotNestedInput
+  }
+
+  export type DepotCreateManyInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactCreateInput = {
+    id?: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    depot: DepotCreateNestedOneWithoutContactsInput
+  }
+
+  export type DepotContactUncheckedCreateInput = {
+    id?: string
+    depotId: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotContactUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depot?: DepotUpdateOneRequiredWithoutContactsNestedInput
+  }
+
+  export type DepotContactUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    depotId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactCreateManyInput = {
+    id?: string
+    depotId: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotContactUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    depotId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -43567,6 +46816,11 @@ export namespace Prisma {
     isNot?: UserWhereInput | null
   }
 
+  export type DepotNullableScalarRelationFilter = {
+    is?: DepotWhereInput | null
+    isNot?: DepotWhereInput | null
+  }
+
   export type QuoteNullableScalarRelationFilter = {
     is?: QuoteWhereInput | null
     isNot?: QuoteWhereInput | null
@@ -43626,6 +46880,7 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    depotId?: SortOrder
   }
 
   export type ShipmentAvgOrderByAggregateInput = {
@@ -43682,6 +46937,7 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    depotId?: SortOrder
   }
 
   export type ShipmentMinOrderByAggregateInput = {
@@ -43727,6 +46983,7 @@ export namespace Prisma {
     createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    depotId?: SortOrder
   }
 
   export type ShipmentSumOrderByAggregateInput = {
@@ -44548,6 +47805,9 @@ export namespace Prisma {
     paymentReceivedAt?: SortOrder
     paymentReceivedById?: SortOrder
     createdById?: SortOrder
+    deletedAt?: SortOrder
+    deletedById?: SortOrder
+    depotId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44609,6 +47869,9 @@ export namespace Prisma {
     paymentReceivedAt?: SortOrder
     paymentReceivedById?: SortOrder
     createdById?: SortOrder
+    deletedAt?: SortOrder
+    deletedById?: SortOrder
+    depotId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -44662,6 +47925,9 @@ export namespace Prisma {
     paymentReceivedAt?: SortOrder
     paymentReceivedById?: SortOrder
     createdById?: SortOrder
+    deletedAt?: SortOrder
+    deletedById?: SortOrder
+    depotId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -45324,6 +48590,108 @@ export namespace Prisma {
     copyrightYear?: SortOrder
   }
 
+  export type DepotContactListRelationFilter = {
+    every?: DepotContactWhereInput
+    some?: DepotContactWhereInput
+    none?: DepotContactWhereInput
+  }
+
+  export type DepotContactOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DepotCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    code?: SortOrder
+    description?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    isDefault?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DepotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    code?: SortOrder
+    description?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    isDefault?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DepotMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    code?: SortOrder
+    description?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    isDefault?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DepotScalarRelationFilter = {
+    is?: DepotWhereInput
+    isNot?: DepotWhereInput
+  }
+
+  export type DepotContactCountOrderByAggregateInput = {
+    id?: SortOrder
+    depotId?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DepotContactMaxOrderByAggregateInput = {
+    id?: SortOrder
+    depotId?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DepotContactMinOrderByAggregateInput = {
+    id?: SortOrder
+    depotId?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    isPrimary?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -45483,6 +48851,13 @@ export namespace Prisma {
     connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
   }
 
+  export type QuoteCreateNestedManyWithoutDeletedByInput = {
+    create?: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput> | QuoteCreateWithoutDeletedByInput[] | QuoteUncheckedCreateWithoutDeletedByInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDeletedByInput | QuoteCreateOrConnectWithoutDeletedByInput[]
+    createMany?: QuoteCreateManyDeletedByInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+  }
+
   export type AccountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -45634,6 +49009,13 @@ export namespace Prisma {
     connectOrCreate?: ShipmentCreateOrConnectWithoutPaymentReceivedByInput | ShipmentCreateOrConnectWithoutPaymentReceivedByInput[]
     createMany?: ShipmentCreateManyPaymentReceivedByInputEnvelope
     connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+  }
+
+  export type QuoteUncheckedCreateNestedManyWithoutDeletedByInput = {
+    create?: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput> | QuoteCreateWithoutDeletedByInput[] | QuoteUncheckedCreateWithoutDeletedByInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDeletedByInput | QuoteCreateOrConnectWithoutDeletedByInput[]
+    createMany?: QuoteCreateManyDeletedByInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -45970,6 +49352,20 @@ export namespace Prisma {
     deleteMany?: ShipmentScalarWhereInput | ShipmentScalarWhereInput[]
   }
 
+  export type QuoteUpdateManyWithoutDeletedByNestedInput = {
+    create?: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput> | QuoteCreateWithoutDeletedByInput[] | QuoteUncheckedCreateWithoutDeletedByInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDeletedByInput | QuoteCreateOrConnectWithoutDeletedByInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutDeletedByInput | QuoteUpsertWithWhereUniqueWithoutDeletedByInput[]
+    createMany?: QuoteCreateManyDeletedByInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutDeletedByInput | QuoteUpdateWithWhereUniqueWithoutDeletedByInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutDeletedByInput | QuoteUpdateManyWithWhereWithoutDeletedByInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -46272,6 +49668,20 @@ export namespace Prisma {
     update?: ShipmentUpdateWithWhereUniqueWithoutPaymentReceivedByInput | ShipmentUpdateWithWhereUniqueWithoutPaymentReceivedByInput[]
     updateMany?: ShipmentUpdateManyWithWhereWithoutPaymentReceivedByInput | ShipmentUpdateManyWithWhereWithoutPaymentReceivedByInput[]
     deleteMany?: ShipmentScalarWhereInput | ShipmentScalarWhereInput[]
+  }
+
+  export type QuoteUncheckedUpdateManyWithoutDeletedByNestedInput = {
+    create?: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput> | QuoteCreateWithoutDeletedByInput[] | QuoteUncheckedCreateWithoutDeletedByInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDeletedByInput | QuoteCreateOrConnectWithoutDeletedByInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutDeletedByInput | QuoteUpsertWithWhereUniqueWithoutDeletedByInput[]
+    createMany?: QuoteCreateManyDeletedByInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutDeletedByInput | QuoteUpdateWithWhereUniqueWithoutDeletedByInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutDeletedByInput | QuoteUpdateManyWithWhereWithoutDeletedByInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutAccountsInput = {
@@ -46584,6 +49994,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type DepotCreateNestedOneWithoutShipmentsInput = {
+    create?: XOR<DepotCreateWithoutShipmentsInput, DepotUncheckedCreateWithoutShipmentsInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutShipmentsInput
+    connect?: DepotWhereUniqueInput
+  }
+
   export type TrackingEventCreateNestedManyWithoutShipmentInput = {
     create?: XOR<TrackingEventCreateWithoutShipmentInput, TrackingEventUncheckedCreateWithoutShipmentInput> | TrackingEventCreateWithoutShipmentInput[] | TrackingEventUncheckedCreateWithoutShipmentInput[]
     connectOrCreate?: TrackingEventCreateOrConnectWithoutShipmentInput | TrackingEventCreateOrConnectWithoutShipmentInput[]
@@ -46733,6 +50149,16 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutCreatedShipmentsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedShipmentsInput, UserUpdateWithoutCreatedShipmentsInput>, UserUncheckedUpdateWithoutCreatedShipmentsInput>
+  }
+
+  export type DepotUpdateOneWithoutShipmentsNestedInput = {
+    create?: XOR<DepotCreateWithoutShipmentsInput, DepotUncheckedCreateWithoutShipmentsInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutShipmentsInput
+    upsert?: DepotUpsertWithoutShipmentsInput
+    disconnect?: DepotWhereInput | boolean
+    delete?: DepotWhereInput | boolean
+    connect?: DepotWhereUniqueInput
+    update?: XOR<XOR<DepotUpdateToOneWithWhereWithoutShipmentsInput, DepotUpdateWithoutShipmentsInput>, DepotUncheckedUpdateWithoutShipmentsInput>
   }
 
   export type TrackingEventUpdateManyWithoutShipmentNestedInput = {
@@ -47391,6 +50817,18 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type UserCreateNestedOneWithoutDeletedQuotesInput = {
+    create?: XOR<UserCreateWithoutDeletedQuotesInput, UserUncheckedCreateWithoutDeletedQuotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDeletedQuotesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type DepotCreateNestedOneWithoutQuotesInput = {
+    create?: XOR<DepotCreateWithoutQuotesInput, DepotUncheckedCreateWithoutQuotesInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutQuotesInput
+    connect?: DepotWhereUniqueInput
+  }
+
   export type DocumentCreateNestedManyWithoutQuoteInput = {
     create?: XOR<DocumentCreateWithoutQuoteInput, DocumentUncheckedCreateWithoutQuoteInput> | DocumentCreateWithoutQuoteInput[] | DocumentUncheckedCreateWithoutQuoteInput[]
     connectOrCreate?: DocumentCreateOrConnectWithoutQuoteInput | DocumentCreateOrConnectWithoutQuoteInput[]
@@ -47514,6 +50952,26 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedQuotesInput, UserUpdateWithoutCreatedQuotesInput>, UserUncheckedUpdateWithoutCreatedQuotesInput>
+  }
+
+  export type UserUpdateOneWithoutDeletedQuotesNestedInput = {
+    create?: XOR<UserCreateWithoutDeletedQuotesInput, UserUncheckedCreateWithoutDeletedQuotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDeletedQuotesInput
+    upsert?: UserUpsertWithoutDeletedQuotesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDeletedQuotesInput, UserUpdateWithoutDeletedQuotesInput>, UserUncheckedUpdateWithoutDeletedQuotesInput>
+  }
+
+  export type DepotUpdateOneWithoutQuotesNestedInput = {
+    create?: XOR<DepotCreateWithoutQuotesInput, DepotUncheckedCreateWithoutQuotesInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutQuotesInput
+    upsert?: DepotUpsertWithoutQuotesInput
+    disconnect?: DepotWhereInput | boolean
+    delete?: DepotWhereInput | boolean
+    connect?: DepotWhereUniqueInput
+    update?: XOR<XOR<DepotUpdateToOneWithWhereWithoutQuotesInput, DepotUpdateWithoutQuotesInput>, DepotUncheckedUpdateWithoutQuotesInput>
   }
 
   export type DocumentUpdateManyWithoutQuoteNestedInput = {
@@ -47858,6 +51316,146 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutSystemConfigUpdatesInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSystemConfigUpdatesInput, UserUpdateWithoutSystemConfigUpdatesInput>, UserUncheckedUpdateWithoutSystemConfigUpdatesInput>
+  }
+
+  export type DepotContactCreateNestedManyWithoutDepotInput = {
+    create?: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput> | DepotContactCreateWithoutDepotInput[] | DepotContactUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: DepotContactCreateOrConnectWithoutDepotInput | DepotContactCreateOrConnectWithoutDepotInput[]
+    createMany?: DepotContactCreateManyDepotInputEnvelope
+    connect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+  }
+
+  export type QuoteCreateNestedManyWithoutDepotInput = {
+    create?: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput> | QuoteCreateWithoutDepotInput[] | QuoteUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDepotInput | QuoteCreateOrConnectWithoutDepotInput[]
+    createMany?: QuoteCreateManyDepotInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+  }
+
+  export type ShipmentCreateNestedManyWithoutDepotInput = {
+    create?: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput> | ShipmentCreateWithoutDepotInput[] | ShipmentUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: ShipmentCreateOrConnectWithoutDepotInput | ShipmentCreateOrConnectWithoutDepotInput[]
+    createMany?: ShipmentCreateManyDepotInputEnvelope
+    connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+  }
+
+  export type DepotContactUncheckedCreateNestedManyWithoutDepotInput = {
+    create?: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput> | DepotContactCreateWithoutDepotInput[] | DepotContactUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: DepotContactCreateOrConnectWithoutDepotInput | DepotContactCreateOrConnectWithoutDepotInput[]
+    createMany?: DepotContactCreateManyDepotInputEnvelope
+    connect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+  }
+
+  export type QuoteUncheckedCreateNestedManyWithoutDepotInput = {
+    create?: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput> | QuoteCreateWithoutDepotInput[] | QuoteUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDepotInput | QuoteCreateOrConnectWithoutDepotInput[]
+    createMany?: QuoteCreateManyDepotInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+  }
+
+  export type ShipmentUncheckedCreateNestedManyWithoutDepotInput = {
+    create?: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput> | ShipmentCreateWithoutDepotInput[] | ShipmentUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: ShipmentCreateOrConnectWithoutDepotInput | ShipmentCreateOrConnectWithoutDepotInput[]
+    createMany?: ShipmentCreateManyDepotInputEnvelope
+    connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+  }
+
+  export type DepotContactUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput> | DepotContactCreateWithoutDepotInput[] | DepotContactUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: DepotContactCreateOrConnectWithoutDepotInput | DepotContactCreateOrConnectWithoutDepotInput[]
+    upsert?: DepotContactUpsertWithWhereUniqueWithoutDepotInput | DepotContactUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: DepotContactCreateManyDepotInputEnvelope
+    set?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    disconnect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    delete?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    connect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    update?: DepotContactUpdateWithWhereUniqueWithoutDepotInput | DepotContactUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: DepotContactUpdateManyWithWhereWithoutDepotInput | DepotContactUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: DepotContactScalarWhereInput | DepotContactScalarWhereInput[]
+  }
+
+  export type QuoteUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput> | QuoteCreateWithoutDepotInput[] | QuoteUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDepotInput | QuoteCreateOrConnectWithoutDepotInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutDepotInput | QuoteUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: QuoteCreateManyDepotInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutDepotInput | QuoteUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutDepotInput | QuoteUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
+  }
+
+  export type ShipmentUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput> | ShipmentCreateWithoutDepotInput[] | ShipmentUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: ShipmentCreateOrConnectWithoutDepotInput | ShipmentCreateOrConnectWithoutDepotInput[]
+    upsert?: ShipmentUpsertWithWhereUniqueWithoutDepotInput | ShipmentUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: ShipmentCreateManyDepotInputEnvelope
+    set?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    disconnect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    delete?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    update?: ShipmentUpdateWithWhereUniqueWithoutDepotInput | ShipmentUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: ShipmentUpdateManyWithWhereWithoutDepotInput | ShipmentUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: ShipmentScalarWhereInput | ShipmentScalarWhereInput[]
+  }
+
+  export type DepotContactUncheckedUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput> | DepotContactCreateWithoutDepotInput[] | DepotContactUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: DepotContactCreateOrConnectWithoutDepotInput | DepotContactCreateOrConnectWithoutDepotInput[]
+    upsert?: DepotContactUpsertWithWhereUniqueWithoutDepotInput | DepotContactUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: DepotContactCreateManyDepotInputEnvelope
+    set?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    disconnect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    delete?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    connect?: DepotContactWhereUniqueInput | DepotContactWhereUniqueInput[]
+    update?: DepotContactUpdateWithWhereUniqueWithoutDepotInput | DepotContactUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: DepotContactUpdateManyWithWhereWithoutDepotInput | DepotContactUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: DepotContactScalarWhereInput | DepotContactScalarWhereInput[]
+  }
+
+  export type QuoteUncheckedUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput> | QuoteCreateWithoutDepotInput[] | QuoteUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutDepotInput | QuoteCreateOrConnectWithoutDepotInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutDepotInput | QuoteUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: QuoteCreateManyDepotInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutDepotInput | QuoteUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutDepotInput | QuoteUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
+  }
+
+  export type ShipmentUncheckedUpdateManyWithoutDepotNestedInput = {
+    create?: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput> | ShipmentCreateWithoutDepotInput[] | ShipmentUncheckedCreateWithoutDepotInput[]
+    connectOrCreate?: ShipmentCreateOrConnectWithoutDepotInput | ShipmentCreateOrConnectWithoutDepotInput[]
+    upsert?: ShipmentUpsertWithWhereUniqueWithoutDepotInput | ShipmentUpsertWithWhereUniqueWithoutDepotInput[]
+    createMany?: ShipmentCreateManyDepotInputEnvelope
+    set?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    disconnect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    delete?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    connect?: ShipmentWhereUniqueInput | ShipmentWhereUniqueInput[]
+    update?: ShipmentUpdateWithWhereUniqueWithoutDepotInput | ShipmentUpdateWithWhereUniqueWithoutDepotInput[]
+    updateMany?: ShipmentUpdateManyWithWhereWithoutDepotInput | ShipmentUpdateManyWithWhereWithoutDepotInput[]
+    deleteMany?: ShipmentScalarWhereInput | ShipmentScalarWhereInput[]
+  }
+
+  export type DepotCreateNestedOneWithoutContactsInput = {
+    create?: XOR<DepotCreateWithoutContactsInput, DepotUncheckedCreateWithoutContactsInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutContactsInput
+    connect?: DepotWhereUniqueInput
+  }
+
+  export type DepotUpdateOneRequiredWithoutContactsNestedInput = {
+    create?: XOR<DepotCreateWithoutContactsInput, DepotUncheckedCreateWithoutContactsInput>
+    connectOrCreate?: DepotCreateOrConnectWithoutContactsInput
+    upsert?: DepotUpsertWithoutContactsInput
+    connect?: DepotWhereUniqueInput
+    update?: XOR<XOR<DepotUpdateToOneWithWhereWithoutContactsInput, DepotUpdateWithoutContactsInput>, DepotUncheckedUpdateWithoutContactsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -48628,6 +52226,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -48679,6 +52278,7 @@ export namespace Prisma {
     paymentReceivedById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -49405,6 +53005,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -49413,6 +53014,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -49467,6 +53070,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -49625,6 +53231,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     client?: ClientCreateNestedOneWithoutQuotesInput
@@ -49633,6 +53240,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -49687,6 +53296,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -49747,6 +53359,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -49755,6 +53368,8 @@ export namespace Prisma {
     treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -49809,6 +53424,9 @@ export namespace Prisma {
     shipmentId?: string | null
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -49869,6 +53487,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -49877,6 +53496,8 @@ export namespace Prisma {
     treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -49931,6 +53552,9 @@ export namespace Prisma {
     shipmentId?: string | null
     paymentReceivedAt?: Date | string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -49991,6 +53615,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     client?: ClientCreateNestedOneWithoutShipmentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -50042,6 +53667,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -50057,6 +53683,134 @@ export namespace Prisma {
 
   export type ShipmentCreateManyPaymentReceivedByInputEnvelope = {
     data: ShipmentCreateManyPaymentReceivedByInput | ShipmentCreateManyPaymentReceivedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuoteCreateWithoutDeletedByInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutUserQuotesInput
+    client?: ClientCreateNestedOneWithoutQuotesInput
+    prospect?: ProspectCreateNestedOneWithoutQuotesInput
+    treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
+    shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
+    paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
+    createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
+    documents?: DocumentCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteUncheckedCreateWithoutDeletedByInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    userId?: string | null
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    clientId?: string | null
+    prospectId?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    treatmentAgentId?: string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    shipmentId?: string | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById?: string | null
+    deletedAt?: Date | string | null
+    depotId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteCreateOrConnectWithoutDeletedByInput = {
+    where: QuoteWhereUniqueInput
+    create: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput>
+  }
+
+  export type QuoteCreateManyDeletedByInputEnvelope = {
+    data: QuoteCreateManyDeletedByInput | QuoteCreateManyDeletedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -50247,6 +54001,7 @@ export namespace Prisma {
     createdById?: StringFilter<"Shipment"> | string
     createdAt?: DateTimeFilter<"Shipment"> | Date | string
     updatedAt?: DateTimeFilter<"Shipment"> | Date | string
+    depotId?: StringNullableFilter<"Shipment"> | string | null
   }
 
   export type DocumentUpsertWithWhereUniqueWithoutUserInput = {
@@ -50721,6 +54476,9 @@ export namespace Prisma {
     paymentReceivedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     paymentReceivedById?: StringNullableFilter<"Quote"> | string | null
     createdById?: StringNullableFilter<"Quote"> | string | null
+    deletedAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
+    deletedById?: StringNullableFilter<"Quote"> | string | null
+    depotId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
   }
@@ -50868,6 +54626,22 @@ export namespace Prisma {
     data: XOR<ShipmentUpdateManyMutationInput, ShipmentUncheckedUpdateManyWithoutPaymentReceivedByInput>
   }
 
+  export type QuoteUpsertWithWhereUniqueWithoutDeletedByInput = {
+    where: QuoteWhereUniqueInput
+    update: XOR<QuoteUpdateWithoutDeletedByInput, QuoteUncheckedUpdateWithoutDeletedByInput>
+    create: XOR<QuoteCreateWithoutDeletedByInput, QuoteUncheckedCreateWithoutDeletedByInput>
+  }
+
+  export type QuoteUpdateWithWhereUniqueWithoutDeletedByInput = {
+    where: QuoteWhereUniqueInput
+    data: XOR<QuoteUpdateWithoutDeletedByInput, QuoteUncheckedUpdateWithoutDeletedByInput>
+  }
+
+  export type QuoteUpdateManyWithWhereWithoutDeletedByInput = {
+    where: QuoteScalarWhereInput
+    data: XOR<QuoteUpdateManyMutationInput, QuoteUncheckedUpdateManyWithoutDeletedByInput>
+  }
+
   export type UserCreateWithoutAccountsInput = {
     id?: string
     email: string
@@ -50901,6 +54675,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -50936,6 +54711,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -50987,6 +54763,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -51022,6 +54799,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -51057,6 +54835,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -51092,6 +54871,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -51143,6 +54923,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -51178,6 +54959,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutClientInput = {
@@ -51213,6 +54995,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutClientInput = {
@@ -51248,6 +55031,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutClientInput = {
@@ -51303,6 +55087,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -51354,6 +55139,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -51415,6 +55201,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -51423,6 +55210,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -51477,6 +55266,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -51927,6 +55719,7 @@ export namespace Prisma {
     userQuotes?: QuoteCreateNestedManyWithoutUserInput
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutConfirmedShipmentPaymentsInput = {
@@ -51962,6 +55755,7 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedCreateNestedManyWithoutUserInput
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutConfirmedShipmentPaymentsInput = {
@@ -52002,6 +55796,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedShipmentsInput = {
@@ -52037,11 +55832,55 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedShipmentsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutCreatedShipmentsInput, UserUncheckedCreateWithoutCreatedShipmentsInput>
+  }
+
+  export type DepotCreateWithoutShipmentsInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactCreateNestedManyWithoutDepotInput
+    quotes?: QuoteCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotUncheckedCreateWithoutShipmentsInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactUncheckedCreateNestedManyWithoutDepotInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotCreateOrConnectWithoutShipmentsInput = {
+    where: DepotWhereUniqueInput
+    create: XOR<DepotCreateWithoutShipmentsInput, DepotUncheckedCreateWithoutShipmentsInput>
   }
 
   export type TrackingEventCreateWithoutShipmentInput = {
@@ -52259,6 +56098,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -52267,6 +56107,8 @@ export namespace Prisma {
     treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -52321,6 +56163,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -52506,6 +56351,7 @@ export namespace Prisma {
     userQuotes?: QuoteUpdateManyWithoutUserNestedInput
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutConfirmedShipmentPaymentsInput = {
@@ -52541,6 +56387,7 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedUpdateManyWithoutUserNestedInput
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUpsertWithoutCreatedShipmentsInput = {
@@ -52587,6 +56434,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedShipmentsInput = {
@@ -52622,6 +56470,56 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
+  }
+
+  export type DepotUpsertWithoutShipmentsInput = {
+    update: XOR<DepotUpdateWithoutShipmentsInput, DepotUncheckedUpdateWithoutShipmentsInput>
+    create: XOR<DepotCreateWithoutShipmentsInput, DepotUncheckedCreateWithoutShipmentsInput>
+    where?: DepotWhereInput
+  }
+
+  export type DepotUpdateToOneWithWhereWithoutShipmentsInput = {
+    where?: DepotWhereInput
+    data: XOR<DepotUpdateWithoutShipmentsInput, DepotUncheckedUpdateWithoutShipmentsInput>
+  }
+
+  export type DepotUpdateWithoutShipmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUpdateManyWithoutDepotNestedInput
+    quotes?: QuoteUpdateManyWithoutDepotNestedInput
+  }
+
+  export type DepotUncheckedUpdateWithoutShipmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUncheckedUpdateManyWithoutDepotNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutDepotNestedInput
   }
 
   export type TrackingEventUpsertWithWhereUniqueWithoutShipmentInput = {
@@ -52726,6 +56624,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -52734,6 +56633,8 @@ export namespace Prisma {
     treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -52788,6 +56689,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -52889,6 +56793,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -52940,6 +56845,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -53007,6 +56913,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -53058,6 +56965,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -53098,6 +57006,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutUserPickupsInput = {
@@ -53133,6 +57042,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutUserPickupsInput = {
@@ -53184,6 +57094,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
@@ -53235,6 +57146,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
@@ -53411,6 +57323,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedPickupsInput = {
@@ -53446,6 +57359,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedPickupsInput = {
@@ -53497,6 +57411,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUserPickupsInput = {
@@ -53532,6 +57447,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type ShipmentUpsertWithoutPickupRequestsInput = {
@@ -53589,6 +57505,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
@@ -53640,6 +57557,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
@@ -53782,6 +57700,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedPickupsInput = {
@@ -53817,6 +57736,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type PickupRequestCreateWithoutLogsInput = {
@@ -53939,6 +57859,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutPickupLogsInput = {
@@ -53974,6 +57895,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutPickupLogsInput = {
@@ -54118,6 +58040,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPickupLogsInput = {
@@ -54153,6 +58076,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutUserPurchasesInput = {
@@ -54188,6 +58112,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutUserPurchasesInput = {
@@ -54223,6 +58148,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutUserPurchasesInput = {
@@ -54394,6 +58320,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedPurchasesInput = {
@@ -54429,6 +58356,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedPurchasesInput = {
@@ -54480,6 +58408,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUserPurchasesInput = {
@@ -54515,6 +58444,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type DocumentUpsertWithWhereUniqueWithoutPurchaseRequestInput = {
@@ -54652,6 +58582,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedPurchasesInput = {
@@ -54687,6 +58618,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type PurchaseRequestCreateWithoutLogsInput = {
@@ -54813,6 +58745,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutPurchaseLogsInput = {
@@ -54848,6 +58781,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutPurchaseLogsInput = {
@@ -54996,6 +58930,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPurchaseLogsInput = {
@@ -55031,6 +58966,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type ShipmentCreateWithoutTrackingEventsInput = {
@@ -55077,6 +59013,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
@@ -55128,6 +59065,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
@@ -55173,6 +59111,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutPerformedTrackingEventsInput = {
@@ -55208,6 +59147,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutPerformedTrackingEventsInput = {
@@ -55270,6 +59210,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
@@ -55321,6 +59262,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
@@ -55372,6 +59314,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPerformedTrackingEventsInput = {
@@ -55407,6 +59350,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type ShipmentCreateWithoutLogsInput = {
@@ -55453,6 +59397,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -55504,6 +59449,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -55549,6 +59495,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutShipmentLogsInput = {
@@ -55584,6 +59531,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutShipmentLogsInput = {
@@ -55646,6 +59594,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -55697,6 +59646,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -55748,6 +59698,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutShipmentLogsInput = {
@@ -55783,6 +59734,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutUserQuotesInput = {
@@ -55818,6 +59770,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutUserQuotesInput = {
@@ -55853,6 +59806,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutUserQuotesInput = {
@@ -55981,6 +59935,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutTreatedQuotesInput = {
@@ -56016,6 +59971,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutTreatedQuotesInput = {
@@ -56067,6 +60023,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     documents?: DocumentCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
@@ -56118,6 +60075,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
@@ -56163,6 +60121,7 @@ export namespace Prisma {
     userQuotes?: QuoteCreateNestedManyWithoutUserInput
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutConfirmedQuotePaymentsInput = {
@@ -56198,6 +60157,7 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedCreateNestedManyWithoutUserInput
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutConfirmedQuotePaymentsInput = {
@@ -56238,6 +60198,7 @@ export namespace Prisma {
     userQuotes?: QuoteCreateNestedManyWithoutUserInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedQuotesInput = {
@@ -56273,11 +60234,132 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedCreateNestedManyWithoutUserInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedQuotesInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutCreatedQuotesInput, UserUncheckedCreateWithoutCreatedQuotesInput>
+  }
+
+  export type UserCreateWithoutDeletedQuotesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    client?: ClientCreateNestedOneWithoutUsersInput
+    createdShipments?: ShipmentCreateNestedManyWithoutCreatedByInput
+    userDocuments?: DocumentCreateNestedManyWithoutUserInput
+    uploadedDocuments?: DocumentCreateNestedManyWithoutUploaderInput
+    prospect?: ProspectCreateNestedOneWithoutUserInput
+    pricingConfigs?: PricingConfigCreateNestedManyWithoutUpdatedByInput
+    createdPickups?: PickupRequestCreateNestedManyWithoutCreatedByInput
+    pickupLogs?: PickupLogCreateNestedManyWithoutChangedByInput
+    userPickups?: PickupRequestCreateNestedManyWithoutUserInput
+    createdPurchases?: PurchaseRequestCreateNestedManyWithoutCreatedByInput
+    purchaseLogs?: PurchaseLogCreateNestedManyWithoutChangedByInput
+    userPurchases?: PurchaseRequestCreateNestedManyWithoutUserInput
+    quoteLogs?: QuoteLogCreateNestedManyWithoutChangedByInput
+    shipmentLogs?: ShipmentLogCreateNestedManyWithoutChangedByInput
+    treatedQuotes?: QuoteCreateNestedManyWithoutTreatmentAgentInput
+    performedTrackingEvents?: TrackingEventCreateNestedManyWithoutPerformedByInput
+    systemConfigUpdates?: SystemConfigCreateNestedManyWithoutUpdatedByInput
+    userQuotes?: QuoteCreateNestedManyWithoutUserInput
+    createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
+    confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
+    confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+  }
+
+  export type UserUncheckedCreateWithoutDeletedQuotesInput = {
+    id?: string
+    email: string
+    emailVerified?: boolean
+    name?: string | null
+    image?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    clientId?: string | null
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    createdShipments?: ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+    userDocuments?: DocumentUncheckedCreateNestedManyWithoutUserInput
+    uploadedDocuments?: DocumentUncheckedCreateNestedManyWithoutUploaderInput
+    prospect?: ProspectUncheckedCreateNestedOneWithoutUserInput
+    pricingConfigs?: PricingConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+    createdPickups?: PickupRequestUncheckedCreateNestedManyWithoutCreatedByInput
+    pickupLogs?: PickupLogUncheckedCreateNestedManyWithoutChangedByInput
+    userPickups?: PickupRequestUncheckedCreateNestedManyWithoutUserInput
+    createdPurchases?: PurchaseRequestUncheckedCreateNestedManyWithoutCreatedByInput
+    purchaseLogs?: PurchaseLogUncheckedCreateNestedManyWithoutChangedByInput
+    userPurchases?: PurchaseRequestUncheckedCreateNestedManyWithoutUserInput
+    quoteLogs?: QuoteLogUncheckedCreateNestedManyWithoutChangedByInput
+    shipmentLogs?: ShipmentLogUncheckedCreateNestedManyWithoutChangedByInput
+    treatedQuotes?: QuoteUncheckedCreateNestedManyWithoutTreatmentAgentInput
+    performedTrackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutPerformedByInput
+    systemConfigUpdates?: SystemConfigUncheckedCreateNestedManyWithoutUpdatedByInput
+    userQuotes?: QuoteUncheckedCreateNestedManyWithoutUserInput
+    createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
+    confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+  }
+
+  export type UserCreateOrConnectWithoutDeletedQuotesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDeletedQuotesInput, UserUncheckedCreateWithoutDeletedQuotesInput>
+  }
+
+  export type DepotCreateWithoutQuotesInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotUncheckedCreateWithoutQuotesInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    contacts?: DepotContactUncheckedCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentUncheckedCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotCreateOrConnectWithoutQuotesInput = {
+    where: DepotWhereUniqueInput
+    create: XOR<DepotCreateWithoutQuotesInput, DepotUncheckedCreateWithoutQuotesInput>
   }
 
   export type DocumentCreateWithoutQuoteInput = {
@@ -56440,6 +60522,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUserQuotesInput = {
@@ -56475,6 +60558,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type ClientUpsertWithoutQuotesInput = {
@@ -56621,6 +60705,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTreatedQuotesInput = {
@@ -56656,6 +60741,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type ShipmentUpsertWithoutFromQuoteInput = {
@@ -56713,6 +60799,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -56764,6 +60851,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -56815,6 +60903,7 @@ export namespace Prisma {
     userQuotes?: QuoteUpdateManyWithoutUserNestedInput
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutConfirmedQuotePaymentsInput = {
@@ -56850,6 +60939,7 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedUpdateManyWithoutUserNestedInput
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUpsertWithoutCreatedQuotesInput = {
@@ -56896,6 +60986,7 @@ export namespace Prisma {
     userQuotes?: QuoteUpdateManyWithoutUserNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedQuotesInput = {
@@ -56931,6 +61022,139 @@ export namespace Prisma {
     userQuotes?: QuoteUncheckedUpdateManyWithoutUserNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
+  }
+
+  export type UserUpsertWithoutDeletedQuotesInput = {
+    update: XOR<UserUpdateWithoutDeletedQuotesInput, UserUncheckedUpdateWithoutDeletedQuotesInput>
+    create: XOR<UserCreateWithoutDeletedQuotesInput, UserUncheckedCreateWithoutDeletedQuotesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDeletedQuotesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDeletedQuotesInput, UserUncheckedUpdateWithoutDeletedQuotesInput>
+  }
+
+  export type UserUpdateWithoutDeletedQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    client?: ClientUpdateOneWithoutUsersNestedInput
+    createdShipments?: ShipmentUpdateManyWithoutCreatedByNestedInput
+    userDocuments?: DocumentUpdateManyWithoutUserNestedInput
+    uploadedDocuments?: DocumentUpdateManyWithoutUploaderNestedInput
+    prospect?: ProspectUpdateOneWithoutUserNestedInput
+    pricingConfigs?: PricingConfigUpdateManyWithoutUpdatedByNestedInput
+    createdPickups?: PickupRequestUpdateManyWithoutCreatedByNestedInput
+    pickupLogs?: PickupLogUpdateManyWithoutChangedByNestedInput
+    userPickups?: PickupRequestUpdateManyWithoutUserNestedInput
+    createdPurchases?: PurchaseRequestUpdateManyWithoutCreatedByNestedInput
+    purchaseLogs?: PurchaseLogUpdateManyWithoutChangedByNestedInput
+    userPurchases?: PurchaseRequestUpdateManyWithoutUserNestedInput
+    quoteLogs?: QuoteLogUpdateManyWithoutChangedByNestedInput
+    shipmentLogs?: ShipmentLogUpdateManyWithoutChangedByNestedInput
+    treatedQuotes?: QuoteUpdateManyWithoutTreatmentAgentNestedInput
+    performedTrackingEvents?: TrackingEventUpdateManyWithoutPerformedByNestedInput
+    systemConfigUpdates?: SystemConfigUpdateManyWithoutUpdatedByNestedInput
+    userQuotes?: QuoteUpdateManyWithoutUserNestedInput
+    createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
+    confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
+    confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDeletedQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: NullableJsonNullValueInput | InputJsonValue
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    createdShipments?: ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+    userDocuments?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    uploadedDocuments?: DocumentUncheckedUpdateManyWithoutUploaderNestedInput
+    prospect?: ProspectUncheckedUpdateOneWithoutUserNestedInput
+    pricingConfigs?: PricingConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+    createdPickups?: PickupRequestUncheckedUpdateManyWithoutCreatedByNestedInput
+    pickupLogs?: PickupLogUncheckedUpdateManyWithoutChangedByNestedInput
+    userPickups?: PickupRequestUncheckedUpdateManyWithoutUserNestedInput
+    createdPurchases?: PurchaseRequestUncheckedUpdateManyWithoutCreatedByNestedInput
+    purchaseLogs?: PurchaseLogUncheckedUpdateManyWithoutChangedByNestedInput
+    userPurchases?: PurchaseRequestUncheckedUpdateManyWithoutUserNestedInput
+    quoteLogs?: QuoteLogUncheckedUpdateManyWithoutChangedByNestedInput
+    shipmentLogs?: ShipmentLogUncheckedUpdateManyWithoutChangedByNestedInput
+    treatedQuotes?: QuoteUncheckedUpdateManyWithoutTreatmentAgentNestedInput
+    performedTrackingEvents?: TrackingEventUncheckedUpdateManyWithoutPerformedByNestedInput
+    systemConfigUpdates?: SystemConfigUncheckedUpdateManyWithoutUpdatedByNestedInput
+    userQuotes?: QuoteUncheckedUpdateManyWithoutUserNestedInput
+    createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
+    confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+  }
+
+  export type DepotUpsertWithoutQuotesInput = {
+    update: XOR<DepotUpdateWithoutQuotesInput, DepotUncheckedUpdateWithoutQuotesInput>
+    create: XOR<DepotCreateWithoutQuotesInput, DepotUncheckedCreateWithoutQuotesInput>
+    where?: DepotWhereInput
+  }
+
+  export type DepotUpdateToOneWithWhereWithoutQuotesInput = {
+    where?: DepotWhereInput
+    data: XOR<DepotUpdateWithoutQuotesInput, DepotUncheckedUpdateWithoutQuotesInput>
+  }
+
+  export type DepotUpdateWithoutQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUpdateManyWithoutDepotNestedInput
+  }
+
+  export type DepotUncheckedUpdateWithoutQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    contacts?: DepotContactUncheckedUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUncheckedUpdateManyWithoutDepotNestedInput
   }
 
   export type DocumentUpsertWithWhereUniqueWithoutQuoteInput = {
@@ -57042,6 +61266,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -57051,6 +61276,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
   }
@@ -57105,6 +61332,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -57170,6 +61400,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -57179,6 +61410,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
   }
@@ -57233,6 +61466,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -57282,6 +61518,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -57291,6 +61528,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
@@ -57345,6 +61584,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -57389,6 +61631,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutQuoteLogsInput = {
@@ -57424,6 +61667,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutQuoteLogsInput = {
@@ -57485,6 +61729,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -57494,6 +61739,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
@@ -57548,6 +61795,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -57598,6 +61848,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutQuoteLogsInput = {
@@ -57633,6 +61884,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutProspectInput = {
@@ -57668,6 +61920,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutProspectInput = {
@@ -57703,6 +61956,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutProspectInput = {
@@ -57753,6 +62007,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -57761,6 +62016,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     documents?: DocumentCreateNestedManyWithoutQuoteInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
@@ -57815,6 +62072,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
@@ -57876,6 +62136,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProspectInput = {
@@ -57911,6 +62172,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type QuoteUpsertWithWhereUniqueWithoutProspectInput = {
@@ -57973,6 +62235,7 @@ export namespace Prisma {
     client?: ClientCreateNestedOneWithoutShipmentsInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
     createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    depot?: DepotCreateNestedOneWithoutShipmentsInput
     trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
@@ -58024,6 +62287,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
     trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
     pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
     fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
@@ -58079,6 +62343,7 @@ export namespace Prisma {
     cancelledAt?: Date | string | null
     cancelReason?: string | null
     paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutUserQuotesInput
@@ -58088,6 +62353,8 @@ export namespace Prisma {
     shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
     paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
     createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    depot?: DepotCreateNestedOneWithoutQuotesInput
     logs?: QuoteLogCreateNestedManyWithoutQuoteInput
     packages?: QuotePackageCreateNestedManyWithoutQuoteInput
   }
@@ -58142,6 +62409,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
@@ -58417,6 +62687,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutUserDocumentsInput = {
@@ -58452,6 +62723,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutUserDocumentsInput = {
@@ -58492,6 +62764,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutUploadedDocumentsInput = {
@@ -58527,6 +62800,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutUploadedDocumentsInput = {
@@ -58589,6 +62863,7 @@ export namespace Prisma {
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
@@ -58640,6 +62915,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
     fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
@@ -58701,6 +62977,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -58710,6 +62987,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
   }
@@ -58764,6 +63043,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
@@ -59063,6 +63345,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUserDocumentsInput = {
@@ -59098,6 +63381,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUpsertWithoutUploadedDocumentsInput = {
@@ -59144,6 +63428,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUploadedDocumentsInput = {
@@ -59179,6 +63464,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutPricingConfigsInput = {
@@ -59214,6 +63500,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutPricingConfigsInput = {
@@ -59249,6 +63536,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutPricingConfigsInput = {
@@ -59300,6 +63588,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPricingConfigsInput = {
@@ -59335,6 +63624,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserCreateWithoutSystemConfigUpdatesInput = {
@@ -59370,6 +63660,7 @@ export namespace Prisma {
     createdQuotes?: QuoteCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserUncheckedCreateWithoutSystemConfigUpdatesInput = {
@@ -59405,6 +63696,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedCreateNestedManyWithoutCreatedByInput
     confirmedQuotePayments?: QuoteUncheckedCreateNestedManyWithoutPaymentReceivedByInput
     confirmedShipmentPayments?: ShipmentUncheckedCreateNestedManyWithoutPaymentReceivedByInput
+    deletedQuotes?: QuoteUncheckedCreateNestedManyWithoutDeletedByInput
   }
 
   export type UserCreateOrConnectWithoutSystemConfigUpdatesInput = {
@@ -59456,6 +63748,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSystemConfigUpdatesInput = {
@@ -59491,6 +63784,436 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
+  }
+
+  export type DepotContactCreateWithoutDepotInput = {
+    id?: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotContactUncheckedCreateWithoutDepotInput = {
+    id?: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotContactCreateOrConnectWithoutDepotInput = {
+    where: DepotContactWhereUniqueInput
+    create: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput>
+  }
+
+  export type DepotContactCreateManyDepotInputEnvelope = {
+    data: DepotContactCreateManyDepotInput | DepotContactCreateManyDepotInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuoteCreateWithoutDepotInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    paymentReceivedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutUserQuotesInput
+    client?: ClientCreateNestedOneWithoutQuotesInput
+    prospect?: ProspectCreateNestedOneWithoutQuotesInput
+    treatmentAgent?: UserCreateNestedOneWithoutTreatedQuotesInput
+    shipment?: ShipmentCreateNestedOneWithoutFromQuoteInput
+    paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedQuotePaymentsInput
+    createdBy?: UserCreateNestedOneWithoutCreatedQuotesInput
+    deletedBy?: UserCreateNestedOneWithoutDeletedQuotesInput
+    documents?: DocumentCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteUncheckedCreateWithoutDepotInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    userId?: string | null
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    clientId?: string | null
+    prospectId?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    treatmentAgentId?: string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    shipmentId?: string | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documents?: DocumentUncheckedCreateNestedManyWithoutQuoteInput
+    logs?: QuoteLogUncheckedCreateNestedManyWithoutQuoteInput
+    packages?: QuotePackageUncheckedCreateNestedManyWithoutQuoteInput
+  }
+
+  export type QuoteCreateOrConnectWithoutDepotInput = {
+    where: QuoteWhereUniqueInput
+    create: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput>
+  }
+
+  export type QuoteCreateManyDepotInputEnvelope = {
+    data: QuoteCreateManyDepotInput | QuoteCreateManyDepotInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ShipmentCreateWithoutDepotInput = {
+    id?: string
+    trackingNumber: string
+    originAddress: string
+    originCity: string
+    originPostalCode: string
+    originCountry: string
+    originContact?: string | null
+    originEmail?: string | null
+    originPhone?: string | null
+    destinationAddress: string
+    destinationCity: string
+    destinationPostalCode: string
+    destinationCountry: string
+    destinationContact?: string | null
+    destinationEmail?: string | null
+    destinationPhone?: string | null
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    packageCount: number
+    value?: number | null
+    currency?: string
+    description: string
+    specialInstructions?: string | null
+    transportMode?: ShipmentCreatetransportModeInput | $Enums.TransportMode[]
+    priority?: $Enums.Priority
+    isDangerous?: boolean
+    isFragile?: boolean
+    requestedPickupDate?: Date | string | null
+    actualPickupDate?: Date | string | null
+    estimatedDeliveryDate?: Date | string | null
+    actualDeliveryDate?: Date | string | null
+    status?: $Enums.ShipmentStatus
+    estimatedCost?: number | null
+    actualCost?: number | null
+    paymentReceivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    client?: ClientCreateNestedOneWithoutShipmentsInput
+    paymentReceivedBy?: UserCreateNestedOneWithoutConfirmedShipmentPaymentsInput
+    createdBy: UserCreateNestedOneWithoutCreatedShipmentsInput
+    trackingEvents?: TrackingEventCreateNestedManyWithoutShipmentInput
+    documents?: DocumentCreateNestedManyWithoutShipmentInput
+    pickupRequests?: PickupRequestCreateNestedManyWithoutShipmentInput
+    fromQuote?: QuoteCreateNestedOneWithoutShipmentInput
+    logs?: ShipmentLogCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageCreateNestedManyWithoutShipmentInput
+  }
+
+  export type ShipmentUncheckedCreateWithoutDepotInput = {
+    id?: string
+    trackingNumber: string
+    clientId?: string | null
+    originAddress: string
+    originCity: string
+    originPostalCode: string
+    originCountry: string
+    originContact?: string | null
+    originEmail?: string | null
+    originPhone?: string | null
+    destinationAddress: string
+    destinationCity: string
+    destinationPostalCode: string
+    destinationCountry: string
+    destinationContact?: string | null
+    destinationEmail?: string | null
+    destinationPhone?: string | null
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    packageCount: number
+    value?: number | null
+    currency?: string
+    description: string
+    specialInstructions?: string | null
+    transportMode?: ShipmentCreatetransportModeInput | $Enums.TransportMode[]
+    priority?: $Enums.Priority
+    isDangerous?: boolean
+    isFragile?: boolean
+    requestedPickupDate?: Date | string | null
+    actualPickupDate?: Date | string | null
+    estimatedDeliveryDate?: Date | string | null
+    actualDeliveryDate?: Date | string | null
+    status?: $Enums.ShipmentStatus
+    estimatedCost?: number | null
+    actualCost?: number | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    trackingEvents?: TrackingEventUncheckedCreateNestedManyWithoutShipmentInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutShipmentInput
+    pickupRequests?: PickupRequestUncheckedCreateNestedManyWithoutShipmentInput
+    fromQuote?: QuoteUncheckedCreateNestedOneWithoutShipmentInput
+    logs?: ShipmentLogUncheckedCreateNestedManyWithoutShipmentInput
+    packages?: ShipmentPackageUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type ShipmentCreateOrConnectWithoutDepotInput = {
+    where: ShipmentWhereUniqueInput
+    create: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput>
+  }
+
+  export type ShipmentCreateManyDepotInputEnvelope = {
+    data: ShipmentCreateManyDepotInput | ShipmentCreateManyDepotInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DepotContactUpsertWithWhereUniqueWithoutDepotInput = {
+    where: DepotContactWhereUniqueInput
+    update: XOR<DepotContactUpdateWithoutDepotInput, DepotContactUncheckedUpdateWithoutDepotInput>
+    create: XOR<DepotContactCreateWithoutDepotInput, DepotContactUncheckedCreateWithoutDepotInput>
+  }
+
+  export type DepotContactUpdateWithWhereUniqueWithoutDepotInput = {
+    where: DepotContactWhereUniqueInput
+    data: XOR<DepotContactUpdateWithoutDepotInput, DepotContactUncheckedUpdateWithoutDepotInput>
+  }
+
+  export type DepotContactUpdateManyWithWhereWithoutDepotInput = {
+    where: DepotContactScalarWhereInput
+    data: XOR<DepotContactUpdateManyMutationInput, DepotContactUncheckedUpdateManyWithoutDepotInput>
+  }
+
+  export type DepotContactScalarWhereInput = {
+    AND?: DepotContactScalarWhereInput | DepotContactScalarWhereInput[]
+    OR?: DepotContactScalarWhereInput[]
+    NOT?: DepotContactScalarWhereInput | DepotContactScalarWhereInput[]
+    id?: StringFilter<"DepotContact"> | string
+    depotId?: StringFilter<"DepotContact"> | string
+    name?: StringFilter<"DepotContact"> | string
+    role?: StringNullableFilter<"DepotContact"> | string | null
+    email?: StringNullableFilter<"DepotContact"> | string | null
+    phone?: StringNullableFilter<"DepotContact"> | string | null
+    isPrimary?: BoolFilter<"DepotContact"> | boolean
+    createdAt?: DateTimeFilter<"DepotContact"> | Date | string
+    updatedAt?: DateTimeFilter<"DepotContact"> | Date | string
+  }
+
+  export type QuoteUpsertWithWhereUniqueWithoutDepotInput = {
+    where: QuoteWhereUniqueInput
+    update: XOR<QuoteUpdateWithoutDepotInput, QuoteUncheckedUpdateWithoutDepotInput>
+    create: XOR<QuoteCreateWithoutDepotInput, QuoteUncheckedCreateWithoutDepotInput>
+  }
+
+  export type QuoteUpdateWithWhereUniqueWithoutDepotInput = {
+    where: QuoteWhereUniqueInput
+    data: XOR<QuoteUpdateWithoutDepotInput, QuoteUncheckedUpdateWithoutDepotInput>
+  }
+
+  export type QuoteUpdateManyWithWhereWithoutDepotInput = {
+    where: QuoteScalarWhereInput
+    data: XOR<QuoteUpdateManyMutationInput, QuoteUncheckedUpdateManyWithoutDepotInput>
+  }
+
+  export type ShipmentUpsertWithWhereUniqueWithoutDepotInput = {
+    where: ShipmentWhereUniqueInput
+    update: XOR<ShipmentUpdateWithoutDepotInput, ShipmentUncheckedUpdateWithoutDepotInput>
+    create: XOR<ShipmentCreateWithoutDepotInput, ShipmentUncheckedCreateWithoutDepotInput>
+  }
+
+  export type ShipmentUpdateWithWhereUniqueWithoutDepotInput = {
+    where: ShipmentWhereUniqueInput
+    data: XOR<ShipmentUpdateWithoutDepotInput, ShipmentUncheckedUpdateWithoutDepotInput>
+  }
+
+  export type ShipmentUpdateManyWithWhereWithoutDepotInput = {
+    where: ShipmentScalarWhereInput
+    data: XOR<ShipmentUpdateManyMutationInput, ShipmentUncheckedUpdateManyWithoutDepotInput>
+  }
+
+  export type DepotCreateWithoutContactsInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quotes?: QuoteCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotUncheckedCreateWithoutContactsInput = {
+    id?: string
+    name: string
+    code: string
+    description?: string | null
+    address: string
+    city: string
+    country?: string
+    postalCode?: string | null
+    phone?: string | null
+    email?: string | null
+    isDefault?: boolean
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quotes?: QuoteUncheckedCreateNestedManyWithoutDepotInput
+    shipments?: ShipmentUncheckedCreateNestedManyWithoutDepotInput
+  }
+
+  export type DepotCreateOrConnectWithoutContactsInput = {
+    where: DepotWhereUniqueInput
+    create: XOR<DepotCreateWithoutContactsInput, DepotUncheckedCreateWithoutContactsInput>
+  }
+
+  export type DepotUpsertWithoutContactsInput = {
+    update: XOR<DepotUpdateWithoutContactsInput, DepotUncheckedUpdateWithoutContactsInput>
+    create: XOR<DepotCreateWithoutContactsInput, DepotUncheckedCreateWithoutContactsInput>
+    where?: DepotWhereInput
+  }
+
+  export type DepotUpdateToOneWithWhereWithoutContactsInput = {
+    where?: DepotWhereInput
+    data: XOR<DepotUpdateWithoutContactsInput, DepotUncheckedUpdateWithoutContactsInput>
+  }
+
+  export type DepotUpdateWithoutContactsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quotes?: QuoteUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUpdateManyWithoutDepotNestedInput
+  }
+
+  export type DepotUncheckedUpdateWithoutContactsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quotes?: QuoteUncheckedUpdateManyWithoutDepotNestedInput
+    shipments?: ShipmentUncheckedUpdateManyWithoutDepotNestedInput
   }
 
   export type AccountCreateManyUserInput = {
@@ -59561,6 +64284,7 @@ export namespace Prisma {
     paymentReceivedById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
   }
 
   export type DocumentCreateManyUserInput = {
@@ -59864,6 +64588,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -59956,6 +64683,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -60009,6 +64739,9 @@ export namespace Prisma {
     shipmentId?: string | null
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -60062,6 +64795,9 @@ export namespace Prisma {
     shipmentId?: string | null
     paymentReceivedAt?: Date | string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -60107,6 +64843,63 @@ export namespace Prisma {
     actualCost?: number | null
     paymentReceivedAt?: Date | string | null
     createdById: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    depotId?: string | null
+  }
+
+  export type QuoteCreateManyDeletedByInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    userId?: string | null
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    clientId?: string | null
+    prospectId?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    treatmentAgentId?: string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    shipmentId?: string | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById?: string | null
+    deletedAt?: Date | string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -60229,6 +65022,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -60280,6 +65074,7 @@ export namespace Prisma {
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -60331,6 +65126,7 @@ export namespace Prisma {
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DocumentUpdateWithoutUserInput = {
@@ -61148,6 +65944,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -61156,6 +65953,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -61210,6 +66009,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -61266,6 +66068,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -61430,6 +66235,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneWithoutQuotesNestedInput
@@ -61438,6 +66244,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -61492,6 +66300,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -61548,6 +66359,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -61595,6 +66409,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -61603,6 +66418,8 @@ export namespace Prisma {
     treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -61657,6 +66474,9 @@ export namespace Prisma {
     shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -61713,6 +66533,9 @@ export namespace Prisma {
     shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -61760,6 +66583,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -61768,6 +66592,8 @@ export namespace Prisma {
     treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -61822,6 +66648,9 @@ export namespace Prisma {
     shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -61878,6 +66707,9 @@ export namespace Prisma {
     shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -61925,6 +66757,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneWithoutShipmentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -61976,6 +66809,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -62025,6 +66859,181 @@ export namespace Prisma {
     actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuoteUpdateWithoutDeletedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutUserQuotesNestedInput
+    client?: ClientUpdateOneWithoutQuotesNestedInput
+    prospect?: ProspectUpdateOneWithoutQuotesNestedInput
+    treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
+    shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
+    paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
+    documents?: DocumentUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateWithoutDeletedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    prospectId?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentAgentId?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateManyWithoutDeletedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    prospectId?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentAgentId?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -62085,6 +67094,7 @@ export namespace Prisma {
     createdById: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    depotId?: string | null
   }
 
   export type QuoteCreateManyClientInput = {
@@ -62136,6 +67146,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -62271,6 +67284,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutClientInput = {
@@ -62306,6 +67320,7 @@ export namespace Prisma {
     createdQuotes?: QuoteUncheckedUpdateManyWithoutCreatedByNestedInput
     confirmedQuotePayments?: QuoteUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
     confirmedShipmentPayments?: ShipmentUncheckedUpdateManyWithoutPaymentReceivedByNestedInput
+    deletedQuotes?: QuoteUncheckedUpdateManyWithoutDeletedByNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutClientInput = {
@@ -62364,6 +67379,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
     createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    depot?: DepotUpdateOneWithoutShipmentsNestedInput
     trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
@@ -62415,6 +67431,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
     pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
@@ -62466,6 +67483,7 @@ export namespace Prisma {
     createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type QuoteUpdateWithoutClientInput = {
@@ -62511,6 +67529,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -62519,6 +67538,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -62573,6 +67594,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -62629,6 +67653,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -63768,6 +68795,9 @@ export namespace Prisma {
     paymentReceivedAt?: Date | string | null
     paymentReceivedById?: string | null
     createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    depotId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -63815,6 +68845,7 @@ export namespace Prisma {
     cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutUserQuotesNestedInput
@@ -63823,6 +68854,8 @@ export namespace Prisma {
     shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
     paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
     createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    depot?: DepotUpdateOneWithoutQuotesNestedInput
     documents?: DocumentUpdateManyWithoutQuoteNestedInput
     logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
     packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
@@ -63877,6 +68910,9 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
@@ -63933,6 +68969,479 @@ export namespace Prisma {
     paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    depotId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactCreateManyDepotInput = {
+    id?: string
+    name: string
+    role?: string | null
+    email?: string | null
+    phone?: string | null
+    isPrimary?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type QuoteCreateManyDepotInput = {
+    id?: string
+    quoteNumber: string
+    trackingToken?: string
+    tokenExpiresAt: Date | string
+    userId?: string | null
+    isAttachedToAccount?: boolean
+    contactEmail: string
+    contactPhone?: string | null
+    contactName?: string | null
+    clientId?: string | null
+    prospectId?: string | null
+    originCountry: string
+    destinationCountry: string
+    transportMode?: QuoteCreatetransportModeInput | $Enums.TransportMode[]
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    originAddress?: string | null
+    originCity?: string | null
+    originPostalCode?: string | null
+    originContactName?: string | null
+    originContactPhone?: string | null
+    originContactEmail?: string | null
+    destinationAddress?: string | null
+    destinationCity?: string | null
+    destinationPostalCode?: string | null
+    destinationContactName?: string | null
+    destinationContactPhone?: string | null
+    destinationContactEmail?: string | null
+    estimatedCost: number
+    validUntil: Date | string
+    currency?: string
+    status?: $Enums.QuoteStatus
+    submittedAt?: Date | string | null
+    acceptedAt?: Date | string | null
+    rejectedAt?: Date | string | null
+    paymentMethod?: $Enums.QuotePaymentMethod | null
+    agentComment?: string | null
+    treatmentStartedAt?: Date | string | null
+    treatmentValidatedAt?: Date | string | null
+    treatmentAgentId?: string | null
+    cancelledAt?: Date | string | null
+    cancelReason?: string | null
+    shipmentId?: string | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById?: string | null
+    deletedAt?: Date | string | null
+    deletedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShipmentCreateManyDepotInput = {
+    id?: string
+    trackingNumber: string
+    clientId?: string | null
+    originAddress: string
+    originCity: string
+    originPostalCode: string
+    originCountry: string
+    originContact?: string | null
+    originEmail?: string | null
+    originPhone?: string | null
+    destinationAddress: string
+    destinationCity: string
+    destinationPostalCode: string
+    destinationCountry: string
+    destinationContact?: string | null
+    destinationEmail?: string | null
+    destinationPhone?: string | null
+    cargoType: $Enums.CargoType
+    weight: number
+    length?: number | null
+    width?: number | null
+    height?: number | null
+    packageCount: number
+    value?: number | null
+    currency?: string
+    description: string
+    specialInstructions?: string | null
+    transportMode?: ShipmentCreatetransportModeInput | $Enums.TransportMode[]
+    priority?: $Enums.Priority
+    isDangerous?: boolean
+    isFragile?: boolean
+    requestedPickupDate?: Date | string | null
+    actualPickupDate?: Date | string | null
+    estimatedDeliveryDate?: Date | string | null
+    actualDeliveryDate?: Date | string | null
+    status?: $Enums.ShipmentStatus
+    estimatedCost?: number | null
+    actualCost?: number | null
+    paymentReceivedAt?: Date | string | null
+    paymentReceivedById?: string | null
+    createdById: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DepotContactUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactUncheckedUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DepotContactUncheckedUpdateManyWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type QuoteUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutUserQuotesNestedInput
+    client?: ClientUpdateOneWithoutQuotesNestedInput
+    prospect?: ProspectUpdateOneWithoutQuotesNestedInput
+    treatmentAgent?: UserUpdateOneWithoutTreatedQuotesNestedInput
+    shipment?: ShipmentUpdateOneWithoutFromQuoteNestedInput
+    paymentReceivedBy?: UserUpdateOneWithoutConfirmedQuotePaymentsNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedQuotesNestedInput
+    deletedBy?: UserUpdateOneWithoutDeletedQuotesNestedInput
+    documents?: DocumentUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUpdateManyWithoutQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    prospectId?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentAgentId?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: DocumentUncheckedUpdateManyWithoutQuoteNestedInput
+    logs?: QuoteLogUncheckedUpdateManyWithoutQuoteNestedInput
+    packages?: QuotePackageUncheckedUpdateManyWithoutQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateManyWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quoteNumber?: StringFieldUpdateOperationsInput | string
+    trackingToken?: StringFieldUpdateOperationsInput | string
+    tokenExpiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    isAttachedToAccount?: BoolFieldUpdateOperationsInput | boolean
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    prospectId?: NullableStringFieldUpdateOperationsInput | string | null
+    originCountry?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    transportMode?: QuoteUpdatetransportModeInput | $Enums.TransportMode[]
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    originAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    originCity?: NullableStringFieldUpdateOperationsInput | string | null
+    originPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    originContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCity?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPostalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactName?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationContactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedCost?: FloatFieldUpdateOperationsInput | number
+    validUntil?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rejectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentMethod?: NullableEnumQuotePaymentMethodFieldUpdateOperationsInput | $Enums.QuotePaymentMethod | null
+    agentComment?: NullableStringFieldUpdateOperationsInput | string | null
+    treatmentStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentValidatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    treatmentAgentId?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    shipmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ShipmentUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    trackingNumber?: StringFieldUpdateOperationsInput | string
+    originAddress?: StringFieldUpdateOperationsInput | string
+    originCity?: StringFieldUpdateOperationsInput | string
+    originPostalCode?: StringFieldUpdateOperationsInput | string
+    originCountry?: StringFieldUpdateOperationsInput | string
+    originContact?: NullableStringFieldUpdateOperationsInput | string | null
+    originEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: StringFieldUpdateOperationsInput | string
+    destinationCity?: StringFieldUpdateOperationsInput | string
+    destinationPostalCode?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    destinationContact?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    packageCount?: IntFieldUpdateOperationsInput | number
+    value?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: ShipmentUpdatetransportModeInput | $Enums.TransportMode[]
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    isDangerous?: BoolFieldUpdateOperationsInput | boolean
+    isFragile?: BoolFieldUpdateOperationsInput | boolean
+    requestedPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    estimatedDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
+    estimatedCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneWithoutShipmentsNestedInput
+    paymentReceivedBy?: UserUpdateOneWithoutConfirmedShipmentPaymentsNestedInput
+    createdBy?: UserUpdateOneRequiredWithoutCreatedShipmentsNestedInput
+    trackingEvents?: TrackingEventUpdateManyWithoutShipmentNestedInput
+    documents?: DocumentUpdateManyWithoutShipmentNestedInput
+    pickupRequests?: PickupRequestUpdateManyWithoutShipmentNestedInput
+    fromQuote?: QuoteUpdateOneWithoutShipmentNestedInput
+    logs?: ShipmentLogUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type ShipmentUncheckedUpdateWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    trackingNumber?: StringFieldUpdateOperationsInput | string
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    originAddress?: StringFieldUpdateOperationsInput | string
+    originCity?: StringFieldUpdateOperationsInput | string
+    originPostalCode?: StringFieldUpdateOperationsInput | string
+    originCountry?: StringFieldUpdateOperationsInput | string
+    originContact?: NullableStringFieldUpdateOperationsInput | string | null
+    originEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: StringFieldUpdateOperationsInput | string
+    destinationCity?: StringFieldUpdateOperationsInput | string
+    destinationPostalCode?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    destinationContact?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    packageCount?: IntFieldUpdateOperationsInput | number
+    value?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: ShipmentUpdatetransportModeInput | $Enums.TransportMode[]
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    isDangerous?: BoolFieldUpdateOperationsInput | boolean
+    isFragile?: BoolFieldUpdateOperationsInput | boolean
+    requestedPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    estimatedDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
+    estimatedCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    trackingEvents?: TrackingEventUncheckedUpdateManyWithoutShipmentNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutShipmentNestedInput
+    pickupRequests?: PickupRequestUncheckedUpdateManyWithoutShipmentNestedInput
+    fromQuote?: QuoteUncheckedUpdateOneWithoutShipmentNestedInput
+    logs?: ShipmentLogUncheckedUpdateManyWithoutShipmentNestedInput
+    packages?: ShipmentPackageUncheckedUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type ShipmentUncheckedUpdateManyWithoutDepotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    trackingNumber?: StringFieldUpdateOperationsInput | string
+    clientId?: NullableStringFieldUpdateOperationsInput | string | null
+    originAddress?: StringFieldUpdateOperationsInput | string
+    originCity?: StringFieldUpdateOperationsInput | string
+    originPostalCode?: StringFieldUpdateOperationsInput | string
+    originCountry?: StringFieldUpdateOperationsInput | string
+    originContact?: NullableStringFieldUpdateOperationsInput | string | null
+    originEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationAddress?: StringFieldUpdateOperationsInput | string
+    destinationCity?: StringFieldUpdateOperationsInput | string
+    destinationPostalCode?: StringFieldUpdateOperationsInput | string
+    destinationCountry?: StringFieldUpdateOperationsInput | string
+    destinationContact?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoType?: EnumCargoTypeFieldUpdateOperationsInput | $Enums.CargoType
+    weight?: FloatFieldUpdateOperationsInput | number
+    length?: NullableFloatFieldUpdateOperationsInput | number | null
+    width?: NullableFloatFieldUpdateOperationsInput | number | null
+    height?: NullableFloatFieldUpdateOperationsInput | number | null
+    packageCount?: IntFieldUpdateOperationsInput | number
+    value?: NullableFloatFieldUpdateOperationsInput | number | null
+    currency?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: ShipmentUpdatetransportModeInput | $Enums.TransportMode[]
+    priority?: EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+    isDangerous?: BoolFieldUpdateOperationsInput | boolean
+    isFragile?: BoolFieldUpdateOperationsInput | boolean
+    requestedPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualPickupDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    estimatedDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualDeliveryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus
+    estimatedCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    actualCost?: NullableFloatFieldUpdateOperationsInput | number | null
+    paymentReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paymentReceivedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -25,6 +25,8 @@ import {
   logQuoteTreatmentStarted,
   logQuoteTreatmentValidated,
   logQuoteCancelled,
+  logQuoteSoftDeleted,
+  logQuoteRestored,
 } from '../lib/quote-log-helper';
 import {
   calculerPrixMultiPackages,
@@ -176,6 +178,8 @@ export async function createQuoteAction(
     // Extraire et valider les données
     const rawData = {
       clientId: formData.get('clientId'),
+      // Dépôt Faso Fret associé (optionnel)
+      depotId: formData.get('depotId') || undefined,
       originCountry: formData.get('originCountry'),
       destinationCountry: formData.get('destinationCountry'),
       cargoType: formData.get('cargoType'),
@@ -345,6 +349,7 @@ export async function createQuoteAction(
       data: {
         quoteNumber,
         clientId: validatedData.clientId,
+        depotId: validatedData.depotId ?? null, // Dépôt Faso Fret (optionnel, fallback sur dépôt par défaut dans les PDFs)
         contactEmail: session.user.email, // Email de l'utilisateur connecté (requis par le schéma)
         originCountry: validatedData.originCountry,
         destinationCountry: validatedData.destinationCountry,
@@ -480,7 +485,8 @@ export async function getQuotesAction(
     const skip = (page - 1) * limit;
 
     // Construire les filtres
-    const where: any = {};
+    // Exclure les devis soft-deleted (deletedAt != null) de la liste normale
+    const where: any = { deletedAt: null };
 
     // Si l'utilisateur est CLIENT, il ne voit que ses propres devis
     if (canReadOwn && !canReadAll) {
@@ -677,6 +683,15 @@ export async function getQuoteAction(id: string) {
           error: 'Vous n\'avez pas accès à ce devis',
         };
       }
+    }
+
+    // Les non-admins ne peuvent pas voir les devis soft-deleted
+    // Les admins y accèdent via la vue "Corbeille"
+    if (quote.deletedAt && !canReadAll) {
+      return {
+        success: false,
+        error: 'Devis introuvable',
+      };
     }
 
     return { success: true, data: quote };
@@ -1024,13 +1039,18 @@ export async function updateQuoteAction(
 }
 
 /**
- * Action : Supprimer un devis
+ * Action : Supprimer un devis (soft delete)
  *
- * Supprime un devis de la base de données
- * Seuls les devis en DRAFT peuvent être supprimés
+ * Marque le devis comme supprimé (deletedAt) au lieu de le supprimer physiquement.
+ * Le devis reste en base de données et peut être restauré par un admin via la Corbeille.
  *
- * @param id - ID du devis à supprimer
- * @returns Résultat de la suppression
+ * Statuts autorisés selon le rôle :
+ * - ADMIN / OPERATIONS_MANAGER / FINANCE_MANAGER : DRAFT, SUBMITTED, SENT, REJECTED, EXPIRED, CANCELLED
+ * - CLIENT : DRAFT uniquement
+ * - Statuts interdits pour tous : ACCEPTED, IN_TREATMENT, VALIDATED (processus métier actif)
+ *
+ * @param id - ID du devis à mettre à la corbeille
+ * @returns Résultat de l'opération
  *
  * @permissions 'quotes:delete' - ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER
  * @permissions 'quotes:delete:own' - CLIENT (uniquement ses propres devis en DRAFT)
@@ -1041,8 +1061,8 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
      * Vérifier l'authentification et les permissions
      *
      * Deux niveaux de permission :
-     * - 'quotes:delete' : ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER → peut supprimer tout devis en DRAFT
-     * - 'quotes:delete:own' : CLIENT → peut supprimer uniquement ses propres devis en DRAFT
+     * - 'quotes:delete' : ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER → statuts élargis
+     * - 'quotes:delete:own' : CLIENT → DRAFT uniquement
      */
     const session = await requireAuth();
     const userRole = session.user.role as UserRole;
@@ -1057,13 +1077,18 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
       };
     }
 
-    // Vérifier que le devis existe
+    // Vérifier que le devis existe et n'est pas déjà supprimé
     const quote = await prisma.quote.findUnique({
       where: { id },
     });
 
     if (!quote) {
       return { success: false, error: 'Devis introuvable' };
+    }
+
+    // Ne pas re-supprimer un devis déjà dans la corbeille
+    if (quote.deletedAt) {
+      return { success: false, error: 'Ce devis est déjà dans la corbeille' };
     }
 
     /**
@@ -1088,14 +1113,26 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
           error: 'Vous n\'avez pas accès à ce devis',
         };
       }
+
+      // CLIENT : seuls les brouillons peuvent être supprimés
+      if (quote.status !== 'DRAFT') {
+        return {
+          success: false,
+          error: 'Seuls les devis en brouillon peuvent être supprimés',
+        };
+      }
     }
 
-    // Empêcher la suppression si le devis n'est pas en DRAFT
-    if (quote.status !== 'DRAFT') {
-      return {
-        success: false,
-        error: 'Seuls les devis en brouillon peuvent être supprimés',
-      };
+    // ADMIN / Agents : statuts autorisés pour le soft delete
+    // Les statuts avec processus métier actif (ACCEPTED, IN_TREATMENT, VALIDATED) sont interdits
+    if (canDeleteAll) {
+      const allowedStatuses = ['DRAFT', 'SUBMITTED', 'SENT', 'REJECTED', 'EXPIRED', 'CANCELLED'];
+      if (!allowedStatuses.includes(quote.status)) {
+        return {
+          success: false,
+          error: `Impossible de supprimer un devis en statut "${quote.status}". Seuls les devis en brouillon, soumis, envoyés, rejetés, expirés ou annulés peuvent être supprimés.`,
+        };
+      }
     }
 
     // Empêcher la suppression si le paiement a été confirmé
@@ -1107,9 +1144,19 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
       };
     }
 
-    // Supprimer le devis
-    await prisma.quote.delete({
+    // Soft delete : marquer le devis comme supprimé (au lieu de prisma.quote.delete)
+    await prisma.quote.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+        deletedById: session.user.id,
+      },
+    });
+
+    // Tracer l'événement dans le QuoteLog pour audit trail
+    await logQuoteSoftDeleted({
+      quoteId: id,
+      changedById: session.user.id,
     });
 
     // Revalider la liste des devis
@@ -1117,7 +1164,7 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
 
     return { success: true, data: undefined };
   } catch (error) {
-    console.error('Error deleting quote:', error);
+    console.error('Error soft-deleting quote:', error);
 
     // Gestion des erreurs de permissions
     if (error instanceof Error) {
@@ -1139,6 +1186,168 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
     return {
       success: false,
       error: 'Une erreur est survenue lors de la suppression du devis',
+    };
+  }
+}
+
+/**
+ * Action : Restaurer un devis depuis la corbeille
+ *
+ * Remet deletedAt et deletedById à null, rendant le devis visible à nouveau.
+ * Réservé aux ADMIN et OPERATIONS_MANAGER.
+ *
+ * @param id - ID du devis à restaurer
+ * @returns Résultat de l'opération
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER uniquement
+ */
+export async function restoreQuoteAction(id: string): Promise<ActionResult> {
+  try {
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Seuls les ADMIN et OPERATIONS_MANAGER peuvent restaurer
+    if (userRole !== 'ADMIN' && userRole !== 'OPERATIONS_MANAGER') {
+      return {
+        success: false,
+        error: 'Seuls les administrateurs et gestionnaires des opérations peuvent restaurer un devis',
+      };
+    }
+
+    // Vérifier que le devis existe
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+    });
+
+    if (!quote) {
+      return { success: false, error: 'Devis introuvable' };
+    }
+
+    // Vérifier que le devis est bien dans la corbeille
+    if (!quote.deletedAt) {
+      return { success: false, error: 'Ce devis n\'est pas dans la corbeille' };
+    }
+
+    // Restaurer le devis en remettant les champs soft delete à null
+    await prisma.quote.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        deletedById: null,
+      },
+    });
+
+    // Tracer l'événement de restauration dans le QuoteLog
+    await logQuoteRestored({
+      quoteId: id,
+      changedById: session.user.id,
+    });
+
+    // Revalider les pages impactées
+    revalidatePath('/dashboard/quotes');
+    revalidatePath(`/dashboard/quotes/${id}`);
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error('Error restoring quote:', error);
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return {
+        success: false,
+        error: 'Vous devez être connecté pour effectuer cette action',
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la restauration du devis',
+    };
+  }
+}
+
+/**
+ * Action : Lister les devis supprimés (corbeille)
+ *
+ * Récupère les devis marqués comme supprimés (deletedAt != null) avec pagination.
+ * Réservé aux ADMIN et OPERATIONS_MANAGER pour la vue "Corbeille".
+ *
+ * @param page - Numéro de page (défaut: 1)
+ * @param limit - Nombre de devis par page (défaut: 20)
+ * @returns Liste paginée des devis soft-deleted
+ *
+ * @permissions ADMIN, OPERATIONS_MANAGER uniquement
+ */
+export async function getDeletedQuotesAction(page = 1, limit = 20) {
+  try {
+    const session = await requireAuth();
+    const userRole = session.user.role as UserRole;
+
+    // Seuls les ADMIN et OPERATIONS_MANAGER accèdent à la corbeille
+    if (userRole !== 'ADMIN' && userRole !== 'OPERATIONS_MANAGER') {
+      return {
+        success: false,
+        error: 'Accès réservé aux administrateurs et gestionnaires des opérations',
+      };
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Récupérer les devis supprimés, triés par date de suppression (plus récent en premier)
+    const [quotes, total] = await Promise.all([
+      prisma.quote.findMany({
+        where: { deletedAt: { not: null } },
+        skip,
+        take: limit,
+        orderBy: { deletedAt: 'desc' },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          // Inclure l'utilisateur qui a supprimé le devis
+          deletedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: { packages: true },
+          },
+        },
+      }),
+      prisma.quote.count({ where: { deletedAt: { not: null } } }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        quotes,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Error getting deleted quotes:', error);
+
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return {
+        success: false,
+        error: 'Vous devez être connecté pour effectuer cette action',
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Une erreur est survenue lors de la récupération des devis supprimés',
     };
   }
 }

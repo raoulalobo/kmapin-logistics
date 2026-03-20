@@ -961,9 +961,15 @@ export default async function QuoteDetailPage({
               </Button>
             )}
 
-            {/* Supprimer - visible uniquement pour CLIENT avec devis DRAFT */}
-            {/* Utilise un Client Component avec AlertDialog de confirmation */}
-            {userRole === 'CLIENT' && quote.status === 'DRAFT' && (
+            {/* Mettre à la corbeille (soft delete) */}
+            {/* CLIENT : visible uniquement sur DRAFT */}
+            {/* ADMIN / OPERATIONS_MANAGER / FINANCE_MANAGER : visible sur DRAFT, SUBMITTED, SENT, REJECTED, EXPIRED, CANCELLED */}
+            {/* Caché si le paiement a été confirmé (paymentReceivedAt != null) */}
+            {!quote.paymentReceivedAt && (
+              (userRole === 'CLIENT' && quote.status === 'DRAFT') ||
+              (['ADMIN', 'OPERATIONS_MANAGER', 'FINANCE_MANAGER'].includes(userRole) &&
+                ['DRAFT', 'SUBMITTED', 'SENT', 'REJECTED', 'EXPIRED', 'CANCELLED'].includes(quote.status))
+            ) && (
               <QuoteDeleteButton quoteId={quote.id} quoteNumber={quote.quoteNumber} />
             )}
 

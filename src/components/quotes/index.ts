@@ -32,8 +32,11 @@ export { QuotePaymentActions } from './quote-payment-actions';
 // Actions client (accepter/rejeter)
 export { QuoteActions } from './quote-actions';
 
-// Bouton de suppression (client, devis DRAFT uniquement)
+// Bouton de mise à la corbeille (soft delete)
 export { QuoteDeleteButton } from './quote-delete-button';
+
+// Bouton de restauration depuis la corbeille (admin uniquement)
+export { QuoteRestoreButton } from './quote-restore-button';
 
 // Bouton de soumission (client soumet son brouillon aux agents, DRAFT → SUBMITTED)
 export { QuoteSubmitButton } from './quote-submit-button';

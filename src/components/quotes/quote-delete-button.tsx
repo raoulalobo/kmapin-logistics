@@ -1,14 +1,16 @@
 /**
- * Composant : Bouton de suppression d'un devis
+ * Composant : Bouton de suppression d'un devis (soft delete)
  *
- * Bouton interactif avec dialog de confirmation pour supprimer un devis DRAFT.
- * Appelle la Server Action deleteQuoteAction après confirmation de l'utilisateur.
+ * Bouton interactif avec dialog de confirmation pour mettre un devis à la corbeille.
+ * Appelle la Server Action deleteQuoteAction (soft delete) après confirmation.
+ * Le devis n'est pas supprimé physiquement : il est marqué avec deletedAt et peut
+ * être restauré par un admin via la vue "Corbeille".
  *
  * Workflow :
- * 1. Le CLIENT clique sur "Supprimer"
- * 2. Un dialog de confirmation s'affiche
- * 3. Si confirmé, appel de deleteQuoteAction
- * 4. Redirection vers la liste des devis après suppression
+ * 1. L'utilisateur clique sur "Mettre à la corbeille"
+ * 2. Un dialog de confirmation s'affiche (non irréversible)
+ * 3. Si confirmé, appel de deleteQuoteAction (soft delete)
+ * 4. Redirection vers la liste des devis
  *
  * @example
  * ```tsx
@@ -51,11 +53,11 @@ interface QuoteDeleteButtonProps {
 }
 
 /**
- * Bouton de suppression d'un devis avec dialog de confirmation
+ * Bouton de mise à la corbeille d'un devis avec dialog de confirmation
  *
- * Utilise un AlertDialog (et non un simple Dialog) car c'est une action destructive
- * qui nécessite une confirmation explicite de l'utilisateur.
- * Après suppression, redirige vers /dashboard/quotes.
+ * Utilise un AlertDialog pour confirmation explicite avant le soft delete.
+ * Après mise à la corbeille, redirige vers /dashboard/quotes.
+ * Un admin pourra restaurer le devis depuis la vue Corbeille.
  */
 export function QuoteDeleteButton({ quoteId, quoteNumber }: QuoteDeleteButtonProps) {
   const router = useRouter();
@@ -63,10 +65,10 @@ export function QuoteDeleteButton({ quoteId, quoteNumber }: QuoteDeleteButtonPro
   const [isOpen, setIsOpen] = useState(false);
 
   /**
-   * Supprimer le devis après confirmation
+   * Mettre le devis à la corbeille après confirmation (soft delete)
    *
    * Workflow :
-   * 1. Appel de la Server Action deleteQuoteAction
+   * 1. Appel de la Server Action deleteQuoteAction (soft delete)
    * 2. Si succès : toast + redirection vers la liste
    * 3. Si erreur : toast d'erreur + le dialog reste ouvert
    */
@@ -75,11 +77,11 @@ export function QuoteDeleteButton({ quoteId, quoteNumber }: QuoteDeleteButtonPro
       const result = await deleteQuoteAction(quoteId);
 
       if (!result.success) {
-        toast.error(result.error || 'Erreur lors de la suppression du devis');
+        toast.error(result.error || 'Erreur lors de la mise à la corbeille du devis');
       } else {
-        toast.success(`Devis ${quoteNumber} supprimé avec succès`);
+        toast.success(`Devis ${quoteNumber} mis à la corbeille`);
         setIsOpen(false);
-        // Rediriger vers la liste des devis après suppression
+        // Rediriger vers la liste des devis après mise à la corbeille
         router.push('/dashboard/quotes');
       }
     });
@@ -90,18 +92,17 @@ export function QuoteDeleteButton({ quoteId, quoteNumber }: QuoteDeleteButtonPro
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <Trash className="mr-2 h-4 w-4" />
-          Supprimer
+          Mettre à la corbeille
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <WarningCircle className="h-5 w-5 text-destructive" />
-            Supprimer le devis {quoteNumber} ?
+            Mettre le devis {quoteNumber} à la corbeille ?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est irréversible. Le devis sera définitivement supprimé
-            de votre compte.
+            Le devis sera déplacé dans la corbeille. Un administrateur pourra le restaurer si nécessaire.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -116,12 +117,12 @@ export function QuoteDeleteButton({ quoteId, quoteNumber }: QuoteDeleteButtonPro
             {isPending ? (
               <>
                 <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
-                Suppression...
+                Mise à la corbeille...
               </>
             ) : (
               <>
                 <Trash className="mr-2 h-4 w-4" />
-                Supprimer définitivement
+                Mettre à la corbeille
               </>
             )}
           </AlertDialogAction>

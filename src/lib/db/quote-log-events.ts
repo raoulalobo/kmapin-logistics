@@ -245,6 +245,43 @@ export const QuoteLogEventType = {
    * - metadata: données contextuelles libres
    */
   SYSTEM_NOTE: 'SYSTEM_NOTE',
+
+  // ============================================
+  // SOFT DELETE (suppression logique)
+  // ============================================
+
+  /**
+   * Devis supprimé (soft delete)
+   * - Le devis est marqué comme supprimé (deletedAt) mais reste en base
+   * - changedById: ID de l'utilisateur ayant supprimé
+   * - metadata: { deletedBy: string, reason?: string }
+   *
+   * @example
+   * ```ts
+   * await logQuoteSoftDeleted({
+   *   quoteId: 'clxxx',
+   *   changedById: userId,
+   *   notes: 'Devis obsolète, client a demandé un nouveau',
+   * });
+   * ```
+   */
+  SOFT_DELETED: 'SOFT_DELETED',
+
+  /**
+   * Devis restauré depuis la corbeille
+   * - Un admin restaure un devis précédemment soft-deleted
+   * - changedById: ID de l'admin qui restaure
+   * - metadata: { restoredBy: string }
+   *
+   * @example
+   * ```ts
+   * await logQuoteRestored({
+   *   quoteId: 'clxxx',
+   *   changedById: adminId,
+   * });
+   * ```
+   */
+  RESTORED: 'RESTORED',
 } as const;
 
 /**

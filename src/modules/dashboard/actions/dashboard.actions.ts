@@ -178,10 +178,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }),
 
     // Revenus depuis les devis payés (paymentReceivedAt != null)
+    // Exclure les devis soft-deleted de toutes les statistiques
     // Devis payés ce mois-ci
     prisma.quote.findMany({
       where: {
         ...whereCompany,
+        deletedAt: null,
         paymentReceivedAt: { gte: startOfMonth },
       },
       select: { estimatedCost: true },
@@ -190,6 +192,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     prisma.quote.findMany({
       where: {
         ...whereCompany,
+        deletedAt: null,
         paymentReceivedAt: { gte: startOfLastMonth, lt: startOfMonth },
       },
       select: { estimatedCost: true },
@@ -198,6 +201,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     prisma.quote.findMany({
       where: {
         ...whereCompany,
+        deletedAt: null,
         status: QuoteStatus.VALIDATED,
         paymentReceivedAt: null,
       },
@@ -207,6 +211,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     prisma.quote.count({
       where: {
         ...whereCompany,
+        deletedAt: null,
         status: QuoteStatus.VALIDATED,
         paymentReceivedAt: null,
         validUntil: { lt: now },
@@ -218,6 +223,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     prisma.quote.count({
       where: {
         ...whereCompany,
+        deletedAt: null,
         status: QuoteStatus.SENT
       },
     }),
@@ -357,10 +363,11 @@ export async function getRevenueChartData() {
   // Sécurité : Si CLIENT sans company, retourner données vides
   const whereCompany = (isClient && !clientId) ? null : (isClient ? { clientId: clientId! } : {});
 
-  // Récupérer les devis payés depuis les 6 derniers mois
+  // Récupérer les devis payés depuis les 6 derniers mois (exclure soft-deleted)
   const paidQuotes = whereCompany === null ? [] : await prisma.quote.findMany({
     where: {
       ...whereCompany,
+      deletedAt: null,
       paymentReceivedAt: { gte: sixMonthsAgo },
     },
     select: {

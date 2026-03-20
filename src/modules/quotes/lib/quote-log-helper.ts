@@ -780,6 +780,78 @@ export async function logQuoteUpdated(
 }
 
 // ============================================
+// SOFT DELETE (suppression logique)
+// ============================================
+
+/**
+ * Crée un log de suppression logique (soft delete) d'un devis
+ *
+ * Enregistre qu'un utilisateur a mis le devis à la corbeille.
+ * Le devis reste en base de données (deletedAt != null) et peut être restauré.
+ *
+ * @param params - Paramètres du log
+ * @param params.quoteId - ID du devis supprimé
+ * @param params.changedById - ID de l'utilisateur qui supprime
+ * @param params.notes - Raison optionnelle de la suppression
+ * @returns Le log créé
+ *
+ * @example
+ * ```ts
+ * await logQuoteSoftDeleted({
+ *   quoteId: 'clxxx',
+ *   changedById: session.user.id,
+ *   notes: 'Devis obsolète, remplacé par QT-2026-0042',
+ * });
+ * ```
+ */
+export async function logQuoteSoftDeleted(params: BaseLogParams) {
+  return await createQuoteLog({
+    quoteId: params.quoteId,
+    eventType: QuoteLogEventType.SOFT_DELETED,
+    changedById: params.changedById,
+    notes: params.notes ?? 'Devis mis à la corbeille',
+    metadata: {
+      deletedBy: params.changedById,
+      deletedAt: new Date().toISOString(),
+    },
+  });
+}
+
+/**
+ * Crée un log de restauration d'un devis depuis la corbeille
+ *
+ * Enregistre qu'un admin a restauré un devis précédemment supprimé.
+ * Le champ deletedAt est remis à null après cette action.
+ *
+ * @param params - Paramètres du log
+ * @param params.quoteId - ID du devis restauré
+ * @param params.changedById - ID de l'admin qui restaure
+ * @param params.notes - Note optionnelle
+ * @returns Le log créé
+ *
+ * @example
+ * ```ts
+ * await logQuoteRestored({
+ *   quoteId: 'clxxx',
+ *   changedById: adminId,
+ *   notes: 'Restauration demandée par le client',
+ * });
+ * ```
+ */
+export async function logQuoteRestored(params: BaseLogParams) {
+  return await createQuoteLog({
+    quoteId: params.quoteId,
+    eventType: QuoteLogEventType.RESTORED,
+    changedById: params.changedById,
+    notes: params.notes ?? 'Devis restauré depuis la corbeille',
+    metadata: {
+      restoredBy: params.changedById,
+      restoredAt: new Date().toISOString(),
+    },
+  });
+}
+
+// ============================================
 // UTILITAIRES
 // ============================================
 

@@ -182,6 +182,7 @@ model User {
   createdQuotes             Quote[]           @relation("CreatedQuotes")
   confirmedQuotePayments    Quote[]           @relation("QuotePaymentReceiver")
   confirmedShipmentPayments Shipment[]        @relation("ShipmentPaymentReceiver")
+  deletedQuotes             Quote[]           @relation("DeletedQuotes")
 
   @@index([clientId])
   @@map("user")
@@ -320,6 +321,8 @@ model Shipment {
   createdBy             User              @relation("CreatedBy", fields: [createdById], references: [id])
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt()
+  depotId               String?
+  depot                 Depot?            @relation(fields: [depotId], references: [id])
   trackingEvents        TrackingEvent[]
   documents             Document[]
   pickupRequests        PickupRequest[]
@@ -607,6 +610,11 @@ model Quote {
   paymentReceivedBy       User?               @relation("QuotePaymentReceiver", fields: [paymentReceivedById], references: [id])
   createdById             String?
   createdBy               User?               @relation("CreatedQuotes", fields: [createdById], references: [id])
+  deletedAt               DateTime?
+  deletedById             String?
+  deletedBy               User?               @relation("DeletedQuotes", fields: [deletedById], references: [id])
+  depotId                 String?
+  depot                   Depot?              @relation(fields: [depotId], references: [id])
   documents               Document[]
   logs                    QuoteLog[]
   packages                QuotePackage[]
@@ -623,6 +631,7 @@ model Quote {
   @@index([destinationContactEmail])
   @@index([originCity])
   @@index([destinationCity])
+  @@index([deletedAt])
 }
 
 model QuotePackage {
@@ -827,4 +836,43 @@ model SystemConfig {
   updatedAt           DateTime @updatedAt()
 
   @@map("system_config")
+}
+
+model Depot {
+  id          String         @id() @default(cuid())
+  name        String
+  code        String         @unique()
+  description String?
+  address     String
+  city        String
+  country     String         @default("Burkina Faso")
+  postalCode  String?
+  phone       String?
+  email       String?
+  isDefault   Boolean        @default(false)
+  isActive    Boolean        @default(true)
+  contacts    DepotContact[]
+  quotes      Quote[]
+  shipments   Shipment[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt()
+
+  @@index([isDefault])
+  @@index([isActive])
+  @@index([code])
+}
+
+model DepotContact {
+  id        String   @id() @default(cuid())
+  depotId   String
+  depot     Depot    @relation(fields: [depotId], references: [id], onDelete: Cascade)
+  name      String
+  role      String?
+  email     String?
+  phone     String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@index([depotId])
 }

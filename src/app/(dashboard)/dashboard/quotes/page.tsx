@@ -13,7 +13,7 @@
 
 import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
-import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Eye, ArrowRight } from '@phosphor-icons/react/dist/ssr';
+import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Eye, ArrowRight, Trash } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -151,12 +151,23 @@ export default async function QuotesPage({
             Gérez vos devis et estimations tarifaires
           </p>
         </div>
-        <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
-          <Link href="/dashboard/quotes/new">
-            <Plus className="h-5 w-5" weight="fill" />
-            Nouveau devis
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Lien Corbeille — visible uniquement pour ADMIN et OPERATIONS_MANAGER */}
+          {(session.user.role === 'ADMIN' || session.user.role === 'OPERATIONS_MANAGER') && (
+            <Button variant="outline" size="lg" asChild className="gap-2">
+              <Link href="/dashboard/quotes/trash">
+                <Trash className="h-5 w-5" />
+                Corbeille
+              </Link>
+            </Button>
+          )}
+          <Button asChild size="lg" className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Link href="/dashboard/quotes/new">
+              <Plus className="h-5 w-5" weight="fill" />
+              Nouveau devis
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Separator />

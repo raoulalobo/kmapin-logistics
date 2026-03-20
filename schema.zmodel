@@ -110,6 +110,9 @@ model User {
   confirmedQuotePayments    Quote[]    @relation("QuotePaymentReceiver")    // Paiements confirmés sur devis
   confirmedShipmentPayments Shipment[] @relation("ShipmentPaymentReceiver") // Paiements confirmés sur colis
 
+  // Relations pour le soft delete de devis
+  deletedQuotes             Quote[]    @relation("DeletedQuotes")           // Devis supprimés (soft delete) par cet utilisateur
+
   // 🔐 Access Policies Zenstack
 
   // Les admins peuvent tout faire
@@ -456,6 +459,14 @@ model Shipment {
   createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // ════════════════════════════════════════════
+  // DÉPÔT (Point de départ / traitement)
+  // ════════════════════════════════════════════
+  // Dépôt/entrepôt Faso Fret associé à cette expédition
+  // Si NULL, le dépôt par défaut (isDefault=true) sera utilisé dans les PDFs
+  depotId        String?
+  depot          Depot?   @relation(fields: [depotId], references: [id])
 
   // Relations
   trackingEvents TrackingEvent[]
@@ -1430,6 +1441,23 @@ model Quote {
   createdById        String?
   createdBy          User?           @relation("CreatedQuotes", fields: [createdById], references: [id])
 
+  // ════════════════════════════════════════════
+  // SOFT DELETE (suppression logique)
+  // ════════════════════════════════════════════
+  // Si non-null, le devis est considéré comme supprimé (invisible dans les vues normales)
+  // Un admin peut restaurer un devis soft-deleted via la vue "Corbeille"
+  deletedAt          DateTime?
+  deletedById        String?
+  deletedBy          User?           @relation("DeletedQuotes", fields: [deletedById], references: [id])
+
+  // ════════════════════════════════════════════
+  // DÉPÔT (Point de départ / traitement)
+  // ════════════════════════════════════════════
+  // Dépôt/entrepôt Faso Fret associé à ce devis
+  // Si NULL, le dépôt par défaut (isDefault=true) sera utilisé dans les PDFs
+  depotId            String?
+  depot              Depot?          @relation(fields: [depotId], references: [id])
+
   documents          Document[]
   logs               QuoteLog[]      // Historique complet des événements (changements de statut, etc.)
   packages           QuotePackage[]  // Colis détaillés du devis (multi-colis)
@@ -1478,6 +1506,7 @@ model Quote {
   @@index([destinationContactEmail]) // Recherche par email destinataire
   @@index([originCity])              // Filtrage par ville origine
   @@index([destinationCity])         // Filtrage par ville destination
+  @@index([deletedAt])              // Optimise le filtrage soft delete (WHERE deletedAt IS NULL)
 }
 
 /**
@@ -2261,4 +2290,110 @@ model SystemConfig {
   @@allow('create,update,delete', auth().role == ADMIN)
 
   @@map("system_config")
+}
+
+// ============================================
+// DÉPÔTS / ENTREPÔTS
+// ============================================
+
+/**
+ * Depot — Point physique de traitement Faso Fret
+ *
+ * Représente un dépôt, entrepôt ou bureau de l'entreprise.
+ * Chaque dépôt possède une adresse complète et peut avoir plusieurs contacts.
+ * Un dépôt marqué isDefault=true est utilisé comme fallback dans les PDFs
+ * quand un devis/expédition n'a pas de dépôt explicitement assigné.
+ *
+ * Les infos phone/email sont dénormalisées du contact principal pour accès rapide
+ * (utilisées dans les en-têtes PDF sans jointure supplémentaire).
+ */
+model Depot {
+  id            String   @id @default(cuid())
+  name          String                    // Ex: "Dépôt Ouagadougou Centre"
+  code          String   @unique          // Code court unique : "OUA-01"
+  description   String?                   // Description libre du dépôt
+
+  // ════════════════════════════════════════════
+  // ADRESSE
+  // ════════════════════════════════════════════
+
+  address       String                    // Adresse complète (rue, numéro)
+  city          String                    // Ville du dépôt
+  country       String   @default("Burkina Faso") // Pays (défaut: Burkina Faso)
+  postalCode    String?                   // Code postal (optionnel selon le pays)
+
+  // ════════════════════════════════════════════
+  // CONTACT RAPIDE (dénormalisé du contact principal)
+  // ════════════════════════════════════════════
+  // Ces champs sont synchronisés automatiquement avec le contact isPrimary=true
+  // pour éviter une jointure supplémentaire dans les PDFs et en-têtes
+
+  phone         String?                   // Téléphone principal du dépôt
+  email         String?                   // Email principal du dépôt
+
+  // ════════════════════════════════════════════
+  // FLAGS
+  // ════════════════════════════════════════════
+
+  isDefault     Boolean  @default(false)  // Un seul dépôt par défaut (géré côté action via transaction)
+  isActive      Boolean  @default(true)   // Soft-delete : false = dépôt désactivé
+
+  // ════════════════════════════════════════════
+  // RELATIONS
+  // ════════════════════════════════════════════
+
+  contacts      DepotContact[]            // Contacts associés au dépôt
+  quotes        Quote[]                   // Devis traités depuis ce dépôt
+  shipments     Shipment[]                // Expéditions traitées depuis ce dépôt
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
+  // Lecture pour tous les utilisateurs authentifiés (affichage dans sélecteurs)
+  // CRUD complet réservé aux admins
+
+  @@allow('read', auth() != null)
+  @@allow('all', auth().role == ADMIN)
+  @@deny('all', true)
+
+  @@index([isDefault])
+  @@index([isActive])
+  @@index([code])
+}
+
+/**
+ * DepotContact — Contact associé à un dépôt
+ *
+ * Chaque dépôt peut avoir plusieurs contacts (responsable, agent de réception, etc.)
+ * Un seul contact par dépôt peut être marqué isPrimary=true (géré côté action).
+ * Le contact principal est utilisé pour dénormaliser phone/email sur le Depot
+ * et pour l'affichage dans les PDFs.
+ */
+model DepotContact {
+  id          String   @id @default(cuid())
+  depotId     String
+  depot       Depot    @relation(fields: [depotId], references: [id], onDelete: Cascade)
+
+  name        String                     // Nom complet du contact
+  role        String?                    // Fonction : "Responsable", "Agent de réception", etc.
+  email       String?                    // Email professionnel du contact
+  phone       String?                    // Téléphone du contact
+  isPrimary   Boolean  @default(false)   // Contact principal du dépôt (un seul par dépôt)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ════════════════════════════════════════════
+  // 🔐 ACCESS POLICIES
+  // ════════════════════════════════════════════
+  // Même logique que Depot : lecture pour authentifiés, CRUD pour admins
+
+  @@allow('read', auth() != null)
+  @@allow('all', auth().role == ADMIN)
+  @@deny('all', true)
+
+  @@index([depotId])
 }

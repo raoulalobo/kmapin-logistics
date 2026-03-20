@@ -239,7 +239,8 @@ exports.Prisma.ShipmentScalarFieldEnum = {
   paymentReceivedById: 'paymentReceivedById',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  depotId: 'depotId'
 };
 
 exports.Prisma.ShipmentPackageScalarFieldEnum = {
@@ -438,6 +439,9 @@ exports.Prisma.QuoteScalarFieldEnum = {
   paymentReceivedAt: 'paymentReceivedAt',
   paymentReceivedById: 'paymentReceivedById',
   createdById: 'createdById',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById',
+  depotId: 'depotId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -584,6 +588,35 @@ exports.Prisma.SystemConfigScalarFieldEnum = {
   vatNumber: 'vatNumber',
   copyrightYear: 'copyrightYear',
   updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DepotScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  description: 'description',
+  address: 'address',
+  city: 'city',
+  country: 'country',
+  postalCode: 'postalCode',
+  phone: 'phone',
+  email: 'email',
+  isDefault: 'isDefault',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DepotContactScalarFieldEnum = {
+  id: 'id',
+  depotId: 'depotId',
+  name: 'name',
+  role: 'role',
+  email: 'email',
+  phone: 'phone',
+  isPrimary: 'isPrimary',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -774,7 +807,9 @@ exports.Prisma.ModelName = {
   CountryDistance: 'CountryDistance',
   TransportRate: 'TransportRate',
   Country: 'Country',
-  SystemConfig: 'SystemConfig'
+  SystemConfig: 'SystemConfig',
+  Depot: 'Depot',
+  DepotContact: 'DepotContact'
 };
 
 /**
