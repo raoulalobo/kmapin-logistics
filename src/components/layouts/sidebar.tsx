@@ -17,9 +17,6 @@ import {
   UserGear,
   Truck,
   Van,
-  FileText,
-  CreditCard,
-  ChartBar,
   Gear,
   SquaresFour,
   Table,
@@ -146,18 +143,6 @@ const navigation: NavSection[] = [
         href: '/dashboard/countries',
         icon: Globe,
         permission: 'countries:read', // Réservé aux ADMIN uniquement
-      },
-      {
-        label: 'Documents',
-        href: '/dashboard/documents',
-        icon: FileText,
-        permission: 'documents:read',
-      },
-      {
-        label: 'Rapports',
-        href: '/dashboard/reports',
-        icon: ChartBar,
-        permission: 'reports:read',
       },
       {
         label: 'Paramètres',
