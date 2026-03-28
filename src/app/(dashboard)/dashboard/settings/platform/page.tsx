@@ -223,8 +223,9 @@ export default function PlatformConfigPage() {
 
   /** Charge les adresses des agences depuis la table Depot */
   async function loadAddresses() {
-    const result = await listDepots();
-    if (result.success) setAddresses(result.data ?? []);
+    // listDepots() retourne le tableau directement (pas { success, data })
+    const depots = await listDepots();
+    setAddresses(depots ?? []);
   }
 
   /** Ouvre le formulaire d'édition prérempli avec les données de l'adresse */
@@ -257,8 +258,8 @@ export default function PlatformConfigPage() {
     setIsAddressLoading(true);
     try {
       if (editingAddress) {
-        // Mise à jour d'une adresse existante
-        const result = await updateDepot(editingAddress.id, {
+        // Mise à jour — updateDepot() retourne le dépôt directement et throw en cas d'erreur
+        await updateDepot(editingAddress.id, {
           name: addressForm.name,
           address: addressForm.address,
           city: addressForm.city,
@@ -266,16 +267,10 @@ export default function PlatformConfigPage() {
           phone: addressForm.phone || undefined,
           email: addressForm.email || undefined,
         });
-        if (result.success) {
-          toast.success('Adresse mise à jour');
-          handleCancelAddress();
-          await loadAddresses();
-        } else {
-          toast.error(result.error || 'Erreur lors de la mise à jour');
-        }
+        toast.success('Adresse mise à jour');
       } else {
-        // Création d'une nouvelle adresse — code auto-généré
-        const result = await createDepot({
+        // Création — createDepot() retourne le dépôt directement et throw en cas d'erreur
+        await createDepot({
           name: addressForm.name,
           code: `ADDR-${Date.now()}`,
           address: addressForm.address,
@@ -286,14 +281,13 @@ export default function PlatformConfigPage() {
           isDefault: addresses.length === 0, // première adresse = défaut
           isActive: true,
         });
-        if (result.success) {
-          toast.success('Adresse ajoutée');
-          handleCancelAddress();
-          await loadAddresses();
-        } else {
-          toast.error(result.error || 'Erreur lors de la création');
-        }
+        toast.success('Adresse ajoutée');
       }
+      handleCancelAddress();
+      await loadAddresses();
+    } catch (error) {
+      // Les actions throw une Error avec message lisible (ex: code déjà existant)
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde');
     } finally {
       setIsAddressLoading(false);
     }
@@ -303,14 +297,16 @@ export default function PlatformConfigPage() {
   async function handleDeleteAddress(id: string) {
     if (!confirm('Supprimer cette adresse ?')) return;
     setIsAddressLoading(true);
-    const result = await deleteDepot(id);
-    if (result.success) {
+    try {
+      // deleteDepot() throw en cas d'erreur (ex: dernier dépôt actif)
+      await deleteDepot(id);
       toast.success('Adresse supprimée');
       await loadAddresses();
-    } else {
-      toast.error(result.error || 'Erreur lors de la suppression');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression');
+    } finally {
+      setIsAddressLoading(false);
     }
-    setIsAddressLoading(false);
   }
 
   async function handleResetConfig() {

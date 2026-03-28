@@ -71,7 +71,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Récupérer la config plateforme + les adresses des agences en parallèle
-    const [systemConfig, depotsResult] = await Promise.all([
+    // listDepots() retourne un tableau directement (pas { success, data })
+    const [systemConfig, depots] = await Promise.all([
       getSystemConfig(),
       listDepots(),
     ]);
@@ -80,15 +81,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       platformFullName: systemConfig.platformFullName,
       primaryColor: systemConfig.primaryColor,
       // Adresses des agences gérées dans /settings/platform → onglet Adresse
-      senderAddresses: depotsResult.success
-        ? depotsResult.data.map((d: any) => ({
-            name: d.name,
-            address: d.address,
-            city: d.city,
-            phone: d.phone ?? null,
-            email: d.email ?? null,
-          }))
-        : [],
+      senderAddresses: depots.map((d) => ({
+        name: d.name,
+        address: d.address,
+        city: d.city,
+        phone: d.phone ?? null,
+        email: d.email ?? null,
+      })),
     };
 
     // Générer le PDF selon le type
