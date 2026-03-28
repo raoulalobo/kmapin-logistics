@@ -65,22 +65,26 @@ export const createTransportRateSchema = z
       errorMap: () => ({ message: 'Mode de transport invalide' }),
     }),
 
+    // 0 est accepté comme valeur sentinelle pour le champ inutilisé selon le mode.
+    // Ex : ROAD/AIR → ratePerM3 = 0 (non-maritime, pas de tarif volumétrique)
+    //      SEA      → ratePerKg  = 0 (maritime, calcul uniquement en €/UP)
+    // Le refine ci-dessous valide que le champ pertinent au mode est >= 0.01.
     ratePerKg: z
       .number({
         required_error: 'Le tarif par kg est requis',
         invalid_type_error: 'Le tarif par kg doit être un nombre',
       })
-      .positive('Le tarif par kg doit être positif')
-      .min(0.01, 'Le tarif minimum est 0.01 €/kg')
+      .min(0, 'Le tarif par kg ne peut pas être négatif')
       .max(1000, 'Le tarif maximum est 1000 €/kg'),
 
+    // Utilisé uniquement pour le mode maritime (SEA) — Unité Payante (€/UP)
+    // Vaut 0 pour les modes ROAD/AIR (valeur sentinelle non-nullable en DB)
     ratePerM3: z
       .number({
         required_error: 'Le tarif par m³ est requis',
         invalid_type_error: 'Le tarif par m³ doit être un nombre',
       })
-      .positive('Le tarif par m³ doit être positif')
-      .min(0.01, 'Le tarif minimum est 0.01 €/m³')
+      .min(0, 'Le tarif par m³ ne peut pas être négatif')
       .max(100000, 'Le tarif maximum est 100000 €/m³'),
 
     cargoTypeSurcharges: cargoTypeSurchargesSchema,
@@ -92,15 +96,29 @@ export const createTransportRateSchema = z
   .refine((data) => data.originCountryCode !== data.destinationCountryCode, {
     message: "Le pays d'origine et de destination doivent être différents",
     path: ['destinationCountryCode'],
-  });
+  })
+  // Règle : mode SEA exige ratePerM3, les autres modes exigent ratePerKg
+  .refine(
+    (data) => {
+      if (data.transportMode === 'SEA') return data.ratePerM3 !== undefined && data.ratePerM3 >= 0.01;
+      return data.ratePerKg !== undefined && data.ratePerKg >= 0.01;
+    },
+    (data) => ({
+      message:
+        data.transportMode === 'SEA'
+          ? 'Le tarif par m³ (€/UP) est requis pour le mode maritime'
+          : 'Le tarif par kg (€/kg) est requis pour ce mode de transport',
+      path: data.transportMode === 'SEA' ? ['ratePerM3'] : ['ratePerKg'],
+    })
+  );
 
 /**
  * Schéma de mise à jour d'un tarif de transport
  * Tous les champs sont optionnels sauf la clé (origin, destination, mode)
  */
 export const updateTransportRateSchema = z.object({
-  ratePerKg: z.number().positive().min(0.01).max(1000).optional(),
-  ratePerM3: z.number().positive().min(0.01).max(100000).optional(),
+  ratePerKg: z.number().min(0.01).max(1000).optional(),
+  ratePerM3: z.number().min(0.01).max(100000).optional(),
   cargoTypeSurcharges: cargoTypeSurchargesSchema,
   prioritySurcharges: prioritySurchargesSchema,
   isActive: z.boolean().optional(),

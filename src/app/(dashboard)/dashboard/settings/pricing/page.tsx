@@ -213,7 +213,18 @@ export default function PricingConfigPage() {
     }
 
     setIsLoading(true);
-    const result = await createTransportRate(newRate);
+
+    // Les deux champs sont non-nullable en DB → on envoie 0 comme valeur sentinelle
+    // pour le champ inutilisé selon le mode de transport :
+    //   SEA      → ratePerKg = 0  (tarif volumétrique €/UP via ratePerM3)
+    //   ROAD/AIR → ratePerM3 = 0  (tarif poids €/kg via ratePerKg)
+    const ratePayload = {
+      ...newRate,
+      ratePerKg: isSea ? 0 : newRate.ratePerKg,
+      ratePerM3: isSea ? newRate.ratePerM3 : 0,
+    };
+
+    const result = await createTransportRate(ratePayload);
 
     if (result.success) {
       toast.success('Tarif créé avec succès');
@@ -268,7 +279,18 @@ export default function PricingConfigPage() {
     }
 
     setIsLoading(true);
-    const { id, ...data } = editingRate;
+
+    // Déstructurer en séparant les clés immuables (non acceptées par updateTransportRateSchema)
+    // des champs modifiables, et conditionner ratePerM3 au mode maritime uniquement.
+    const { id, originCountryCode: _origin, destinationCountryCode: _dest, transportMode: _mode, ...rest } = editingRate;
+    const data = {
+      // Le mode maritime utilise ratePerM3 (€/UP), les autres utilisent ratePerKg (€/kg)
+      ratePerKg: isSeaEdit ? undefined : rest.ratePerKg,
+      ratePerM3: isSeaEdit ? rest.ratePerM3 : undefined,
+      notes: rest.notes,
+      isActive: rest.isActive,
+    };
+
     const result = await updateTransportRate(id, data);
 
     if (result.success) {
