@@ -1123,17 +1123,9 @@ export async function deleteQuoteAction(id: string): Promise<ActionResult> {
       }
     }
 
-    // ADMIN / Agents : statuts autorisés pour le soft delete
-    // Les statuts avec processus métier actif (ACCEPTED, IN_TREATMENT, VALIDATED) sont interdits
-    if (canDeleteAll) {
-      const allowedStatuses = ['DRAFT', 'SUBMITTED', 'SENT', 'REJECTED', 'EXPIRED', 'CANCELLED'];
-      if (!allowedStatuses.includes(quote.status)) {
-        return {
-          success: false,
-          error: `Impossible de supprimer un devis en statut "${quote.status}". Seuls les devis en brouillon, soumis, envoyés, rejetés, expirés ou annulés peuvent être supprimés.`,
-        };
-      }
-    }
+    // ADMIN / Agents : tous les statuts sont autorisés pour le soft delete
+    // La seule restriction est le paiement confirmé (vérifiée ci-dessous)
+    // Note : le devis reste restaurable par un ADMIN depuis la corbeille
 
     // Empêcher la suppression si le paiement a été confirmé
     // (une facture peut être générée à partir de ce devis)

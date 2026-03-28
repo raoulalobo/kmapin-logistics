@@ -13,12 +13,13 @@
 
 import { requireAuth } from '@/lib/auth/config';
 import Link from 'next/link';
-import { Plus, FileText, MapPin, CurrencyEur, TrendUp, CheckCircle, XCircle, Clock, Funnel, Eye, ArrowRight, Trash } from '@phosphor-icons/react/dist/ssr';
+import { Plus, FileText, TrendUp, CheckCircle, Clock, Funnel, Trash } from '@phosphor-icons/react/dist/ssr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getQuotesAction } from '@/modules/quotes';
+import { QuotesDataTable, type QuoteRow } from '@/components/quotes/quotes-data-table';
 import { QuoteStatus } from '@/lib/db/enums';
 
 /**
@@ -61,42 +62,6 @@ function formatStatus(status: QuoteStatus): string {
   return statusMap[status] || status;
 }
 
-/**
- * Labels français pour chaque statut de devis
- * Simple mapping statut -> texte affiché
- */
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  DRAFT: 'Brouillon',
-  SUBMITTED: 'Soumis',
-  SENT: 'Envoyé',
-  ACCEPTED: 'Accepté',
-  REJECTED: 'Refusé',
-  EXPIRED: 'Expiré',
-  IN_TREATMENT: 'En traitement',
-  VALIDATED: 'Validé',
-  CANCELLED: 'Annulé',
-};
-
-/**
- * Fonction utilitaire pour formater le type de cargo en français
- */
-function formatCargoType(type: string): string {
-  const cargoMap: Record<string, string> = {
-    GENERAL: 'Général',
-    FOOD: 'Alimentaire',
-    ELECTRONICS: 'Électronique',
-    PHARMACEUTICALS: 'Pharma',
-    CHEMICALS: 'Chimique',
-    CONSTRUCTION: 'Construction',
-    TEXTILES: 'Textile',
-    AUTOMOTIVE: 'Auto',
-    MACHINERY: 'Machines',
-    PERISHABLE: 'Périssable',
-    HAZARDOUS: 'Dangereux',
-  };
-
-  return cargoMap[type] || type;
-}
 
 export default async function QuotesPage({
   searchParams,
@@ -289,7 +254,7 @@ export default async function QuotesPage({
         </CardContent>
       </Card>
 
-      {/* Liste des devis */}
+      {/* DataTable des devis */}
       {quotes.length === 0 ? (
         <Card className="p-12">
           <div className="flex flex-col items-center justify-center text-center">
@@ -320,114 +285,10 @@ export default async function QuotesPage({
           </div>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {quotes.map((quote) => (
-            <Card key={quote.id} className="hover:bg-accent/50 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  {/* Informations principales */}
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-primary" />
-                      <div>
-                        <Link
-                          href={`/dashboard/quotes/${quote.id}`}
-                          className="text-lg font-semibold hover:underline"
-                        >
-                          {quote.quoteNumber}
-                        </Link>
-                        <p className="text-sm text-muted-foreground">
-                          {quote.client?.name}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Route */}
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{quote.originCountry}</span>
-                      </div>
-                      <span className="text-muted-foreground">→</span>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{quote.destinationCountry}</span>
-                      </div>
-                    </div>
-
-                    {/* Détails — Résumé colis + poids total + validité */}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {/* Nombre de colis si disponible (_count.packages), sinon type de cargo */}
-                      {(quote as any)._count?.packages > 0 ? (
-                        <span>
-                          {(quote as any)._count.packages} colis — {quote.weight} kg
-                        </span>
-                      ) : (
-                        <>
-                          <span>{formatCargoType(quote.cargoType)}</span>
-                          <span>•</span>
-                          <span>{quote.weight} kg</span>
-                        </>
-                      )}
-                      {quote.volume && (
-                        <>
-                          <span>•</span>
-                          <span>{quote.volume} m³</span>
-                        </>
-                      )}
-                      <span>•</span>
-                      <span>
-                        Valide jusqu&apos;au {new Date(quote.validUntil).toLocaleDateString('fr-FR')}
-                      </span>
-                    </div>
-
-                    {/* Coût */}
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                      <CurrencyEur className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {quote.estimatedCost.toFixed(2)} {quote.currency}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* ═══════════════════════════════════════════════════════════ */}
-                  {/* STATUT ET ACTIONS                                           */}
-                  {/* Badge de statut attrayant + bouton "Voir détails"           */}
-                  {/* ═══════════════════════════════════════════════════════════ */}
-                  <div className="flex flex-col items-end gap-3">
-                    {/* Badge de statut - Couleur uniforme, bien contrasté */}
-                    <div
-                      className="
-                        inline-flex items-center px-4 py-2 rounded-full
-                        font-bold text-sm uppercase tracking-wide
-                        bg-indigo-600 text-white
-                        border-2 border-indigo-700
-                        shadow-lg shadow-indigo-500/30
-                        hover:bg-indigo-700 hover:scale-105
-                        transition-all duration-200
-                      "
-                    >
-                      {STATUS_LABELS[quote.status]}
-                    </div>
-
-                    {/* Bouton "Voir détails" attrayant */}
-                    <Button
-                      asChild
-                      size="sm"
-                      className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 group"
-                    >
-                      <Link href={`/dashboard/quotes/${quote.id}`}>
-                        <Eye className="h-4 w-4" weight="fill" />
-                        <span>Voir détails</span>
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <QuotesDataTable
+          data={quotes as unknown as QuoteRow[]}
+          userRole={session.user.role as string}
+        />
       )}
 
       {/* Pagination */}

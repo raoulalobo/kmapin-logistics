@@ -35,6 +35,9 @@ export { QuoteActions } from './quote-actions';
 // Bouton de mise à la corbeille (soft delete)
 export { QuoteDeleteButton } from './quote-delete-button';
 
+// Menu d'actions contextuel (⋮) pour la liste des devis
+export { QuoteActionsMenu } from './quote-actions-menu';
+
 // Bouton de restauration depuis la corbeille (admin uniquement)
 export { QuoteRestoreButton } from './quote-restore-button';
 
@@ -43,3 +46,6 @@ export { QuoteSubmitButton } from './quote-submit-button';
 
 // Formulaire dynamique multi-colis (useFieldArray)
 export { PackageFieldArray } from './package-field-array';
+
+// DataTable TanStack pour la liste des devis
+export { QuotesDataTable, type QuoteRow } from './quotes-data-table';
