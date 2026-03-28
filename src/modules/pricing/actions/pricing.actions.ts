@@ -94,9 +94,11 @@ export async function getStandardRatesAction(filters?: PricingFiltersData) {
         destinationCode: rate.destinationCountryCode,
         transportMode: rate.transportMode,
         cargoType: CargoType.GENERAL, // Valeur par défaut
-        pricePerKg: rate.ratePerKg,
-        minPrice: rate.ratePerKg * 10, // Estimation : 10 kg minimum
-        maxPrice: rate.ratePerKg * 100, // Estimation : 100 kg maximum
+        // SEA utilise ratePerM3 (€/UP) ; ROAD/AIR utilisent ratePerKg (€/kg)
+        // ratePerKg vaut 0 comme sentinelle pour SEA → on prend ratePerM3 à la place
+        pricePerKg: rate.transportMode === 'SEA' ? rate.ratePerM3 : rate.ratePerKg,
+        minPrice: (rate.transportMode === 'SEA' ? rate.ratePerM3 : rate.ratePerKg) * 10,
+        maxPrice: (rate.transportMode === 'SEA' ? rate.ratePerM3 : rate.ratePerKg) * 100,
         estimatedDaysMin,
         estimatedDaysMax,
         currency: 'EUR',

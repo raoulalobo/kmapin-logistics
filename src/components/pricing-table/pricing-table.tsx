@@ -241,7 +241,7 @@ export function PricingTable() {
                         {/* Prix estimé */}
                         <TableCell>
                           <span className="font-bold text-[#003D82]">
-                            {rate.pricePerKg.toFixed(2)} € /kg
+                            {rate.pricePerKg.toFixed(2)} {rate.transportMode === 'SEA' ? '€ /UP' : '€ /kg'}
                           </span>
                         </TableCell>
 
