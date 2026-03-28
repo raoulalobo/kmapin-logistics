@@ -27,7 +27,6 @@ import {
   House,
   Globe,
   ShoppingCart,
-  Warehouse,
 } from '@phosphor-icons/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -141,12 +140,6 @@ const navigation: NavSection[] = [
         href: '/dashboard/settings/platform',
         icon: Gear,
         permission: 'settings:platform', // Réservé aux ADMIN uniquement
-      },
-      {
-        label: 'Dépôts',
-        href: '/dashboard/depots',
-        icon: Warehouse,
-        permission: 'depots:read', // ADMIN, OPERATIONS_MANAGER, FINANCE_MANAGER, VIEWER
       },
       {
         label: 'Pays',

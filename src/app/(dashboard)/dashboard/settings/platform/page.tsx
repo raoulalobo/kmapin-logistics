@@ -38,7 +38,12 @@ import {
   MapPin,
   IdentificationCard,
   Image as ImageIcon,
+  Plus,
+  Trash,
+  PencilSimple,
 } from '@phosphor-icons/react';
+
+import { listDepots, createDepot, updateDepot, deleteDepot } from '@/modules/depots';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -91,6 +96,17 @@ export default function PlatformConfigPage() {
   // ID de la config existante (null si nouvelle)
   const [configId, setConfigId] = useState<string | null>(null);
 
+  // === ÉTATS ADRESSES ===
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [isAddressLoading, setIsAddressLoading] = useState(false);
+  // null = aucune édition, objet = édition de l'adresse existante
+  const [editingAddress, setEditingAddress] = useState<any | null>(null);
+  // true = formulaire d'ajout visible
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    name: '', address: '', city: '', country: 'Burkina Faso', phone: '', email: '',
+  });
+
   // === FORMULAIRE ===
 
   // Configuration du formulaire avec React Hook Form + Zod
@@ -125,6 +141,7 @@ export default function PlatformConfigPage() {
 
   useEffect(() => {
     loadConfiguration();
+    loadAddresses();
   }, []);
 
   /**
@@ -202,6 +219,100 @@ export default function PlatformConfigPage() {
    * Réinitialise la configuration aux valeurs par défaut
    * Demande confirmation avant d'écraser toutes les personnalisations
    */
+  // === HANDLERS ADRESSES ===
+
+  /** Charge les adresses des agences depuis la table Depot */
+  async function loadAddresses() {
+    const result = await listDepots();
+    if (result.success) setAddresses(result.data ?? []);
+  }
+
+  /** Ouvre le formulaire d'édition prérempli avec les données de l'adresse */
+  function handleEditAddress(addr: any) {
+    setEditingAddress(addr);
+    setAddressForm({
+      name: addr.name,
+      address: addr.address,
+      city: addr.city,
+      country: addr.country,
+      phone: addr.phone ?? '',
+      email: addr.email ?? '',
+    });
+    setShowAddressForm(true);
+  }
+
+  /** Réinitialise et ferme le formulaire d'adresse */
+  function handleCancelAddress() {
+    setShowAddressForm(false);
+    setEditingAddress(null);
+    setAddressForm({ name: '', address: '', city: '', country: 'Burkina Faso', phone: '', email: '' });
+  }
+
+  /** Crée ou met à jour une adresse selon l'état editingAddress */
+  async function handleSaveAddress() {
+    if (!addressForm.name || !addressForm.address || !addressForm.city) {
+      toast.error('Libellé, rue et ville sont obligatoires');
+      return;
+    }
+    setIsAddressLoading(true);
+    try {
+      if (editingAddress) {
+        // Mise à jour d'une adresse existante
+        const result = await updateDepot(editingAddress.id, {
+          name: addressForm.name,
+          address: addressForm.address,
+          city: addressForm.city,
+          country: addressForm.country,
+          phone: addressForm.phone || undefined,
+          email: addressForm.email || undefined,
+        });
+        if (result.success) {
+          toast.success('Adresse mise à jour');
+          handleCancelAddress();
+          await loadAddresses();
+        } else {
+          toast.error(result.error || 'Erreur lors de la mise à jour');
+        }
+      } else {
+        // Création d'une nouvelle adresse — code auto-généré
+        const result = await createDepot({
+          name: addressForm.name,
+          code: `ADDR-${Date.now()}`,
+          address: addressForm.address,
+          city: addressForm.city,
+          country: addressForm.country,
+          phone: addressForm.phone || undefined,
+          email: addressForm.email || undefined,
+          isDefault: addresses.length === 0, // première adresse = défaut
+          isActive: true,
+        });
+        if (result.success) {
+          toast.success('Adresse ajoutée');
+          handleCancelAddress();
+          await loadAddresses();
+        } else {
+          toast.error(result.error || 'Erreur lors de la création');
+        }
+      }
+    } finally {
+      setIsAddressLoading(false);
+    }
+  }
+
+  /** Supprime une adresse après confirmation */
+  async function handleDeleteAddress(id: string) {
+    if (!confirm('Supprimer cette adresse ?')) return;
+    setIsAddressLoading(true);
+    const result = await deleteDepot(id);
+    if (result.success) {
+      toast.success('Adresse supprimée');
+      await loadAddresses();
+    } else {
+      toast.error(result.error || 'Erreur lors de la suppression');
+    }
+    setIsAddressLoading(false);
+  }
+
   async function handleResetConfig() {
     setIsLoading(true);
     try {
@@ -604,62 +715,168 @@ export default function PlatformConfigPage() {
         </TabsContent>
 
         {/* ════════════════════════════════════════════
-            ONGLET 4 : ADRESSE
+            ONGLET 4 : ADRESSES
         ════════════════════════════════════════════ */}
         <TabsContent value="address">
           <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                Adresse du Siège Social
-              </CardTitle>
-              <CardDescription>
-                Adresse officielle affichée dans les mentions légales et les documents
-              </CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Adresses de la Société
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Ces adresses apparaissent dans l'en-tête des PDF (devis et factures)
+                </CardDescription>
+              </div>
+              {/* Bouton d'ajout — masqué si le formulaire est déjà ouvert */}
+              {!showAddressForm && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setShowAddressForm(true)}
+                  className="shrink-0"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Ajouter
+                </Button>
+              )}
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Adresse complète */}
-              <div className="space-y-2">
-                <Label htmlFor="companyAddress">Adresse</Label>
-                <Textarea
-                  id="companyAddress"
-                  placeholder="123 Avenue du Commerce, Zone Industrielle"
-                  rows={2}
-                  {...form.register('companyAddress')}
-                />
-              </div>
+            <CardContent className="space-y-4">
 
-              <div className="grid gap-6 md:grid-cols-3">
-                {/* Ville */}
-                <div className="space-y-2">
-                  <Label htmlFor="companyCity">Ville</Label>
-                  <Input
-                    id="companyCity"
-                    placeholder="Ouagadougou"
-                    {...form.register('companyCity')}
-                  />
-                </div>
+              {/* ── Liste des adresses existantes ── */}
+              {addresses.length === 0 && !showAddressForm && (
+                <p className="text-sm text-muted-foreground py-4 text-center">
+                  Aucune adresse enregistrée. Cliquez sur "Ajouter" pour en créer une.
+                </p>
+              )}
 
-                {/* Code postal */}
-                <div className="space-y-2">
-                  <Label htmlFor="companyPostalCode">Code Postal</Label>
-                  <Input
-                    id="companyPostalCode"
-                    placeholder="01 BP 1234"
-                    {...form.register('companyPostalCode')}
-                  />
+              {addresses.map((addr) => (
+                <div
+                  key={addr.id}
+                  className="flex items-start justify-between rounded-lg border p-4 gap-4"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="font-medium text-sm">{addr.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {addr.address}, {addr.city}
+                      {addr.country && addr.country !== 'Burkina Faso' ? ` — ${addr.country}` : ''}
+                    </p>
+                    {(addr.phone || addr.email) && (
+                      <p className="text-xs text-muted-foreground">
+                        {[addr.phone, addr.email].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditAddress(addr)}
+                    >
+                      <PencilSimple className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteAddress(addr.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+              ))}
 
-                {/* Pays */}
-                <div className="space-y-2">
-                  <Label htmlFor="companyCountry">Pays</Label>
-                  <Input
-                    id="companyCountry"
-                    placeholder="Burkina Faso"
-                    {...form.register('companyCountry')}
-                  />
+              {/* ── Formulaire d'ajout / édition inline ── */}
+              {showAddressForm && (
+                <div className="rounded-lg border border-dashed p-4 space-y-4 bg-muted/30">
+                  <p className="text-sm font-medium">
+                    {editingAddress ? 'Modifier l\'adresse' : 'Nouvelle adresse'}
+                  </p>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Libellé */}
+                    <div className="space-y-1 md:col-span-2">
+                      <Label>Libellé *</Label>
+                      <Input
+                        placeholder="Ex : Siège social, Agence Bobo-Dioulasso…"
+                        value={addressForm.name}
+                        onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Rue */}
+                    <div className="space-y-1 md:col-span-2">
+                      <Label>Rue / Adresse *</Label>
+                      <Input
+                        placeholder="123 Avenue du Commerce"
+                        value={addressForm.address}
+                        onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Ville */}
+                    <div className="space-y-1">
+                      <Label>Ville *</Label>
+                      <Input
+                        placeholder="Ouagadougou"
+                        value={addressForm.city}
+                        onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Pays */}
+                    <div className="space-y-1">
+                      <Label>Pays</Label>
+                      <Input
+                        placeholder="Burkina Faso"
+                        value={addressForm.country}
+                        onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Téléphone */}
+                    <div className="space-y-1">
+                      <Label>Téléphone</Label>
+                      <Input
+                        placeholder="+226 25 00 00 00"
+                        value={addressForm.phone}
+                        onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-1">
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="contact@exemple.com"
+                        value={addressForm.email}
+                        onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button type="button" variant="outline" size="sm" onClick={handleCancelAddress}>
+                      Annuler
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleSaveAddress}
+                      disabled={isAddressLoading}
+                    >
+                      {isAddressLoading && <CircleNotch className="mr-2 h-4 w-4 animate-spin" />}
+                      Enregistrer
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
+
             </CardContent>
           </Card>
         </TabsContent>

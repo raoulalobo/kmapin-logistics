@@ -200,15 +200,20 @@ export function generateInvoicePDF(
   doc.setFont('helvetica', 'normal');
   doc.text(config.platformFullName, 20, 33);
 
-  // Afficher le nom du dépôt dans le bandeau si disponible
-  if (config.depot) {
-    doc.setFontSize(8);
-    doc.text(`Dépôt : ${config.depot.name}`, pageWidth - 20, 25, { align: 'right' });
-    const depotAddr = `${config.depot.address}, ${config.depot.city}`;
-    doc.text(depotAddr, pageWidth - 20, 30, { align: 'right' });
-    if (config.depot.phone || config.depot.email) {
-      const contactLine = [config.depot.phone, config.depot.email].filter(Boolean).join(' | ');
-      doc.text(contactLine, pageWidth - 20, 35, { align: 'right' });
+  // Afficher les adresses des agences empilées à droite dans le bandeau
+  if (config.senderAddresses?.length) {
+    doc.setFontSize(7);
+    let addrY = 22;
+    for (const addr of config.senderAddresses) {
+      if (addrY > 45) break; // éviter le débordement du bandeau coloré
+      doc.text(`${addr.address}, ${addr.city}`, pageWidth - 20, addrY, { align: 'right' });
+      addrY += 4;
+      const contact = [addr.phone, addr.email].filter(Boolean).join(' · ');
+      if (contact) {
+        doc.text(contact, pageWidth - 20, addrY, { align: 'right' });
+        addrY += 4;
+      }
+      addrY += 2;
     }
   }
 
@@ -600,15 +605,16 @@ export function generateInvoiceFromQuotePDF(
   doc.setFont('helvetica', 'bold');
   doc.text('PAYÉ', pageWidth - 27.5, 23, { align: 'center' });
 
-  // Afficher les infos du dépôt sous le bandeau si disponible
+  // Afficher la première adresse sous le bandeau (résumé compact pour la facture)
   let depotOffset = 0;
-  if (config.depot) {
+  const firstAddr = config.senderAddresses?.[0];
+  if (firstAddr) {
     doc.setTextColor(...textColor);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Dépôt : ${config.depot.name} — ${config.depot.address}, ${config.depot.city}`, 20, 45);
-    if (config.depot.phone || config.depot.email) {
-      const contactLine = [config.depot.phone, config.depot.email].filter(Boolean).join(' | ');
+    doc.text(`${firstAddr.address}, ${firstAddr.city}`, 20, 45);
+    const contactLine = [firstAddr.phone, firstAddr.email].filter(Boolean).join(' · ');
+    if (contactLine) {
       doc.text(contactLine, 20, 49);
       depotOffset = 8;
     } else {
