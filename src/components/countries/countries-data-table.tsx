@@ -211,12 +211,21 @@ export function CountriesDataTable({ countries }: CountriesDataTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer le pays{' '}
-              <strong>{deletingCountry?.name}</strong> ({deletingCountry?.code}) ?
-              <br />
-              <br />
-              Cette action est irréversible et peut affecter les expéditions et devis existants.
+            <AlertDialogDescription asChild>
+              <div>
+                Êtes-vous sûr de vouloir supprimer le pays{' '}
+                <strong>{deletingCountry?.name}</strong> ({deletingCountry?.code}) ?
+
+                {/* Avertissement cascade : suppression des routes de tarifs liées */}
+                <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  <strong>Attention :</strong> toutes les routes de tarifs de transport
+                  impliquant ce pays (en origine ou en destination) seront également supprimées.
+                </div>
+
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Cette action est irréversible et peut affecter les expéditions et devis existants.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

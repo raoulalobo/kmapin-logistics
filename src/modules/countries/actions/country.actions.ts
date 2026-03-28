@@ -214,18 +214,39 @@ export async function deleteCountry(id: string) {
 
   // Vérifier que l'utilisateur est admin
   const session = await requireAdmin();
-
-  // TODO: Vérifier si le pays est utilisé dans des shipments/quotes/distances
-  // avant de permettre la suppression
-
-  // Supprimer le pays avec access control automatique
   const db = getEnhancedPrismaFromSession(session);
+
+  // Récupérer le code ISO du pays avant suppression
+  // (TransportRate est indexé par code, pas par id)
+  const countryToDelete = await db.country.findUnique({
+    where: { id },
+    select: { code: true },
+  });
+
+  if (!countryToDelete) {
+    throw new Error('Pays introuvable');
+  }
+
+  // Supprimer en cascade les tarifs de transport liés à ce pays
+  // (pas de @relation Prisma sur TransportRate → suppression manuelle nécessaire)
+  // Cible toutes les routes où le pays apparaît en origine OU en destination.
+  await prisma.transportRate.deleteMany({
+    where: {
+      OR: [
+        { originCountryCode: countryToDelete.code },
+        { destinationCountryCode: countryToDelete.code },
+      ],
+    },
+  });
+
+  // Supprimer le pays (access control Zenstack appliqué automatiquement)
   const country = await db.country.delete({
     where: { id },
   });
 
   // Revalider le cache des pages concernées
   revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard/settings/pricing');
   revalidatePath('/dashboard/countries');
 
   return country;
