@@ -85,6 +85,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         name: d.name,
         address: d.address,
         city: d.city,
+        postalCode: d.postalCode ?? null,
         phone: d.phone ?? null,
         email: d.email ?? null,
       })),

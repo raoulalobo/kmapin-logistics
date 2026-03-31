@@ -29,6 +29,7 @@ export interface PlatformPDFConfig {
     name: string;
     address: string;
     city: string;
+    postalCode?: string | null;
     phone?: string | null;
     email?: string | null;
   }> | null;
@@ -213,36 +214,28 @@ export function generateQuotePDF(
   // ========================================
   // EN-TÊTE : Logo et titre
   // ========================================
+  // Bandeau coloré agrandi (50mm) pour loger le letterhead avant "DEVIS"
   doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 40, 'F');
+  doc.rect(0, 0, pageWidth, 50, 'F');
 
   doc.setTextColor(255, 255, 255);
+
+  // Ligne 1 : accroche (7pt italic)
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Merci de votre confiance. Ce devis ne constitue pas un engagement contractuel.', 20, 9);
+
+  // Ligne 2 : nom de la plateforme + accroche (10pt)
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${config.platformFullName} — Votre partenaire en logistique multi-modale`, 20, 16);
+
+  // Titre DEVIS
   doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('DEVIS', 20, 25);
+  doc.text('DEVIS', 20, 35);
 
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text(config.platformFullName, 20, 33);
-
-  // Afficher les adresses des agences (gérées dans /settings/platform) empilées à droite
-  if (config.senderAddresses?.length) {
-    doc.setFontSize(7);
-    let addrY = 22;
-    for (const addr of config.senderAddresses) {
-      if (addrY > 45) break; // éviter le débordement du bandeau coloré
-      doc.text(`${addr.address}, ${addr.city}`, pageWidth - 20, addrY, { align: 'right' });
-      addrY += 4;
-      const contact = [addr.phone, addr.email].filter(Boolean).join(' · ');
-      if (contact) {
-        doc.text(contact, pageWidth - 20, addrY, { align: 'right' });
-        addrY += 4;
-      }
-      addrY += 2; // espace entre deux adresses
-    }
-  }
-
-  yPos = 50;
+  yPos = 60; // contenu commence après le bandeau de 50mm + 10mm de marge
 
   // ========================================
   // INFORMATIONS DEVIS
@@ -517,19 +510,30 @@ export function generateQuotePDF(
   // ========================================
   // PIED DE PAGE
   // ========================================
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'italic');
-  const footer = 'Merci de votre confiance. Ce devis ne constitue pas un engagement contractuel.';
-  doc.text(footer, pageWidth / 2, pageHeight - 15, { align: 'center' });
+  const addrs = config.senderAddresses ?? [];
+  const addrLineH = 5;
+  // Ancrer la dernière adresse à 10mm du bas, et remonter vers le haut selon le nombre d'adresses
+  const footerAddrStartY = pageHeight - 10 - ((addrs.length - 1) * addrLineH);
 
-  doc.setFont('helvetica', 'normal');
-  doc.text(
-    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
-    pageWidth / 2,
-    pageHeight - 10,
-    { align: 'center' }
-  );
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, footerAddrStartY - 4, pageWidth - 20, footerAddrStartY - 4); // séparateur
+
+  // Adresses empilées — une par ligne avec toutes les informations disponibles
+  if (addrs.length) {
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    addrs.forEach((addr, i) => {
+      const parts = [
+        addr.name,
+        [addr.address, addr.city, addr.postalCode].filter(Boolean).join(', '),
+        addr.phone,
+        addr.email,
+      ].filter(Boolean) as string[];
+      doc.text(parts.join('  —  '), pageWidth / 2, footerAddrStartY + i * addrLineH, { align: 'center' });
+    });
+  }
+
 
   // Convertir en Buffer pour le retour
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'));

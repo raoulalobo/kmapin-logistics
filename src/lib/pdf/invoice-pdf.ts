@@ -188,36 +188,28 @@ export function generateInvoicePDF(
   // ========================================
   // EN-TÊTE : Logo et titre
   // ========================================
+  // Bandeau coloré agrandi (50mm) pour loger le letterhead avant "FACTURE"
   doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 40, 'F');
+  doc.rect(0, 0, pageWidth, 50, 'F');
 
   doc.setTextColor(255, 255, 255);
+
+  // Ligne 1 : message de confiance (7pt italic)
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Merci pour votre confiance. Paiement à effectuer avant la date d\'échéance.', 20, 9);
+
+  // Ligne 2 : nom de la plateforme + accroche (10pt)
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${config.platformFullName} — Votre partenaire en logistique multi-modale`, 20, 16);
+
+  // Titre FACTURE
   doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('FACTURE', 20, 25);
+  doc.text('FACTURE', 20, 35);
 
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text(config.platformFullName, 20, 33);
-
-  // Afficher les adresses des agences empilées à droite dans le bandeau
-  if (config.senderAddresses?.length) {
-    doc.setFontSize(7);
-    let addrY = 22;
-    for (const addr of config.senderAddresses) {
-      if (addrY > 45) break; // éviter le débordement du bandeau coloré
-      doc.text(`${addr.address}, ${addr.city}`, pageWidth - 20, addrY, { align: 'right' });
-      addrY += 4;
-      const contact = [addr.phone, addr.email].filter(Boolean).join(' · ');
-      if (contact) {
-        doc.text(contact, pageWidth - 20, addrY, { align: 'right' });
-        addrY += 4;
-      }
-      addrY += 2;
-    }
-  }
-
-  yPos = 50;
+  yPos = 60; // contenu commence après le bandeau de 50mm + 10mm de marge
 
   // ========================================
   // INFORMATIONS FACTURE
@@ -263,8 +255,9 @@ export function generateInvoicePDF(
   }
 
   // Colonne droite : Détails de la facture
+  // yPos = 60 pour aligner avec "FACTURER À :" en colonne gauche (bandeau = 50mm + marge = 10mm)
   const rightCol = pageWidth - 80;
-  yPos = 50;
+  yPos = 60;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
@@ -327,14 +320,18 @@ export function generateInvoicePDF(
   // ========================================
   // TOTAUX
   // ========================================
-  const totalsX = pageWidth - 75;
+  // Deux colonnes fixes pour éviter tout chevauchement :
+  //   labelX : bord gauche des libellés (ex: "Sous-total :")
+  //   valueX : bord droit des valeurs — right-aligned (ex: "510.50 EUR")
+  const labelX = pageWidth - 90; // ≈ 120mm — zone totaux de 72mm
+  const valueX = pageWidth - 18; // ≈ 192mm — bord droit (marge 18mm)
   yPos = finalY;
 
   // Sous-total
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('Sous-total :', totalsX, yPos);
-  doc.text(`${data.subtotal.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+  doc.text('Sous-total :', labelX, yPos);
+  doc.text(`${data.subtotal.toFixed(2)} ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
   yPos += 7;
@@ -342,8 +339,8 @@ export function generateInvoicePDF(
   // Remise (si applicable)
   if (data.discount > 0) {
     doc.setTextColor(200, 50, 50);
-    doc.text('Remise :', totalsX, yPos);
-    doc.text(`-${data.discount.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+    doc.text('Remise :', labelX, yPos);
+    doc.text(`-${data.discount.toFixed(2)} ${data.currency}`, valueX, yPos, {
       align: 'right',
     });
     doc.setTextColor(...textColor);
@@ -351,20 +348,20 @@ export function generateInvoicePDF(
   }
 
   // TVA
-  doc.text(`TVA (${data.taxRate}%) :`, totalsX, yPos);
-  doc.text(`${data.taxAmount.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+  doc.text(`TVA (${data.taxRate}%) :`, labelX, yPos);
+  doc.text(`${data.taxAmount.toFixed(2)} ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
   yPos += 10;
 
-  // Total (encadré)
+  // Total — encadré couvrant toute la largeur de la zone totaux
   doc.setFillColor(...lightGray);
-  doc.rect(totalsX - 5, yPos - 6, 50, 10, 'F');
+  doc.rect(labelX - 5, yPos - 6, valueX - labelX + 10, 10, 'F');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('TOTAL :', totalsX, yPos);
-  doc.text(`${data.total.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+  doc.text('TOTAL :', labelX, yPos);
+  doc.text(`${data.total.toFixed(2)} ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
 
@@ -387,19 +384,32 @@ export function generateInvoicePDF(
   // ========================================
   // PIED DE PAGE
   // ========================================
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'italic');
-  const footer = 'Merci pour votre confiance. Paiement à effectuer avant la date d\'échéance.';
-  doc.text(footer, pageWidth / 2, pageHeight - 15, { align: 'center' });
+  const addrs = config.senderAddresses ?? [];
+  // Chaque adresse occupe une ligne : nom — adresse, ville [CP] — tél — email
+  // On remonte le séparateur selon le nombre d'adresses (5mm par ligne + 6mm gap)
+  const addrLineH = 5;
+  // Ancrer la dernière adresse à 10mm du bas, et remonter vers le haut selon le nombre d'adresses
+  const footerAddrStartY = pageHeight - 10 - ((addrs.length - 1) * addrLineH);
 
-  doc.setFont('helvetica', 'normal');
-  doc.text(
-    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
-    pageWidth / 2,
-    pageHeight - 10,
-    { align: 'center' }
-  );
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, footerAddrStartY - 4, pageWidth - 20, footerAddrStartY - 4); // séparateur
+
+  // Adresses empilées — une par ligne avec toutes les informations disponibles
+  if (addrs.length) {
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    addrs.forEach((addr, i) => {
+      // Construire la ligne : nom — adresse, ville CP — tél — email
+      const parts = [
+        addr.name,
+        [addr.address, addr.city, addr.postalCode].filter(Boolean).join(', '),
+        addr.phone,
+        addr.email,
+      ].filter(Boolean) as string[];
+      doc.text(parts.join('  —  '), pageWidth / 2, footerAddrStartY + i * addrLineH, { align: 'center' });
+    });
+  }
 
   // Convertir en Buffer pour le retour
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
@@ -586,43 +596,35 @@ export function generateInvoiceFromQuotePDF(
   // ========================================
   // EN-TÊTE : Logo et titre
   // ========================================
+  // Bandeau coloré agrandi (50mm) pour loger le letterhead avant "FACTURE"
   doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 40, 'F');
+  doc.rect(0, 0, pageWidth, 50, 'F');
 
   doc.setTextColor(255, 255, 255);
+
+  // Ligne 1 : message de confiance (7pt italic)
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
+  doc.text('Merci pour votre confiance. Cette facture a été générée automatiquement suite à la confirmation de votre paiement.', 20, 9);
+
+  // Ligne 2 : nom de la plateforme + accroche (10pt)
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${config.platformFullName} — Votre partenaire en logistique multi-modale`, 20, 16);
+
+  // Titre FACTURE
   doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('FACTURE', 20, 25);
+  doc.text('FACTURE', 20, 35);
 
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text(config.platformFullName, 20, 33);
-
-  // Badge PAYÉ (coin droit)
+  // Badge PAYÉ (coin droit du bandeau, y=15→27 — même hauteur que la ligne 2)
   doc.setFillColor(...successColor);
-  doc.roundedRect(pageWidth - 45, 15, 35, 12, 2, 2, 'F');
+  doc.roundedRect(pageWidth - 45, 11, 35, 12, 2, 2, 'F');
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('PAYÉ', pageWidth - 27.5, 23, { align: 'center' });
+  doc.text('PAYÉ', pageWidth - 27.5, 19, { align: 'center' });
 
-  // Afficher la première adresse sous le bandeau (résumé compact pour la facture)
-  let depotOffset = 0;
-  const firstAddr = config.senderAddresses?.[0];
-  if (firstAddr) {
-    doc.setTextColor(...textColor);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${firstAddr.address}, ${firstAddr.city}`, 20, 45);
-    const contactLine = [firstAddr.phone, firstAddr.email].filter(Boolean).join(' · ');
-    if (contactLine) {
-      doc.text(contactLine, 20, 49);
-      depotOffset = 8;
-    } else {
-      depotOffset = 4;
-    }
-  }
-
-  yPos = 50 + depotOffset;
+  yPos = 60; // contenu commence après le bandeau de 50mm + 10mm de marge
 
   // ========================================
   // INFORMATIONS CLIENT
@@ -683,11 +685,13 @@ export function generateInvoiceFromQuotePDF(
   }
 
   // Colonne droite : Détails de la facture
+  // yPos = 60 pour aligner avec "CLIENT :" en colonne gauche (bandeau = 50mm + marge = 10mm)
   const rightCol = pageWidth - 80;
-  yPos = 50;
+  yPos = 60;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
+  doc.setTextColor(...textColor); // s'assurer que le texte est bien en couleur foncée hors bandeau
   doc.text('N° FACTURE :', rightCol, yPos);
   doc.setFont('helvetica', 'normal');
   doc.text(invoiceNumber, rightCol + 30, yPos);
@@ -937,34 +941,39 @@ export function generateInvoiceFromQuotePDF(
   // ========================================
   // TOTAUX
   // ========================================
-  const totalsX = pageWidth - 75;
+  // Deux colonnes fixes pour éviter tout chevauchement :
+  //   labelX  : bord gauche des libellés (ex: "Sous-total HT :")
+  //   valueX  : bord droit des valeurs — right-aligned (ex: "510.50 EUR")
+  const labelX = pageWidth - 90; // ≈ 120mm — laisse ≈70mm pour la zone totaux
+  const valueX = pageWidth - 18; // ≈ 192mm — bord droit des valeurs (marge 18mm)
   yPos = finalY;
 
   // Sous-total HT
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('Sous-total HT :', totalsX, yPos);
-  doc.text(`${data.estimatedCost.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+  doc.setTextColor(...textColor);
+  doc.text('Sous-total HT :', labelX, yPos);
+  doc.text(`${data.estimatedCost.toFixed(2)} ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
   yPos += 7;
 
   // TVA (0% car export ou exonéré)
-  doc.text('TVA (0%) :', totalsX, yPos);
-  doc.text(`0.00 ${data.currency}`, totalsX + 40, yPos, {
+  doc.text('TVA (0%) :', labelX, yPos);
+  doc.text(`0.00 ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
   yPos += 10;
 
-  // Total TTC (encadré)
+  // Total TTC — encadré coloré couvrant toute la largeur de la zone totaux
   doc.setFillColor(...successColor);
-  doc.rect(totalsX - 5, yPos - 6, 50, 10, 'F');
+  doc.rect(labelX - 5, yPos - 6, valueX - labelX + 10, 10, 'F');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(255, 255, 255);
-  doc.text('TOTAL TTC :', totalsX, yPos);
-  doc.text(`${data.estimatedCost.toFixed(2)} ${data.currency}`, totalsX + 40, yPos, {
+  doc.text('TOTAL TTC :', labelX, yPos);
+  doc.text(`${data.estimatedCost.toFixed(2)} ${data.currency}`, valueX, yPos, {
     align: 'right',
   });
 
@@ -988,23 +997,29 @@ export function generateInvoiceFromQuotePDF(
   // ========================================
   // PIED DE PAGE
   // ========================================
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.setFont('helvetica', 'italic');
-  doc.text(
-    'Merci pour votre confiance. Cette facture a été générée automatiquement suite à la confirmation de votre paiement.',
-    pageWidth / 2,
-    pageHeight - 15,
-    { align: 'center' }
-  );
+  const addrs = config.senderAddresses ?? [];
+  const addrLineH = 5;
+  // Ancrer la dernière adresse à 10mm du bas, et remonter vers le haut selon le nombre d'adresses
+  const footerAddrStartY = pageHeight - 10 - ((addrs.length - 1) * addrLineH);
 
-  doc.setFont('helvetica', 'normal');
-  doc.text(
-    `${config.platformFullName} - Votre partenaire en logistique multi-modale`,
-    pageWidth / 2,
-    pageHeight - 10,
-    { align: 'center' }
-  );
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, footerAddrStartY - 4, pageWidth - 20, footerAddrStartY - 4); // séparateur
+
+  // Adresses empilées — une par ligne avec toutes les informations disponibles
+  if (addrs.length) {
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont('helvetica', 'normal');
+    addrs.forEach((addr, i) => {
+      const parts = [
+        addr.name,
+        [addr.address, addr.city, addr.postalCode].filter(Boolean).join(', '),
+        addr.phone,
+        addr.email,
+      ].filter(Boolean) as string[];
+      doc.text(parts.join('  —  '), pageWidth / 2, footerAddrStartY + i * addrLineH, { align: 'center' });
+    });
+  }
 
   // Convertir en Buffer pour le retour
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
