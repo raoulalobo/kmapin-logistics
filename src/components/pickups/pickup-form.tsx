@@ -576,6 +576,7 @@ export function PickupForm({
                         min="1"
                         placeholder="5"
                         {...field}
+                        onWheel={(e) => e.currentTarget.blur()} // empêche le scroll de modifier la valeur
                         onChange={(e) =>
                           field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                         }
@@ -599,6 +600,7 @@ export function PickupForm({
                         min="0"
                         placeholder="100"
                         {...field}
+                        onWheel={(e) => e.currentTarget.blur()} // empêche le scroll de modifier la valeur
                         onChange={(e) =>
                           field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)
                         }
@@ -622,6 +624,7 @@ export function PickupForm({
                         min="0"
                         placeholder="2.5"
                         {...field}
+                        onWheel={(e) => e.currentTarget.blur()} // empêche le scroll de modifier la valeur
                         onChange={(e) =>
                           field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)
                         }

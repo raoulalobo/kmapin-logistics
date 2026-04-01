@@ -344,6 +344,7 @@ export function PickupRequestPublicForm() {
                           type="number"
                           step="0.1"
                           value={field.value || ''}
+                          onWheel={(e) => e.currentTarget.blur()} // empêche le scroll de modifier la valeur
                           onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
                         />
                       </FormControl>
@@ -364,6 +365,7 @@ export function PickupRequestPublicForm() {
                           type="number"
                           step="0.01"
                           value={field.value || ''}
+                          onWheel={(e) => e.currentTarget.blur()} // empêche le scroll de modifier la valeur
                           onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
                         />
                       </FormControl>
