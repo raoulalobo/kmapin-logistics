@@ -72,13 +72,20 @@ export const getTransportRate = unstable_cache(
         },
       });
 
+      console.log(
+        `[getTransportRate] ${originCountryCode}→${destinationCountryCode} ${transportMode}:`,
+        rate ? `trouvé (actif: ${rate.isActive}, ratePerKg: ${rate.ratePerKg})` : 'non trouvé'
+      );
+
       return rate;
     } catch (error) {
       console.error('[getTransportRate] Erreur:', error);
       return null;
     }
   },
-  ['transport-rate'],
+  // ⚠️ La clé DOIT inclure les paramètres — sinon toutes les routes partagent
+  // la même entrée de cache et la première réponse (même null) est renvoyée pour toutes
+  ['transport-rate', 'v1'],
   {
     revalidate: 3600, // 1 heure
     tags: ['transport-rates'],

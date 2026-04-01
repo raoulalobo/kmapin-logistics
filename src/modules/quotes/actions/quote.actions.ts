@@ -1842,15 +1842,33 @@ export async function calculateQuoteEstimateAction(
       cargoSurcharges = transportRate.cargoTypeSurcharges || config.cargoTypeSurcharges;
       prioritySurcharges = transportRate.prioritySurcharges || config.prioritySurcharges;
     } else {
-      // ROUTE NON CONFIGURÉE : Utiliser les tarifs par défaut avec multiplicateur de mode de transport
-      // Le multiplicateur permet de différencier les prix selon le mode (AIR: 3.0x, SEA: 0.6x, etc.)
-      const transportMultiplier = config.transportMultipliers[primaryTransportMode] || 1.0;
+      // ROUTE NON CONFIGURÉE : Utiliser les tarifs directs depuis config.transportMultipliers
+      //
+      // ⚠️ IMPORTANT — Sémantique de transportMultipliers après refactoring :
+      //   ROAD / AIR → valeur en €/kg  (ex: ROAD = 1.0 €/kg, AIR = 3.0 €/kg)
+      //   SEA        → valeur en €/m³  (ex: SEA = 120.0 €/m³, facturation volumétrique)
+      //
+      // config.defaultRatePerKg / defaultRatePerM3 n'existent plus dans PricingConfigData
+      // → les utiliser produisait NaN (undefined × number = NaN)
+      const directRate = config.transportMultipliers[primaryTransportMode] ?? 1.0;
 
-      ratePerKg = config.defaultRatePerKg * transportMultiplier;
-      ratePerM3 = config.defaultRatePerM3 * transportMultiplier;
+      if (primaryTransportMode === 'SEA') {
+        // Maritime : facturation à la mesure (m³), pas au poids
+        ratePerKg = 0;
+        ratePerM3 = directRate;
+      } else {
+        // Routier / Aérien : facturation au poids (kg)
+        ratePerKg = directRate;
+        ratePerM3 = 0;
+      }
       cargoSurcharges = config.cargoTypeSurcharges;
       prioritySurcharges = config.prioritySurcharges;
       usedDefaultRate = true;
+
+      console.log(
+        `[calculateQuoteEstimateAction] Aucun tarif configuré pour ${originCode}→${destCode} ${primaryTransportMode},`,
+        `utilisation du tarif par défaut: ${directRate}`
+      );
     }
 
     // === 4. Calcul du prix de base : MAX(poids × ratePerKg, volume × ratePerM3) ===
