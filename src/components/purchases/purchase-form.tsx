@@ -391,7 +391,12 @@ export function PurchaseForm({
                       type="number"
                       min="1"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                // Autoriser le champ vide (val === '') pour que l'utilisateur puisse
+                // effacer et re-saisir — Zod rejettera undefined à la soumission
+                const val = e.target.value;
+                field.onChange(val === '' ? undefined : parseInt(val, 10));
+              }}
                       disabled={isFormSubmitting}
                     />
                   </FormControl>
@@ -413,8 +418,13 @@ export function PurchaseForm({
                       min="0"
                       placeholder="0.00"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                      value={field.value || ''}
+                      onChange={(e) => {
+                        // Garde explicite : '' → undefined (champ vide autorisé)
+                        // évite parseFloat('0') || undefined → undefined qui bloque la saisie de 0.xx
+                        const val = e.target.value;
+                        field.onChange(val === '' ? undefined : parseFloat(val));
+                      }}
+                      value={field.value ?? ''}
                       disabled={isFormSubmitting}
                     />
                   </FormControl>
@@ -436,8 +446,12 @@ export function PurchaseForm({
                       min="0"
                       placeholder="0.00"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                      value={field.value || ''}
+                      onChange={(e) => {
+                        // Même garde : '' → undefined, sinon parseFloat
+                        const val = e.target.value;
+                        field.onChange(val === '' ? undefined : parseFloat(val));
+                      }}
+                      value={field.value ?? ''}
                       disabled={isFormSubmitting}
                     />
                   </FormControl>
