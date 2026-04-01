@@ -137,6 +137,7 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any,
         include: {
           client: true,
           packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
+          depot: true, // Dépôt sélectionné — filtrage de l'adresse expéditeur dans le PDF
         },
       },
       client: true,
@@ -237,8 +238,24 @@ async function generateShipmentInvoicePDFRoute(shipmentId: string, session: any,
     })),
   };
 
+  // Filtrer pdfConfig pour n'afficher que le dépôt sélectionné sur la facture
+  // Le dépôt provient du devis source (fromQuote.depot)
+  const effectivePdfConfig: PlatformPDFConfig = quote.depot
+    ? {
+        ...pdfConfig,
+        senderAddresses: [{
+          name: quote.depot.name,
+          address: quote.depot.address,
+          city: quote.depot.city,
+          postalCode: quote.depot.postalCode ?? null,
+          phone: quote.depot.phone ?? null,
+          email: quote.depot.email ?? null,
+        }],
+      }
+    : pdfConfig;
+
   // Générer le PDF avec la config plateforme dynamique (nom, couleur)
-  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, effectivePdfConfig);
 
   // Nom du fichier avec le numéro de suivi
   const filename = `facture-${shipment.trackingNumber}.pdf`;
@@ -272,6 +289,7 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any, pdfCo
       client: true,
       shipment: true, // Pour récupérer le numéro de suivi si disponible
       packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
+      depot: true,    // Dépôt sélectionné — filtrage de l'adresse expéditeur dans le PDF
     },
   });
 
@@ -358,8 +376,23 @@ async function generateQuoteInvoicePDFRoute(quoteId: string, session: any, pdfCo
     })),
   };
 
+  // Filtrer pdfConfig pour n'afficher que le dépôt sélectionné sur la facture
+  const effectivePdfConfig: PlatformPDFConfig = quote.depot
+    ? {
+        ...pdfConfig,
+        senderAddresses: [{
+          name: quote.depot.name,
+          address: quote.depot.address,
+          city: quote.depot.city,
+          postalCode: quote.depot.postalCode ?? null,
+          phone: quote.depot.phone ?? null,
+          email: quote.depot.email ?? null,
+        }],
+      }
+    : pdfConfig;
+
   // Générer le PDF avec la config plateforme dynamique (nom, couleur, adresse expéditeur)
-  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, pdfConfig);
+  const pdfBuffer = generateInvoiceFromQuotePDF(pdfData, effectivePdfConfig);
 
   // Nom du fichier
   const filename = `facture-${quote.quoteNumber}.pdf`;
@@ -388,6 +421,7 @@ async function generateQuotePDFRoute(quoteId: string, session: any, pdfConfig: P
       client: true,   // Client (COMPANY ou INDIVIDUAL)
       createdBy: true,
       packages: { orderBy: { createdAt: 'asc' } }, // Colis détaillés multi-colis
+      depot: true,    // Dépôt sélectionné — filtrage de l'adresse expéditeur dans le PDF
     },
   });
 
@@ -451,8 +485,24 @@ async function generateQuotePDFRoute(quoteId: string, session: any, pdfConfig: P
     })),
   };
 
+  // Filtrer pdfConfig pour n'afficher que le dépôt sélectionné sur le devis
+  // Si aucun dépôt sélectionné, conserver tous les dépôts (comportement par défaut)
+  const effectivePdfConfig: PlatformPDFConfig = quote.depot
+    ? {
+        ...pdfConfig,
+        senderAddresses: [{
+          name: quote.depot.name,
+          address: quote.depot.address,
+          city: quote.depot.city,
+          postalCode: quote.depot.postalCode ?? null,
+          phone: quote.depot.phone ?? null,
+          email: quote.depot.email ?? null,
+        }],
+      }
+    : pdfConfig;
+
   // Générer le PDF avec la config plateforme dynamique (nom, couleur, adresse expéditeur)
-  const pdfBuffer = generateQuotePDF(pdfData, pdfConfig);
+  const pdfBuffer = generateQuotePDF(pdfData, effectivePdfConfig);
 
   // Nom du fichier
   const filename = `devis-${quote.quoteNumber}.pdf`;
