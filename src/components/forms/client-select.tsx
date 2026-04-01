@@ -264,9 +264,14 @@ export function ClientSelect({
               left: dropdownRect.left,
               width: dropdownRect.width,
               zIndex: 9999,
+              backgroundColor: 'white', // fond opaque explicite — évite les vars CSS non résolues dans le portail
+              borderRadius: '0.5rem',
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+              border: '1px solid hsl(214.3 31.8% 91.4%)',
+              overflow: 'hidden',
             }}
           >
-            <Card className="p-0 shadow-lg bg-background border-border/50">
+            <Card className="p-0 shadow-none bg-transparent border-0">
               {/* Champ de recherche */}
               <div className="p-3 border-b">
                 <div className="relative">
