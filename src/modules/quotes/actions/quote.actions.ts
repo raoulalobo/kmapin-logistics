@@ -1988,15 +1988,27 @@ export async function saveQuoteFromCalculatorAction(
     const tokenExpiresAt = new Date();
     tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
 
+    // Vérifier que estimatedCost est un nombre valide (pas NaN ni Infinity)
+    // Peut arriver si aucun tarif n'est configuré pour la route et que le fallback échoue
+    const estimatedCost = estimation.data.estimatedCost;
+    if (!isFinite(estimatedCost) || isNaN(estimatedCost)) {
+      return {
+        success: false,
+        error: 'Impossible de calculer le tarif pour cette route. Contactez notre équipe.',
+      };
+    }
+
     // Créer le devis en DRAFT
-    // - userId : toujours renseigné (utilisateur connecté)
-    // - clientId : renseigné si l'utilisateur est rattaché à une entreprise, null sinon
+    // - user/client : via relation Prisma (connect) — userId scalaire non exposé directement
     // - isAttachedToAccount : true car créé par un utilisateur authentifié
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        userId: session.user.id,
-        clientId: session.user.clientId ?? null,
+        // Prisma attend la syntaxe relation { connect } et non le scalaire userId directement
+        user: { connect: { id: session.user.id } },
+        ...(session.user.clientId
+          ? { client: { connect: { id: session.user.clientId } } }
+          : {}),
         contactEmail: session.user.email,
         contactName: session.user.name ?? null,
         isAttachedToAccount: true,
@@ -2004,10 +2016,8 @@ export async function saveQuoteFromCalculatorAction(
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
         weight: validatedData.weight,
-        // volume supprimé : le modèle Quote n'a pas de colonne volume
-        // (DB utilise les champs individuels length, width, height — tous optionnels)
         transportMode: validatedData.transportMode,
-        estimatedCost: estimation.data.estimatedCost,
+        estimatedCost,
         currency: 'EUR',
         validUntil,
         tokenExpiresAt,
