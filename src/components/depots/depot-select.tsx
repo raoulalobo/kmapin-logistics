@@ -7,6 +7,10 @@
  *
  * Affiche le format : "CODE - Nom" (ex: "OUA-01 - Dépôt Ouagadougou")
  *
+ * Le dropdown est rendu via createPortal dans document.body pour éviter
+ * les problèmes de stacking context (z-index piégé dans un parent avec
+ * transform/opacity/shadow qui crée son propre contexte).
+ *
  * @param value - ID du dépôt sélectionné
  * @param onChange - Callback quand la sélection change
  */
@@ -14,6 +18,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { CircleNotch, CaretUpDown, Check, Warehouse } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -40,7 +45,17 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Ref sur le bouton trigger pour calculer la position du dropdown
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // Ref sur le dropdown pour le click-outside (portail = hors du DOM parent)
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Position calculée en coordonnées viewport (pour position: fixed)
+  const [dropdownRect, setDropdownRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   // Charger les dépôts au montage
   useEffect(() => {
@@ -66,16 +81,55 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fermer le dropdown au clic extérieur
+  /**
+   * Ouvrir le dropdown et calculer sa position en coordonnées viewport.
+   * getBoundingClientRect() retourne des coordonnées viewport → parfait pour position: fixed.
+   */
+  function openDropdown() {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setDropdownRect({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+    setOpen((prev) => !prev);
+  }
+
+  /**
+   * Fermer le dropdown au clic extérieur.
+   * Vérifie le trigger ET le dropdown (qui est dans un portail, hors du DOM parent).
+   */
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const isInsideTrigger = triggerRef.current?.contains(target);
+      const isInsideDropdown = dropdownRef.current?.contains(target);
+      if (!isInsideTrigger && !isInsideDropdown) {
         setOpen(false);
+        setSearch('');
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+    /**
+     * Fermer si l'utilisateur scrolle (le dropdown resterait à une position obsolète)
+     */
+    function handleScroll() {
+      setOpen(false);
+      setSearch('');
+    }
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+    };
+  }, [open]);
 
   // Filtrer les dépôts par recherche (nom ou code)
   const filtered = depots.filter((d) => {
@@ -96,15 +150,16 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div>
       {/* Bouton trigger */}
       <Button
+        ref={triggerRef}
         type="button"
         variant="outline"
         role="combobox"
         aria-expanded={open}
         className="w-full justify-between"
-        onClick={() => setOpen(!open)}
+        onClick={openDropdown}
       >
         {selected ? (
           <span className="flex items-center gap-2 truncate">
@@ -118,61 +173,84 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
         <CaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
-          {/* Champ de recherche */}
-          <div className="p-2 border-b">
-            <input
-              type="text"
-              placeholder="Rechercher un dépôt..."
-              className="w-full rounded-sm border-0 bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              autoFocus
-            />
-          </div>
+      {/*
+       * Dropdown via createPortal dans document.body
+       *
+       * position: fixed + coordonnées getBoundingClientRect() = rendu hors
+       * de toute hiérarchie de stacking context. Évite le problème où les
+       * cards suivantes (Itinéraire, etc.) passaient par-dessus le dropdown.
+       */}
+      {open && dropdownRect && typeof window !== 'undefined' &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: 'fixed',
+              top: dropdownRect.top,
+              left: dropdownRect.left,
+              width: dropdownRect.width,
+              zIndex: 9999,
+              backgroundColor: 'white', // fond opaque explicite — bypasse les vars CSS
+              borderRadius: '0.375rem',
+              border: '1px solid hsl(214.3 31.8% 91.4%)',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Champ de recherche */}
+            <div className="p-2 border-b">
+              <input
+                type="text"
+                placeholder="Rechercher un dépôt..."
+                className="w-full rounded-sm border-0 bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
 
-          {/* Liste des options */}
-          <ScrollArea className="max-h-[200px]">
-            {filtered.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                Aucun dépôt trouvé
-              </p>
-            ) : (
-              filtered.map((depot) => (
-                <button
-                  key={depot.id}
-                  type="button"
-                  className={cn(
-                    'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent',
-                    value === depot.id && 'bg-accent'
-                  )}
-                  onClick={() => {
-                    onChange(depot.id);
-                    setOpen(false);
-                    setSearch('');
-                  }}
-                >
-                  <Check
+            {/* Liste des options */}
+            <ScrollArea className="max-h-[200px]">
+              {filtered.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Aucun dépôt trouvé
+                </p>
+              ) : (
+                filtered.map((depot) => (
+                  <button
+                    key={depot.id}
+                    type="button"
                     className={cn(
-                      'h-4 w-4 shrink-0',
-                      value === depot.id ? 'opacity-100' : 'opacity-0'
+                      'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent',
+                      value === depot.id && 'bg-accent'
                     )}
-                  />
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {depot.code}
-                  </span>
-                  <span className="truncate">{depot.name}</span>
-                  {depot.isDefault && (
-                    <span className="ml-auto text-xs text-muted-foreground">(défaut)</span>
-                  )}
-                </button>
-              ))
-            )}
-          </ScrollArea>
-        </div>
-      )}
+                    onClick={() => {
+                      onChange(depot.id);
+                      setOpen(false);
+                      setSearch('');
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        'h-4 w-4 shrink-0',
+                        value === depot.id ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {depot.code}
+                    </span>
+                    <span className="truncate">{depot.name}</span>
+                    {depot.isDefault && (
+                      <span className="ml-auto text-xs text-muted-foreground">(défaut)</span>
+                    )}
+                  </button>
+                ))
+              )}
+            </ScrollArea>
+          </div>,
+          document.body
+        )
+      }
     </div>
   );
 }
