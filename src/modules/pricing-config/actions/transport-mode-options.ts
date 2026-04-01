@@ -148,8 +148,8 @@ export async function getTransportModeOptionsAction(): Promise<
       }
 
       // Construire le label enrichi
-      // Format: "Mode (impact - délai)" ou "Mode (référence - délai)"
-      const labelWithDetails = `${TRANSPORT_MODE_LABELS[mode]} (${percentageImpact} ${speedMention}- ${deliveryLabel})`;
+      // Format: "Mode express (délai)" ou "Mode (délai)" — sans pourcentage
+      const labelWithDetails = `${TRANSPORT_MODE_LABELS[mode]} ${speedMention}(${deliveryLabel})`;
 
       return {
         value: mode,
@@ -175,7 +175,7 @@ export async function getTransportModeOptionsAction(): Promise<
       {
         value: 'ROAD',
         label: 'Routier',
-        labelWithDetails: 'Routier (référence - 3-7 jours)',
+        labelWithDetails: 'Routier (3-7 jours)',
         multiplier: 1.0,
         percentageImpact: 'référence',
         deliveryMin: 3,
@@ -185,7 +185,7 @@ export async function getTransportModeOptionsAction(): Promise<
       {
         value: 'SEA',
         label: 'Maritime',
-        labelWithDetails: 'Maritime (-40% économique - 20-45 jours)',
+        labelWithDetails: 'Maritime économique (20-45 jours)',
         multiplier: 0.6,
         //percentageImpact: '-40%',
         percentageImpact: '',
@@ -196,7 +196,7 @@ export async function getTransportModeOptionsAction(): Promise<
       {
         value: 'AIR',
         label: 'Aérien',
-        labelWithDetails: 'Aérien (+200% express - 1-3 jours)',
+        labelWithDetails: 'Aérien express (1-3 jours)',
         multiplier: 3.0,
         percentageImpact: '',
         deliveryMin: 1,
@@ -301,13 +301,8 @@ export async function getPriorityOptionsAction(): Promise<
       const percentageLabel = formatPrioritySurcharge(surcharge);
 
       // Construire le label enrichi
-      // Format: "Label (+X% - description)" ou "Label (description)" si 0%
-      let labelWithDetails: string;
-      if (surcharge === 0) {
-        labelWithDetails = `${label} (${description})`;
-      } else {
-        labelWithDetails = `${label} (${percentageLabel} - ${description})`;
-      }
+      // Format: "Label (description)" — sans pourcentage
+      const labelWithDetails = `${label} (${description})`;
 
       return {
         value: priority,
@@ -336,7 +331,7 @@ export async function getPriorityOptionsAction(): Promise<
       {
         value: 'NORMAL',
         label: 'Normal',
-        labelWithDetails: 'Normal (+10% - légèrement accéléré)',
+        labelWithDetails: 'Normal (légèrement accéléré)',
         surcharge: 0.1,
         percentageLabel: '+10%',
         description: 'légèrement accéléré',
@@ -344,7 +339,7 @@ export async function getPriorityOptionsAction(): Promise<
       {
         value: 'URGENT',
         label: 'Urgent',
-        labelWithDetails: 'Urgent (+30% - prioritaire)',
+        labelWithDetails: 'Urgent (prioritaire)',
         surcharge: 0.3,
         percentageLabel: '+30%',
         description: 'prioritaire',
