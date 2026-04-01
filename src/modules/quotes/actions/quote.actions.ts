@@ -2004,7 +2004,8 @@ export async function saveQuoteFromCalculatorAction(
         destinationCountry: validatedData.destinationCountry,
         cargoType: validatedData.cargoType,
         weight: validatedData.weight,
-        volume: validatedData.volume,
+        // volume supprimé : le modèle Quote n'a pas de colonne volume
+        // (DB utilise les champs individuels length, width, height — tous optionnels)
         transportMode: validatedData.transportMode,
         estimatedCost: estimation.data.estimatedCost,
         currency: 'EUR',
@@ -2022,7 +2023,10 @@ export async function saveQuoteFromCalculatorAction(
       data: { id: quote.id, quoteNumber: quote.quoteNumber },
     };
   } catch (error) {
-    console.error('Error saving quote from calculator:', error);
+    console.error('[saveQuoteFromCalculatorAction] Erreur:', {
+      message: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : undefined,
+    });
 
     // Gestion des erreurs
     if (error instanceof Error) {
