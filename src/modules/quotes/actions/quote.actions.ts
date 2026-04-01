@@ -2887,8 +2887,10 @@ export async function createGuestQuoteAction(
       contactEmail: validated.contactEmail,
     });
 
-    // 3. Calculer le coût estimé automatiquement
-    const estimationResult = await calculateQuoteEstimateAction({
+    // 3. Calculer le coût estimé — algorithme v2 (calculerPrixDevisDynamic)
+    // Remplace calculateQuoteEstimateAction (v1) pour unifier la logique de calcul
+    const { calculateQuoteEstimateV2Action } = await import('./calculate-quote-estimate-v2');
+    const estimationResult = await calculateQuoteEstimateV2Action({
       originCountry: validated.originCountry,
       destinationCountry: validated.destinationCountry,
       cargoType: validated.cargoType,
