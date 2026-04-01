@@ -389,7 +389,6 @@ export function PurchaseForm({
                   <FormControl>
                     <Input
                       type="number"
-                      min="1"
                       {...field}
                       // ?? '' : évite value={undefined} qui basculerait l'input en non-contrôlé
                       // (React restaurerait alors la valeur précédente depuis le DOM)
