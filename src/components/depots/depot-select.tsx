@@ -3,7 +3,11 @@
  *
  * Sélecteur de dépôt pour les formulaires (devis, expéditions).
  * Charge les dépôts actifs via listDepotsForSelect() et affiche un combobox
- * avec recherche. Le dépôt par défaut est pré-sélectionné si aucune valeur n'est fournie.
+ * avec recherche.
+ *
+ * Options disponibles :
+ * - "Défaut" (value = '') → déclenche le fallback PDF : tous les dépôts apparaissent
+ * - Un dépôt spécifique (value = id) → seul ce dépôt apparaît sur le PDF
  *
  * Affiche le format : "CODE - Nom" (ex: "OUA-01 - Dépôt Ouagadougou")
  *
@@ -19,7 +23,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { CircleNotch, CaretUpDown, Check, Warehouse } from '@phosphor-icons/react';
+import { CircleNotch, CaretUpDown, Check, Warehouse, Buildings } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -63,14 +67,8 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
       try {
         const data = await listDepotsForSelect();
         setDepots(data);
-
-        // Si aucune valeur sélectionnée, pré-sélectionner le dépôt par défaut
-        if (!value) {
-          const defaultDepot = data.find((d) => d.isDefault);
-          if (defaultDepot) {
-            onChange(defaultDepot.id);
-          }
-        }
+        // Pas d'auto-sélection : "Défaut" (value = '') est une option valide
+        // qui déclenche le fallback PDF (tous les dépôts affichés sur le document)
       } catch {
         console.error('[DepotSelect] Erreur chargement dépôts');
       } finally {
@@ -161,6 +159,7 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
         className="w-full justify-between"
         onClick={openDropdown}
       >
+        {/* Affichage du dépôt sélectionné, ou "Défaut" si aucun dépôt explicite */}
         {selected ? (
           <span className="flex items-center gap-2 truncate">
             <Warehouse className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -168,7 +167,10 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
             <span className="truncate">{selected.name}</span>
           </span>
         ) : (
-          <span className="text-muted-foreground">Sélectionner un dépôt...</span>
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <Buildings className="h-4 w-4 shrink-0" />
+            <span>Défaut — tous les dépôts</span>
+          </span>
         )}
         <CaretUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
@@ -211,6 +213,29 @@ export function DepotSelect({ value, onChange }: DepotSelectProps) {
 
             {/* Liste des options */}
             <ScrollArea className="max-h-[200px]">
+              {/* Option spéciale "Défaut" — déclenche le fallback PDF (tous les dépôts affichés) */}
+              <button
+                type="button"
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent border-b',
+                  !value && 'bg-accent'
+                )}
+                onClick={() => {
+                  onChange('');
+                  setOpen(false);
+                  setSearch('');
+                }}
+              >
+                <Check
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    !value ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                <Buildings className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="font-medium">Défaut</span>
+                <span className="ml-auto text-xs text-muted-foreground">tous les dépôts</span>
+              </button>
               {filtered.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">
                   Aucun dépôt trouvé
