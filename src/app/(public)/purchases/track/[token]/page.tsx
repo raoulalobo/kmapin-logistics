@@ -75,11 +75,7 @@ export default async function PublicPurchaseTrackingPage({ params }: PageProps) 
           name: true,
         },
       },
-      shipment: {
-        select: {
-          trackingNumber: true,
-        },
-      },
+      // Pas de relation 'shipment' sur PurchaseRequest — retiré
       logs: {
         orderBy: { createdAt: 'desc' },
         include: {
