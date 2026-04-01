@@ -213,7 +213,7 @@ export function ClientSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="absolute z-50 mt-2 w-full p-0 shadow-lg backdrop-blur-md bg-background/95 border-border/50">
+        <Card className="absolute z-50 mt-2 w-full p-0 shadow-lg bg-background border-border/50">
           {/* Champ de recherche */}
           <div className="p-3 border-b">
             <div className="relative">
