@@ -391,12 +391,16 @@ export function PurchaseForm({
                       type="number"
                       min="1"
                       {...field}
+                      // ?? '' : évite value={undefined} qui basculerait l'input en non-contrôlé
+                      // (React restaurerait alors la valeur précédente depuis le DOM)
+                      value={field.value ?? ''}
                       onChange={(e) => {
-                // Autoriser le champ vide (val === '') pour que l'utilisateur puisse
-                // effacer et re-saisir — Zod rejettera undefined à la soumission
-                const val = e.target.value;
-                field.onChange(val === '' ? undefined : parseInt(val, 10));
-              }}
+                        // val === '' → undefined pour que Zod rejette à la soumission
+                        // val non vide → parseInt pour stocker un nombre
+                        const val = e.target.value;
+                        field.onChange(val === '' ? undefined : parseInt(val, 10));
+                      }}
+                      onWheel={(e) => e.currentTarget.blur()}
                       disabled={isFormSubmitting}
                     />
                   </FormControl>
