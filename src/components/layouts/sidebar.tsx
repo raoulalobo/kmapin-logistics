@@ -39,6 +39,7 @@ type NavLink = {
   icon: React.ElementType;
   badge?: string; // Pour afficher un badge (ex: nombre de notifications)
   permission?: string; // Permission requise pour afficher ce lien (optionnel)
+  exact?: boolean; // Si true, actif uniquement sur la route exacte (pas les sous-routes)
 };
 
 /**
@@ -61,13 +62,13 @@ const navigation: NavSection[] = [
         label: 'Accueil',
         href: '/',
         icon: House,
-        // Pas de permission requise - accessible à tous
+        exact: true, // "/" est préfixe de toutes les routes — match exact obligatoire
       },
       {
         label: 'Dashboard',
         href: '/dashboard',
         icon: SquaresFour,
-        // Pas de permission requise - accessible à tous
+        exact: true, // "/dashboard" est préfixe de toutes les routes dashboard
       },
     ],
   },
@@ -148,6 +149,7 @@ const navigation: NavSection[] = [
         label: 'Paramètres',
         href: '/dashboard/settings',
         icon: Gear,
+        exact: true, // "/dashboard/settings" est préfixe de pricing et platform
         // Pas de permission - accessible à tous (paramètres personnels)
       },
     ],
@@ -244,7 +246,9 @@ export function Sidebar({
               {/* Liens de la section */}
               {section.links.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+                // exact: true → match strict (routes parentes comme / ou /dashboard)
+                // exact: false/undefined → match aussi les sous-routes (ex: /dashboard/shipments/123)
+                const isActive = pathname === link.href || (!link.exact && pathname.startsWith(link.href + '/'));
 
                 return (
                   <Link
