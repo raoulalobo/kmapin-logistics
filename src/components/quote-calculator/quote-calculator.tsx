@@ -772,6 +772,9 @@ export function QuoteCalculator(props: QuoteCalculatorProps) {
         height: 0,
         transportMode: lastFormData.transportMode,
         priority: lastFormData.priority,
+        // Prix calculé par la v2 (multi-colis) et affiché à l'utilisateur — source de vérité
+        // L'action de sauvegarde l'utilisera directement sans recalcul via l'algorithme v1
+        estimatedCost: result.totalPrice,
       };
 
       const response = await saveQuoteFromCalculatorAction(flatData);

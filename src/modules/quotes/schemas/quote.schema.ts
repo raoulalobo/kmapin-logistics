@@ -577,6 +577,10 @@ export const quoteEstimateSchema = z.object({
     .enum(['STANDARD', 'NORMAL', 'URGENT'])
     .default('STANDARD')
     .optional(),
+
+  // Prix déjà calculé par le calculateur v2 (multi-colis) — transmis pour éviter un double calcul
+  // Si fourni, l'action de sauvegarde l'utilise directement sans recalculer via l'algorithme v1
+  estimatedCost: z.number().positive().optional(),
 });
 
 /**

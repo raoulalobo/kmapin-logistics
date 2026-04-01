@@ -1985,13 +1985,15 @@ export async function saveQuoteFromCalculatorAction(
     // Valider les données
     const validatedData = quoteEstimateSchema.parse(data);
 
-    // Calculer l'estimation pour obtenir le coût
-    const estimation = await calculateQuoteEstimateAction(data);
+    // Utiliser le prix fourni par le calculateur v2 (multi-colis) — source de vérité
+    // Ne pas recalculer avec calculateQuoteEstimateAction (v1, algorithme différent)
+    // car cela produirait un montant différent de ce qui a été affiché à l'utilisateur
+    const estimatedCost = validatedData.estimatedCost;
 
-    if (!estimation.success || !estimation.data) {
+    if (estimatedCost === undefined || !isFinite(estimatedCost) || isNaN(estimatedCost)) {
       return {
         success: false,
-        error: 'Erreur lors du calcul de l\'estimation',
+        error: 'Le montant du devis est invalide. Veuillez recalculer avant de sauvegarder.',
       };
     }
 
@@ -2005,16 +2007,6 @@ export async function saveQuoteFromCalculatorAction(
     // Date d'expiration du token de suivi : 72h
     const tokenExpiresAt = new Date();
     tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 72);
-
-    // Vérifier que estimatedCost est un nombre valide (pas NaN ni Infinity)
-    // Peut arriver si aucun tarif n'est configuré pour la route et que le fallback échoue
-    const estimatedCost = estimation.data.estimatedCost;
-    if (!isFinite(estimatedCost) || isNaN(estimatedCost)) {
-      return {
-        success: false,
-        error: 'Impossible de calculer le tarif pour cette route. Contactez notre équipe.',
-      };
-    }
 
     // Créer le devis en DRAFT
     // - user/client : via relation Prisma (connect) — userId scalaire non exposé directement
